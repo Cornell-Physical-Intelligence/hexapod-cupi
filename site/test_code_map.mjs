@@ -59,6 +59,8 @@ assert.ok(/class="file[^"]* hit" data-module="src\/locomotion\/omniwalk\/mdp\/re
 assert.ok(/class="sym class hit"/.test(html('strip')), 'The matching class block turns red');
 input('query', 'OmniVecEnv');
 assert.ok(html('results').includes('src/locomotion/rl/wrapper.py'));
+// The first match opens; the destination wrapper also names OmniVecEnv, so choose the wrapper.
+click('results', {file:'src/locomotion/rl/wrapper.py'});
 assert.equal(elements.get('file-heading').textContent, 'rl/wrapper.py');
 click('results', {file:'src/locomotion/omniwalk/mdp/actions.py'});
 assert.equal(elements.get('file-heading').textContent, 'omniwalk/mdp/actions.py');

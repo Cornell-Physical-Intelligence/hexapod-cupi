@@ -50,11 +50,17 @@ def physics_config(cfg, metadata):
 
 
 def checkpoint_reward_version(record):
-    """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1."""
+    """The reward a checkpoint was trained with; checkpoints from before the flag trained version 1, and
+    a named experiment's checkpoint may record its task's own version."""
     version = record["identity"].get("reward_version", "1")
-    if version not in ("1", "2", "3", "4"):
-        raise ValueError("Unknown checkpoint reward version: " + str(version))
-    return version
+    if version in ("1", "2", "3", "4"):
+        return version
+    if record["identity"].get("experiment") is not None:
+        from locomotion.omniwalk.destination_task import REWARD_VERSION
+
+        if version == REWARD_VERSION:
+            return version
+    raise ValueError("Unknown checkpoint reward version: " + str(version))
 
 
 def json_shape(value):
@@ -85,6 +91,24 @@ def require_embedded_declaration(infos, record):
     """The declaration pickled inside the checkpoint must equal its JSON record."""
     if json_shape(infos) != {"identity": record["identity"], "updates": record["updates"]}:
         raise ValueError("Embedded checkpoint declaration differs")
+
+
+# A starting checkpoint must have trained the same robot. Its sources, physics and admission may predate
+# this run: each lineage step adds its experiment's code, and the PR 71 model trained on the earlier floor.
+STARTING_KEYS = (
+    "model_sha256",
+    "usd_sha256",
+    "stance_sha256",
+    "geometry_sha256",
+    "geometry_extrema_sha256",
+)
+
+
+def require_starting_identity(record, identity):
+    """Reject a starting checkpoint trained on another robot model, asset, stance or geometry."""
+    different = [key for key in STARTING_KEYS if record["identity"].get(key) != identity[key]]
+    if different:
+        raise ValueError("Starting checkpoint robot differs: " + ", ".join(different))
 
 
 def require_checkpoint_identity(record, identity):

@@ -88,48 +88,56 @@ class DependencyIdentityTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "runtime dependencies"):
             require_checkpoint_identity(record, identity)
 
+    def entry_fixture(self, root, remote):
+        """Local stand-ins for a pack's inputs; returns the pack command line and the preflight identity."""
+        (root / "stance.json").write_text(
+            json.dumps({"nominal_joint_position_rad": [0.0] * 18, "reset_root_height_m": 0.2})
+        )
+        for name in ("geometry.json", "geometry_extrema.npz", "checkpoint.pt"):
+            (root / name).write_bytes(name.encode())
+        local = {
+            "--stance": root / "stance.json",
+            "--geometry": root / "geometry.json",
+            "--geometry-extrema": root / "geometry_extrema.npz",
+            "--checkpoint": root / "checkpoint.pt",
+        }
+
+        def command(mode, name=None, **options):
+            """Return the pack's command line with local inputs in place of the container paths."""
+            args = prepare(root / (name or mode), remote, mode=mode, **options)["command_args"]
+            for option, value in local.items():
+                if option in args:
+                    args[args.index(option) + 1] = str(value)
+            return args
+
+        def preflight(script, args):
+            """Parse a command line with the script's parser and return the identity its preflight prints."""
+            # A checkout has no frozen pack manifests or standing captures; the identity path runs unchanged.
+            with (
+                patch.object(cli, "validate", return_value=None),
+                patch.object(cli, "verify_runtime", return_value={"schema": "fixture"}),
+                patch.object(cli, "require_admission", return_value={"fixture": True}),
+                redirect_stdout(io.StringIO()) as printed,
+            ):
+                self.assertEqual(
+                    script.main(args + ["--output", str(root / "unused"), "--preflight-only"]),
+                    0,
+                )
+            return json.loads(printed.getvalue())
+
+        return command, preflight
+
     def test_training_and_evaluation_scripts_bind_the_same_entry(self):
         """A checkpoint that train.py declares passes play.py's identity check; a changed entry hash fails it."""
         remote = "/srv/cupi/hexapod/runs/james/entry_fixture"
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
-            (root / "stance.json").write_text(
-                json.dumps({"nominal_joint_position_rad": [0.0] * 18, "reset_root_height_m": 0.2})
-            )
-            for name in ("geometry.json", "geometry_extrema.npz", "checkpoint.pt"):
-                (root / name).write_bytes(name.encode())
-            local = {
-                "--stance": root / "stance.json",
-                "--geometry": root / "geometry.json",
-                "--geometry-extrema": root / "geometry_extrema.npz",
-                "--checkpoint": root / "checkpoint.pt",
-            }
-            checkpoint_sha = cli.sha(root / "checkpoint.pt")
+            fixture, preflight = self.entry_fixture(root, remote)
 
             def command(mode, **options):
-                """Return the pack's command line with local inputs in place of the container paths."""
-                args = prepare(root / mode, remote, mode=mode, updates=2000, **options)[
-                    "command_args"
-                ]
-                for option, value in local.items():
-                    if option in args:
-                        args[args.index(option) + 1] = str(value)
-                return args
+                return fixture(mode, updates=2000, **options)
 
-            def preflight(script, args):
-                """Parse a command line with the script's parser and return the identity its preflight prints."""
-                # A checkout has no frozen pack manifests or standing captures; the identity path runs unchanged.
-                with (
-                    patch.object(cli, "validate", return_value=None),
-                    patch.object(cli, "verify_runtime", return_value={"schema": "fixture"}),
-                    patch.object(cli, "require_admission", return_value={"fixture": True}),
-                    redirect_stdout(io.StringIO()) as printed,
-                ):
-                    self.assertEqual(
-                        script.main(args + ["--output", str(root / "unused"), "--preflight-only"]),
-                        0,
-                    )
-                return json.loads(printed.getvalue())
+            checkpoint_sha = cli.sha(root / "checkpoint.pt")
 
             trained = preflight(train, command("train"))
             self.assertEqual(trained["entry_sha256"], cli.sha(ROOT / "scripts/train.py"))
@@ -155,6 +163,53 @@ class DependencyIdentityTests(unittest.TestCase):
                 require_checkpoint_identity(declaration, evaluated)
             with self.assertRaisesRegex(ValueError, "implementation differs"):
                 preflight(play, evaluation)
+
+    def test_an_experiment_checkpoint_records_its_reward_and_evaluates_only_as_that_experiment(
+        self,
+    ):
+        from locomotion.omniwalk.destination_task import REWARD_VERSION
+
+        remote = "/srv/cupi/hexapod/runs/james/experiment_fixture"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            command, preflight = self.entry_fixture(root, remote)
+            options = dict(
+                steps_per_env=36, allocation_profile="flat_pilot_v1", max_wall_seconds=21600
+            )
+            trained = preflight(
+                train, command("train", updates=600, experiment="destination_v9", **options)
+            )
+            self.assertEqual(
+                (trained["experiment"], trained["reward_version"], trained["reward_task"]),
+                ("destination_v9", REWARD_VERSION, "destination_v9"),
+            )
+            checkpoint_sha = cli.sha(root / "checkpoint.pt")
+            (root / "checkpoint.json").write_text(
+                json.dumps(
+                    {"identity": trained, "updates": 600, "checkpoint_sha256": checkpoint_sha}
+                )
+            )
+
+            def evaluation(name, experiment):
+                return command(
+                    "evaluate",
+                    name,
+                    experiment=experiment,
+                    checkpoint=remote + "/checkpoint.pt",
+                    checkpoint_sha=checkpoint_sha,
+                    checkpoint_declaration_sha="b" * 64,
+                    **options,
+                )
+
+            evaluated = preflight(play, evaluation("same", "destination_v9"))
+            self.assertEqual(
+                (evaluated["reward_version"], evaluated["reward_task"]),
+                (REWARD_VERSION, "destination_v9"),
+            )
+            for name, experiment in (("other", "destination_v1"), ("none", None)):
+                with self.subTest(experiment=experiment):
+                    with self.assertRaisesRegex(ValueError, "experiment destination_v9 differs"):
+                        preflight(play, evaluation(name, experiment))
 
     def test_scripts_and_native_replay_declare_one_physics_identity(self):
         import ast

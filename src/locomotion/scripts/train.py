@@ -8,6 +8,7 @@ import json
 import os
 import time
 from functools import partial
+from pathlib import Path
 
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS, TaskConfig
 from locomotion.scripts.cli import (
@@ -30,8 +31,30 @@ def parse_args(argv=None):
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     add_common_arguments(parser)
     add_learner_arguments(parser)
+    parser.add_argument(
+        "--initialize-from",
+        type=Path,
+        help="Checkpoint whose actor, critic and optimizer state start this run; inputs that the "
+        "wrapper adds start at zero weight. The update count and configuration are this run's own.",
+    )
+    parser.add_argument("--initialize-from-sha256")
+    parser.add_argument("--initialize-from-declaration-sha256")
+    parser.add_argument(
+        "--initialize-rate",
+        choices=["configured", "checkpoint"],
+        default="configured",
+        help="Restart the adaptive learning rate at its configured value or continue the checkpoint's.",
+    )
     add_app_arguments(parser, argv)
-    return resolve_options(parser.parse_args(argv), "train")
+    args = resolve_options(parser.parse_args(argv), "train")
+    starting = (
+        args.initialize_from,
+        args.initialize_from_sha256,
+        args.initialize_from_declaration_sha256,
+    )
+    if len({value is None for value in starting}) != 1:
+        raise ValueError("A starting checkpoint needs its SHA-256 and its declaration's")
+    return args
 
 
 def require_gait_clock(args):
@@ -45,6 +68,12 @@ def training_wrapper(env, args, task):
     from locomotion.rl.wrapper import OmniVecEnv
 
     wrapper, options = OmniVecEnv, {}
+    if args.experiment is not None:
+        from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS
+        from locomotion.rl.destination_wrapper import DestinationVecEnv
+
+        wrapper = DestinationVecEnv
+        options = {"destination_input": EXPERIMENT_INPUTS[args.experiment]}
     if args.learner == "amp":
         from locomotion.amp.amp import AMPConfig, AMPVecEnv, CollisionCapture
 
@@ -106,6 +135,46 @@ def name_wandb_run(args, identity):
     wandb.config.update({"identity": identity}, allow_val_change=True)
 
 
+def start_from_checkpoint(runner, args, config, identity):
+    """Load the starting checkpoint's networks and optimizer, widened for added inputs, and record them."""
+    import torch
+
+    from locomotion.evaluation.checkpoint import (
+        checkpoint_reward_version,
+        require_embedded_declaration,
+        require_starting_identity,
+    )
+    from locomotion.rl.ppo import initialize_learner
+
+    declaration = args.initialize_from.with_suffix(".json")
+    if sha(args.initialize_from) != args.initialize_from_sha256:
+        raise ValueError("Starting checkpoint bytes differ")
+    if sha(declaration) != args.initialize_from_declaration_sha256:
+        raise ValueError("Starting checkpoint declaration bytes differ")
+    record = json.loads(declaration.read_text())
+    if record["checkpoint_sha256"] != args.initialize_from_sha256:
+        raise ValueError("Starting checkpoint declaration names other bytes")
+    require_starting_identity(record, identity)
+    loaded = torch.load(str(args.initialize_from), weights_only=False, map_location=args.device)
+    require_embedded_declaration(loaded.get("infos"), record)
+    widened, rate = initialize_learner(
+        runner.alg, loaded, config["algorithm"]["learning_rate"], args.initialize_rate
+    )
+    identity["initialized_from"] = {
+        "checkpoint_sha256": args.initialize_from_sha256,
+        "declaration_sha256": args.initialize_from_declaration_sha256,
+        "experiment": record["identity"].get("experiment"),
+        "reward_version": checkpoint_reward_version(record),
+        "reward_task": record["identity"].get("reward_task"),
+        "updates": record["updates"],
+        "physics_config_equal": record["identity"].get("physics_config")
+        == identity["physics_config"],
+        "loaded": ["actor", "critic", "optimizer"],
+        "widened_inputs": widened,
+        "learning_rate": {"value": rate, "source": args.initialize_rate},
+    }
+
+
 def training_runner(env, args, config, identity, state, started):
     """Build the RSL-RL runner with update diagnostics, load capture and a record after each update.
 
@@ -119,7 +188,17 @@ def training_runner(env, args, config, identity, state, started):
     from locomotion.omniwalk.task import TrainingTask
     from locomotion.rl.ppo import DeviationSchedule
 
-    task = TrainingTask(env, TaskConfig(seed=args.seed), args.output / "task")
+    if args.experiment is None:
+        task = TrainingTask(env, TaskConfig(seed=args.seed), args.output / "task")
+    else:
+        from locomotion.omniwalk.destination_task import EXPERIMENTS, DestinationTrainingTask
+
+        settings = EXPERIMENTS[args.experiment]
+        if args.episode_seconds != settings["episode_seconds"]:
+            raise ValueError(f"{args.experiment} trains {settings['episode_seconds']} s episodes")
+        task = DestinationTrainingTask(
+            env, TaskConfig(seed=args.seed), args.output / "task", settings["reward"]
+        )
     metrics = TaskMetrics(task)
     wrapped = training_wrapper(env, args, task)
     if args.networks == "mlp" and args.gait_clock != task.reward_config.schedule_period_controls:
@@ -139,6 +218,8 @@ def training_runner(env, args, config, identity, state, started):
     runner = OnPolicyRunner(
         wrapped, runner_config, str(args.output / "learner"), device=args.device
     )
+    if args.initialize_from is not None:
+        start_from_checkpoint(runner, args, config, identity)
     diagnostics = UpdateDiagnostics(runner.alg)
     runner.alg.update = diagnostics.update
     if args.action_std_final is not None:

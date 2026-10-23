@@ -206,6 +206,20 @@
       "purpose": "Build the 42-value proprioception frame, the 231-value actor observation and the 234-value critic observation."
     },
     {
+      "path": "src/locomotion/omniwalk/mdp/destination.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Follow each command's destination, the pose the command would have reached, and describe the gap to it for experiments destination_v1 to destination_v9."
+    },
+    {
+      "path": "src/locomotion/omniwalk/destination_task.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Experiments destination_v1 to destination_v9: the canonical task plus per-control pay for staying near each command's destination and fixed command lengths."
+    },
+    {
       "path": "src/locomotion/omniwalk/mdp/rewards.py",
       "previous_path": "locomotion/omni/task.py",
       "classification": "current",
@@ -302,6 +316,13 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and a deviation schedule, and load a recorded actor."
+    },
+    {
+      "path": "src/locomotion/rl/destination_wrapper.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Append the gap to each command's destination and the time since the command began to the actor and critic inputs for experiments destination_v1 to destination_v9."
     },
     {
       "path": "src/locomotion/rl/wrapper.py",

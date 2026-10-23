@@ -59,6 +59,25 @@ class ResumeTests(unittest.TestCase):
         self.assertEqual(code, 0, state.get("traceback"))
         self.assertEqual((state["updates"], state["transitions"]), (3, 288))
 
+    def test_a_run_started_from_a_checkpoint_resumes_and_keeps_its_start(self):
+        self.assertEqual(self.code, 0, self.state.get("traceback"))
+        options = ("--action-std-final", "0.05")
+        code, output, state = run(
+            self.temporary.name, "started", "--initialize-from", str(self.checkpoint), *options
+        )
+        self.assertEqual(code, 0, state.get("traceback"))
+        start = state["identity"]["initialized_from"]
+        self.assertEqual(start["checkpoint_sha256"], train_sha(self.checkpoint))
+        code, _, state = run(
+            self.temporary.name,
+            "started_resumed",
+            "--resume",
+            str(output / "checkpoint_update000001.pt"),
+            *options,
+        )
+        self.assertEqual(code, 0, state.get("traceback"))
+        self.assertEqual(state["identity"]["initialized_from"], start)
+
     def test_changed_training_contract_fails_before_an_update(self):
         variants = [
             ("--action-mean", "tanh"),
