@@ -562,6 +562,25 @@ class WrapperTests(unittest.TestCase):
         self.assertEqual(ppo_config(7, gait_clock=60, destination_input="none"), base)
 
 
+class SurrogateTests(unittest.TestCase):
+    def test_surrogate_evaluation_rebuilds_a_native_experiment_checkpoint(self):
+        from locomotion.surrogate.evaluate import DEFAULT_TASK, task_and_wrapper
+        from locomotion.surrogate.train import resolve
+
+        plain_args = SimpleNamespace(task=None, wrapper=None)
+        task, wrapper = task_and_wrapper(plain_args, {"experiment": "destination_v9"})
+        self.assertIs(resolve(wrapper), DestinationVecEnv)
+        self.assertIsInstance(resolve(task)(GaitDouble(1)), DestinationTrainingTask)
+        self.assertEqual(
+            resolve(task)(GaitDouble(1)).reward_config, EXPERIMENTS["destination_v9"]["reward"]
+        )
+        self.assertEqual(
+            task_and_wrapper(plain_args, {}), (DEFAULT_TASK, "locomotion.rl.wrapper:OmniVecEnv")
+        )
+        chosen = SimpleNamespace(task="a:B", wrapper="c:D")
+        self.assertEqual(task_and_wrapper(chosen, {"experiment": "destination_v9"}), ("a:B", "c:D"))
+
+
 class StartTests(unittest.TestCase):
     def test_a_widened_start_computes_what_the_checkpoint_did_and_restarts_the_rate(self):
         torch.manual_seed(0)
@@ -619,9 +638,119 @@ class StartTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             widen_inputs(bad, learner(6, 7))
 
+    def test_a_widened_normalizer_passes_the_added_inputs_unscaled_and_a_missing_one_is_named(self):
+        from rsl_rl.modules.normalization import EmpiricalNormalization
 
-if __name__ == "__main__":
-    unittest.main()
+        class Actor(torch.nn.Module):
+            def __init__(self, inputs, normalize=True):
+                super().__init__()
+                if normalize:
+                    self.obs_normalizer = EmpiricalNormalization(inputs)
+                self.mlp = torch.nn.Linear(inputs, 2)
+
+        def learner(inputs, normalize=True):
+            algorithm = SimpleNamespace(
+                actor=Actor(inputs, normalize),
+                critic=torch.nn.Sequential(torch.nn.Linear(inputs, 1)),
+            )
+            algorithm.optimizer = torch.optim.Adam(
+                [*algorithm.actor.parameters(), *algorithm.critic.parameters()]
+            )
+            return algorithm
+
+        narrow = learner(4)
+        narrow.actor.obs_normalizer.update(torch.randn(64, 4) * 3 + 1)
+        saved = {
+            "actor_state_dict": narrow.actor.state_dict(),
+            "critic_state_dict": narrow.critic.state_dict(),
+            "optimizer_state_dict": narrow.optimizer.state_dict(),
+        }
+        widened = widen_inputs(saved, learner(6))
+        self.assertEqual(widened, [["actor.mlp.weight", 4, 6], ["critic.0.weight", 4, 6]])
+        state = saved["actor_state_dict"]
+        for name, fill in (("_mean", 0.0), ("_var", 1.0), ("_std", 1.0)):
+            column = state[f"obs_normalizer.{name}"]
+            self.assertEqual(tuple(column.shape), (1, 6))
+            torch.testing.assert_close(column[:, 4:], torch.full((1, 2), fill))
+            torch.testing.assert_close(column[:, :4], getattr(narrow.actor.obs_normalizer, name))
+        empirical = {
+            "actor_state_dict": narrow.actor.state_dict(),
+            "critic_state_dict": narrow.critic.state_dict(),
+            "optimizer_state_dict": narrow.optimizer.state_dict(),
+        }
+        with self.assertRaisesRegex(ValueError, "obs_normalizer._mean"):
+            widen_inputs(empirical, learner(6, normalize=False))
+
+
+class NativeStartTests(unittest.TestCase):
+    def test_native_training_starts_only_from_a_declared_checkpoint_of_the_same_robot(self):
+        import json
+        import tempfile
+        from pathlib import Path
+        from unittest.mock import patch
+
+        import locomotion.rl.ppo as ppo
+        from locomotion.evaluation.checkpoint import STARTING_KEYS
+        from locomotion.scripts.train import sha, start_from_checkpoint
+
+        robot = {key: key[0] * 64 for key in STARTING_KEYS}
+        identity = {**robot, "physics_config": {"floor": "isaaclab_mesh"}}
+        parent = {
+            **robot,
+            "physics_config": {"floor": "earlier"},
+            "experiment": "destination_v8",
+            "reward_version": "4",
+            "reward_task": "v4_yaw_gate",
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory) / "checkpoint.pt"
+
+            def write(record_identity, infos_identity=None):
+                torch.save(
+                    {"infos": {"identity": infos_identity or record_identity, "updates": 3500}},
+                    path,
+                )
+                record = {
+                    "identity": record_identity,
+                    "updates": 3500,
+                    "checkpoint_sha256": sha(path),
+                }
+                path.with_suffix(".json").write_text(json.dumps(record))
+                return SimpleNamespace(
+                    initialize_from=path,
+                    initialize_from_sha256=sha(path),
+                    initialize_from_declaration_sha256=sha(path.with_suffix(".json")),
+                    initialize_rate="configured",
+                    device="cpu",
+                )
+
+            config = {"algorithm": {"learning_rate": 3e-4}}
+            with patch.object(
+                ppo, "initialize_learner", return_value=([["actor.0.weight", 4, 6]], 3e-4)
+            ):
+                args = write(parent)
+                started = dict(identity)
+                start_from_checkpoint(SimpleNamespace(alg=None), args, config, started)
+                start = started["initialized_from"]
+                self.assertEqual(
+                    (start["declaration_sha256"], start["experiment"], start["updates"]),
+                    (args.initialize_from_declaration_sha256, "destination_v8", 3500),
+                )
+                self.assertFalse(start["physics_config_equal"])
+                cases = {
+                    "declaration bytes": (parent, None, "initialize_from_declaration_sha256"),
+                    "robot differs: usd_sha256": (dict(parent, usd_sha256="0" * 64), None, None),
+                    "Embedded checkpoint declaration": (parent, dict(parent, seed=1), None),
+                }
+                for message, (record, infos, broken) in cases.items():
+                    with self.subTest(message=message):
+                        args = write(record, infos)
+                        if broken:
+                            setattr(args, broken, "0" * 64)
+                        with self.assertRaisesRegex(ValueError, message):
+                            start_from_checkpoint(
+                                SimpleNamespace(alg=None), args, config, dict(identity)
+                            )
 
 
 class PackTests(unittest.TestCase):
@@ -645,6 +774,7 @@ class PackTests(unittest.TestCase):
                 experiment="destination_v1",
                 initialize_from=start,
                 initialize_from_sha="c" * 64,
+                initialize_from_declaration_sha="d" * 64,
                 steps_per_env=36,
                 allocation_profile="flat_pilot_v1",
                 max_wall_seconds=21600,
@@ -655,9 +785,11 @@ class PackTests(unittest.TestCase):
                 args[args.index("--initialize-from") + 1], "/checkpoint/checkpoint_update002500.pt"
             )
             self.assertEqual(args[args.index("--initialize-from-sha256") + 1], "c" * 64)
+            self.assertEqual(args[args.index("--initialize-from-declaration-sha256") + 1], "d" * 64)
             self.assertNotIn("--initialize-rate", args)  # the configured rate is the default
             self.assertIn([str(Path(start).parent), "/checkpoint"], binding["extra_mounts"])
             self.assertEqual(binding["input_files"][start], "c" * 64)
+            self.assertEqual(binding["input_files"][start[: -len(".pt")] + ".json"], "d" * 64)
             pack = json.loads((root / "train/PACK.json").read_text())
             self.assertEqual(
                 (pack["experiment"], pack["initialize_from_sha256"]), ("destination_v1", "c" * 64)
@@ -678,11 +810,31 @@ class PackTests(unittest.TestCase):
                     dict(mode="train", experiment="unknown"),
                     dict(mode="diagnostic", experiment="destination_v1"),
                     dict(mode="train", initialize_from=start),
-                    dict(mode="train", initialize_from="/tmp/x.pt", initialize_from_sha="c" * 64),
+                    dict(mode="train", initialize_from=start, initialize_from_sha="c" * 64),
+                    dict(
+                        mode="train",
+                        initialize_from="/tmp/x.pt",
+                        initialize_from_sha="c" * 64,
+                        initialize_from_declaration_sha="d" * 64,
+                    ),
+                    dict(
+                        mode="train",
+                        initialize_from=start,
+                        initialize_from_sha="c" * 64,
+                        initialize_from_declaration_sha="not a hash",
+                    ),
+                    dict(
+                        mode="evaluate",
+                        checkpoint="/tmp/x.pt",
+                        checkpoint_sha="a" * 64,
+                        checkpoint_declaration_sha="b" * 64,
+                    ),
                 )
             ):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):
                     prepare(root / f"bad{index}", remote, **bad)
+                # A refusal writes nothing, so the same output can be prepared again.
+                self.assertFalse((root / f"bad{index}").exists())
 
 
 class LaunchMountTests(unittest.TestCase):
@@ -699,3 +851,7 @@ class LaunchMountTests(unittest.TestCase):
             and node.value.startswith("/")
         }
         self.assertIn("/checkpoint", allowed)
+
+
+if __name__ == "__main__":
+    unittest.main()

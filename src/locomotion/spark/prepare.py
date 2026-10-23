@@ -76,6 +76,7 @@ def prepare(
     experiment=None,
     initialize_from=None,
     initialize_from_sha=None,
+    initialize_from_declaration_sha=None,
     initialize_rate="configured",
     allocation_profile="standard",
     max_wall_seconds=6200,
@@ -211,13 +212,26 @@ def prepare(
         raise ValueError("Episode length selection applies to training, between 5 and 20 seconds")
     if initialize_from is not None and (mode != "train" or learner != "ppo"):
         raise ValueError("A starting checkpoint applies to PPO training")
-    if (initialize_from is None) != (initialize_from_sha is None) or initialize_rate not in (
+    starting = (initialize_from, initialize_from_sha, initialize_from_declaration_sha)
+    if len({value is None for value in starting}) != 1 or initialize_rate not in (
         "configured",
         "checkpoint",
     ):
         raise ValueError(
-            "A starting checkpoint needs its SHA-256 and a configured or checkpoint rate"
+            "A starting checkpoint needs its two file hashes and a configured or checkpoint rate"
         )
+    # Check the checkpoint paths and hashes before anything is written, so a refusal leaves no pack.
+    if initialize_from is not None:
+        initialize_from = Path(initialize_from)
+        if (
+            not within_roots(initialize_from, RUN_ROOTS)
+            or ".." in initialize_from.parts
+            or any(
+                len(h) != 64 or set(h) - set("0123456789abcdef")
+                for h in (initialize_from_sha, initialize_from_declaration_sha)
+            )
+        ):
+            raise ValueError("Invalid starting checkpoint identity")
     supplied = (
         checkpoint is not None,
         checkpoint_sha is not None,
@@ -225,6 +239,17 @@ def prepare(
     )
     if (mode == "evaluate" and not all(supplied)) or (mode != "evaluate" and any(supplied)):
         raise ValueError("Evaluation requires a checkpoint and its two file hashes")
+    if checkpoint is not None:
+        checkpoint = Path(checkpoint)
+        if (
+            not within_roots(checkpoint, RUN_ROOTS)
+            or ".." in checkpoint.parts
+            or any(
+                len(h) != 64 or set(h) - set("0123456789abcdef")
+                for h in (checkpoint_sha, checkpoint_declaration_sha)
+            )
+        ):
+            raise ValueError("Invalid checkpoint identity")
     compatibility = (
         checkpoint_compatibility is not None,
         checkpoint_compatibility_sha256 is not None,
@@ -371,16 +396,6 @@ def prepare(
     if episode_seconds != 20.0:
         binding["command_args"] += ["--episode-seconds", str(episode_seconds)]
     if checkpoint is not None:
-        checkpoint = Path(checkpoint)
-        if (
-            not within_roots(checkpoint, RUN_ROOTS)
-            or ".." in checkpoint.parts
-            or any(
-                len(h) != 64 or set(h) - set("0123456789abcdef")
-                for h in (checkpoint_sha, checkpoint_declaration_sha)
-            )
-        ):
-            raise ValueError("Invalid checkpoint identity")
         binding["extra_mounts"].append([str(checkpoint.parent), "/checkpoint"])
         binding["input_files"][str(checkpoint)] = checkpoint_sha
         binding["input_files"][str(checkpoint.with_suffix(".json"))] = checkpoint_declaration_sha
@@ -393,23 +408,20 @@ def prepare(
     if experiment is not None:
         binding["command_args"] += ["--experiment", experiment]
     if initialize_from is not None:
-        initialize_from = Path(initialize_from)
-        if (
-            not within_roots(initialize_from, RUN_ROOTS)
-            or ".." in initialize_from.parts
-            or len(initialize_from_sha) != 64
-            or set(initialize_from_sha) - set("0123456789abcdef")
-        ):
-            raise ValueError("Invalid starting checkpoint identity")
-        # Training mounts no evaluation checkpoint, so the starting checkpoint takes the launcher's
-        # read-only /checkpoint mount.
+        # Training mounts no evaluation checkpoint, so the starting checkpoint and its declaration take
+        # the launcher's read-only /checkpoint mount.
         binding["extra_mounts"].append([str(initialize_from.parent), "/checkpoint"])
         binding["input_files"][str(initialize_from)] = initialize_from_sha
+        binding["input_files"][str(initialize_from.with_suffix(".json"))] = (
+            initialize_from_declaration_sha
+        )
         binding["command_args"] += [
             "--initialize-from",
             "/checkpoint/" + initialize_from.name,
             "--initialize-from-sha256",
             initialize_from_sha,
+            "--initialize-from-declaration-sha256",
+            initialize_from_declaration_sha,
         ]
         if initialize_rate != "configured":
             binding["command_args"] += ["--initialize-rate", initialize_rate]
@@ -423,6 +435,9 @@ def prepare(
             checkpoint_compatibility_sha256,
         ]
     save(output / "binding.json", binding)
+    reward_version = "4"
+    if experiment is not None:
+        from locomotion.omniwalk.destination_task import REWARD_VERSION as reward_version
     save(
         output / "PACK.json",
         {
@@ -431,8 +446,8 @@ def prepare(
             "binding_sha256": sha(output / "binding.json"),
             "mode": mode,
             "seed": seed,
-            "reward_version": "4",
-            "reward_task": "v4_yaw_gate",
+            "reward_version": reward_version,
+            "reward_task": "v4_yaw_gate" if experiment is None else experiment,
             "action_mean": action_mean,
             "learner": learner,
             "networks": networks,
@@ -448,6 +463,7 @@ def prepare(
                 else {
                     "initialize_from": str(initialize_from),
                     "initialize_from_sha256": initialize_from_sha,
+                    "initialize_from_declaration_sha256": initialize_from_declaration_sha,
                     "initialize_rate": initialize_rate,
                 }
             ),
@@ -519,6 +535,7 @@ def main():
     parser.add_argument("--experiment", choices=sorted(EXPERIMENT_INPUTS))
     parser.add_argument("--initialize-from", type=Path)
     parser.add_argument("--initialize-from-sha")
+    parser.add_argument("--initialize-from-declaration-sha")
     parser.add_argument(
         "--initialize-rate", choices=["configured", "checkpoint"], default="configured"
     )

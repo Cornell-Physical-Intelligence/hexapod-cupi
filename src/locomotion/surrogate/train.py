@@ -236,8 +236,16 @@ def resume_record(path, identity):
     if record.get("checkpoint_sha256") != sha(path):
         raise ValueError("Resume checkpoint hash differs from its record")
     parent = record["identity"]
-    # Run location and execution threads do not change the training contract.
-    excluded = {"repository", "threads", "scope", "resume", "exploration_schedule_updates"}
+    # Run location and execution threads do not change the training contract; a run's starting checkpoint
+    # is its own history, which the resumed run carries forward from the record.
+    excluded = {
+        "repository",
+        "threads",
+        "scope",
+        "resume",
+        "exploration_schedule_updates",
+        "initialized_from",
+    }
     different = sorted(
         key
         for key in (parent.keys() | identity.keys()) - excluded
@@ -552,6 +560,8 @@ def run(args, argv=None):
             identity["exploration_schedule_updates"] = parent["identity"].get(
                 "exploration_schedule_updates"
             )
+            if "initialized_from" in parent["identity"]:
+                identity["initialized_from"] = parent["identity"]["initialized_from"]
             identity["resume"] = {
                 "checkpoint_sha256": parent["checkpoint_sha256"],
                 "record_sha256": sha(args.resume.with_suffix(".json")),

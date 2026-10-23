@@ -38,6 +38,7 @@ def parse_args(argv=None):
         "wrapper adds start at zero weight. The update count and configuration are this run's own.",
     )
     parser.add_argument("--initialize-from-sha256")
+    parser.add_argument("--initialize-from-declaration-sha256")
     parser.add_argument(
         "--initialize-rate",
         choices=["configured", "checkpoint"],
@@ -46,8 +47,13 @@ def parse_args(argv=None):
     )
     add_app_arguments(parser, argv)
     args = resolve_options(parser.parse_args(argv), "train")
-    if (args.initialize_from is None) != (args.initialize_from_sha256 is None):
-        raise ValueError("A starting checkpoint needs its SHA-256")
+    starting = (
+        args.initialize_from,
+        args.initialize_from_sha256,
+        args.initialize_from_declaration_sha256,
+    )
+    if len({value is None for value in starting}) != 1:
+        raise ValueError("A starting checkpoint needs its SHA-256 and its declaration's")
     return args
 
 
@@ -63,9 +69,11 @@ def training_wrapper(env, args, task):
 
     wrapper, options = OmniVecEnv, {}
     if args.experiment is not None:
+        from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS
         from locomotion.rl.destination_wrapper import DestinationVecEnv
 
-        wrapper, options = DestinationVecEnv, {"destination_input": "ghost"}
+        wrapper = DestinationVecEnv
+        options = {"destination_input": EXPERIMENT_INPUTS[args.experiment]}
     if args.learner == "amp":
         from locomotion.amp.amp import AMPConfig, AMPVecEnv, CollisionCapture
 
@@ -131,16 +139,36 @@ def start_from_checkpoint(runner, args, config, identity):
     """Load the starting checkpoint's networks and optimizer, widened for added inputs, and record them."""
     import torch
 
+    from locomotion.evaluation.checkpoint import (
+        checkpoint_reward_version,
+        require_embedded_declaration,
+        require_starting_identity,
+    )
     from locomotion.rl.ppo import initialize_learner
 
+    declaration = args.initialize_from.with_suffix(".json")
     if sha(args.initialize_from) != args.initialize_from_sha256:
         raise ValueError("Starting checkpoint bytes differ")
+    if sha(declaration) != args.initialize_from_declaration_sha256:
+        raise ValueError("Starting checkpoint declaration bytes differ")
+    record = json.loads(declaration.read_text())
+    if record["checkpoint_sha256"] != args.initialize_from_sha256:
+        raise ValueError("Starting checkpoint declaration names other bytes")
+    require_starting_identity(record, identity)
     loaded = torch.load(str(args.initialize_from), weights_only=False, map_location=args.device)
+    require_embedded_declaration(loaded.get("infos"), record)
     widened, rate = initialize_learner(
         runner.alg, loaded, config["algorithm"]["learning_rate"], args.initialize_rate
     )
     identity["initialized_from"] = {
         "checkpoint_sha256": args.initialize_from_sha256,
+        "declaration_sha256": args.initialize_from_declaration_sha256,
+        "experiment": record["identity"].get("experiment"),
+        "reward_version": checkpoint_reward_version(record),
+        "reward_task": record["identity"].get("reward_task"),
+        "updates": record["updates"],
+        "physics_config_equal": record["identity"].get("physics_config")
+        == identity["physics_config"],
         "loaded": ["actor", "critic", "optimizer"],
         "widened_inputs": widened,
         "learning_rate": {"value": rate, "source": args.initialize_rate},

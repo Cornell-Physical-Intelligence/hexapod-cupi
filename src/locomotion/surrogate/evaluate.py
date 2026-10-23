@@ -405,6 +405,28 @@ def build_parser():
     return parser
 
 
+def task_and_wrapper(args, identity):
+    """The task and wrapper to rebuild: the command line, then the record's own, then the experiment's.
+
+    A native experiment checkpoint records ``experiment`` but no task or wrapper; its destination task and
+    wrapper follow from the name, as native training builds them.
+    """
+    experiment = identity.get("experiment")
+    task = (
+        f"locomotion.omniwalk.destination_task:experiment_task({experiment})"
+        if experiment is not None
+        else DEFAULT_TASK
+    )
+    wrapper = (
+        "locomotion.rl.destination_wrapper:DestinationVecEnv"
+        if experiment is not None
+        else "locomotion.rl.wrapper:OmniVecEnv"
+    )
+    return args.task or identity.get("task") or task, args.wrapper or identity.get(
+        "wrapper"
+    ) or wrapper
+
+
 def main(argv=None):
     args = build_parser().parse_args(argv)
     # self_check calls this entry point in its own process and keeps its thread settings afterwards.
@@ -447,8 +469,7 @@ def evaluate_checkpoint(args):
     if config is None:
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
     seed = args.seed if args.seed is not None else int(identity.get("seed", 20260917))
-    task_spec = args.task or identity.get("task") or DEFAULT_TASK
-    wrapper_spec = args.wrapper or identity.get("wrapper") or "locomotion.rl.wrapper:OmniVecEnv"
+    task_spec, wrapper_spec = task_and_wrapper(args, identity)
     profiles = {case["case_id"]: case["profile"] for case in evaluation.learning_probe_cases()}
     probes = list(profiles)
     selected = (

@@ -393,9 +393,17 @@ def build_identity(args, cfg, metadata):
         "networks": args.networks,
     }
     if args.experiment is not None:
+        from locomotion.omniwalk.destination_task import REWARD_VERSION
+
+        # A named experiment trains its own reward, not canonical version 4.
         identity["experiment"] = args.experiment
+        identity["reward_version"] = REWARD_VERSION
+        identity["reward_task"] = args.experiment
     if getattr(args, "initialize_from", None) is not None:
-        identity["initialized_from"] = {"checkpoint_sha256": args.initialize_from_sha256}
+        identity["initialized_from"] = {
+            "checkpoint_sha256": args.initialize_from_sha256,
+            "declaration_sha256": args.initialize_from_declaration_sha256,
+        }
     if args.extended_updates:
         # The exploration decay length enters ppo_config; the opt-in records the requested run length beside it.
         identity["training_updates"] = args.updates
@@ -424,6 +432,12 @@ def bind_checkpoint(args, identity, compatibility):
     record = json.loads(args.checkpoint.with_suffix(".json").read_text())
     if record["checkpoint_sha256"] != args.checkpoint_sha256:
         raise ValueError("Checkpoint declaration differs")
+    # The experiment decides the task, the wrapper and the inputs; it must be the one the checkpoint trained.
+    if record["identity"].get("experiment") != identity.get("experiment"):
+        raise ValueError(
+            f"Checkpoint experiment {record['identity'].get('experiment')} differs from the requested "
+            f"{identity.get('experiment')}"
+        )
     if compatibility is None:
         require_checkpoint_identity(record, identity)
     else:

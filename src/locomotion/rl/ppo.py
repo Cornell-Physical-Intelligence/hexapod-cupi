@@ -126,11 +126,20 @@ class DeviationSchedule:
         return losses
 
 
+# An empirical normalizer's statistics for an added input start as RSL-RL starts them: mean 0, variance and
+# deviation 1, so the input passes unscaled until the normalizer updates; a zero deviation would divide by eps.
+NORMALIZER_FILL = {"_mean": 0.0, "_var": 1.0, "_std": 1.0}
+
+
 def widen_inputs(loaded, algorithm):
     """Give a checkpoint's first layers zero weights and zero optimizer moments for inputs a wrapper added.
 
     A weight whose input width grew keeps its columns and gains zero columns at the end, so the network
-    computes what it computed before the new inputs existed. Every other shape must match. Returns
+    computes what it computed before the new inputs existed. An observation normalizer's mean gains zeros
+    and its variance and deviation gain ones. Every other shape must match. The new columns' Adam moments
+    start at zero but share the weight's step count, so Adam's bias correction no longer offsets them:
+    their first optimizer step is about 3.2 times the learning rate and, under a steady gradient, their
+    step peaks near 6.5 times by the tenth optimizer step and is still about twice it after 300. Returns
     ``[name, old inputs, new inputs]`` for each widened weight.
     """
     widened, grown = [], {}
@@ -140,6 +149,11 @@ def widen_inputs(loaded, algorithm):
     ):
         target = model.state_dict()
         for name, value in list(loaded[key].items()):
+            if name not in target:
+                raise ValueError(
+                    f"Checkpoint {key}.{name} has no counterpart in the new network; "
+                    "the observation normalization may differ"
+                )
             want = target[name].shape
             if value.shape == want:
                 continue
@@ -147,8 +161,13 @@ def widen_inputs(loaded, algorithm):
                 raise ValueError(
                     f"Checkpoint {key}.{name} {tuple(value.shape)} cannot start a {tuple(want)} weight"
                 )
-            extra = value.new_zeros(want[0], want[1] - value.shape[1])
+            fill = (
+                NORMALIZER_FILL.get(name.rsplit(".", 1)[-1], 0.0) if "normalizer" in name else 0.0
+            )
+            extra = value.new_full((want[0], want[1] - value.shape[1]), fill)
             loaded[key][name] = torch.cat((value, extra), 1)
+            if "normalizer" in name:
+                continue
             widened.append([f"{key[: -len('_state_dict')]}.{name}", value.shape[1], want[1]])
             grown[tuple(value.shape)] = want
     params = [p for group in algorithm.optimizer.param_groups for p in group["params"]]

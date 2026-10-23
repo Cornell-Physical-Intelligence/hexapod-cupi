@@ -170,7 +170,6 @@ EXPERIMENTS = {
             destination_kernel="exponential",
             command_controls=1000,
         ),
-        "destination_input": "ghost",
         "episode_seconds": 20.0,
     },
 }
