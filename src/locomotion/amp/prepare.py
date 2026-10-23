@@ -1,76 +1,117 @@
 """Pack a fresh native replay with unchanged physics and ownership controls."""
+
 from __future__ import annotations
 
 import argparse
 import json
-from pathlib import Path
 import shutil
+from pathlib import Path
 
-from .model import ROOT, digest
-from locomotion.spark.prepare import prepare as prepare_kernel
-from .replay_native import validate_trajectory
 from locomotion.robots.hexapod import MODEL_SHA256
+from locomotion.spark.prepare import prepare as prepare_kernel
 from locomotion.spark.safety import RUN_ROOTS, within_roots
 from locomotion.spark.validation import CLEANUP_MARGIN_SECONDS
 
+from .model import ROOT, digest
+from .replay_native import validate_trajectory
+
 
 def write(path, data):
-    path.write_text(json.dumps(data, indent=2, allow_nan=False)+'\n')
+    path.write_text(json.dumps(data, indent=2, allow_nan=False) + "\n")
 
 
-def prepare(trajectory_directory, output, remote_root, root=ROOT, *, inputs=None, start_phase=0.,
-            startup_ramp_controls=0):
-    if start_phase not in (0., .5):
-        raise ValueError('Replay start phase must be 0 or 0.5')
+def prepare(
+    trajectory_directory,
+    output,
+    remote_root,
+    root=ROOT,
+    *,
+    inputs=None,
+    start_phase=0.0,
+    startup_ramp_controls=0,
+):
+    if start_phase not in (0.0, 0.5):
+        raise ValueError("Replay start phase must be 0 or 0.5")
     if type(startup_ramp_controls) is not int or startup_ramp_controls not in (0, 50):
-        raise ValueError('Startup ramp must contain 0 or 50 controls')
+        raise ValueError("Startup ramp must contain 0 or 50 controls")
     root, trajectory_directory, output = map(Path, (root, trajectory_directory, output))
     remote_root = Path(remote_root)
     if not within_roots(remote_root, RUN_ROOTS):
-        raise ValueError('Fresh guarded Spark run root required')
-    trajectory = trajectory_directory/'trajectory.npz'
+        raise ValueError("Fresh guarded Spark run root required")
+    trajectory = trajectory_directory / "trajectory.npz"
     declaration, _ = validate_trajectory(trajectory, digest(trajectory), MODEL_SHA256)
-    if start_phase == .5 and round(declaration['config']['period_s']/.02) % 2:
-        raise ValueError('Half-cycle replay requires an even number of controls')
-    binding = prepare_kernel(output, remote_root, mode='replay', root=root, inputs=inputs)
-    optimized = output/'trajectory'
+    if start_phase == 0.5 and round(declaration["config"]["period_s"] / 0.02) % 2:
+        raise ValueError("Half-cycle replay requires an even number of controls")
+    binding = prepare_kernel(output, remote_root, mode="replay", root=root, inputs=inputs)
+    optimized = output / "trajectory"
     optimized.mkdir()
-    for name in ('INPUT.json', 'SOLVER.json', 'RESULT.json', 'trajectory.npz'):
-        shutil.copy2(trajectory_directory/name, optimized/name)
-        binding['input_files'][str(remote_root/'trajectory'/name)] = digest(optimized/name)
-    binding['extra_mounts'].append([str(remote_root/'trajectory'), '/realized_prior'])
-    binding['command_args'] += ['--trajectory', '/realized_prior/trajectory.npz',
-        '--trajectory-sha256', digest(trajectory), '--start-phase', str(start_phase),
-        '--startup-ramp-controls', str(startup_ramp_controls)]
-    binding['max_wall_seconds'] = 1500
-    binding['max_seconds'] = 1500 + CLEANUP_MARGIN_SECONDS
-    deadline = binding['command_args'].index('--max-wall-seconds')+1
-    binding['command_args'][deadline] = '1500'
-    freeze_sha = binding['source_freeze_sha256']
-    write(output/'binding.json', binding)
-    write(output/'PACK.json', {'remote_root': str(remote_root), 'source_freeze_sha256': freeze_sha,
-        'binding_sha256': digest(output/'binding.json'), 'kernel_source_unchanged': True,
-        'controller_kind': 'optimized_periodic_motor_targets', 'learned_policy': False,
-        'stage2_complete': False, 'files': {p.relative_to(output).as_posix(): digest(p)
-            for p in sorted(output.rglob('*')) if p.is_file() and p.name != 'PACK.json'}})
+    for name in ("INPUT.json", "SOLVER.json", "RESULT.json", "trajectory.npz"):
+        shutil.copy2(trajectory_directory / name, optimized / name)
+        binding["input_files"][str(remote_root / "trajectory" / name)] = digest(optimized / name)
+    binding["extra_mounts"].append([str(remote_root / "trajectory"), "/realized_prior"])
+    binding["command_args"] += [
+        "--trajectory",
+        "/realized_prior/trajectory.npz",
+        "--trajectory-sha256",
+        digest(trajectory),
+        "--start-phase",
+        str(start_phase),
+        "--startup-ramp-controls",
+        str(startup_ramp_controls),
+    ]
+    binding["max_wall_seconds"] = 1500
+    binding["max_seconds"] = 1500 + CLEANUP_MARGIN_SECONDS
+    deadline = binding["command_args"].index("--max-wall-seconds") + 1
+    binding["command_args"][deadline] = "1500"
+    freeze_sha = binding["source_freeze_sha256"]
+    write(output / "binding.json", binding)
+    write(
+        output / "PACK.json",
+        {
+            "remote_root": str(remote_root),
+            "source_freeze_sha256": freeze_sha,
+            "binding_sha256": digest(output / "binding.json"),
+            "kernel_source_unchanged": True,
+            "controller_kind": "optimized_periodic_motor_targets",
+            "learned_policy": False,
+            "stage2_complete": False,
+            "files": {
+                p.relative_to(output).as_posix(): digest(p)
+                for p in sorted(output.rglob("*"))
+                if p.is_file() and p.name != "PACK.json"
+            },
+        },
+    )
     return binding
 
 
 def main():
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument('--trajectory-directory', type=Path, required=True)
-    parser.add_argument('--output', type=Path, required=True)
-    parser.add_argument('--remote-root', required=True)
-    parser.add_argument('--inputs', type=Path, required=True)
-    parser.add_argument('--start-phase', type=float, choices=[0., .5], default=0.)
-    parser.add_argument('--startup-ramp-controls', type=int, choices=[0, 50], default=0)
+    parser.add_argument("--trajectory-directory", type=Path, required=True)
+    parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--remote-root", required=True)
+    parser.add_argument("--inputs", type=Path, required=True)
+    parser.add_argument("--start-phase", type=float, choices=[0.0, 0.5], default=0.0)
+    parser.add_argument("--startup-ramp-controls", type=int, choices=[0, 50], default=0)
     args = parser.parse_args()
-    binding = prepare(args.trajectory_directory, args.output, args.remote_root,
-                      inputs=args.inputs, start_phase=args.start_phase,
-                      startup_ramp_controls=args.startup_ramp_controls)
-    print(json.dumps({'source': binding['source'], 'output': binding['output'],
-                      'source_freeze_sha256': binding['source_freeze_sha256']}))
+    binding = prepare(
+        args.trajectory_directory,
+        args.output,
+        args.remote_root,
+        inputs=args.inputs,
+        start_phase=args.start_phase,
+        startup_ramp_controls=args.startup_ramp_controls,
+    )
+    print(
+        json.dumps(
+            {
+                "source": binding["source"],
+                "output": binding["output"],
+                "source_freeze_sha256": binding["source_freeze_sha256"],
+            }
+        )
+    )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

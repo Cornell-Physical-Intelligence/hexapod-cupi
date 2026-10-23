@@ -15,7 +15,6 @@ import math
 from collections.abc import Callable
 
 import torch
-
 from isaaclab.sensors.ray_caster.patterns.patterns_cfg import PatternBaseCfg
 from isaaclab.utils.configclass import configclass
 
@@ -41,9 +40,7 @@ def mid360_surrogate_pattern(
     )
     elevation = torch.asin(sin_elevation)
     golden_ratio_conjugate = (math.sqrt(5.0) - 1.0) / 2.0
-    azimuth = -math.pi + 2.0 * math.pi * torch.remainder(
-        index * golden_ratio_conjugate, 1.0
-    )
+    azimuth = -math.pi + 2.0 * math.pi * torch.remainder(index * golden_ratio_conjugate, 1.0)
 
     cos_elevation = torch.cos(elevation)
     directions = torch.stack(
@@ -61,20 +58,12 @@ def mid360_surrogate_pattern(
     # at a configurable number of sigma. Per-return temporal angular randomness
     # cannot be represented by a static RayCaster pattern.
     hash_a = torch.clamp(
-        torch.remainder(
-            torch.sin((index + cfg.seed) * 12.9898) * 43758.5453, 1.0
-        ),
+        torch.remainder(torch.sin((index + cfg.seed) * 12.9898) * 43758.5453, 1.0),
         min=1.0e-7,
     )
-    hash_b = torch.remainder(
-        torch.sin((index + cfg.seed) * 78.233) * 12345.6789, 1.0
-    )
-    hash_c = torch.remainder(
-        torch.sin((index + cfg.seed) * 37.719) * 24634.6345, 1.0
-    )
-    standard_normal = torch.sqrt(-2.0 * torch.log(hash_a)) * torch.cos(
-        2.0 * math.pi * hash_b
-    )
+    hash_b = torch.remainder(torch.sin((index + cfg.seed) * 78.233) * 12345.6789, 1.0)
+    hash_c = torch.remainder(torch.sin((index + cfg.seed) * 37.719) * 24634.6345, 1.0)
+    standard_normal = torch.sqrt(-2.0 * torch.log(hash_a)) * torch.cos(2.0 * math.pi * hash_b)
     standard_normal = torch.clamp(
         standard_normal,
         -cfg.angular_error_clip_sigma,

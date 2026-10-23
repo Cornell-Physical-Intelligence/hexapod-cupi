@@ -1,16 +1,27 @@
 """Train PPO or AMP on the admitted canonical simulator."""
+
 from __future__ import annotations
 
 import argparse
 import copy
-from functools import partial
 import json
 import os
 import time
+from functools import partial
 
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS, TaskConfig
-from locomotion.scripts.cli import (ConfigRecord, add_app_arguments, add_common_arguments, add_learner_arguments,
-    learner_config, resolve_options, run, save, scalars, sha)
+from locomotion.scripts.cli import (
+    ConfigRecord,
+    add_app_arguments,
+    add_common_arguments,
+    add_learner_arguments,
+    learner_config,
+    resolve_options,
+    run,
+    save,
+    scalars,
+    sha,
+)
 from locomotion.spark.validation import collected_transitions, decay_updates, finish_training_update
 
 
@@ -20,56 +31,79 @@ def parse_args(argv=None):
     add_common_arguments(parser)
     add_learner_arguments(parser)
     add_app_arguments(parser, argv)
-    return resolve_options(parser.parse_args(argv), 'train')
+    return resolve_options(parser.parse_args(argv), "train")
 
 
 def require_gait_clock(args):
     """Reject an MLP policy without the gait clock that the active reward reads."""
-    if args.networks == 'mlp' and args.gait_clock != GAIT_CLOCK_CONTROLS:
-        raise ValueError(f'The active reward requires the {GAIT_CLOCK_CONTROLS}-control gait clock')
+    if args.networks == "mlp" and args.gait_clock != GAIT_CLOCK_CONTROLS:
+        raise ValueError(f"The active reward requires the {GAIT_CLOCK_CONTROLS}-control gait clock")
 
 
 def training_wrapper(env, args, task):
     """Wrap the task for RSL-RL; AMP adds collision capture and the discriminator configuration."""
     from locomotion.rl.wrapper import OmniVecEnv
+
     wrapper, options = OmniVecEnv, {}
-    if args.learner == 'amp':
+    if args.learner == "amp":
         from locomotion.amp.amp import AMPConfig, AMPVecEnv, CollisionCapture
+
         wrapper = AMPVecEnv
-        options = {'collision': CollisionCapture(env), 'amp_config': AMPConfig().resolve(args.seed)}
-    return wrapper(task, **options, observation_scaling=args.observation_scaling,
-        command_segments=args.command_segments, gait_clock=args.gait_clock,
-        action_smoothing=args.action_smoothing, velocity_noise=args.velocity_noise)
+        options = {"collision": CollisionCapture(env), "amp_config": AMPConfig().resolve(args.seed)}
+    return wrapper(
+        task,
+        **options,
+        observation_scaling=args.observation_scaling,
+        command_segments=args.command_segments,
+        gait_clock=args.gait_clock,
+        action_smoothing=args.action_smoothing,
+        velocity_noise=args.velocity_noise,
+    )
 
 
 def write_checkpoint(runner, args, config, identity, state, num_envs, update):
     """Save the runner with its identity, write the JSON declaration and name the checkpoint in state.json."""
-    path = args.output/f'checkpoint_update{update:06d}.pt'
-    runner.save(str(path), infos={'identity': identity, 'updates': update})
-    save(path.with_suffix('.json'), {'identity': identity, 'updates': update,
-        'checkpoint_sha256': sha(path), 'transitions': collected_transitions(update, config, num_envs)})
-    state['checkpoint'] = str(path)
-    state['checkpoint_sha256'] = sha(path)
-    save(args.output/'state.json', state)
+    path = args.output / f"checkpoint_update{update:06d}.pt"
+    runner.save(str(path), infos={"identity": identity, "updates": update})
+    save(
+        path.with_suffix(".json"),
+        {
+            "identity": identity,
+            "updates": update,
+            "checkpoint_sha256": sha(path),
+            "transitions": collected_transitions(update, config, num_envs),
+        },
+    )
+    state["checkpoint"] = str(path)
+    state["checkpoint_sha256"] = sha(path)
+    save(args.output / "state.json", state)
 
 
 def metrics_row(values, runner, env, metrics, diagnostics, config):
     """Return the metrics.jsonl row for the values RSL-RL logs after one update."""
     from locomotion.evaluation.ppo_diagnostics import action_metrics
-    update = values['it']+1
-    return {'update': update, 'transitions': collected_transitions(update, config, env.num_envs),
-        'collection_seconds': values['collect_time'], 'learning_seconds': values['learn_time'],
-        'loss': values['loss_dict'], 'learning_rate': values['learning_rate'],
-        'mean_action_std': float(values['action_std'].mean()),
-        'actions': action_metrics(runner.alg.storage, env.joint_names),
-        'task': metrics.status(reset_interval=True), 'policy_update': diagnostics.latest}
+
+    update = values["it"] + 1
+    return {
+        "update": update,
+        "transitions": collected_transitions(update, config, env.num_envs),
+        "collection_seconds": values["collect_time"],
+        "learning_seconds": values["learn_time"],
+        "loss": values["loss_dict"],
+        "learning_rate": values["learning_rate"],
+        "mean_action_std": float(values["action_std"].mean()),
+        "actions": action_metrics(runner.alg.storage, env.joint_names),
+        "task": metrics.status(reset_interval=True),
+        "policy_update": diagnostics.latest,
+    }
 
 
 def name_wandb_run(args, identity):
     """Name the W&B run after the seed and the frozen source; RSL-RL names it after its log directory."""
     import wandb
-    wandb.run.name = f'seed{args.seed}-{args.source_freeze_sha256[:12]}'
-    wandb.config.update({'identity': identity}, allow_val_change=True)
+
+    wandb.run.name = f"seed{args.seed}-{args.source_freeze_sha256[:12]}"
+    wandb.config.update({"identity": identity}, allow_val_change=True)
 
 
 def training_runner(env, args, config, identity, state, started):
@@ -78,35 +112,45 @@ def training_runner(env, args, config, identity, state, started):
     Return the runner and the load accumulator.
     """
     from rsl_rl.runners import OnPolicyRunner
+
     from locomotion.evaluation.loads import TrainingLoads
     from locomotion.evaluation.ppo_diagnostics import UpdateDiagnostics
     from locomotion.evaluation.task_metrics import TaskMetrics
-    from locomotion.rl.ppo import DeviationSchedule
     from locomotion.omniwalk.task import TrainingTask
-    task = TrainingTask(env, TaskConfig(seed=args.seed), args.output/'task')
+    from locomotion.rl.ppo import DeviationSchedule
+
+    task = TrainingTask(env, TaskConfig(seed=args.seed), args.output / "task")
     metrics = TaskMetrics(task)
     wrapped = training_wrapper(env, args, task)
-    if args.networks == 'mlp' and args.gait_clock != task.reward_config.schedule_period_controls:
-        raise ValueError('The contact-schedule reward needs a gait clock of the same period')
+    if args.networks == "mlp" and args.gait_clock != task.reward_config.schedule_period_controls:
+        raise ValueError("The contact-schedule reward needs a gait clock of the same period")
     runner_config = copy.deepcopy(config)
     # The wrapper consumes its own options; the runner receives the stock keys.
-    runner_config.pop('environment_wrapper', None)
-    runner_config.pop('exploration', None)
-    if args.logger == 'wandb':
+    runner_config.pop("environment_wrapper", None)
+    runner_config.pop("exploration", None)
+    if args.logger == "wandb":
         # The logger choice stays out of ppo_config, which checkpoint loading compares.
         # Copy saved checkpoints: container paths do not exist where offline runs sync.
-        os.environ.update(WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK='false')
-        runner_config.update(logger='wandb', wandb_project=args.wandb_project)
+        os.environ.update(
+            WANDB_DIR=str(args.output), WANDB_MODE=args.wandb_mode, WANDB_SYMLINK="false"
+        )
+        runner_config.update(logger="wandb", wandb_project=args.wandb_project)
         wrapped.cfg = ConfigRecord(wrapped.cfg)
-    runner = OnPolicyRunner(wrapped, runner_config, str(args.output/'learner'), device=args.device)
+    runner = OnPolicyRunner(
+        wrapped, runner_config, str(args.output / "learner"), device=args.device
+    )
     diagnostics = UpdateDiagnostics(runner.alg)
     runner.alg.update = diagnostics.update
     if args.action_std_final is not None:
         # The schedule wraps the diagnostic update, so each record reads the deviation it trained with.
-        runner.alg.update = DeviationSchedule(runner.alg, args.action_std, args.action_std_final,
-            decay_updates(args.updates, args.action_std_decay_updates)).update
+        runner.alg.update = DeviationSchedule(
+            runner.alg,
+            args.action_std,
+            args.action_std_final,
+            decay_updates(args.updates, args.action_std_decay_updates),
+        ).update
     loads = TrainingLoads(env)
-    if args.learner == 'amp':
+    if args.learner == "amp":
         wrapped.collision.inner = loads
         env.capture = wrapped.collision
     else:
@@ -117,18 +161,28 @@ def training_runner(env, args, config, identity, state, started):
     def log(**values):
         log_update(**values)
         row = metrics_row(values, runner, env, metrics, diagnostics, config)
-        with (args.output/'metrics.jsonl').open('a') as stream:
-            stream.write(json.dumps(row, allow_nan=False)+'\n')
+        with (args.output / "metrics.jsonl").open("a") as stream:
+            stream.write(json.dumps(row, allow_nan=False) + "\n")
         if runner.logger.writer is not None:
-            for tag, value in scalars(row['task'], 'Task').items():
-                runner.logger.writer.add_scalar(tag, value, values['it'])
-        if args.logger == 'wandb' and row['update'] == 1:
+            for tag, value in scalars(row["task"], "Task").items():
+                runner.logger.writer.add_scalar(tag, value, values["it"])
+        if args.logger == "wandb" and row["update"] == 1:
             name_wandb_run(args, identity)
-        state.update(updates=row['update'], transitions=row['transitions'], wall_seconds=time.monotonic()-started)
-        save(args.output/'state.json', state)
-        finish_training_update(row['update'], args.updates, time.monotonic()-started,
-            args.max_wall_seconds, checkpoint,
-            lambda: save(args.output/'force_metrics.json', loads.report()))
+        state.update(
+            updates=row["update"],
+            transitions=row["transitions"],
+            wall_seconds=time.monotonic() - started,
+        )
+        save(args.output / "state.json", state)
+        finish_training_update(
+            row["update"],
+            args.updates,
+            time.monotonic() - started,
+            args.max_wall_seconds,
+            checkpoint,
+            lambda: save(args.output / "force_metrics.json", loads.report()),
+        )
+
     runner.logger.log = log
     return runner, loads
 
@@ -137,16 +191,18 @@ def learn(env, session):
     """Run the requested updates and save the loads; run() saves them again after any outcome."""
     args = session.args
     config = learner_config(args, session.identity, session.state)
-    runner, session.loads = training_runner(env, args, config, session.identity, session.state, session.started)
+    runner, session.loads = training_runner(
+        env, args, config, session.identity, session.state, session.started
+    )
     runner.learn(args.updates, init_at_random_ep_len=False)
-    save(args.output/'force_metrics.json', session.loads.report())
+    save(args.output / "force_metrics.json", session.loads.report())
 
 
 def main(argv=None):
     args = parse_args(argv)
     require_gait_clock(args)
-    return run(args, 'train', learn)
+    return run(args, "train", learn)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     raise SystemExit(main())

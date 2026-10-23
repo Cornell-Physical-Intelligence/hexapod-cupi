@@ -1,21 +1,27 @@
 """Replay actions open loop on the surrogate and score stored telemetry under any reward."""
+
 from __future__ import annotations
 
 import argparse
 import importlib
 import json
-from pathlib import Path
 import time
+from pathlib import Path
 
 import numpy as np
 import torch
 
+from locomotion.omniwalk.mdp.actions import executed_action_feature
 from locomotion.omniwalk.mdp.commands import TaskConfig
 from locomotion.omniwalk.mdp.frames import rotate
-from locomotion.omniwalk.mdp.actions import executed_action_feature
-from locomotion.surrogate.env import Renderer, SurrogateConfig, SurrogateEnv, contact_overrides, make_env
+from locomotion.surrogate.env import (
+    Renderer,
+    SurrogateConfig,
+    SurrogateEnv,
+    contact_overrides,
+    make_env,
+)
 from locomotion.surrogate.train import resolve, thread_count
-
 
 REWARD_TASKS = {"v4_yaw_gate": "locomotion.omniwalk.task:TrainingTask"}
 # Fields that are flags or bookkeeping, not env.telemetry entries.
@@ -42,16 +48,28 @@ class TelemetryPlayer(SurrogateEnv):
     def __init__(self, arrays):
         controls, replicas = arrays["action"].shape[:2]
         self._reset_current = None
-        super().__init__(SurrogateConfig(num_envs=replicas, episode_seconds=120.), threads=0, substep_state=False)
+        super().__init__(
+            SurrogateConfig(num_envs=replicas, episode_seconds=120.0),
+            threads=0,
+            substep_state=False,
+        )
         self._reset_current = {key: value.clone() for key, value in self.current.items()}
-        self.arrays = {key: value for key, value in arrays.items()
-                       if value.ndim >= 2 and value.shape[:2] == (controls, replicas)}
+        self.arrays = {
+            key: value
+            for key, value in arrays.items()
+            if value.ndim >= 2 and value.shape[:2] == (controls, replicas)
+        }
         reset_before = self.arrays.get("reset_before")
         if reset_before is None:
-            done = self.arrays["terminated"] | self.arrays.get("truncated", np.zeros_like(self.arrays["terminated"]))
+            done = self.arrays["terminated"] | self.arrays.get(
+                "truncated", np.zeros_like(self.arrays["terminated"])
+            )
             reset_before = np.concatenate((np.ones((1, replicas), dtype=bool), done[:-1]))
         self.reset_before = reset_before.astype(bool)
-        steps, count = np.zeros((controls, replicas), dtype=np.int64), np.zeros(replicas, dtype=np.int64)
+        steps, count = (
+            np.zeros((controls, replicas), dtype=np.int64),
+            np.zeros(replicas, dtype=np.int64),
+        )
         for control in range(controls):
             count = np.where(self.reset_before[control], 0, count) + 1
             steps[control] = count
@@ -60,7 +78,11 @@ class TelemetryPlayer(SurrogateEnv):
     def reset(self, indices=None):
         if self._reset_current is None:
             return super().reset(indices)
-        indices = torch.arange(self.num_envs) if indices is None else torch.as_tensor(indices, dtype=torch.long)
+        indices = (
+            torch.arange(self.num_envs)
+            if indices is None
+            else torch.as_tensor(indices, dtype=torch.long)
+        )
         for key, value in self.current.items():
             value[indices] = self._reset_current[key][indices]
         self.held[indices] = self.neutral
@@ -71,10 +93,16 @@ class TelemetryPlayer(SurrogateEnv):
 
     def step(self, action):
         row = self.cursor
-        take = lambda key: torch.from_numpy(np.ascontiguousarray(self.arrays[key][row]))
-        pose, nav = take("root_pose_xyzw").to(torch.float64), take("linear_velocity_nav").to(torch.float64)
+
+        def take(key):
+            return torch.from_numpy(np.ascontiguousarray(self.arrays[key][row]))
+
+        pose, nav = (
+            take("root_pose_xyzw").to(torch.float64),
+            take("linear_velocity_nav").to(torch.float64),
+        )
         state = self._state
-        state[:] = 0.
+        state[:] = 0.0
         state[:, 1:4] = (pose[:, :3] - self._origins64).numpy()
         state[:, 4], state[:, 5:8] = pose[:, 6].numpy(), pose[:, 3:6].numpy()
         state[:, 1 + self._qpos_columns] = self.arrays["joint_position_rad"][row]
@@ -89,11 +117,17 @@ class TelemetryPlayer(SurrogateEnv):
         telemetry.setdefault("toe_xyz_body", current["toe_body"].clone())
         telemetry.setdefault("linear_velocity_body", current["linear"].clone())
         terminated = take("terminated").to(torch.bool)
-        truncated = take("truncated").to(torch.bool) if "truncated" in self.arrays else torch.zeros_like(terminated)
+        truncated = (
+            take("truncated").to(torch.bool)
+            if "truncated" in self.arrays
+            else torch.zeros_like(terminated)
+        )
         telemetry.update(command=self.commands.clone(), terminated=terminated, truncated=truncated)
         self.telemetry, self.current = telemetry, current
         self.held = telemetry["joint_target_rad"].to(torch.float32).clone()
-        self.previous_action = executed_action_feature(self.held, self.neutral, self.cfg.action_scale_rad).clone()
+        self.previous_action = executed_action_feature(
+            self.held, self.neutral, self.cfg.action_scale_rad
+        ).clone()
         self.history = torch.cat((self.history[:, 1:], self._proprio(current)[:, None]), dim=1)
         self.episode_steps = torch.from_numpy(self._episode_steps_at[row].copy())
         result = self.observations(current)
@@ -116,9 +150,16 @@ class FunctionScorer:
         self.previous_target[indices] = self.neutral
 
     def __call__(self, telemetry, command, terminated):
-        result = self.function({**telemetry, "previous_action": self.previous_action,
-                                "previous_joint_velocity_rad_s": self.previous_rate,
-                                "previous_joint_target_rad": self.previous_target}, command, terminated)
+        result = self.function(
+            {
+                **telemetry,
+                "previous_action": self.previous_action,
+                "previous_joint_velocity_rad_s": self.previous_rate,
+                "previous_joint_target_rad": self.previous_target,
+            },
+            command,
+            terminated,
+        )
         self.previous_action = telemetry["action"].clone()
         self.previous_rate = telemetry["joint_velocity_rad_s"].clone()
         self.previous_target = telemetry["joint_target_rad"].clone()
@@ -150,7 +191,9 @@ def score_arrays(data, names, nominal_height=None, neutral=None):
                     player.reset(restarted)
                 player.commands[:] = commands[control]
                 output = player.step(actions[control])
-                reward, components = scorer(player.telemetry, commands[control], output["terminated"])
+                reward, components = scorer(
+                    player.telemetry, commands[control], output["terminated"]
+                )
             else:
                 if len(restarted):
                     scorer.reset(restarted)
@@ -158,14 +201,24 @@ def score_arrays(data, names, nominal_height=None, neutral=None):
                 player.commands[:] = commands[control]
                 reward = scorer.step(actions[control])["reward"]
                 components = scorer.last_components
-            rows[name].append({"reward": reward.detach().clone(), **{key: value.detach().clone() for key, value in components.items()}})
+            rows[name].append(
+                {
+                    "reward": reward.detach().clone(),
+                    **{key: value.detach().clone() for key, value in components.items()},
+                }
+            )
     player.close()
-    return {name: {key: torch.stack([row[key] for row in values]).numpy() for key in values[0]}
-            for name, values in rows.items()}
+    return {
+        name: {key: torch.stack([row[key] for row in values]).numpy() for key in values[0]}
+        for name, values in rows.items()
+    }
 
 
 def reward_summary(scores):
-    return {name: {key: float(value.mean()) for key, value in components.items()} for name, components in scores.items()}
+    return {
+        name: {key: float(value.mean()) for key, value in components.items()}
+        for name, components in scores.items()
+    }
 
 
 def run(env, action_at, controls, output, *, rewards=(), video=False, view="three_quarter"):
@@ -178,18 +231,28 @@ def run(env, action_at, controls, output, *, rewards=(), video=False, view="thre
     writer = renderer = None
     if video:
         import cv2
+
         renderer = Renderer(env, view=view)
     started = time.perf_counter()
     for control in range(controls):
         action = action_at(control)
         result = env.step(action)
         telemetry = env.telemetry
-        records.append({**{key: value.numpy().copy() for key, value in telemetry.items()},
-                        "reset_before": reset_before.numpy().copy()})
+        records.append(
+            {
+                **{key: value.numpy().copy() for key, value in telemetry.items()},
+                "reset_before": reset_before.numpy().copy(),
+            }
+        )
         if renderer is not None and control % 2 == 1:
             frame = renderer.frame(0)
             if writer is None:
-                writer = cv2.VideoWriter(str(output / "replay.mp4"), cv2.VideoWriter_fourcc(*"avc1"), 25, frame.shape[1::-1])
+                writer = cv2.VideoWriter(
+                    str(output / "replay.mp4"),
+                    cv2.VideoWriter_fourcc(*"avc1"),
+                    25,
+                    frame.shape[1::-1],
+                )
             writer.write(frame[:, :, ::-1])
         done = result["terminated"] | result["truncated"]
         reset_before = done.clone()
@@ -203,14 +266,29 @@ def run(env, action_at, controls, output, *, rewards=(), video=False, view="thre
     # The repository task classes score the stored record with their own memory rules.
     scores = score_arrays(data, list(rewards)) if rewards else {}
     if scores:
-        np.savez_compressed(output / "rewards.npz", **{f"{name}/{key}": value for name, values in scores.items() for key, value in values.items()})
+        np.savez_compressed(
+            output / "rewards.npz",
+            **{
+                f"{name}/{key}": value
+                for name, values in scores.items()
+                for key, value in values.items()
+            },
+        )
     settle = min(100, controls // 2)
     nav, gyro = data["linear_velocity_nav"][settle:], data["angular_velocity_body"][settle:]
     steps = np.abs(np.diff(data["joint_target_rad"], axis=0))[~data["reset_before"][1:]]
     rms = np.sqrt(data["torque_square_sum_400hz"][settle:] / 8)
-    summary = {"schema": "hexapod_surrogate_replay_v1", "surrogate": True, "controls": controls, "replicas": replicas,
-        "window_start_control": settle, "command_first_control": data["command"][0].tolist() if replicas <= 4 else data["command"][0, :4].tolist(),
-        "mean_velocity_nav_mps": nav.mean((0, 1)).tolist(), "mean_yaw_rate_rad_s": float(gyro[..., 2].mean()),
+    summary = {
+        "schema": "hexapod_surrogate_replay_v1",
+        "surrogate": True,
+        "controls": controls,
+        "replicas": replicas,
+        "window_start_control": settle,
+        "command_first_control": data["command"][0].tolist()
+        if replicas <= 4
+        else data["command"][0, :4].tolist(),
+        "mean_velocity_nav_mps": nav.mean((0, 1)).tolist(),
+        "mean_yaw_rate_rad_s": float(gyro[..., 2].mean()),
         "achieved_planar_speed_mps": float(np.linalg.norm(nav[..., :2], axis=-1).mean()),
         "planar_velocity_std_xy_mps": [float(nav[..., 0].std()), float(nav[..., 1].std())],
         "vertical_velocity_rms_mps": float(np.sqrt((nav[..., 2] ** 2).mean())),
@@ -218,20 +296,37 @@ def run(env, action_at, controls, output, *, rewards=(), video=False, view="thre
         "roll_pitch_rate_mean_norm_rad_s": float(np.linalg.norm(gyro[..., :2], axis=-1).mean()),
         "root_height_mean_m": float(data["root_pose_xyzw"][settle:, :, 2].mean()),
         "final_root_height_m": data["root_pose_xyzw"][-1, :4, 2].tolist(),
-        "final_displacement_forward_left_m": [(-(data["root_pose_xyzw"][-1, :4, 1] - env.origins[:4, 1].numpy())).tolist(),
-                                              (data["root_pose_xyzw"][-1, :4, 0] - env.origins[:4, 0].numpy()).tolist()],
-        "limiter_fraction_coxa_femur_tibia": [float((np.abs(steps[:, k::3] - env.cfg.target_slew_rad) <= 2e-6).mean()) for k in range(3)],
-        "requested_saturation_fraction_400hz": float(data["saturation_count_400hz"][settle:].mean() / 8),
-        "applied_torque_rms_coxa_femur_tibia_nm": [float(np.sqrt((rms[..., k::3] ** 2).mean())) for k in range(3)],
+        "final_displacement_forward_left_m": [
+            (-(data["root_pose_xyzw"][-1, :4, 1] - env.origins[:4, 1].numpy())).tolist(),
+            (data["root_pose_xyzw"][-1, :4, 0] - env.origins[:4, 0].numpy()).tolist(),
+        ],
+        "limiter_fraction_coxa_femur_tibia": [
+            float((np.abs(steps[:, k::3] - env.cfg.target_slew_rad) <= 2e-6).mean())
+            for k in range(3)
+        ],
+        "requested_saturation_fraction_400hz": float(
+            data["saturation_count_400hz"][settle:].mean() / 8
+        ),
+        "applied_torque_rms_coxa_femur_tibia_nm": [
+            float(np.sqrt((rms[..., k::3] ** 2).mean())) for k in range(3)
+        ],
         "torque_rms_norm_mean_nm": float(np.linalg.norm(rms, axis=-1).mean()),
-        "toe_loaded_all_substeps_fraction": (data["surrogate_toe_cap_force_min_400hz"][settle:] > 1.).mean((0, 1)).tolist(),
-        "nonfoot_control_fraction": float((data["other_body_force_max_400hz"] > 1.).mean()),
-        "terminations": int(data["terminated"].sum()), "truncations": int(data["truncated"].sum()),
-        "speed_clamp_events": env.speed_clamp_events, "peak_joint_speed_rad_s": env.peak_joint_speed,
-        "touchdown_events": env.touchdown_events, "touchdown_overshoot_events": env.overshoot_events,
+        "toe_loaded_all_substeps_fraction": (
+            data["surrogate_toe_cap_force_min_400hz"][settle:] > 1.0
+        )
+        .mean((0, 1))
+        .tolist(),
+        "nonfoot_control_fraction": float((data["other_body_force_max_400hz"] > 1.0).mean()),
+        "terminations": int(data["terminated"].sum()),
+        "truncations": int(data["truncated"].sum()),
+        "speed_clamp_events": env.speed_clamp_events,
+        "peak_joint_speed_rad_s": env.peak_joint_speed,
+        "touchdown_events": env.touchdown_events,
+        "touchdown_overshoot_events": env.overshoot_events,
         "reward_component_means": reward_summary(scores),
         "controls_per_second": controls * replicas / (time.perf_counter() - started),
-        "scope": "CPU MuJoCo surrogate; design evidence."}
+        "scope": "CPU MuJoCo surrogate; design evidence.",
+    }
     (output / "summary.json").write_text(json.dumps(summary, indent=2, allow_nan=False) + "\n")
     return summary
 
@@ -244,7 +339,11 @@ def load_actions(path, field, env):
             target = data["joint_target_rad"].astype(np.float32)
             actions = (target - env.neutral.numpy()) / env.cfg.action_scale_rad
         else:
-            key = field if field in names else next(k for k in ("policy_action", "action") if k in names)
+            key = (
+                field
+                if field in names
+                else next(k for k in ("policy_action", "action") if k in names)
+            )
             actions = data[key].astype(np.float32)
         commands = data["command"].astype(np.float32) if "command" in names else None
     if actions.ndim == 2:
@@ -268,37 +367,68 @@ def parse_mean(text):
 
 
 def main(argv=None):
-    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter, allow_abbrev=False)
+    parser = argparse.ArgumentParser(
+        description=__doc__,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        allow_abbrev=False,
+    )
     sub = parser.add_subparsers(dest="mode", required=True)
     common = argparse.ArgumentParser(add_help=False)
     common.add_argument("--output", type=Path, required=True)
     common.add_argument("--controls", type=int)
     common.add_argument("--command", type=float, nargs=3, metavar=("FORWARD", "LEFT", "YAW"))
-    common.add_argument("--rewards", nargs="*", default=["v4_yaw_gate"], help="v4_yaw_gate or module:Class/function.")
-    common.add_argument("--episode-seconds", type=float, default=60.)
-    common.add_argument("--threads", type=int, default=2, help="Physics and torch threads for this process (1 to 6).")
+    common.add_argument(
+        "--rewards",
+        nargs="*",
+        default=["v4_yaw_gate"],
+        help="v4_yaw_gate or module:Class/function.",
+    )
+    common.add_argument("--episode-seconds", type=float, default=60.0)
+    common.add_argument(
+        "--threads",
+        type=int,
+        default=2,
+        help="Physics and torch threads for this process (1 to 6).",
+    )
     common.add_argument("--video", action="store_true", help="Render replica 0 to replay.mp4.")
     common.add_argument("--view", choices=["three_quarter", "side"], default="three_quarter")
     common.add_argument("--contact", action="append", default=[], metavar="FIELD=VALUE")
     trace = sub.add_parser("trace", parents=[common])
     trace.add_argument("--trace", type=Path, required=True)
-    trace.add_argument("--field", default="policy_action", help="policy_action, action, or target (joint_target_rad).")
+    trace.add_argument(
+        "--field",
+        default="policy_action",
+        help="policy_action, action, or target (joint_target_rad).",
+    )
     scripted = sub.add_parser("scripted", parents=[common])
-    scripted.add_argument("--mean", default="0", help="One value, 18 comma-separated values, or a .json/.npy file.")
-    scripted.add_argument("--std", type=float, default=.15)
+    scripted.add_argument(
+        "--mean", default="0", help="One value, 18 comma-separated values, or a .json/.npy file."
+    )
+    scripted.add_argument("--std", type=float, default=0.15)
     scripted.add_argument("--replicas", type=int, default=128)
     scripted.add_argument("--seed", type=int, default=20260917)
     score = sub.add_parser("score")
     score.add_argument("--telemetry", type=Path, required=True)
     score.add_argument("--rewards", nargs="+", default=["v4_yaw_gate"])
-    score.add_argument("--output", type=Path, help="Optional new npz file for per-control components.")
-    score.add_argument("--command", type=float, nargs=3, metavar=("FORWARD", "LEFT", "YAW"),
-                       help="Score under this held command in place of the stored one (required meaning for a native probe record).")
+    score.add_argument(
+        "--output", type=Path, help="Optional new npz file for per-control components."
+    )
+    score.add_argument(
+        "--command",
+        type=float,
+        nargs=3,
+        metavar=("FORWARD", "LEFT", "YAW"),
+        help="Score under this held command in place of the stored one (required meaning for a native probe record).",
+    )
     args = parser.parse_args(argv)
     if args.mode == "score":
         if args.output is not None:
             # numpy appends the suffix to a name without it; the result keeps a fresh name either way.
-            args.output = args.output if args.output.suffix == ".npz" else args.output.with_name(args.output.name + ".npz")
+            args.output = (
+                args.output
+                if args.output.suffix == ".npz"
+                else args.output.with_name(args.output.name + ".npz")
+            )
             if args.output.exists():
                 raise FileExistsError(f"{args.output} exists; choose a new output file")
         with np.load(args.telemetry, allow_pickle=False) as file:
@@ -306,12 +436,24 @@ def main(argv=None):
         if "command" not in data:
             # A native probe record holds a zero command; --command names the one to score under.
             controls, replicas = data["action"].shape[:2]
-            data["command"] = np.broadcast_to(np.asarray(args.command or (0., 0., 0.), dtype=np.float32), (controls, replicas, 3)).copy()
+            data["command"] = np.broadcast_to(
+                np.asarray(args.command or (0.0, 0.0, 0.0), dtype=np.float32),
+                (controls, replicas, 3),
+            ).copy()
         elif args.command is not None:
-            data["command"] = np.broadcast_to(np.asarray(args.command, dtype=np.float32), data["command"].shape).copy()
+            data["command"] = np.broadcast_to(
+                np.asarray(args.command, dtype=np.float32), data["command"].shape
+            ).copy()
         scores = score_arrays(data, args.rewards)
         if args.output:
-            np.savez_compressed(args.output, **{f"{name}/{key}": value for name, values in scores.items() for key, value in values.items()})
+            np.savez_compressed(
+                args.output,
+                **{
+                    f"{name}/{key}": value
+                    for name, values in scores.items()
+                    for key, value in values.items()
+                },
+            )
         print(json.dumps(reward_summary(scores), indent=2))
         return 0
     # The same count reaches torch and the MuJoCo thread pool.
@@ -322,8 +464,13 @@ def main(argv=None):
         actions, commands = load_actions(args.trace, args.field, probe)
         replicas = actions.shape[1]
         controls = min(args.controls or len(actions), len(actions))
-        env = make_env(replicas, threads=min(args.threads, replicas) if replicas > 1 else 0, contact=contact,
-                       episode_seconds=args.episode_seconds, substep_state=False)
+        env = make_env(
+            replicas,
+            threads=min(args.threads, replicas) if replicas > 1 else 0,
+            contact=contact,
+            episode_seconds=args.episode_seconds,
+            substep_state=False,
+        )
         actions = torch.from_numpy(actions)
 
         def action_at(control):
@@ -336,14 +483,31 @@ def main(argv=None):
             return actions[control]
     else:
         controls = args.controls or 500
-        env = make_env(args.replicas, threads=args.threads, contact=contact, episode_seconds=args.episode_seconds, substep_state=False)
-        env.commands[:] = torch.tensor(args.command if args.command is not None else [0., 0., 0.])
+        env = make_env(
+            args.replicas,
+            threads=args.threads,
+            contact=contact,
+            episode_seconds=args.episode_seconds,
+            substep_state=False,
+        )
+        env.commands[:] = torch.tensor(
+            args.command if args.command is not None else [0.0, 0.0, 0.0]
+        )
         mean = parse_mean(args.mean)
         generator = torch.Generator().manual_seed(args.seed)
 
         def action_at(control):
             return mean + args.std * torch.randn(args.replicas, 18, generator=generator)
-    summary = run(env, action_at, controls, args.output, rewards=args.rewards, video=args.video, view=args.view)
+
+    summary = run(
+        env,
+        action_at,
+        controls,
+        args.output,
+        rewards=args.rewards,
+        video=args.video,
+        view=args.view,
+    )
     print(json.dumps(summary, indent=2))
     return 0
 

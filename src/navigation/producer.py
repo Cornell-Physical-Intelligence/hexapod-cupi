@@ -1,12 +1,12 @@
 """A non-blocking pose-to-command protocol."""
+
 from __future__ import annotations
 
 import math
 from typing import Protocol, runtime_checkable
-from contracts.pose import Pose2D
 
 from contracts.command import VelocityCommand
-
+from contracts.pose import Pose2D
 
 __all__ = ["CommandProducer", "Pose2D", "wrap_to_pi"]
 
