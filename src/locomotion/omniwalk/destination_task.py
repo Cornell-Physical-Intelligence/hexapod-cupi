@@ -64,7 +64,8 @@ command is a walk (``speed_curriculum_walks_only``: no zero commands, turns or a
 after 4 s to 12 s), the destination pay is four times wider (0.8 at 5 mm instead of at 1.2 mm) and the
 level gate averages the last 10 updates instead of 50. ``destination_v14`` is v13 whose back-off judges
 the last ``speed_curriculum_backoff_window_controls`` (50 updates) at the level, so a level gets 50
-updates before it can be lowered while it still rises after 10.
+updates before it can be lowered while it still rises after 10. ``destination_v15`` is v14 that raises
+the level only when no robot fell in the window it judges (``speed_curriculum_advance_without_falls``).
 """
 
 import hashlib
@@ -112,6 +113,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_backoff_threshold: float | None = None
     speed_curriculum_walks_only: bool | None = None
     speed_curriculum_backoff_window_controls: int | None = None
+    speed_curriculum_advance_without_falls: bool | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -197,6 +199,11 @@ class DestinationRewardConfig(RewardConfig):
             raise ValueError(
                 "A back-off window needs a back-off and spans at least the level window"
             )
+        if self.speed_curriculum_advance_without_falls is not None and (
+            self.speed_curriculum_advance_without_falls is not True
+            or self.speed_curriculum_threshold is None
+        ):
+            raise ValueError("Advancing without falls is True or None and needs a speed curriculum")
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -419,6 +426,14 @@ EXPERIMENTS["destination_v14"] = {
         EXPERIMENTS["destination_v13"]["reward"], speed_curriculum_backoff_window_controls=1800
     ),
 }
+# destination_v15 is destination_v14 that raises the level only when no robot fell during the 10 updates
+# it judges: the v14 checkpoints at 0.125 and 0.15 m/s fell within 2 s in most directions.
+EXPERIMENTS["destination_v15"] = {
+    **EXPERIMENTS["destination_v14"],
+    "reward": replace(
+        EXPERIMENTS["destination_v14"]["reward"], speed_curriculum_advance_without_falls=True
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -442,6 +457,8 @@ class DestinationTrainingTask(TrainingTask):
             self.curriculum_window = torch.zeros(
                 chosen.speed_curriculum_window_controls, dtype=torch.float64, device=env.device
             )
+            # Falls per control over the same window, for advancing only after a fall-free window.
+            self.curriculum_falls = torch.zeros_like(self.curriculum_window)
             self.curriculum_filled = 0
             span = chosen.speed_curriculum_backoff_window_controls
             self.curriculum_backoff_window = torch.zeros(
@@ -494,13 +511,15 @@ class DestinationTrainingTask(TrainingTask):
         self.env.commands[walks, 0] = speed * torch.cos(angle)
         self.env.commands[walks, 1] = speed * torch.sin(angle)
 
-    def _curriculum_step(self, pay):
+    def _curriculum_step(self, pay, terminated=None):
         """Record the mean destination pay of this control; raise the top speed past the threshold and
         lower it below the back-off, each judged on its own window of controls at the level."""
         config = self.reward_config
         value = pay.detach().mean()
         window = config.speed_curriculum_window_controls
         self.curriculum_window[self.curriculum_filled % window] = value.to(self.curriculum_window)
+        falls = 0 if terminated is None else terminated.detach().sum()
+        self.curriculum_falls[self.curriculum_filled % window] = falls
         self.curriculum_filled += 1
         span = config.speed_curriculum_backoff_window_controls
         if span is not None:
@@ -543,6 +562,8 @@ class DestinationTrainingTask(TrainingTask):
             return
         if mean <= config.speed_curriculum_threshold:
             return
+        if config.speed_curriculum_advance_without_falls and float(self.curriculum_falls.sum()) > 0:
+            return
         record = {
             "controls_completed": self.controls_completed,
             "level_mps": round(self.curriculum_level, 6),
@@ -566,6 +587,7 @@ class DestinationTrainingTask(TrainingTask):
             "level_mps": round(self.curriculum_level, 6),
             "window_controls": filled,
             "window_mean": float(self.curriculum_window[:filled].mean()) if filled else None,
+            "window_falls": int(self.curriculum_falls[:filled].sum()),
             "complete": self.curriculum_complete,
             "advances": self.curriculum_advances,
         }
@@ -630,7 +652,7 @@ class DestinationTrainingTask(TrainingTask):
             components["destination"] = (config.destination_weight * alive * closeness).to(reward)
             reward = reward + components["destination"]
             if config.speed_curriculum_start_mps is not None:
-                self._curriculum_step(components["destination"])
+                self._curriculum_step(components["destination"], terminated)
         if config.hold_weight is not None:
             components["hold"] = self._hold(command, terminated).to(reward)
             reward = reward + components["hold"]

@@ -636,6 +636,28 @@ class BackoffTests(unittest.TestCase):
         self.assertEqual(task.curriculum_level, 0.1)
         self.assertTrue(task.curriculum_status()["advances"][-1]["back_off"])
 
+    def test_destination_v15_rises_only_after_a_window_without_falls(self):
+        fourteen, fifteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v14", "destination_v15")
+        )
+        changed = {k for k, v in asdict(fifteen).items() if asdict(fourteen)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_advance_without_falls"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v15"], "ghost")
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, fifteen)
+        none, one = torch.zeros(64, dtype=torch.bool), torch.zeros(64, dtype=torch.bool)
+        one[3] = True
+        # High pay with one fall at control 100 holds the level at the read after 364 controls; the fall
+        # leaves the 360-control window at control 460 and the level rises at the next read (462).
+        for k in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), one if k == 99 else none)
+        self.assertEqual(task.curriculum_level, 0.075)
+        self.assertEqual(task.curriculum_status()["window_falls"], 1)
+        for _ in range(98):
+            task._curriculum_step(torch.full((64,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.1)
+
     def test_destination_v12_is_v10_with_the_back_off(self):
         ten, twelve = (EXPERIMENTS[n]["reward"] for n in ("destination_v10", "destination_v12"))
         changed = {k for k, v in asdict(twelve).items() if asdict(ten)[k] != v}
