@@ -575,6 +575,30 @@ class BackoffTests(unittest.TestCase):
             self.assertEqual(task.curriculum_level, level)
         self.assertTrue(task.curriculum_status()["advances"][-1]["back_off"])
 
+    def test_destination_v13_walks_everywhere_and_pays_0_8_at_5_mm(self):
+        twelve, thirteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v12", "destination_v13")
+        )
+        changed = {k for k, v in asdict(thirteen).items() if asdict(twelve)[k] != v}
+        self.assertEqual(changed, {"destination_distance_m", "speed_curriculum_walks_only"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v13"], "ghost")
+        width, power = thirteen.destination_distance_m, thirteen.destination_power
+        self.assertAlmostEqual(1 / (1 + (0.005 / width) ** power), 0.8)
+        with self.assertRaises(ValueError):
+            replace(thirteen, speed_curriculum_walks_only=False).validate()
+        native = GaitDouble(2048)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, thirteen)
+        task.reset()
+        command = native.commands
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        # Every row walks without yaw; about a fifth are due to stop.
+        self.assertTrue(bool((speed > 0).all()) and bool((command[:, 2] == 0).all()))
+        self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.2, delta=0.03)
+        stopping = torch.nonzero(task.stop_pending).flatten()
+        task._resample(stopping)
+        self.assertTrue(bool((native.commands[stopping] == 0).all()))
+
     def test_destination_v12_is_v10_with_the_back_off(self):
         ten, twelve = (EXPERIMENTS[n]["reward"] for n in ("destination_v10", "destination_v12"))
         changed = {k for k, v in asdict(twelve).items() if asdict(ten)[k] != v}

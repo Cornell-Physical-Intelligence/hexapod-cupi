@@ -59,7 +59,9 @@ rows for the last ``speed_curriculum_window_controls`` controls at that speed, e
 ``destination_v11`` is v10 with a quarter of the walks at the top speed and a back-off: a full window
 below ``speed_curriculum_backoff_threshold`` lowers the top speed one step (not below the first level),
 so training does not stay at a speed whose pay keeps falling. ``destination_v12`` is v10 with v11's
-back-off and v10's half of the walks at the top speed.
+back-off and v10's half of the walks at the top speed. ``destination_v13`` is v12 where every fresh
+command is a walk (``speed_curriculum_walks_only``: no zero commands, turns or arcs; a fifth still stop
+after 4 s to 12 s) and the destination pay is four times wider: 0.8 at 5 mm instead of at 1.2 mm.
 """
 
 import hashlib
@@ -105,6 +107,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_window_controls: int | None = None
     speed_curriculum_new_share: float | None = None
     speed_curriculum_backoff_threshold: float | None = None
+    speed_curriculum_walks_only: bool | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -177,6 +180,10 @@ class DestinationRewardConfig(RewardConfig):
             raise ValueError(
                 "The back-off threshold needs a curriculum and lies below its threshold"
             )
+        if self.speed_curriculum_walks_only is not None and (
+            self.speed_curriculum_walks_only is not True or self.speed_curriculum_threshold is None
+        ):
+            raise ValueError("Walks only is True or None and needs a speed curriculum")
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -377,6 +384,17 @@ EXPERIMENTS["destination_v12"] = {
         EXPERIMENTS["destination_v10"]["reward"], speed_curriculum_backoff_threshold=0.65
     ),
 }
+# destination_v13 is destination_v12 with every fresh command a walk in a uniform direction (a fifth
+# still stop after 4 s to 12 s) and the rational destination pay widened so 5 mm pays 0.8: the width
+# solves 1 / (1 + (5 mm / w) ** 1.2) = 0.8, w = 15.9 mm (v3 to v12: 3.7 mm, which pays 0.8 at 1.2 mm).
+EXPERIMENTS["destination_v13"] = {
+    **EXPERIMENTS["destination_v12"],
+    "reward": replace(
+        EXPERIMENTS["destination_v12"]["reward"],
+        destination_distance_m=0.005 / 0.25 ** (1 / 1.2),
+        speed_curriculum_walks_only=True,
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -426,7 +444,12 @@ class DestinationTrainingTask(TrainingTask):
         config = self.reward_config
         indices = torch.as_tensor(indices, dtype=torch.long, device=self.env.commands.device)
         command = self.env.commands[indices]
-        walks = indices[(command[:, :2] != 0).any(-1) & (command[:, 2] == 0)]
+        if config.speed_curriculum_walks_only:
+            # Every fresh command becomes a walk; the stop schedule then zeroes the rows it ends.
+            self.env.commands[indices, 2] = 0
+            walks = indices
+        else:
+            walks = indices[(command[:, :2] != 0).any(-1) & (command[:, 2] == 0)]
         if not len(walks):
             return
         step = config.speed_curriculum_step_mps
