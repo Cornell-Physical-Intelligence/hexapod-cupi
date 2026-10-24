@@ -462,6 +462,20 @@ EXPERIMENTS["destination_v16"] = {
         speed_curriculum_backoff_distance_m=0.05,
     ),
 }
+# destination_v17 is destination_v16 without any back-off and with a 30-update window: attempt 8 tracked
+# 0.125 m/s at 0.80-0.92 of the destination pay, but the 5 cm rule lowered the level within about 10
+# updates every time. The level now rises only after 30 updates (1080 controls) above 0.8 without a fall
+# and never falls.
+EXPERIMENTS["destination_v17"] = {
+    **EXPERIMENTS["destination_v16"],
+    "reward": replace(
+        EXPERIMENTS["destination_v16"]["reward"],
+        speed_curriculum_window_controls=1080,
+        speed_curriculum_backoff_threshold=None,
+        speed_curriculum_backoff_window_controls=None,
+        speed_curriculum_backoff_distance_m=None,
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):

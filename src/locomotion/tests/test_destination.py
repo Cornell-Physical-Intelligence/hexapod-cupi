@@ -748,6 +748,41 @@ class GaitClockTests(unittest.TestCase):
         record = task.curriculum_status()["advances"][-2]
         self.assertEqual((record["back_off"], record["reason"]), (True, "distance"))
 
+    def test_destination_v17_never_backs_off_and_rises_after_30_updates(self):
+        sixteen, seventeen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v16", "destination_v17")
+        )
+        changed = {k for k, v in asdict(seventeen).items() if asdict(sixteen)[k] != v}
+        self.assertEqual(
+            changed,
+            {
+                "speed_curriculum_window_controls",
+                "speed_curriculum_backoff_threshold",
+                "speed_curriculum_backoff_window_controls",
+                "speed_curriculum_backoff_distance_m",
+            },
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v17"], "ghost")
+        self.assertEqual(seventeen.gait_clock_scaling, "speed_v1")
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, seventeen)
+        none = torch.zeros(64, dtype=torch.bool)
+        # The window is read every 21 controls: 1071 controls are too few, the read at 1092 raises the level.
+        for _ in range(1071):
+            task._curriculum_step(torch.full((64,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.075)
+        for _ in range(21):
+            task._curriculum_step(torch.full((64,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.1)
+        # Low pay, falls and far robots hold the level and never lower it.
+        fell, far = none.clone(), torch.full((64,), 0.5)
+        fell[0] = True
+        for _ in range(5000):
+            task._curriculum_step(torch.full((64,), 0.1), fell, far)
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertFalse(any(a.get("back_off") for a in task.curriculum_status()["advances"]))
+
     def test_the_wrapper_shows_the_task_phase_and_records_the_scaling(self):
         sixteen = EXPERIMENTS["destination_v16"]["reward"]
         task, native = moving_task(lambda k: (0.0, -0.125 * 0.02 * k, 0.0), reward=sixteen)

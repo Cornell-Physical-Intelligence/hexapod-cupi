@@ -1,0 +1,21 @@
+{
+  "id": "20261024T234259_destination_v17_no_backoff",
+  "date": "2026-10-24T23:42:59.000000Z",
+  "title": "Add destination_v17: the speed-scaled clock with no back-off and a 30-update window",
+  "summary": "destination_v17 is destination_v16 without any back-off and with a 30-update (1080-control) window. Attempt 8 of destination_v16 tracked 0.125 m/s at 0.80-0.92 of the destination pay, but the 5 cm rule lowered the level within about 10 updates every time and it cycled 0.075 to 0.125 m/s 10 times in 587 updates. The level now rises only when the destination pay averages above 0.8 over 30 updates at the level without a fall, and it never falls.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v17 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261024T234259_destination_v17_no_backoff.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task and reward are unchanged."
+}
