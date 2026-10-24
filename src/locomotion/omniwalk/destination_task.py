@@ -62,7 +62,9 @@ so training does not stay at a speed whose pay keeps falling. ``destination_v12`
 back-off and v10's half of the walks at the top speed. ``destination_v13`` is v12 where every fresh
 command is a walk (``speed_curriculum_walks_only``: no zero commands, turns or arcs; a fifth still stop
 after 4 s to 12 s), the destination pay is four times wider (0.8 at 5 mm instead of at 1.2 mm) and the
-level gate averages the last 10 updates instead of 50.
+level gate averages the last 10 updates instead of 50. ``destination_v14`` is v13 whose back-off judges
+the last ``speed_curriculum_backoff_window_controls`` (50 updates) at the level, so a level gets 50
+updates before it can be lowered while it still rises after 10.
 """
 
 import hashlib
@@ -109,6 +111,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_new_share: float | None = None
     speed_curriculum_backoff_threshold: float | None = None
     speed_curriculum_walks_only: bool | None = None
+    speed_curriculum_backoff_window_controls: int | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -185,6 +188,15 @@ class DestinationRewardConfig(RewardConfig):
             self.speed_curriculum_walks_only is not True or self.speed_curriculum_threshold is None
         ):
             raise ValueError("Walks only is True or None and needs a speed curriculum")
+        span = self.speed_curriculum_backoff_window_controls
+        if span is not None and (
+            self.speed_curriculum_backoff_threshold is None
+            or type(span) is not int
+            or span < self.speed_curriculum_window_controls
+        ):
+            raise ValueError(
+                "A back-off window needs a back-off and spans at least the level window"
+            )
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -398,6 +410,15 @@ EXPERIMENTS["destination_v13"] = {
         speed_curriculum_window_controls=360,
     ),
 }
+# destination_v14 is destination_v13 whose back-off averages the last 1800 controls (50 updates) at the
+# level: on v13's 10-update window, 10 updates at 0.15 m/s dropped the level and the next 10 at 0.125 m/s
+# usually dropped it again, so 0.15 m/s never trained for more than about 10 updates at a time.
+EXPERIMENTS["destination_v14"] = {
+    **EXPERIMENTS["destination_v13"],
+    "reward": replace(
+        EXPERIMENTS["destination_v13"]["reward"], speed_curriculum_backoff_window_controls=1800
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -422,6 +443,11 @@ class DestinationTrainingTask(TrainingTask):
                 chosen.speed_curriculum_window_controls, dtype=torch.float64, device=env.device
             )
             self.curriculum_filled = 0
+            span = chosen.speed_curriculum_backoff_window_controls
+            self.curriculum_backoff_window = torch.zeros(
+                span or 1, dtype=torch.float64, device=env.device
+            )
+            self.curriculum_backoff_filled = 0
             self.curriculum_complete = False
             self.curriculum_advances = []
         super().__init__(env, config, output_dir, chosen)
@@ -469,25 +495,43 @@ class DestinationTrainingTask(TrainingTask):
         self.env.commands[walks, 1] = speed * torch.sin(angle)
 
     def _curriculum_step(self, pay):
-        """Record the mean destination pay of this control; raise the top speed past the threshold."""
+        """Record the mean destination pay of this control; raise the top speed past the threshold and
+        lower it below the back-off, each judged on its own window of controls at the level."""
         config = self.reward_config
+        value = pay.detach().mean()
         window = config.speed_curriculum_window_controls
-        self.curriculum_window[self.curriculum_filled % window] = (
-            pay.detach().mean().to(self.curriculum_window)
-        )
+        self.curriculum_window[self.curriculum_filled % window] = value.to(self.curriculum_window)
         self.curriculum_filled += 1
+        span = config.speed_curriculum_backoff_window_controls
+        if span is not None:
+            self.curriculum_backoff_window[self.curriculum_backoff_filled % span] = value.to(
+                self.curriculum_backoff_window
+            )
+            self.curriculum_backoff_filled += 1
         # Read the window about once per update (50 updates per window) to avoid a host sync each control.
         if self.curriculum_filled < window or self.curriculum_filled % max(1, window // 50):
             return
         mean = float(self.curriculum_window.mean())
         first = round(config.speed_curriculum_start_mps + config.speed_curriculum_step_mps, 6)
         backoff = config.speed_curriculum_backoff_threshold
-        if backoff is not None and mean < backoff and self.curriculum_level > first + 1e-9:
+        judged = mean
+        if span is not None:
+            judged = (
+                float(self.curriculum_backoff_window.mean())
+                if self.curriculum_backoff_filled >= span
+                else None
+            )
+        if (
+            backoff is not None
+            and judged is not None
+            and judged < backoff
+            and self.curriculum_level > first + 1e-9
+        ):
             self.curriculum_advances.append(
                 {
                     "controls_completed": self.controls_completed,
                     "level_mps": round(self.curriculum_level, 6),
-                    "window_mean": mean,
+                    "window_mean": judged,
                     "back_off": True,
                 }
             )
@@ -495,7 +539,7 @@ class DestinationTrainingTask(TrainingTask):
                 self.curriculum_level - config.speed_curriculum_step_mps, 6
             )
             self.curriculum_complete = False
-            self.curriculum_filled = 0
+            self.curriculum_filled = self.curriculum_backoff_filled = 0
             return
         if mean <= config.speed_curriculum_threshold:
             return
@@ -511,7 +555,7 @@ class DestinationTrainingTask(TrainingTask):
             return
         self.curriculum_advances.append(record)
         self.curriculum_level = round(self.curriculum_level + config.speed_curriculum_step_mps, 6)
-        self.curriculum_filled = 0
+        self.curriculum_filled = self.curriculum_backoff_filled = 0
 
     def curriculum_status(self):
         if self.reward_config.speed_curriculum_start_mps is None:

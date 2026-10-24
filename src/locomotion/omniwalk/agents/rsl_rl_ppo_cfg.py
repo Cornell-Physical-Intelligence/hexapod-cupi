@@ -192,6 +192,7 @@ EXPERIMENT_INPUTS = {
     "destination_v11": "ghost",
     "destination_v12": "ghost",
     "destination_v13": "ghost",
+    "destination_v14": "ghost",
 }
 
 

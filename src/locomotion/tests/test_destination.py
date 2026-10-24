@@ -609,6 +609,33 @@ class BackoffTests(unittest.TestCase):
         task._resample(stopping)
         self.assertTrue(bool((native.commands[stopping] == 0).all()))
 
+    def test_destination_v14_backs_off_only_after_50_updates_at_a_level(self):
+        thirteen, fourteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v13", "destination_v14")
+        )
+        changed = {k for k, v in asdict(fourteen).items() if asdict(thirteen)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_backoff_window_controls"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v14"], "ghost")
+        with self.assertRaises(ValueError):
+            replace(fourteen, speed_curriculum_backoff_window_controls=100).validate()
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, fourteen)
+        # 10 updates above 0.8 raise the level each time, up to 0.125 m/s; the window is read every 7
+        # controls, so the first read after 360 controls comes at 364.
+        for level in (0.1, 0.125):
+            for _ in range(364):
+                task._curriculum_step(torch.full((64,), 0.9))
+            self.assertEqual(task.curriculum_level, level)
+        # Low pay holds the level until 1800 controls have passed there, then lowers it once.
+        for _ in range(1799):
+            task._curriculum_step(torch.full((64,), 0.5))
+        self.assertEqual(task.curriculum_level, 0.125)
+        for _ in range(7):
+            task._curriculum_step(torch.full((64,), 0.5))
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertTrue(task.curriculum_status()["advances"][-1]["back_off"])
+
     def test_destination_v12_is_v10_with_the_back_off(self):
         ten, twelve = (EXPERIMENTS[n]["reward"] for n in ("destination_v10", "destination_v12"))
         changed = {k for k, v in asdict(twelve).items() if asdict(ten)[k] != v}
