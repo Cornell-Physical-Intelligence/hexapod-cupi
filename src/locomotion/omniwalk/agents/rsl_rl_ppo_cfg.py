@@ -190,6 +190,7 @@ EXPERIMENT_INPUTS = {
     "destination_v9": "ghost",
     "destination_v10": "ghost",
     "destination_v11": "ghost",
+    "destination_v12": "ghost",
 }
 
 

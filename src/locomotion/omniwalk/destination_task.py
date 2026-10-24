@@ -58,7 +58,8 @@ rows for the last ``speed_curriculum_window_controls`` controls at that speed, e
 ``speed_curriculum_threshold``, up to ``speed_curriculum_final_mps``; the task's status reports the level.
 ``destination_v11`` is v10 with a quarter of the walks at the top speed and a back-off: a full window
 below ``speed_curriculum_backoff_threshold`` lowers the top speed one step (not below the first level),
-so training does not stay at a speed whose pay keeps falling.
+so training does not stay at a speed whose pay keeps falling. ``destination_v12`` is v10 with v11's
+back-off and v10's half of the walks at the top speed.
 """
 
 import hashlib
@@ -366,6 +367,14 @@ EXPERIMENTS["destination_v11"] = {
         EXPERIMENTS["destination_v10"]["reward"],
         speed_curriculum_new_share=0.25,
         speed_curriculum_backoff_threshold=0.65,
+    ),
+}
+# destination_v12 is destination_v10 with destination_v11's back-off: a quarter of the walks at the top
+# speed left the 0.1 m/s pay flat for 4000 updates, so half return to the top speed.
+EXPERIMENTS["destination_v12"] = {
+    **EXPERIMENTS["destination_v10"],
+    "reward": replace(
+        EXPERIMENTS["destination_v10"]["reward"], speed_curriculum_backoff_threshold=0.65
     ),
 }
 

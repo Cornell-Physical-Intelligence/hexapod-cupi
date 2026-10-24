@@ -575,6 +575,12 @@ class BackoffTests(unittest.TestCase):
             self.assertEqual(task.curriculum_level, level)
         self.assertTrue(task.curriculum_status()["advances"][-1]["back_off"])
 
+    def test_destination_v12_is_v10_with_the_back_off(self):
+        ten, twelve = (EXPERIMENTS[n]["reward"] for n in ("destination_v10", "destination_v12"))
+        changed = {k for k, v in asdict(twelve).items() if asdict(ten)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_backoff_threshold"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v12"], "ghost")
+
 
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):
