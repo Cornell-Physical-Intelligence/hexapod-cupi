@@ -1,0 +1,36 @@
+{
+  "id": "20261024T012925_shared_control_arithmetic",
+  "date": "2026-10-24T01:29:25Z",
+  "title": "Remove the manager-based prototype and share the control arithmetic with the Direct task",
+  "summary": "The manager-based prototype added more code than it would remove: the MuJoCo surrogate, AMP and the destination task still need TrainingTask and OmniVecEnv, and native parity keeps the raw PhysX reads. This change removes it; branch jcc463/manager-based-prototype keeps it at 0c071dc5. The Direct environment (omniwalk/env.py) now imports the termination rule, the 400 Hz load counters, the control telemetry, the toe points and the measured-state arithmetic from omniwalk/mdp/terminations.py, loads.py and state.py, as the surrogate does, and drops its own copies. The training metrics read the same termination constants. A stubbed Direct control that covers a fall, a tilt, a joint-limit violation and a timeout gives 191 bit-identical output tensors before and after the change.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Run the native parity harness on this source in the certification run that renews the c48_long receipt for the reformatted runtime.",
+  "changes": [
+    "configs/source_inventory.json",
+    "src/locomotion/README.md",
+    "src/locomotion/evaluation/task_metrics.py",
+    "src/locomotion/omniwalk/env.py",
+    "src/locomotion/omniwalk/mdp/loads.py",
+    "src/locomotion/omniwalk/mdp/memory.py",
+    "src/locomotion/omniwalk/mdp/state.py",
+    "src/locomotion/omniwalk/mdp/terminations.py",
+    "src/locomotion/omniwalk/manager_based/*",
+    "src/locomotion/rl/manager_wrapper.py",
+    "src/locomotion/rl/wrapper.py",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/replay.py",
+    "src/locomotion/surrogate/tests/test_manager_memory.py",
+    "src/locomotion/tests/test_manager_based.py",
+    "site/updates/20261024T012925_shared_control_arithmetic.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_direct_environment.py",
+    "src/locomotion/tests/test_env.py",
+    "src/locomotion/surrogate/tests/test_env.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The arithmetic is unchanged and no gate or recorded result changes. The physics closure now includes the three shared modules; the pending certification of main's reformatted runtime covers this source as well."
+}

@@ -199,6 +199,13 @@
       "purpose": "Use the canonical XYZW quaternion and navigation frames."
     },
     {
+      "path": "src/locomotion/omniwalk/mdp/loads.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion",
+      "purpose": "Accumulate one control's 400 Hz motor torques and floor forces and pack the control telemetry."
+    },
+    {
       "path": "src/locomotion/omniwalk/mdp/observations.py",
       "previous_path": "locomotion/priors/features.py",
       "classification": "current",
@@ -225,6 +232,20 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Compute the yaw-gated omnidirectional walking reward from one control's telemetry."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/state.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion",
+      "purpose": "Locate the toe points on each tibia and turn raw articulation readings into the measured state."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/terminations.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Locomotion",
+      "purpose": "End an episode on a fall, a tilt or a joint-limit violation, and time it out after its declared length."
     },
     {
       "path": "src/locomotion/omniwalk/task.py",
@@ -2025,6 +2046,14 @@
     "tools/source_inventory.py": {
       "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
       "sha256": "bf39dc5919b7563003cda9d4024c1414599126098b775ab45749011e38ec6686"
+    },
+    "src/locomotion/surrogate/tests/test_manager_memory.py": {
+      "source_commit": "0c071dc5402973a450bf3f9709929e88b644250a",
+      "sha256": "66a5eb9fd88c4d14d7278dced200187fb9f004ad6b7f61e249ea160ee8f4cea1"
+    },
+    "src/locomotion/tests/test_manager_based.py": {
+      "source_commit": "0c071dc5402973a450bf3f9709929e88b644250a",
+      "sha256": "d02d810f9dc213f105a13b5b1bae481426e2a6c24bc41ab02905e005f926dc7c"
     }
   }
 }

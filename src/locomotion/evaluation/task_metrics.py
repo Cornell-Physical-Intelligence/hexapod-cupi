@@ -5,6 +5,11 @@ import math
 import torch
 
 from locomotion.omniwalk.mdp.rewards import CONTROL_DT_S, REWARD_VERSION, SCHEMA
+from locomotion.omniwalk.mdp.terminations import (
+    FALL_HEIGHT_M,
+    JOINT_LIMIT_SLACK_RAD,
+    TILT_LIMIT_RAD,
+)
 
 METRIC_COMMAND_CLASSES = ("zero", "linear_0.025", "linear_0.05", "yaw", "arc", "other")
 METRIC_TERMINATION_REASONS = ("height", "tilt", "joint_limit", "timeout")
@@ -86,13 +91,16 @@ class TaskMetrics:
         )
         reward_values = reward.detach().to(torch.float64)
         nonfoot = t["other_body_force_max_400hz"] > 1.0
-        # These are the existing env.py termination predicates, using its exact
-        # returned gravity Z rather than recomputing orientation from a quaternion.
+        # These are the termination predicates of mdp/terminations.py, using the environment's
+        # exact returned gravity Z rather than recomputing orientation from a quaternion.
         terminated, truncated = output["terminated"], output["truncated"]
-        height = t["root_pose_xyzw"][:, 2] < 0.045
-        tilt = output["obs"][:, 173] > -math.cos(0.85)
+        height = t["root_pose_xyzw"][:, 2] < FALL_HEIGHT_M
+        tilt = output["obs"][:, 173] > -math.cos(TILT_LIMIT_RAD)
         q = t["joint_position_rad"]
-        joint_limit = ((q < self.env.lower - 2e-6) | (q > self.env.upper + 2e-6)).any(-1)
+        joint_limit = (
+            (q < self.env.lower - JOINT_LIMIT_SLACK_RAD)
+            | (q > self.env.upper + JOINT_LIMIT_SLACK_RAD)
+        ).any(-1)
         physical_reasons = torch.stack((height, tilt, joint_limit), dim=-1)
         reason_rows = torch.cat(
             (physical_reasons & terminated[:, None], truncated[:, None]), dim=-1
