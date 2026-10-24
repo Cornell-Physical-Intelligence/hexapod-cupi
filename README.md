@@ -21,7 +21,7 @@ shows each part and joint of the approved robot.
 | `src/contracts/` | Shared message types, such as speed and direction commands and planar poses. |
 | `src/mission/` | Sensor-pattern and transport prototypes. |
 | `robot/` | The approved robot model (18 motors, 7.47 kg) and its hash-pinned simulation inputs. |
-| `viewer/` | The browser viewer for the robot's parts and joints. |
+| `viewer/` | The browser viewer for the robot's parts and joints, and the [Runs page](viewer/README.md) that replays native and surrogate evaluations. |
 | `site/`, `docs/`, `tools/`, `configs/`, `tests/` | The progress site, guides, checks, archive records and repository tests. |
 
 `src/` holds the importable Python packages; `uv sync` installs them in editable
