@@ -206,13 +206,6 @@
       "purpose": "Accumulate one control's 400 Hz motor torques and floor forces and pack the control telemetry."
     },
     {
-      "path": "src/locomotion/omniwalk/mdp/memory.py",
-      "previous_path": null,
-      "classification": "prototype",
-      "owner": "Locomotion",
-      "purpose": "Hold the command schedule and the reward memory that the manager-based walking task carries between controls."
-    },
-    {
       "path": "src/locomotion/omniwalk/mdp/observations.py",
       "previous_path": "locomotion/priors/features.py",
       "classification": "current",
@@ -260,27 +253,6 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Sample commands, apply the walking reward and notify an optional observer around selected episode resets."
-    },
-    {
-      "path": "src/locomotion/omniwalk/manager_based/__init__.py",
-      "previous_path": null,
-      "classification": "prototype",
-      "owner": "Locomotion",
-      "purpose": "Package namespace for the manager-based walking task prototype."
-    },
-    {
-      "path": "src/locomotion/omniwalk/manager_based/env_cfg.py",
-      "previous_path": null,
-      "classification": "prototype",
-      "owner": "Locomotion",
-      "purpose": "Declare the walking task as one Isaac Lab manager-based configuration on the Direct task's robot, floor and simulation."
-    },
-    {
-      "path": "src/locomotion/omniwalk/manager_based/terms.py",
-      "previous_path": null,
-      "classification": "prototype",
-      "owner": "Locomotion",
-      "purpose": "Implement the manager terms: native reads, the slew-limited action, the command bank, reward components, resets and the 400 Hz load recorder."
     },
     {
       "path": "src/locomotion/amp/__init__.py",
@@ -379,13 +351,6 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Wrap the walking task as an RSL-RL vector environment with fixed input scales, the gait clock, action smoothing, velocity noise and command segments."
-    },
-    {
-      "path": "src/locomotion/rl/manager_wrapper.py",
-      "previous_path": null,
-      "classification": "prototype",
-      "owner": "Locomotion",
-      "purpose": "Wrap the manager-based walking environment for RSL-RL with the input recipe and command bootstraps of the walking wrapper."
     },
     {
       "path": "src/locomotion/robots/__init__.py",
@@ -2081,6 +2046,14 @@
     "tools/source_inventory.py": {
       "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
       "sha256": "bf39dc5919b7563003cda9d4024c1414599126098b775ab45749011e38ec6686"
+    },
+    "src/locomotion/surrogate/tests/test_manager_memory.py": {
+      "source_commit": "0c071dc5402973a450bf3f9709929e88b644250a",
+      "sha256": "66a5eb9fd88c4d14d7278dced200187fb9f004ad6b7f61e249ea160ee8f4cea1"
+    },
+    "src/locomotion/tests/test_manager_based.py": {
+      "source_commit": "0c071dc5402973a450bf3f9709929e88b644250a",
+      "sha256": "d02d810f9dc213f105a13b5b1bae481426e2a6c24bc41ab02905e005f926dc7c"
     }
   }
 }

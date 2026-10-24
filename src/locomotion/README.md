@@ -30,9 +30,8 @@ shows definitions and imports.
 - `mdp/observations.py`: proprioception frame and 231-value actor input.
 - `mdp/commands.py`: command bank and gait-clock period.
 - `mdp/rewards.py`: recorded yaw-gated reward.
-- `mdp/terminations.py`, `mdp/loads.py`, `mdp/state.py`: termination rule, 400 Hz loads and control telemetry, toe points and measured state. The surrogate imports them; `env.py` keeps its certified copies.
+- `mdp/loads.py`, `mdp/state.py`, `mdp/terminations.py`: 400 Hz loads and control telemetry, toe points and measured state, and the termination rule. `env.py` and the MuJoCo surrogate import them.
 - `agents/rsl_rl_ppo_cfg.py`: Torch-free `ppo_config` and the default `RECIPES['c48_long']`.
-- `manager_based/` with `mdp/memory.py` and `rl/manager_wrapper.py`: a prototype of the same task as one Isaac Lab manager-based configuration. It has no native admission. `tests/test_manager_based.py` and `surrogate/tests/test_manager_memory.py` hold it to the Direct task's arithmetic.
 
 The layout mirrors Isaac Lab: `robots/` is `isaaclab_assets`, `omniwalk/` a
 `tasks/direct/<task>` package with `agents/`, `rl/` is `isaaclab_rl` and `scripts/`
