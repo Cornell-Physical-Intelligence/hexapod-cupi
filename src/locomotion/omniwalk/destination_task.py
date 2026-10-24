@@ -61,7 +61,8 @@ below ``speed_curriculum_backoff_threshold`` lowers the top speed one step (not 
 so training does not stay at a speed whose pay keeps falling. ``destination_v12`` is v10 with v11's
 back-off and v10's half of the walks at the top speed. ``destination_v13`` is v12 where every fresh
 command is a walk (``speed_curriculum_walks_only``: no zero commands, turns or arcs; a fifth still stop
-after 4 s to 12 s) and the destination pay is four times wider: 0.8 at 5 mm instead of at 1.2 mm.
+after 4 s to 12 s), the destination pay is four times wider (0.8 at 5 mm instead of at 1.2 mm) and the
+level gate averages the last 10 updates instead of 50.
 """
 
 import hashlib
@@ -387,12 +388,14 @@ EXPERIMENTS["destination_v12"] = {
 # destination_v13 is destination_v12 with every fresh command a walk in a uniform direction (a fifth
 # still stop after 4 s to 12 s) and the rational destination pay widened so 5 mm pays 0.8: the width
 # solves 1 / (1 + (5 mm / w) ** 1.2) = 0.8, w = 15.9 mm (v3 to v12: 3.7 mm, which pays 0.8 at 1.2 mm).
+# The level gate averages the last 360 controls (10 updates of 36) instead of 50 updates.
 EXPERIMENTS["destination_v13"] = {
     **EXPERIMENTS["destination_v12"],
     "reward": replace(
         EXPERIMENTS["destination_v12"]["reward"],
         destination_distance_m=0.005 / 0.25 ** (1 / 1.2),
         speed_curriculum_walks_only=True,
+        speed_curriculum_window_controls=360,
     ),
 }
 

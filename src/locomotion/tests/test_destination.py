@@ -500,13 +500,15 @@ class CurriculumTests(unittest.TestCase):
             EXPERIMENTS["destination_v10"]["reward"],
         )
         changed = {key for key, value in asdict(ten).items() if asdict(nine)[key] != value}
-        # destination_v11 adds the back-off; v10 leaves it off.
         self.assertEqual(
             changed,
             {
-                key
-                for key in asdict(ten)
-                if key.startswith("speed_curriculum_") and "backoff" not in key
+                "speed_curriculum_start_mps",
+                "speed_curriculum_step_mps",
+                "speed_curriculum_final_mps",
+                "speed_curriculum_threshold",
+                "speed_curriculum_window_controls",
+                "speed_curriculum_new_share",
             },
         )
         self.assertEqual(EXPERIMENT_INPUTS["destination_v10"], "ghost")
@@ -580,7 +582,15 @@ class BackoffTests(unittest.TestCase):
             EXPERIMENTS[n]["reward"] for n in ("destination_v12", "destination_v13")
         )
         changed = {k for k, v in asdict(thirteen).items() if asdict(twelve)[k] != v}
-        self.assertEqual(changed, {"destination_distance_m", "speed_curriculum_walks_only"})
+        self.assertEqual(
+            changed,
+            {
+                "destination_distance_m",
+                "speed_curriculum_walks_only",
+                "speed_curriculum_window_controls",
+            },
+        )
+        self.assertEqual(thirteen.speed_curriculum_window_controls, 360)
         self.assertEqual(EXPERIMENT_INPUTS["destination_v13"], "ghost")
         width, power = thirteen.destination_distance_m, thirteen.destination_power
         self.assertAlmostEqual(1 / (1 + (0.005 / width) ** power), 0.8)
