@@ -69,6 +69,11 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
         else require_learner_configuration
     )
     check(checkpoint_record, identity, config)
+    if config.get("environment_wrapper", {}).get("gait_clock_scaling") is not None:
+        raise ValueError(
+            "Native evaluation does not follow a speed-scaled gait clock yet; "
+            "evaluate this checkpoint with locomotion.surrogate.evaluate"
+        )
     observation = env.observations(env.current)["obs"]
     scaled = actor_input(env, args, observation)
     if args.networks == "paper":

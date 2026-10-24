@@ -16,11 +16,26 @@ from locomotion.rl.wrapper import OmniVecEnv
 class DestinationVecEnv(OmniVecEnv):
     """``OmniVecEnv`` with the five destination inputs appended to the actor and critic inputs."""
 
-    def __init__(self, task, tensor_dict=None, *, destination_input="ghost", **options):
+    def __init__(
+        self,
+        task,
+        tensor_dict=None,
+        *,
+        destination_input="ghost",
+        gait_clock_scaling=None,
+        **options,
+    ):
         if destination_input != "ghost":
             raise ValueError("DestinationVecEnv applies the ghost destination input")
         if not hasattr(task, "destination"):
             raise ValueError("The destination inputs need a DestinationTrainingTask")
+        # The configuration records the task's clock scaling so that evaluation rebuilds the same phase.
+        if getattr(task.reward_config, "gait_clock_scaling", None) != gait_clock_scaling or (
+            gait_clock_scaling is not None and not options.get("gait_clock")
+        ):
+            raise ValueError(
+                "The gait_clock_scaling option must match the task's and needs the gait clock"
+            )
         super().__init__(task, tensor_dict, **options)
 
     def destination_inputs(self, pending):

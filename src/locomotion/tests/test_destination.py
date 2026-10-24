@@ -665,6 +665,111 @@ class BackoffTests(unittest.TestCase):
         self.assertEqual(EXPERIMENT_INPUTS["destination_v12"], "ghost")
 
 
+class GaitClockTests(unittest.TestCase):
+    def test_speed_v1_is_the_fixed_clock_up_to_0_075_and_shortens_the_cycle_above(self):
+        from locomotion.omniwalk.mdp.gait import GaitPhase, gait_cycle
+        from locomotion.omniwalk.mdp.rewards import scheduled_swing
+        from locomotion.rl.wrapper import clock_features
+
+        command = torch.tensor([[0.0, 0.05, 0.0], [-0.075, 0.0, 0.0], [0.0, 0.0, 0.2]])
+        gait = GaitPhase(3, "speed_v1", "cpu")
+        for k in range(600):
+            steps = torch.full((3,), k)
+            swing, period = gait.swing(command)
+            self.assertTrue(bool((swing == scheduled_swing(steps)).all()), k)
+            torch.testing.assert_close(period, torch.full((3,), 1.2, dtype=torch.float64))
+            torch.testing.assert_close(
+                clock_features(steps, 60, command, gait.phase),
+                clock_features(steps, 60, command),
+                atol=1e-5,
+                rtol=0,
+            )
+            gait.advance(command)
+        walks = torch.tensor([[0.0875, 0.0, 0.0], [0.0, -0.1, 0.0], [0.125, 0.0, 0.0], [0.3, 0, 0]])
+        period, swing = gait_cycle(walks, "speed_v1")
+        torch.testing.assert_close(
+            period, torch.tensor([56.0, 52.0, 44.0, 40.0], dtype=torch.float64)
+        )
+        torch.testing.assert_close(swing, torch.tensor([0.44, 0.48, 0.5, 0.5], dtype=torch.float64))
+
+    def test_evaluation_follows_the_phase_the_training_task_kept(self):
+        from locomotion.omniwalk.mdp.gait import GaitPhase
+
+        trained, followed = GaitPhase(1, "speed_v1", "cpu"), GaitPhase(1, "speed_v1", "cpu")
+        speeds = [0.1] * 70 + [0.125] * 50 + [0.0] * 30 + [0.15] * 40
+        for k, speed in enumerate(speeds):
+            command = torch.tensor([[speed, 0.0, 0.0]])
+            seen = followed.follow(command, torch.tensor([k])).clone()
+            torch.testing.assert_close(seen, trained.phase)
+            trained.advance(command)
+        # A 0.125 m/s walk crosses half its 44-control cycle in 22 controls.
+        gait = GaitPhase(1, "speed_v1", "cpu")
+        for _ in range(22):
+            gait.advance(torch.tensor([[0.125, 0.0, 0.0]]))
+        self.assertAlmostEqual(float(gait.phase[0]), 0.5)
+
+    def test_destination_v16_scales_the_clock_and_backs_off_a_robot_5_cm_from_its_ghost(self):
+        fifteen, sixteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v15", "destination_v16")
+        )
+        changed = {k for k, v in asdict(sixteen).items() if asdict(fifteen)[k] != v}
+        self.assertEqual(changed, {"gait_clock_scaling", "speed_curriculum_backoff_distance_m"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v16"], "ghost")
+        with self.assertRaises(ValueError):
+            replace(sixteen, gait_clock_scaling="speed_v0").validate()
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, sixteen)
+        near, none = torch.zeros(64), torch.zeros(64, dtype=torch.bool)
+        for _ in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), none, near)
+        self.assertEqual(task.curriculum_level, 0.1)
+        # A fallen robot's distance does not count (its fall holds the level); a standing one 6 cm away
+        # lowers it at the next read of a full window, however high the pay.
+        far, fell = near.clone(), none.clone()
+        far[5], fell[5] = 0.2, True
+        for k in range(364):
+            task._curriculum_step(
+                torch.full((64,), 0.9), fell if k == 10 else none, far if k == 10 else near
+            )
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertEqual(task.curriculum_status()["window_lost"], 0)
+        far[5] = 0.06
+        for _ in range(7):
+            task._curriculum_step(torch.full((64,), 0.9), none, far)
+        self.assertEqual(task.curriculum_level, 0.075)
+        # The first level holds while any robot stands that far away, and rises once none has for a window.
+        for _ in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), none, far)
+        self.assertEqual(task.curriculum_level, 0.075)
+        for _ in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), none, near)
+        self.assertEqual(task.curriculum_level, 0.1)
+        record = task.curriculum_status()["advances"][-2]
+        self.assertEqual((record["back_off"], record["reason"]), (True, "distance"))
+
+    def test_the_wrapper_shows_the_task_phase_and_records_the_scaling(self):
+        sixteen = EXPERIMENTS["destination_v16"]["reward"]
+        task, native = moving_task(lambda k: (0.0, -0.125 * 0.02 * k, 0.0), reward=sixteen)
+        with self.assertRaises(ValueError):
+            DestinationVecEnv(task, plain, observation_scaling="fixed", gait_clock=60)
+        env = DestinationVecEnv(
+            task, plain, observation_scaling="fixed", gait_clock=60, gait_clock_scaling="speed_v1"
+        )
+        native.commands[:] = torch.tensor([[0.125, 0.0, 0.0]])
+        task.remaining_controls[:] = 1000
+        env.get_observations()
+        for _ in range(22):
+            observation, *_ = env.step(torch.zeros(1, 18))
+        torch.testing.assert_close(
+            observation["policy"][0, 231:233], torch.tensor([0.0, -1.0]), atol=1e-5, rtol=0
+        )
+        # The reward scheduled tripod B's swing at the half cycle, not the fixed clock's control 22.
+        self.assertEqual(task.last_components["gait_schedule"].shape, (1,))
+        swing, _ = task.gait.swing(native.commands)
+        self.assertEqual(swing[0].tolist(), [False, True, False, True, False, True])
+
+
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):
         task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0))  # 0.02 m/s short

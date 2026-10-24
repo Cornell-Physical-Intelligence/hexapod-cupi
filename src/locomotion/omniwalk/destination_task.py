@@ -75,11 +75,13 @@ from pathlib import Path
 
 import torch
 
+from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_SCALINGS
 from locomotion.omniwalk.mdp.destination import (
     advance_destination,
     destination_distance,
     planar_pose,
 )
+from locomotion.omniwalk.mdp.gait import GaitPhase
 from locomotion.omniwalk.mdp.rewards import RewardConfig
 from locomotion.omniwalk.task import TrainingTask
 
@@ -114,6 +116,8 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_walks_only: bool | None = None
     speed_curriculum_backoff_window_controls: int | None = None
     speed_curriculum_advance_without_falls: bool | None = None
+    speed_curriculum_backoff_distance_m: float | None = None
+    gait_clock_scaling: str | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -204,6 +208,18 @@ class DestinationRewardConfig(RewardConfig):
             or self.speed_curriculum_threshold is None
         ):
             raise ValueError("Advancing without falls is True or None and needs a speed curriculum")
+        distance = self.speed_curriculum_backoff_distance_m
+        if distance is not None and (
+            self.speed_curriculum_threshold is None or not math.isfinite(distance) or distance <= 0
+        ):
+            raise ValueError(
+                "A back-off distance needs a speed curriculum and is positive and finite"
+            )
+        if (
+            self.gait_clock_scaling is not None
+            and self.gait_clock_scaling not in GAIT_CLOCK_SCALINGS
+        ):
+            raise ValueError("gait_clock_scaling is None or a name in mdp/commands.py")
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -434,6 +450,18 @@ EXPERIMENTS["destination_v15"] = {
         EXPERIMENTS["destination_v14"]["reward"], speed_curriculum_advance_without_falls=True
     ),
 }
+# destination_v16 is destination_v15 with a gait clock that follows the walking speed and a back-off
+# whenever a robot ends up more than 5 cm from its ghost. On the fixed 1.2 s clock 0.125 m/s needs 90 mm
+# strides, beyond the 66-80 mm the +-0.35 rad action range reaches; speed_v1 shortens the cycle from 60
+# controls at 0.075 m/s to 52, 44 and 40 at 0.1, 0.125 and 0.15 m/s, each tripod swinging 0.4 to 0.5 of it.
+EXPERIMENTS["destination_v16"] = {
+    **EXPERIMENTS["destination_v15"],
+    "reward": replace(
+        EXPERIMENTS["destination_v15"]["reward"],
+        gait_clock_scaling="speed_v1",
+        speed_curriculum_backoff_distance_m=0.05,
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -450,6 +478,11 @@ class DestinationTrainingTask(TrainingTask):
         self.hold_mean = torch.zeros(env.num_envs, 18, device=env.device)
         self.stop_pending = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
         self.stop_rest = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
+        self.gait = (
+            None
+            if chosen.gait_clock_scaling is None
+            else GaitPhase(env.num_envs, chosen.gait_clock_scaling, env.device)
+        )
         if chosen.speed_curriculum_start_mps is not None:
             self.curriculum_level = round(
                 chosen.speed_curriculum_start_mps + chosen.speed_curriculum_step_mps, 6
@@ -459,6 +492,8 @@ class DestinationTrainingTask(TrainingTask):
             )
             # Falls per control over the same window, for advancing only after a fall-free window.
             self.curriculum_falls = torch.zeros_like(self.curriculum_window)
+            # Robots further than the back-off distance from their ghost, per control over the window.
+            self.curriculum_lost = torch.zeros_like(self.curriculum_window)
             self.curriculum_filled = 0
             span = chosen.speed_curriculum_backoff_window_controls
             self.curriculum_backoff_window = torch.zeros(
@@ -469,10 +504,27 @@ class DestinationTrainingTask(TrainingTask):
             self.curriculum_advances = []
         super().__init__(env, config, output_dir, chosen)
 
+    @property
+    def gait_clock_phase(self):
+        """The speed-scaled gait phase in cycles that the wrapper shows the policy, or None."""
+        return None if self.gait is None else self.gait.phase
+
     def reset(self, indices=None):
         # A reset draws a fresh command; a stop scheduled for the ended episode lapses.
         self.stop_pending[self._indices(indices)] = False
+        if self.gait is not None:
+            self.gait.reset(self._indices(indices))
         return super().reset(indices)
+
+    def reward_telemetry(self, command):
+        telemetry = super().reward_telemetry(command)
+        if self.gait is not None:
+            # The schedule at the phase this control ran under, with its command's cycle.
+            swing, period = self.gait.swing(command)
+            device = telemetry["scheduled_swing"].device
+            telemetry["scheduled_swing"] = swing.to(device)
+            telemetry["schedule_period_s"] = period.to(device, torch.float32)
+        return telemetry
 
     def _resample(self, indices):
         super()._resample(indices)
@@ -511,15 +563,24 @@ class DestinationTrainingTask(TrainingTask):
         self.env.commands[walks, 0] = speed * torch.cos(angle)
         self.env.commands[walks, 1] = speed * torch.sin(angle)
 
-    def _curriculum_step(self, pay, terminated=None):
+    def _curriculum_step(self, pay, terminated=None, distance=None):
         """Record the mean destination pay of this control; raise the top speed past the threshold and
-        lower it below the back-off, each judged on its own window of controls at the level."""
+        lower it below the back-off, each judged on its own window of controls at the level. With a
+        back-off distance, any standing robot further than it from its ghost in the window lowers it too."""
         config = self.reward_config
         value = pay.detach().mean()
         window = config.speed_curriculum_window_controls
         self.curriculum_window[self.curriculum_filled % window] = value.to(self.curriculum_window)
         falls = 0 if terminated is None else terminated.detach().sum()
         self.curriculum_falls[self.curriculum_filled % window] = falls
+        limit = config.speed_curriculum_backoff_distance_m
+        lost = 0
+        if limit is not None and distance is not None:
+            standing = torch.ones_like(distance, dtype=torch.bool)
+            if terminated is not None:
+                standing = ~terminated.to(distance.device)
+            lost = ((distance.detach() > limit) & standing).sum()
+        self.curriculum_lost[self.curriculum_filled % window] = lost
         self.curriculum_filled += 1
         span = config.speed_curriculum_backoff_window_controls
         if span is not None:
@@ -540,18 +601,16 @@ class DestinationTrainingTask(TrainingTask):
                 if self.curriculum_backoff_filled >= span
                 else None
             )
-        if (
-            backoff is not None
-            and judged is not None
-            and judged < backoff
-            and self.curriculum_level > first + 1e-9
-        ):
+        low = backoff is not None and judged is not None and judged < backoff
+        far = limit is not None and float(self.curriculum_lost.sum()) > 0
+        if (low or far) and self.curriculum_level > first + 1e-9:
             self.curriculum_advances.append(
                 {
                     "controls_completed": self.controls_completed,
                     "level_mps": round(self.curriculum_level, 6),
-                    "window_mean": judged,
+                    "window_mean": judged if low else mean,
                     "back_off": True,
+                    **({"reason": "pay" if low else "distance"} if limit is not None else {}),
                 }
             )
             self.curriculum_level = round(
@@ -560,7 +619,8 @@ class DestinationTrainingTask(TrainingTask):
             self.curriculum_complete = False
             self.curriculum_filled = self.curriculum_backoff_filled = 0
             return
-        if mean <= config.speed_curriculum_threshold:
+        # A robot past the back-off distance also holds the first level.
+        if far or mean <= config.speed_curriculum_threshold:
             return
         if config.speed_curriculum_advance_without_falls and float(self.curriculum_falls.sum()) > 0:
             return
@@ -588,6 +648,7 @@ class DestinationTrainingTask(TrainingTask):
             "window_controls": filled,
             "window_mean": float(self.curriculum_window[:filled].mean()) if filled else None,
             "window_falls": int(self.curriculum_falls[:filled].sum()),
+            "window_lost": int(self.curriculum_lost[:filled].sum()),
             "complete": self.curriculum_complete,
             "advances": self.curriculum_advances,
         }
@@ -631,12 +692,12 @@ class DestinationTrainingTask(TrainingTask):
     def _reward(self, command, terminated):
         self._advance_destination(command)
         reward, components, telemetry = super()._reward(command, terminated)
+        if self.gait is not None:
+            self.gait.advance(command)
         config = self.reward_config
         if config.destination_weight > 0:
-            scaled = (
-                destination_distance(telemetry["root_pose_xyzw"], self.destination)
-                / config.destination_distance_m
-            )
+            distance = destination_distance(telemetry["root_pose_xyzw"], self.destination)
+            scaled = distance / config.destination_distance_m
             if config.destination_kernel == "exponential":
                 closeness = torch.exp(-scaled)
             elif config.destination_kernel == "rational":
@@ -652,7 +713,7 @@ class DestinationTrainingTask(TrainingTask):
             components["destination"] = (config.destination_weight * alive * closeness).to(reward)
             reward = reward + components["destination"]
             if config.speed_curriculum_start_mps is not None:
-                self._curriculum_step(components["destination"], terminated)
+                self._curriculum_step(components["destination"], terminated, distance)
         if config.hold_weight is not None:
             components["hold"] = self._hold(command, terminated).to(reward)
             reward = reward + components["hold"]
