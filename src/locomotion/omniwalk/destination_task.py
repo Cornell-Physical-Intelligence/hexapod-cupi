@@ -56,6 +56,9 @@ commands and the stops after a walk are v9's. The top speed starts one step abov
 ``speed_curriculum_start_mps`` and rises by one step whenever the destination pay, averaged over all
 rows for the last ``speed_curriculum_window_controls`` controls at that speed, exceeds
 ``speed_curriculum_threshold``, up to ``speed_curriculum_final_mps``; the task's status reports the level.
+``destination_v11`` is v10 with a quarter of the walks at the top speed and a back-off: a full window
+below ``speed_curriculum_backoff_threshold`` lowers the top speed one step (not below the first level),
+so training does not stay at a speed whose pay keeps falling.
 """
 
 import hashlib
@@ -100,6 +103,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_threshold: float | None = None
     speed_curriculum_window_controls: int | None = None
     speed_curriculum_new_share: float | None = None
+    speed_curriculum_backoff_threshold: float | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -162,6 +166,15 @@ class DestinationRewardConfig(RewardConfig):
                 "The speed curriculum needs a step up to its start, a final speed a whole number "
                 "of steps above it, a threshold within the destination weight, a positive window "
                 "and a share from 0 to 1"
+            )
+        backoff = self.speed_curriculum_backoff_threshold
+        if backoff is not None and (
+            self.speed_curriculum_threshold is None
+            or not math.isfinite(backoff)
+            or not 0 < backoff < self.speed_curriculum_threshold
+        ):
+            raise ValueError(
+                "The back-off threshold needs a curriculum and lies below its threshold"
             )
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
@@ -344,6 +357,17 @@ EXPERIMENTS["destination_v10"] = {
         speed_curriculum_new_share=0.5,
     ),
 }
+# destination_v11 is destination_v10 with three quarters of the walks at the slower levels and a back-off:
+# training at 0.125 m/s let the destination pay fall from 0.73 to 0.42 and cost the 0.05 m/s walks their
+# millimetre end gaps, so a full window below 0.65 lowers the top speed one step.
+EXPERIMENTS["destination_v11"] = {
+    **EXPERIMENTS["destination_v10"],
+    "reward": replace(
+        EXPERIMENTS["destination_v10"]["reward"],
+        speed_curriculum_new_share=0.25,
+        speed_curriculum_backoff_threshold=0.65,
+    ),
+}
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -421,6 +445,23 @@ class DestinationTrainingTask(TrainingTask):
         if self.curriculum_filled < window or self.curriculum_filled % max(1, window // 50):
             return
         mean = float(self.curriculum_window.mean())
+        first = round(config.speed_curriculum_start_mps + config.speed_curriculum_step_mps, 6)
+        backoff = config.speed_curriculum_backoff_threshold
+        if backoff is not None and mean < backoff and self.curriculum_level > first + 1e-9:
+            self.curriculum_advances.append(
+                {
+                    "controls_completed": self.controls_completed,
+                    "level_mps": round(self.curriculum_level, 6),
+                    "window_mean": mean,
+                    "back_off": True,
+                }
+            )
+            self.curriculum_level = round(
+                self.curriculum_level - config.speed_curriculum_step_mps, 6
+            )
+            self.curriculum_complete = False
+            self.curriculum_filled = 0
+            return
         if mean <= config.speed_curriculum_threshold:
             return
         record = {

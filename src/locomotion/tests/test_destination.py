@@ -500,8 +500,14 @@ class CurriculumTests(unittest.TestCase):
             EXPERIMENTS["destination_v10"]["reward"],
         )
         changed = {key for key, value in asdict(ten).items() if asdict(nine)[key] != value}
+        # destination_v11 adds the back-off; v10 leaves it off.
         self.assertEqual(
-            changed, {key for key in asdict(ten) if key.startswith("speed_curriculum_")}
+            changed,
+            {
+                key
+                for key in asdict(ten)
+                if key.startswith("speed_curriculum_") and "backoff" not in key
+            },
         )
         self.assertEqual(EXPERIMENT_INPUTS["destination_v10"], "ghost")
         for bad in (
@@ -544,6 +550,30 @@ class CurriculumTests(unittest.TestCase):
         status = task.curriculum_status()
         self.assertTrue(status["complete"])
         self.assertEqual([a["level_mps"] for a in status["advances"]], [0.075, 0.1, 0.125, 0.15])
+
+
+class BackoffTests(unittest.TestCase):
+    def test_destination_v11_rehearses_more_and_backs_off_a_falling_level(self):
+        ten, eleven = (EXPERIMENTS[n]["reward"] for n in ("destination_v10", "destination_v11"))
+        changed = {k for k, v in asdict(eleven).items() if asdict(ten)[k] != v}
+        self.assertEqual(
+            changed, {"speed_curriculum_new_share", "speed_curriculum_backoff_threshold"}
+        )
+        with self.assertRaises(ValueError):
+            replace(eleven, speed_curriculum_backoff_threshold=0.9).validate()
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, eleven)
+        window = eleven.speed_curriculum_window_controls
+        # The first level never backs off; a raised level that falls below 0.65 drops one step.
+        for _ in range(window):
+            task._curriculum_step(torch.full((64,), 0.5))
+        self.assertEqual(task.curriculum_level, 0.075)
+        for pay, level in ((0.85, 0.1), (0.85, 0.125), (0.6, 0.1)):
+            for _ in range(window):
+                task._curriculum_step(torch.full((64,), pay))
+            self.assertEqual(task.curriculum_level, level)
+        self.assertTrue(task.curriculum_status()["advances"][-1]["back_off"])
 
 
 class WrapperTests(unittest.TestCase):
