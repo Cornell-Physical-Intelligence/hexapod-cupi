@@ -29,12 +29,14 @@ class DestinationVecEnv(OmniVecEnv):
             raise ValueError("DestinationVecEnv applies the ghost destination input")
         if not hasattr(task, "destination"):
             raise ValueError("The destination inputs need a DestinationTrainingTask")
-        # The configuration records the task's clock scaling so that evaluation rebuilds the same phase.
-        if getattr(task.reward_config, "gait_clock_scaling", None) != gait_clock_scaling or (
+        # A task's speed-scaled clock must be recorded so that evaluation rebuilds the same phase.
+        # Evaluation rebuilds that phase itself, so a recorded scaling may meet a task without one.
+        kept = getattr(task.reward_config, "gait_clock_scaling", None)
+        if (kept is not None and kept != gait_clock_scaling) or (
             gait_clock_scaling is not None and not options.get("gait_clock")
         ):
             raise ValueError(
-                "The gait_clock_scaling option must match the task's and needs the gait clock"
+                "The gait_clock_scaling option must record the task's and needs the gait clock"
             )
         super().__init__(task, tensor_dict, **options)
 
