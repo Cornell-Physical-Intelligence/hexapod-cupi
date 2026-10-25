@@ -25,10 +25,16 @@ class CommandBootstrapPPO(PPO):
 
 
 class CappedRatePPO(CommandBootstrapPPO):
-    """Stock PPO whose learning rate never exceeds ``learning_rate_max``."""
+    """Stock PPO whose learning rate never exceeds ``learning_rate_max`` and, when ``learning_rate_min``
+    is given, never falls below it (the stock adaptive schedule's own floor is 1e-5)."""
 
-    def __init__(self, *args, learning_rate_max, **kwargs):
+    def __init__(self, *args, learning_rate_max, learning_rate_min=None, **kwargs):
         self.learning_rate_max = float(learning_rate_max)
+        self.learning_rate_min = None if learning_rate_min is None else float(learning_rate_min)
+        if self.learning_rate_min is not None and not (
+            0 < self.learning_rate_min <= self.learning_rate_max
+        ):
+            raise ValueError("The learning-rate floor lies above zero and at most the ceiling")
         super().__init__(*args, **kwargs)
         for group in self.optimizer.param_groups:
             group["lr"] = self.learning_rate
@@ -39,7 +45,10 @@ class CappedRatePPO(CommandBootstrapPPO):
 
     @learning_rate.setter
     def learning_rate(self, value):
-        self._learning_rate = min(float(value), self.learning_rate_max)
+        value = min(float(value), self.learning_rate_max)
+        if self.learning_rate_min is not None:
+            value = max(value, self.learning_rate_min)
+        self._learning_rate = value
 
 
 # The environment clips sampled actions before its physical target limits. PPO stores those raw

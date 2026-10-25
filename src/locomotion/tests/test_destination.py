@@ -1107,6 +1107,43 @@ class DriftTests(unittest.TestCase):
         self.assertGreater(task.curriculum_advances[-1]["window_mean"], 0.8)
         self.assertLess(task.curriculum_advances[-1]["window_mean"], 0.81)
 
+    def test_destination_v23_charges_the_evaluators_planar_error_each_walking_control(self):
+        twentytwo, twentythree = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v22", "destination_v23")
+        )
+        changed = {k for k, v in asdict(twentythree).items() if asdict(twentytwo)[k] != v}
+        self.assertEqual(changed, {"planar_error_weight"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v23"], "ghost_v11")
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentythree)
+        # At heading 0 navigation forward is world -y. Rows: on the command; one bound (37.5 mm/s) off at
+        # 0.15 m/s; 0.05 m/s off a 0.05 m/s walk (bound 25 mm/s); a zero command, never charged.
+        command = torch.tensor(
+            [[0.15, 0.0, 0.0], [0.15, 0.0, 0.0], [0.05, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        )
+        native.current["root_velocity"] = torch.tensor(
+            [
+                [0.0, -0.15, 0, 0, 0, 0],
+                [0.0375, -0.15, 0, 0, 0, 0],
+                [0.0, -0.1, 0, 0, 0, 0],
+                [0.3, 0.0, 0, 0, 0, 0],
+            ]
+        )
+        telemetry = {"root_pose_xyzw": torch.tensor([[0.0, 0, 0.1, 0, 0, 0, 1.0]]).repeat(4, 1)}
+        torch.testing.assert_close(
+            task._planar_error(command, telemetry), torch.tensor([0.0, -0.5, -2.0, 0.0])
+        )
+
+    def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
+        from locomotion.rl.ppo import CappedRatePPO
+
+        learner = CappedRatePPO.__new__(CappedRatePPO)
+        learner.learning_rate_max, learner.learning_rate_min = 1e-4, 2e-5
+        for value, kept in ((1e-5, 2e-5), (5e-5, 5e-5), (1e-3, 1e-4)):
+            learner.learning_rate = value
+            self.assertAlmostEqual(learner.learning_rate, kept)
+
 
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):

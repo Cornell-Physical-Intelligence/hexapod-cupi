@@ -121,6 +121,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_pass_checks: bool | None = None
     speed_curriculum_planar_bound_scale: float | None = None
     speed_curriculum_measure: str | None = None
+    planar_error_weight: float | None = None
     destination_linear_from_m: float | None = None
     destination_penalty_cap: float | None = None
     gait_clock_scaling: str | None = None
@@ -550,6 +551,14 @@ EXPERIMENTS["destination_v21"] = {**EXPERIMENTS["destination_v20"]}
 EXPERIMENTS["destination_v22"] = {
     **EXPERIMENTS["destination_v21"],
     "reward": replace(EXPERIMENTS["destination_v21"]["reward"], speed_curriculum_measure="drift"),
+}
+# destination_v23 is destination_v22 with a per-control charge on the evaluator's planar speed error,
+# -0.5 * (|velocity - command| / max(0.025, a quarter of the speed))^2 while walking. At 0.15 m/s the
+# destination_v21 robots averaged the command within about 1 mm/s over each step but swung 25-40 mm/s
+# within it, failing the evaluator's planar check; no reward term saw that swing.
+EXPERIMENTS["destination_v23"] = {
+    **EXPERIMENTS["destination_v22"],
+    "reward": replace(EXPERIMENTS["destination_v22"]["reward"], planar_error_weight=0.5),
 }
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
@@ -1051,6 +1060,9 @@ class DestinationTrainingTask(TrainingTask):
             reward = reward + components["destination"]
             if config.speed_curriculum_start_mps is not None:
                 self._curriculum_step(components["destination"], terminated, distance)
+        if config.planar_error_weight is not None:
+            components["planar_error"] = self._planar_error(command, telemetry).to(reward)
+            reward = reward + components["planar_error"]
         if config.hold_weight is not None:
             components["hold"] = self._hold(command, terminated).to(reward)
             reward = reward + components["hold"]
@@ -1062,6 +1074,24 @@ class DestinationTrainingTask(TrainingTask):
             components["heading"] = (config.heading_weight * alive * closeness).to(reward)
             reward = reward + components["heading"]
         return reward, components, telemetry
+
+    def _planar_error(self, command, telemetry):
+        """Charge each walking control the square of its planar speed error over the evaluator's bound,
+        measured on the root's centre-of-mass velocity as the evaluator reads it."""
+        config = self.reward_config
+        pose = telemetry["root_pose_xyzw"].to(torch.float32)
+        current = getattr(self.env, "current", {})
+        if "root_velocity" in current:
+            world = current["root_velocity"][:, :3].to(pose)
+            planar = navigation(inverse_rotate(pose[:, 3:], world))[:, :2]
+        else:
+            planar = telemetry["linear_velocity_nav"].to(pose)[:, :2]
+        command = command.to(pose)
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        error = torch.linalg.vector_norm(planar - command[:, :2], dim=-1)
+        bound = torch.clamp(0.25 * speed, min=0.025)
+        moving = (command != 0).any(-1).to(pose)
+        return -config.planar_error_weight * moving * (error / bound).square()
 
     def _hold(self, command, terminated):
         """Anchor the joints' running mean a grace period into a zero command and charge its drift."""
