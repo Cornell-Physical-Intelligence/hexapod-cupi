@@ -619,6 +619,14 @@ EXPERIMENTS["destination_v26"] = {
         stop_fraction=0.5,
     ),
 }
+# destination_v27 is destination_v26 with a quarter of the walks stopping. Fine-tuned 600 updates from the
+# native destination_v25 update-1350 checkpoint, v26 stood still (stops 8/8 at 0.05 to 0.1 m/s, quiet probes
+# pass by update 300) but fell behind the ghost the longer it trained: the median end gap of the 0.05 m/s
+# walk grew from 2.46 mm to 2.62, 3.32 and 3.96 mm at updates 100, 300 and 600.
+EXPERIMENTS["destination_v27"] = {
+    **EXPERIMENTS["destination_v26"],
+    "reward": replace(EXPERIMENTS["destination_v26"]["reward"], stop_fraction=0.25),
+}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.

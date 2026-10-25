@@ -219,10 +219,11 @@ EXPERIMENT_INPUTS = {
     "destination_v24": "ghost_v11",
     "destination_v25": "ghost_v11",
     "destination_v26": "ghost_v11",
+    "destination_v27": "ghost_v11",
 }
 # The speed-scaled gait clock of each named experiment that uses one (its reward's gait_clock_scaling;
 # locomotion/tests/test_destination.py checks the two agree). Its wrapper records and applies it.
-EXPERIMENT_CLOCKS = {name: "speed_v1" for name in (f"destination_v{k}" for k in range(16, 27))}
+EXPERIMENT_CLOCKS = {name: "speed_v1" for name in (f"destination_v{k}" for k in range(16, 28))}
 
 
 def recipe_options(name, **overrides):

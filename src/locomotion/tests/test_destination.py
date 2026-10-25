@@ -1217,6 +1217,16 @@ class DriftTests(unittest.TestCase):
         self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.5, delta=0.03)
         self.assertIsNone(task.curriculum_status())
 
+    def test_destination_v27_stops_a_quarter_of_the_walks(self):
+        twentyseven = EXPERIMENTS["destination_v27"]["reward"]
+        self.assertEqual(replace(twentyseven, stop_fraction=0.5), EXPERIMENTS["destination_v26"]["reward"])
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v27"], "ghost_v11")
+        native = GaitDouble(4096)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentyseven)
+        task.reset()
+        self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.25, delta=0.03)
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 
