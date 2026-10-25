@@ -81,6 +81,7 @@ from locomotion.omniwalk.mdp.destination import (
     destination_distance,
     planar_pose,
 )
+from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
 from locomotion.omniwalk.mdp.gait import GaitPhase
 from locomotion.omniwalk.mdp.rewards import RewardConfig
 from locomotion.omniwalk.task import TrainingTask
@@ -117,6 +118,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_backoff_window_controls: int | None = None
     speed_curriculum_advance_without_falls: bool | None = None
     speed_curriculum_backoff_distance_m: float | None = None
+    speed_curriculum_pass_checks: bool | None = None
     gait_clock_scaling: str | None = None
     command_controls: int = 0
 
@@ -220,6 +222,10 @@ class DestinationRewardConfig(RewardConfig):
             and self.gait_clock_scaling not in GAIT_CLOCK_SCALINGS
         ):
             raise ValueError("gait_clock_scaling is None or a name in mdp/commands.py")
+        if self.speed_curriculum_pass_checks is not None and (
+            self.speed_curriculum_pass_checks is not True or self.speed_curriculum_threshold is None
+        ):
+            raise ValueError("Passing the checks is True or None and needs a speed curriculum")
         if self.destination_quiet not in (None, "flat", "off"):
             raise ValueError("destination_quiet is None (track the ghost), flat or off")
         hold = (
@@ -476,6 +482,45 @@ EXPERIMENTS["destination_v17"] = {
         speed_curriculum_backoff_distance_m=None,
     ),
 }
+# destination_v18 is destination_v17 that also needs every walk finished in the 30 updates to pass the
+# evaluator's moving checks: at update 500 of destination_v17 seven directions held 0.125 m/s within 6 mm of
+# the ghost, but every case failed the planar-error check and three asked for torque above 1.6 Nm too often.
+EXPERIMENTS["destination_v18"] = {
+    **EXPERIMENTS["destination_v17"],
+    "reward": replace(EXPERIMENTS["destination_v17"]["reward"], speed_curriculum_pass_checks=True),
+}
+
+# The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
+# at the start of each case; the surrogate clamps joints at the native speed limit.
+WALK_SKIPPED_CONTROLS = 100
+WALK_CHECKS = (
+    "planar_error_mps",
+    "yaw_error_rad_s",
+    "tilt_rms_degrees",
+    "vertical_velocity_rms_mps",
+    "computed_demand_over_rating_fraction",
+    "joint_speed_limit",
+    "terminated",
+)
+JOINT_SPEED_LIMIT_RAD_S = 50.26548245743669
+
+
+def walk_failures(sums, counted, speed, fast, fell):
+    """Each row's failed walking checks, as booleans in ``WALK_CHECKS`` order, from the per-control sums of
+    planar error, yaw-rate error, squared tilt, squared vertical velocity and share of joints above 1.6 Nm."""
+    mean = sums / counted.clamp_min(1)[:, None]
+    return torch.stack(
+        (
+            mean[:, 0] > torch.clamp(0.25 * speed, min=0.025),
+            mean[:, 1] > 0.06,
+            torch.rad2deg(mean[:, 2].sqrt()) > 5.0,
+            mean[:, 3].sqrt() > 0.04,
+            mean[:, 4] > 0.005,
+            fast,
+            fell,
+        ),
+        -1,
+    )
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -516,6 +561,16 @@ class DestinationTrainingTask(TrainingTask):
             self.curriculum_backoff_filled = 0
             self.curriculum_complete = False
             self.curriculum_advances = []
+            # Walks finished, and those that failed a check, per control over the window.
+            self.curriculum_walks = torch.zeros_like(self.curriculum_window)
+            self.curriculum_failed = torch.zeros_like(self.curriculum_window)
+            self.pending_walks = self.pending_failed = 0
+            self.check_failures = dict.fromkeys(WALK_CHECKS, 0)
+            n, device = env.num_envs, env.device
+            self.walk_counted = torch.zeros(n, dtype=torch.float64, device=device)
+            self.walk_sums = torch.zeros(n, 5, dtype=torch.float64, device=device)
+            self.walk_fast = torch.zeros(n, dtype=torch.bool, device=device)
+            self.walk_fell = torch.zeros(n, dtype=torch.bool, device=device)
         super().__init__(env, config, output_dir, chosen)
 
     @property
@@ -541,6 +596,8 @@ class DestinationTrainingTask(TrainingTask):
         return telemetry
 
     def _resample(self, indices):
+        if self.reward_config.speed_curriculum_pass_checks and len(indices):
+            self._finish_walks(indices)
         super()._resample(indices)
         if len(indices):
             if self.reward_config.speed_curriculum_start_mps is not None:
@@ -577,6 +634,62 @@ class DestinationTrainingTask(TrainingTask):
         self.env.commands[walks, 0] = speed * torch.cos(angle)
         self.env.commands[walks, 1] = speed * torch.sin(angle)
 
+    def _record_walks(self, command, telemetry, terminated):
+        """Add this control to each walk's sums for the evaluator's moving checks after its first 100 controls."""
+        t = telemetry
+        command = command.to(self.walk_sums.device)
+        moving = (command != 0).any(-1)
+        counted = moving & (self.command_elapsed.to(moving.device) > WALK_SKIPPED_CONTROLS)
+        pose = t["root_pose_xyzw"].to(self.walk_sums)
+        x, y, z, w = pose[:, 3:].unbind(-1)
+        up = 1 - 2 * (x * x + y * y)
+        # The evaluator reads the root's centre-of-mass velocity, as the environment's state holds it.
+        world = self.env.current["root_velocity"][:, :3].to(self.walk_sums)
+        planar = navigation(inverse_rotate(pose[:, 3:], world))[:, :2] - command[:, :2].to(
+            self.walk_sums
+        )
+        vertical = world[:, 2]
+        values = torch.stack(
+            (
+                torch.linalg.vector_norm(planar, dim=-1),
+                (t["angular_velocity_body"].to(self.walk_sums)[:, 2] - command[:, 2]).abs(),
+                torch.arccos(up.clamp(-1, 1)).square(),
+                vertical.square(),
+                (t["computed_torque_nm"].to(self.walk_sums).abs() > 1.6)
+                .to(self.walk_sums)
+                .mean(-1),
+            ),
+            -1,
+        )
+        self.walk_sums += values * counted[:, None]
+        self.walk_counted += counted.to(self.walk_counted)
+        fast = (t["joint_velocity_rad_s"].abs() > JOINT_SPEED_LIMIT_RAD_S).any(-1)
+        self.walk_fast |= fast.to(counted.device) & counted
+        self.walk_fell |= terminated.to(moving.device) & moving
+
+    def _finish_walks(self, indices):
+        """Score the walks that end at these rows (their command is about to change) and clear their sums."""
+        indices = torch.as_tensor(indices, dtype=torch.long, device=self.walk_sums.device)
+        ended = (self.walk_counted[indices] > 0) | self.walk_fell[indices]
+        rows = indices[ended]
+        if len(rows):
+            speed = torch.linalg.vector_norm(self.env.commands[rows, :2], dim=-1).to(self.walk_sums)
+            failed = walk_failures(
+                self.walk_sums[rows],
+                self.walk_counted[rows],
+                speed,
+                self.walk_fast[rows],
+                self.walk_fell[rows],
+            )
+            for name, count in zip(WALK_CHECKS, failed.sum(0).tolist()):
+                self.check_failures[name] += int(count)
+            self.pending_walks += len(rows)
+            self.pending_failed += int(failed.any(-1).sum())
+        self.walk_sums[indices] = 0
+        self.walk_counted[indices] = 0
+        self.walk_fast[indices] = False
+        self.walk_fell[indices] = False
+
     def _curriculum_step(self, pay, terminated=None, distance=None):
         """Record the mean destination pay of this control; raise the top speed past the threshold and
         lower it below the back-off, each judged on its own window of controls at the level. With a
@@ -595,6 +708,10 @@ class DestinationTrainingTask(TrainingTask):
                 standing = ~terminated.to(distance.device)
             lost = ((distance.detach() > limit) & standing).sum()
         self.curriculum_lost[self.curriculum_filled % window] = lost
+        if config.speed_curriculum_pass_checks:
+            self.curriculum_walks[self.curriculum_filled % window] = self.pending_walks
+            self.curriculum_failed[self.curriculum_filled % window] = self.pending_failed
+            self.pending_walks = self.pending_failed = 0
         self.curriculum_filled += 1
         span = config.speed_curriculum_backoff_window_controls
         if span is not None:
@@ -638,6 +755,10 @@ class DestinationTrainingTask(TrainingTask):
             return
         if config.speed_curriculum_advance_without_falls and float(self.curriculum_falls.sum()) > 0:
             return
+        if config.speed_curriculum_pass_checks and (
+            float(self.curriculum_failed.sum()) > 0 or float(self.curriculum_walks.sum()) == 0
+        ):
+            return
         record = {
             "controls_completed": self.controls_completed,
             "level_mps": round(self.curriculum_level, 6),
@@ -651,6 +772,8 @@ class DestinationTrainingTask(TrainingTask):
         self.curriculum_advances.append(record)
         self.curriculum_level = round(self.curriculum_level + config.speed_curriculum_step_mps, 6)
         self.curriculum_filled = self.curriculum_backoff_filled = 0
+        if config.speed_curriculum_pass_checks:
+            self.check_failures = dict.fromkeys(WALK_CHECKS, 0)
 
     def curriculum_status(self):
         if self.reward_config.speed_curriculum_start_mps is None:
@@ -663,6 +786,15 @@ class DestinationTrainingTask(TrainingTask):
             "window_mean": float(self.curriculum_window[:filled].mean()) if filled else None,
             "window_falls": int(self.curriculum_falls[:filled].sum()),
             "window_lost": int(self.curriculum_lost[:filled].sum()),
+            **(
+                {
+                    "window_walks": int(self.curriculum_walks[:filled].sum()),
+                    "window_walks_failed": int(self.curriculum_failed[:filled].sum()),
+                    "level_check_failures": dict(self.check_failures),
+                }
+                if self.reward_config.speed_curriculum_pass_checks
+                else {}
+            ),
             "complete": self.curriculum_complete,
             "advances": self.curriculum_advances,
         }
@@ -708,6 +840,8 @@ class DestinationTrainingTask(TrainingTask):
         reward, components, telemetry = super()._reward(command, terminated)
         if self.gait is not None:
             self.gait.advance(command)
+        if self.reward_config.speed_curriculum_pass_checks:
+            self._record_walks(command, telemetry, terminated)
         config = self.reward_config
         if config.destination_weight > 0:
             distance = destination_distance(telemetry["root_pose_xyzw"], self.destination)
