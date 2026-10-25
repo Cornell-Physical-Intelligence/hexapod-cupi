@@ -128,6 +128,11 @@ class DestinationRewardConfig(RewardConfig):
     destination_linear_from_m: float | None = None
     destination_penalty_cap: float | None = None
     gait_clock_scaling: str | None = None
+    end_destination_weight: float | None = None
+    end_destination_distance_m: float | None = None
+    end_destination_power: float | None = None
+    run_mix: tuple | None = None
+    long_stand_controls: int | None = None
     command_controls: int = 0
 
     def validate(self):
@@ -139,11 +144,13 @@ class DestinationRewardConfig(RewardConfig):
             and not (math.isfinite(self.destination_power) and self.destination_power > 0)
         ):
             raise ValueError("The rational kernel, and only it, needs a positive finite power")
-        stop = (self.stop_fraction, self.stop_after_min_controls, self.stop_after_max_controls)
+        # A run mix draws its own share of walks that stop, but still needs the stop's bounds.
+        fraction = 1.0 if self.run_mix is not None else self.stop_fraction
+        stop = (fraction, self.stop_after_min_controls, self.stop_after_max_controls)
         if any(value is not None for value in stop) and (
             any(value is None for value in stop)
-            or not math.isfinite(self.stop_fraction)
-            or not 0 < self.stop_fraction <= 1
+            or not math.isfinite(fraction)
+            or not 0 < fraction <= 1
             or type(self.stop_after_min_controls) is not int
             or type(self.stop_after_max_controls) is not int
             or not 10 <= self.stop_after_min_controls <= self.stop_after_max_controls
@@ -300,12 +307,42 @@ class DestinationRewardConfig(RewardConfig):
             self.command_controls == 0 or 10 <= self.command_controls <= 5000
         ):
             raise ValueError("command_controls is 0 (the drawn durations) or 10 to 5000 controls")
+        end = (self.end_destination_weight, self.end_destination_distance_m, self.end_destination_power)
+        if any(value is not None for value in end) and (
+            any(value is None for value in end)
+            or not all(math.isfinite(value) and value > 0 for value in end)
+            or self.destination_weight <= 0
+        ):
+            raise ValueError(
+                "The run-end destination pay needs a positive finite weight, width and power "
+                "beside the destination pay"
+            )
+        mix = self.run_mix
+        if mix is not None and (
+            type(mix) is not tuple
+            or len(mix) != 4
+            or not all(math.isfinite(share) and share >= 0 for share in mix)
+            or abs(sum(mix) - 1) > 1e-9
+            or self.stop_fraction is not None
+            or self.walk_speed_min_mps is None
+            or self.command_controls == 0
+            or type(self.long_stand_controls) is not int
+            or not self.command_controls <= self.long_stand_controls <= 5000
+        ):
+            raise ValueError(
+                "A run mix gives four shares (turns, stands, walks that stop, walks) summing to 1, "
+                "with uniform walk speeds, no stop fraction, fixed command controls and long stands "
+                "from command_controls to 5000 controls"
+            )
+        if self.long_stand_controls is not None and mix is None:
+            raise ValueError("Long stands need a run mix")
         ceiling = (
             (self.linear_tracking_weight + self.yaw_tracking_weight)
             * (1 + self.stride_tracking_weight)
             + 6 * self.stride_length_weight / self.schedule_period_controls
             + self.destination_weight
             + (self.heading_weight or 0.0)
+            + (self.end_destination_weight or 0.0)
         )
         if self.termination_weight < 10 * ceiling:
             raise ValueError(
@@ -627,6 +664,29 @@ EXPERIMENTS["destination_v27"] = {
     **EXPERIMENTS["destination_v26"],
     "reward": replace(EXPERIMENTS["destination_v26"]["reward"], stop_fraction=0.25),
 }
+# destination_v28 is destination_v27 with destination_v9's destination pay added back (the rational
+# kernel at 3.7 mm, power 1.2: 0.62 at 2.5 mm, 0.23 at 1 cm) and scaled by how far the run is through,
+# from 0 at its start to 1 at its last control, so the end of each run pays for millimetre gaps to the
+# ghost. Every run draws one of four kinds: 10% turn in place at 0.2 rad/s for 20 s, 10% stand still for
+# 20 s or 32 s (half each, as the evaluator's quiet probes), 50% walk 4 to 12 s and then stop for the rest
+# of the 20 s, and 30% walk the whole 20 s; walks go in a uniform direction at 0.05 to 0.15 m/s.
+# Episodes last up to 32 s and every other run ends at 20 s. Termination 52 keeps ten times the 5.15
+# tracking ceiling. The native destination_v27 update-900 checkpoint stops 8/8 at every speed but its
+# 0.05 m/s walk ends 3.34 mm from the ghost (v9 0.82 mm).
+EXPERIMENTS["destination_v28"] = {
+    **EXPERIMENTS["destination_v27"],
+    "reward": replace(
+        EXPERIMENTS["destination_v27"]["reward"],
+        end_destination_weight=1.0,
+        end_destination_distance_m=0.0037,
+        end_destination_power=1.2,
+        run_mix=(0.1, 0.1, 0.5, 0.3),
+        long_stand_controls=1600,
+        stop_fraction=None,
+        termination_weight=52.0,
+    ),
+    "episode_seconds": 32.0,
+}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.
@@ -687,6 +747,11 @@ class DestinationTrainingTask(TrainingTask):
         self.hold_mean = torch.zeros(env.num_envs, 18, device=env.device)
         self.stop_pending = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
         self.stop_rest = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
+        # Each run's planned length and the controls it has run, for the run-end pay and the run mix.
+        self.run_length = torch.full(
+            (env.num_envs,), chosen.command_controls, dtype=torch.long, device=env.device
+        )
+        self.run_elapsed = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
         # The root pose before the latest control, for the ghost_v10 velocity input.
         self.control_start_pose = env.current["root"].detach().clone()
         self.gait = (
@@ -748,6 +813,7 @@ class DestinationTrainingTask(TrainingTask):
     def reset(self, indices=None):
         # A reset draws a fresh command; a stop scheduled for the ended episode lapses.
         self.stop_pending[self._indices(indices)] = False
+        self.run_elapsed[self._indices(indices)] = 0
         if self.gait is not None:
             self.gait.reset(self._indices(indices))
         output = super().reset(indices)
@@ -767,7 +833,18 @@ class DestinationTrainingTask(TrainingTask):
             telemetry["schedule_period_s"] = period.to(device, torch.float32)
         return telemetry
 
+    def step(self, action):
+        result = super().step(action)
+        if self.reward_config.run_mix is not None:
+            # A run shorter than the episode times out at its planned length.
+            ended = (self.run_elapsed >= self.run_length) & ~result["terminated"]
+            result["truncated"] = result["truncated"] | ended.to(result["truncated"].device)
+        return result
+
     def _resample(self, indices):
+        if self.reward_config.run_mix is not None:
+            # A run at its planned length keeps its command until the reset that ends it.
+            indices = indices[self.run_elapsed[indices] < self.run_length[indices]]
         if self.reward_config.speed_curriculum_pass_checks and len(indices):
             self._finish_walks(indices)
         drift = self.reward_config.speed_curriculum_measure == "drift"
@@ -777,10 +854,12 @@ class DestinationTrainingTask(TrainingTask):
         if len(indices):
             if self.reward_config.speed_curriculum_start_mps is not None:
                 self._curriculum_walks(indices)
+            elif self.reward_config.run_mix is not None:
+                self._mixed_runs(indices)
             elif self.reward_config.walk_speed_min_mps is not None:
                 self._uniform_walks(indices)
             self.command_started[indices] = True
-            if self.reward_config.command_controls:
+            if self.reward_config.command_controls and self.reward_config.run_mix is None:
                 self.remaining_controls[indices] = self.reward_config.command_controls
             if self.reward_config.stop_fraction is not None:
                 self._schedule_stops(indices)
@@ -804,6 +883,43 @@ class DestinationTrainingTask(TrainingTask):
         self.env.commands[indices, 0] = speed * torch.cos(angle)
         self.env.commands[indices, 1] = speed * torch.sin(angle)
         self.env.commands[indices, 2] = 0
+
+    def _mixed_runs(self, indices):
+        """Stop the walks whose walking part ended; draw each fresh run a turn, stand, walk that stops or walk."""
+        config = self.reward_config
+        indices = torch.as_tensor(indices, dtype=torch.long, device=self.stop_pending.device)
+        stopping = indices[self.stop_pending[indices]]
+        self.env.commands[stopping] = 0
+        self.remaining_controls[stopping] = self.stop_rest[stopping].to(self.remaining_controls)
+        self.stop_pending[stopping] = False
+        fresh = indices[~torch.isin(indices, stopping)]
+        if not len(fresh):
+            return
+        draws = torch.rand(len(fresh), 2, generator=self.rng).to(fresh.device)
+        edges = torch.tensor(config.run_mix, dtype=torch.float64).cumsum(0).to(fresh.device)
+        kind = torch.bucketize(draws[:, 0].double(), edges[:-1], right=True)  # 0 turn .. 3 walk
+        self.run_length[fresh] = config.command_controls
+        self.remaining_controls[fresh] = config.command_controls
+        self._uniform_walks(fresh[kind >= 2])
+        turns = fresh[kind == 0]
+        sign = torch.where(draws[kind == 0, 1] < 0.5, -1.0, 1.0).to(self.env.commands)
+        self.env.commands[turns] = 0
+        self.env.commands[turns, 2] = sign * self.config.yaw_rate_rad_s
+        stands = fresh[kind == 1]
+        self.env.commands[stands] = 0
+        long = stands[draws[kind == 1, 1] < 0.5]
+        self.run_length[long] = config.long_stand_controls
+        self.remaining_controls[long] = config.long_stand_controls
+        stops = fresh[kind == 2]
+        walking = torch.randint(
+            config.stop_after_min_controls,
+            config.stop_after_max_controls + 1,
+            (len(stops),),
+            generator=self.rng,
+        ).to(stops.device)
+        self.remaining_controls[stops] = walking.to(self.remaining_controls)
+        self.stop_rest[stops] = config.command_controls - walking
+        self.stop_pending[stops] = True
 
     def _curriculum_walks(self, indices):
         """Give each fresh walk a uniform direction and the top or a slower curriculum speed."""
@@ -1112,6 +1228,7 @@ class DestinationTrainingTask(TrainingTask):
     def _reward(self, command, terminated):
         self.control_start_pose = self.previous_pose.detach().clone().to(self.control_start_pose)
         self._advance_destination(command)
+        self.run_elapsed += 1
         reward, components, telemetry = super()._reward(command, terminated)
         if self.gait is not None:
             self.gait.advance(command)
@@ -1143,6 +1260,13 @@ class DestinationTrainingTask(TrainingTask):
             reward = reward + components["destination"]
             if config.speed_curriculum_start_mps is not None:
                 self._curriculum_step(components["destination"], terminated, distance)
+            if config.end_destination_weight is not None:
+                # The same gap on destination_v9's narrower kernel, weighted by the share of the run done.
+                scaled = distance / config.end_destination_distance_m
+                share = (self.run_elapsed.to(distance) / self.run_length.to(distance)).clamp(max=1)
+                closeness = share * alive / (1 + scaled.pow(config.end_destination_power))
+                components["end_destination"] = (config.end_destination_weight * closeness).to(reward)
+                reward = reward + components["end_destination"]
         if config.planar_error_weight is not None:
             components["planar_error"] = self._planar_error(command, telemetry).to(reward)
             reward = reward + components["planar_error"]

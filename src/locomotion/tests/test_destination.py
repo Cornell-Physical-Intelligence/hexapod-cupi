@@ -1227,6 +1227,55 @@ class DriftTests(unittest.TestCase):
         task.reset()
         self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.25, delta=0.03)
 
+    def test_destination_v28_mixes_runs_and_pays_the_ghost_gap_more_towards_each_runs_end(self):
+        settings = EXPERIMENTS["destination_v28"]
+        eight = settings["reward"]
+        self.assertEqual(settings["episode_seconds"], 32.0)
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v28"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(eight, run_mix=(0.5, 0.5, 0.5, 0.0)).validate()
+        with self.assertRaises(ValueError):
+            replace(eight, termination_weight=42.0).validate()
+        native = GaitDouble(8192)
+        native.cfg.episode_seconds, native.cfg.declaration = 32.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, eight)
+        task.reset()
+        command = native.commands
+        planar = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        turns = (planar == 0) & (command[:, 2] != 0)
+        stands = (command == 0).all(-1)
+        walks = planar > 0
+        self.assertTrue(bool((command[turns, 2].abs() == 0.2).all()))
+        self.assertTrue(bool((planar[walks] >= 0.05 - 1e-6).all() & (planar[walks] <= 0.15 + 1e-6).all()))
+        for share, rows in ((0.1, turns), (0.1, stands), (0.5, task.stop_pending), (0.8, walks)):
+            self.assertAlmostEqual(float(rows.double().mean()), share, delta=0.015)
+        long = task.run_length == 1600
+        self.assertTrue(bool((long == (stands & (task.remaining_controls == 1600))).all()))
+        self.assertAlmostEqual(float(long.double().mean()), 0.05, delta=0.01)
+
+        # Shortened runs: walks stop after 10 to 20 controls of 60 and long stands last 90.
+        short = replace(
+            eight, command_controls=60, long_stand_controls=90, stop_after_min_controls=10,
+            stop_after_max_controls=20,
+        )
+        native = GaitDouble(512)
+        native.cfg.episode_seconds, native.cfg.declaration = 32.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, short)
+        task.reset()
+        stopping, length = task.stop_pending.clone(), task.run_length.clone()
+        still = (native.commands == 0).all(-1)
+        for k in range(1, 61):
+            result = task.step(torch.zeros(512, 18))
+            # The body stays at the origin, so a stand is at its ghost and earns the run's share done.
+            torch.testing.assert_close(
+                task.last_components["end_destination"][still], (k / length[still]).float()
+            )
+            self.assertTrue(bool((result["truncated"] == (length == k)).all()))
+            if k == 30:
+                self.assertTrue(bool((native.commands[stopping] == 0).all()))
+        # The 60-control runs keep their command until the reset that the timeout calls for.
+        self.assertTrue(bool((task.remaining_controls[length == 60] == 0).all()))
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 

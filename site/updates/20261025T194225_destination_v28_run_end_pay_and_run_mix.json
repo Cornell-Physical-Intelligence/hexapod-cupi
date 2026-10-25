@@ -1,0 +1,21 @@
+{
+  "id": "20261025T194225_destination_v28_run_end_pay_and_run_mix",
+  "date": "2026-10-25T19:42:25.000000Z",
+  "title": "Add destination_v28: destination_v9's ghost pay ramped over each run, and a mix of runs",
+  "summary": "destination_v28 is destination_v27 with destination_v9's destination pay added back (the rational kernel at 3.7 mm, power 1.2) and weighted by the share of the run done, 0 at its start and 1 at its last control. Every run draws one of four kinds: 10% turn in place at 0.2 rad/s for 20 s, 10% stand still for 20 s or 32 s, 50% walk 4 to 12 s and then stop for the rest of the 20 s, and 30% walk the whole 20 s, in uniform directions at 0.05 to 0.15 m/s. Episodes last up to 32 s and every other run times out at 20 s. Termination 52 keeps ten times the 5.15 tracking ceiling. The native destination_v27 update-900 checkpoint stops 8/8 at every speed but its 0.05 m/s walk ends 3.34 mm from the ghost (v9 0.82 mm).",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Fine-tune the native destination_v27 update-900 checkpoint on the surrogate and test it against v9.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T194225_destination_v28_run_end_pay_and_run_mix.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and evaluator are unchanged."
+}
