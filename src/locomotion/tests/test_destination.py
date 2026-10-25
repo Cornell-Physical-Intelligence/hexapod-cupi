@@ -867,6 +867,43 @@ class GaitClockTests(unittest.TestCase):
         self.assertEqual(task.curriculum_level, 0.1)
         self.assertEqual(task.curriculum_status()["top_speed_controls"], 0)
 
+    def test_destination_v19_charges_a_growing_lag_and_doubles_the_planar_bound(self):
+        from locomotion.omniwalk.destination_task import WALK_CHECKS, linear_tail, walk_failures
+
+        eighteen, nineteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v18", "destination_v19")
+        )
+        changed = {k for k, v in asdict(nineteen).items() if asdict(eighteen)[k] != v}
+        self.assertEqual(
+            changed,
+            {
+                "destination_linear_from_m",
+                "destination_penalty_cap",
+                "speed_curriculum_planar_bound_scale",
+            },
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v19"], "ghost")
+        with self.assertRaises(ValueError):
+            replace(nineteen, destination_kernel="linear", destination_power=None).validate()
+        # The rational kernel up to 20 mm, then its tangent: zero near 49 mm and -1 from 117 mm on.
+        distance = torch.tensor([0.005, 0.02, 0.0201, 0.0493, 0.1, 0.2])
+        kernel = 1 / (1 + (distance / nineteen.destination_distance_m).pow(1.2))
+        pay = linear_tail(distance, kernel, nineteen)
+        torch.testing.assert_close(pay[:2], kernel[:2])
+        torch.testing.assert_close(
+            pay, torch.tensor([0.8, 0.4311, 0.4297, 0.0, -0.7457, -1.0]), atol=2e-3, rtol=0
+        )
+        # At 0.125 m/s the walking check now allows 62.5 mm/s of mean planar error.
+        failed = walk_failures(
+            torch.tensor([[0.06, 0, 0, 0, 0], [0.065, 0, 0, 0, 0]]),
+            torch.ones(2),
+            torch.full((2,), 0.125),
+            torch.zeros(2, dtype=torch.bool),
+            torch.zeros(2, dtype=torch.bool),
+            nineteen.speed_curriculum_planar_bound_scale,
+        )
+        self.assertEqual(failed[:, WALK_CHECKS.index("planar_error_mps")].tolist(), [False, True])
+
     def test_the_wrapper_shows_the_task_phase_and_records_the_scaling(self):
         sixteen = EXPERIMENTS["destination_v16"]["reward"]
         task, native = moving_task(lambda k: (0.0, -0.125 * 0.02 * k, 0.0), reward=sixteen)

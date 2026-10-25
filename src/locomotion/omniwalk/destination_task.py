@@ -119,6 +119,9 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_advance_without_falls: bool | None = None
     speed_curriculum_backoff_distance_m: float | None = None
     speed_curriculum_pass_checks: bool | None = None
+    speed_curriculum_planar_bound_scale: float | None = None
+    destination_linear_from_m: float | None = None
+    destination_penalty_cap: float | None = None
     gait_clock_scaling: str | None = None
     command_controls: int = 0
 
@@ -222,6 +225,22 @@ class DestinationRewardConfig(RewardConfig):
             and self.gait_clock_scaling not in GAIT_CLOCK_SCALINGS
         ):
             raise ValueError("gait_clock_scaling is None or a name in mdp/commands.py")
+        scale = self.speed_curriculum_planar_bound_scale
+        if scale is not None and (
+            not self.speed_curriculum_pass_checks or not math.isfinite(scale) or scale <= 0
+        ):
+            raise ValueError("A planar bound scale needs the walking checks and is positive")
+        linear = (self.destination_linear_from_m, self.destination_penalty_cap)
+        if any(value is not None for value in linear) and (
+            any(value is None for value in linear)
+            or self.destination_kernel != "rational"
+            or not all(math.isfinite(value) for value in linear)
+            or self.destination_linear_from_m <= 0
+            or self.destination_penalty_cap <= 0
+        ):
+            raise ValueError(
+                "A linear tail needs the rational kernel, a positive start and a positive penalty cap"
+            )
         if self.speed_curriculum_pass_checks is not None and (
             self.speed_curriculum_pass_checks is not True or self.speed_curriculum_threshold is None
         ):
@@ -490,6 +509,21 @@ EXPERIMENTS["destination_v18"] = {
     "reward": replace(EXPERIMENTS["destination_v17"]["reward"], speed_curriculum_pass_checks=True),
 }
 
+# destination_v19 is destination_v18 whose destination pay falls in a straight line beyond 20 mm, at the
+# rational kernel's slope there (0.431 at 20 mm, 0 at 49 mm, -1 from 117 mm), so a growing lag behind the
+# ghost keeps costing; and whose walking checks allow twice the evaluator's planar error. From update 1450
+# to 4400 of destination_v18 at 0.15 m/s the destination pay fell from 0.76 to 0.34 per control while the
+# speed held: the robots let the gap grow into the flat tail of the kernel.
+EXPERIMENTS["destination_v19"] = {
+    **EXPERIMENTS["destination_v18"],
+    "reward": replace(
+        EXPERIMENTS["destination_v18"]["reward"],
+        destination_linear_from_m=0.02,
+        destination_penalty_cap=1.0,
+        speed_curriculum_planar_bound_scale=2.0,
+    ),
+}
+
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.
 WALK_SKIPPED_CONTROLS = 100
@@ -505,13 +539,14 @@ WALK_CHECKS = (
 JOINT_SPEED_LIMIT_RAD_S = 50.26548245743669
 
 
-def walk_failures(sums, counted, speed, fast, fell):
+def walk_failures(sums, counted, speed, fast, fell, planar_scale=1.0):
     """Each row's failed walking checks, as booleans in ``WALK_CHECKS`` order, from the per-control sums of
-    planar error, yaw-rate error, squared tilt, squared vertical velocity and share of joints above 1.6 Nm."""
+    planar error, yaw-rate error, squared tilt, squared vertical velocity and share of joints above 1.6 Nm.
+    ``planar_scale`` multiplies the evaluator's planar-error bound."""
     mean = sums / counted.clamp_min(1)[:, None]
     return torch.stack(
         (
-            mean[:, 0] > torch.clamp(0.25 * speed, min=0.025),
+            mean[:, 0] > planar_scale * torch.clamp(0.25 * speed, min=0.025),
             mean[:, 1] > 0.06,
             torch.rad2deg(mean[:, 2].sqrt()) > 5.0,
             mean[:, 3].sqrt() > 0.04,
@@ -521,6 +556,17 @@ def walk_failures(sums, counted, speed, fast, fell):
         ),
         -1,
     )
+
+
+def linear_tail(distance, closeness, config):
+    """Continue the rational kernel past ``destination_linear_from_m`` along its tangent there, down to a
+    penalty of ``destination_penalty_cap``."""
+    start, power = config.destination_linear_from_m, config.destination_power
+    ratio = start / config.destination_distance_m
+    value = 1 / (1 + ratio**power)
+    slope = -power * ratio ** (power - 1) / config.destination_distance_m * value**2
+    tail = (value + slope * (distance - start)).clamp_min(-config.destination_penalty_cap)
+    return torch.where(distance > start, tail.to(closeness), closeness)
 
 
 class DestinationTrainingTask(TrainingTask):
@@ -700,6 +746,7 @@ class DestinationTrainingTask(TrainingTask):
                 speed,
                 self.walk_fast[rows],
                 self.walk_fell[rows],
+                self.reward_config.speed_curriculum_planar_bound_scale or 1.0,
             )
             for name, count in zip(WALK_CHECKS, failed.sum(0).tolist()):
                 self.check_failures[name] += int(count)
@@ -878,6 +925,8 @@ class DestinationTrainingTask(TrainingTask):
                 closeness = torch.exp(-scaled)
             elif config.destination_kernel == "rational":
                 closeness = 1 / (1 + scaled.pow(config.destination_power))
+                if config.destination_linear_from_m is not None:
+                    closeness = linear_tail(distance, closeness, config)
             else:
                 closeness = (1 - scaled).clamp_min(0)
             quiet = (command == 0).all(-1).to(closeness.device)
