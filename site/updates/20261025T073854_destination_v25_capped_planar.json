@@ -1,0 +1,21 @@
+{
+  "id": "20261025T073854_destination_v25_capped_planar",
+  "date": "2026-10-25T07:38:54.000000Z",
+  "title": "Add destination_v25: a linear planar error charge capped at -1 per control",
+  "summary": "destination_v25 is destination_v23 whose planar error charge is -0.5 * min(|velocity - command| / bound, 2): linear, -0.5 at the evaluator's bound and at most -1 per control. The first native destination_v23 run met brief velocity spikes in Isaac: from update 140 its squared charge rose from -0.15 to -1.25 per control while the mean planar error only doubled. Its value loss also rose to 11000 within each episode; surrogate attempts 13 and 14 from the same v9 ghost_v11 start show the same within-episode rise after the 0.1 m/s step without the charge (action-limit charge falling to -2.4), and recover.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Requeue the native run as destination_v25 from the v9 ghost_v11 start.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T073854_destination_v25_capped_planar.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and evaluator are unchanged."
+}

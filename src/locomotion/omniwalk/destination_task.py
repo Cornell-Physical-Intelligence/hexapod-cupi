@@ -122,6 +122,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_planar_bound_scale: float | None = None
     speed_curriculum_measure: str | None = None
     planar_error_weight: float | None = None
+    planar_error_cap: float | None = None
     destination_linear_from_m: float | None = None
     destination_penalty_cap: float | None = None
     gait_clock_scaling: str | None = None
@@ -227,6 +228,12 @@ class DestinationRewardConfig(RewardConfig):
             and self.gait_clock_scaling not in GAIT_CLOCK_SCALINGS
         ):
             raise ValueError("gait_clock_scaling is None or a name in mdp/commands.py")
+        if self.planar_error_cap is not None and (
+            self.planar_error_weight is None
+            or not math.isfinite(self.planar_error_cap)
+            or self.planar_error_cap <= 0
+        ):
+            raise ValueError("A planar error cap needs the planar error charge and is positive")
         if self.speed_curriculum_measure not in (None, "drift") or (
             self.speed_curriculum_measure is not None and self.speed_curriculum_threshold is None
         ):
@@ -566,6 +573,15 @@ EXPERIMENTS["destination_v23"] = {
 EXPERIMENTS["destination_v24"] = {
     **EXPERIMENTS["destination_v23"],
     "reward": replace(EXPERIMENTS["destination_v23"]["reward"], speed_curriculum_final_mps=0.175),
+}
+# destination_v25 is destination_v23 whose planar error charge is linear and capped:
+# -0.5 * min(|velocity - command| / bound, 2), at most -1 per control. Natively (Isaac) the squared charge
+# of destination_v23 met brief velocity spikes: from update 140 its mean rose from -0.15 to -1.25 while the
+# mean error only doubled, the value loss climbed from about 25 to 11000 within each episode and the
+# reward fell from 5 to 1.3.
+EXPERIMENTS["destination_v25"] = {
+    **EXPERIMENTS["destination_v23"],
+    "reward": replace(EXPERIMENTS["destination_v23"]["reward"], planar_error_cap=2.0),
 }
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
@@ -1083,8 +1099,9 @@ class DestinationTrainingTask(TrainingTask):
         return reward, components, telemetry
 
     def _planar_error(self, command, telemetry):
-        """Charge each walking control the square of its planar speed error over the evaluator's bound,
-        measured on the root's centre-of-mass velocity as the evaluator reads it."""
+        """Charge each walking control its planar speed error over the evaluator's bound, measured on the
+        root's centre-of-mass velocity as the evaluator reads it: squared, or linear up to
+        ``planar_error_cap`` when one is set."""
         config = self.reward_config
         pose = telemetry["root_pose_xyzw"].to(torch.float32)
         current = getattr(self.env, "current", {})
@@ -1098,7 +1115,12 @@ class DestinationTrainingTask(TrainingTask):
         error = torch.linalg.vector_norm(planar - command[:, :2], dim=-1)
         bound = torch.clamp(0.25 * speed, min=0.025)
         moving = (command != 0).any(-1).to(pose)
-        return -config.planar_error_weight * moving * (error / bound).square()
+        ratio = error / bound
+        if config.planar_error_cap is None:
+            charge = ratio.square()
+        else:
+            charge = ratio.clamp_max(config.planar_error_cap)
+        return -config.planar_error_weight * moving * charge
 
     def _hold(self, command, terminated):
         """Anchor the joints' running mean a grace period into a zero command and charge its drift."""

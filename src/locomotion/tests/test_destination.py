@@ -1171,6 +1171,33 @@ class DriftTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 ppo_config(7, **options)
 
+    def test_destination_v25_caps_a_linear_planar_error_charge(self):
+        twentythree, twentyfive = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v23", "destination_v25")
+        )
+        changed = {k for k, v in asdict(twentyfive).items() if asdict(twentythree)[k] != v}
+        self.assertEqual(changed, {"planar_error_cap"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v25"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(twentyfive, planar_error_weight=None).validate()
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentyfive)
+        # At 0.15 m/s (bound 37.5 mm/s): on the command, at the bound, at three bounds (capped), stopped.
+        command = torch.tensor([[0.15, 0.0, 0.0]] * 3 + [[0.0, 0.0, 0.0]])
+        native.current["root_velocity"] = torch.tensor(
+            [
+                [0.0, -0.15, 0, 0, 0, 0],
+                [0.0375, -0.15, 0, 0, 0, 0],
+                [0.1125, -0.15, 0, 0, 0, 0],
+                [0.3, 0.0, 0, 0, 0, 0],
+            ]
+        )
+        telemetry = {"root_pose_xyzw": torch.tensor([[0.0, 0, 0.1, 0, 0, 0, 1.0]]).repeat(4, 1)}
+        torch.testing.assert_close(
+            task._planar_error(command, telemetry), torch.tensor([0.0, -0.5, -1.0, 0.0])
+        )
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 
