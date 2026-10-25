@@ -1144,6 +1144,33 @@ class DriftTests(unittest.TestCase):
         self.assertEqual(twentyfour.speed_curriculum_final_mps, 0.175)
         self.assertEqual(EXPERIMENT_INPUTS["destination_v24"], "ghost_v11")
 
+    def test_named_experiment_clocks_match_their_rewards_and_reach_the_learner_configuration(self):
+        from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_CLOCKS
+
+        for name, settings in EXPERIMENTS.items():
+            self.assertEqual(
+                EXPERIMENT_CLOCKS.get(name), settings["reward"].gait_clock_scaling, name
+            )
+        config = ppo_config(
+            7,
+            action_mean="tanh",
+            learning_rate_max=1e-4,
+            learning_rate_min=2e-5,
+            gait_clock=60,
+            destination_input="ghost_v11",
+            gait_clock_scaling="speed_v1",
+        )
+        self.assertEqual(config["algorithm"]["learning_rate_min"], 2e-5)
+        self.assertEqual(config["environment_wrapper"]["gait_clock_scaling"], "speed_v1")
+        self.assertNotIn("learning_rate_min", ppo_config(7, learning_rate_max=1e-4)["algorithm"])
+        for options in (
+            {"learning_rate_min": 2e-5},
+            {"learning_rate_max": 1e-4, "learning_rate_min": 2e-4},
+            {"gait_clock_scaling": "speed_v1"},
+        ):
+            with self.assertRaises(ValueError):
+                ppo_config(7, **options)
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 

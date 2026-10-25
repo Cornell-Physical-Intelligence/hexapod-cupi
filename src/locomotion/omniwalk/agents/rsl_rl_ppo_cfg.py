@@ -12,6 +12,7 @@ def ppo_config(
     observation_scaling="none",
     command_segments="continuous",
     learning_rate_max=None,
+    learning_rate_min=None,
     action_std=0.15,
     action_noise_correlation=0.0,
     action_std_final=None,
@@ -21,6 +22,7 @@ def ppo_config(
     action_std_decay_updates=None,
     steps_per_env=24,
     destination_input="none",
+    gait_clock_scaling=None,
 ):
     if action_mean not in ("unbounded", "tanh"):
         raise ValueError("Action mean must be unbounded or tanh")
@@ -43,6 +45,12 @@ def ppo_config(
         type(learning_rate_max) is float and 1e-5 <= learning_rate_max <= 1e-2
     ):
         raise ValueError("The learning-rate ceiling must lie inside the stock schedule range")
+    if learning_rate_min is not None and not (
+        type(learning_rate_min) is float
+        and learning_rate_max is not None
+        and 1e-6 <= learning_rate_min <= learning_rate_max
+    ):
+        raise ValueError("The learning-rate floor needs the ceiling and lies from 1e-6 up to it")
     if type(action_std) is not float or not 0.01 <= action_std <= 1.0:
         raise ValueError("The initial action standard deviation must lie between 0.01 and 1")
     if (
@@ -69,6 +77,8 @@ def ppo_config(
         raise ValueError("The rollout length is a multiple of 6 from 12 to 96 controls per robot")
     if destination_input not in ("none", "ghost", "ghost_v10", "ghost_v11"):
         raise ValueError("The destination input is none, ghost, ghost_v10 or ghost_v11")
+    if gait_clock_scaling not in (None, "speed_v1") or (gait_clock_scaling and not gait_clock):
+        raise ValueError("The gait clock scaling is None or speed_v1 and needs the gait clock")
     distribution = (
         "GaussianDistribution"
         if action_mean == "unbounded"
@@ -130,6 +140,8 @@ def ppo_config(
             learning_rate_max=learning_rate_max,
             learning_rate=min(1e-3, learning_rate_max),
         )
+    if learning_rate_min is not None:
+        config["algorithm"]["learning_rate_min"] = learning_rate_min
     if action_std_final is not None:
         config["exploration"] = {"action_std_final": action_std_final}
     if action_std_decay_updates is not None:
@@ -147,6 +159,7 @@ def ppo_config(
             ("action_smoothing", action_smoothing, "none"),
             ("velocity_noise", velocity_noise, 0.0),
             ("destination_input", destination_input, "none"),
+            ("gait_clock_scaling", gait_clock_scaling, None),
         )
         if value != default
     }
@@ -167,6 +180,7 @@ RECIPES = {
         "action_smoothing": "mean2",
         "velocity_noise": 0.5,
         "learning_rate_max": 3e-4,
+        "learning_rate_min": None,
         "action_std": 0.15,
         "action_noise_correlation": 0.0,
         "action_std_final": 0.05,
@@ -204,6 +218,9 @@ EXPERIMENT_INPUTS = {
     "destination_v23": "ghost_v11",
     "destination_v24": "ghost_v11",
 }
+# The speed-scaled gait clock of each named experiment that uses one (its reward's gait_clock_scaling;
+# locomotion/tests/test_destination.py checks the two agree). Its wrapper records and applies it.
+EXPERIMENT_CLOCKS = {name: "speed_v1" for name in (f"destination_v{k}" for k in range(16, 25))}
 
 
 def recipe_options(name, **overrides):

@@ -34,7 +34,12 @@ from locomotion.evaluation.checkpoint import (
     require_compatibility_identity,
 )
 from locomotion.evaluation.task_metrics import scalars as scalars
-from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS, RECIPES, ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import (
+    EXPERIMENT_CLOCKS,
+    EXPERIMENT_INPUTS,
+    RECIPES,
+    ppo_config,
+)
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256, verify_assets
@@ -170,6 +175,11 @@ def add_learner_arguments(parser):
         help="Ceiling for the adaptive learning rate; the stock schedule allows 1e-2.",
     )
     parser.add_argument(
+        "--learning-rate-min",
+        type=float,
+        help="Floor for the adaptive learning rate above the stock schedule's 1e-5; needs the ceiling.",
+    )
+    parser.add_argument(
         "--action-std",
         type=float,
         help="Initial standard deviation of the Gaussian action distribution.",
@@ -250,6 +260,7 @@ def learner_options(args):
         observation_scaling=args.observation_scaling,
         command_segments=args.command_segments,
         learning_rate_max=args.learning_rate_max,
+        learning_rate_min=args.learning_rate_min,
         action_std=args.action_std,
         action_noise_correlation=args.action_noise_correlation,
         action_std_final=args.action_std_final,
@@ -536,6 +547,8 @@ def learner_config(args, identity, state):
         factory, options = amp_ppo_config, {"networks": args.networks}
     if args.experiment is not None:
         options["destination_input"] = EXPERIMENT_INPUTS[args.experiment]
+        if args.experiment in EXPERIMENT_CLOCKS:
+            options["gait_clock_scaling"] = EXPERIMENT_CLOCKS[args.experiment]
     config = factory(
         args.seed,
         **options,

@@ -8,7 +8,12 @@ import re
 import shutil
 from pathlib import Path
 
-from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS, RECIPES, ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import (
+    EXPERIMENT_CLOCKS,
+    EXPERIMENT_INPUTS,
+    RECIPES,
+    ppo_config,
+)
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.robots.hexapod import sha
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
@@ -62,6 +67,7 @@ def prepare(
     observation_scaling=None,
     command_segments=None,
     learning_rate_max=None,
+    learning_rate_min=None,
     action_std=None,
     action_noise_correlation=None,
     action_std_final=None,
@@ -110,6 +116,7 @@ def prepare(
             observation_scaling=observation_scaling,
             command_segments=command_segments,
             learning_rate_max=learning_rate_max,
+            learning_rate_min=learning_rate_min,
             action_std=action_std,
             action_noise_correlation=action_noise_correlation,
             action_std_final=action_std_final,
@@ -182,6 +189,11 @@ def prepare(
             observation_normalization=observation_normalization,
             **learner_options,
             **({} if experiment is None else {"destination_input": EXPERIMENT_INPUTS[experiment]}),
+            **(
+                {"gait_clock_scaling": EXPERIMENT_CLOCKS[experiment]}
+                if experiment in EXPERIMENT_CLOCKS
+                else {}
+            ),
         )
     except ValueError as error:
         raise ValueError(
@@ -524,6 +536,7 @@ def main():
     parser.add_argument("--observation-scaling", choices=["none", "fixed"])
     parser.add_argument("--command-segments", choices=["continuous", "bootstrap"])
     parser.add_argument("--learning-rate-max", type=float)
+    parser.add_argument("--learning-rate-min", type=float)
     parser.add_argument("--action-std", type=float)
     parser.add_argument("--action-noise-correlation", type=float)
     parser.add_argument("--action-std-final", type=float)
