@@ -523,6 +523,16 @@ EXPERIMENTS["destination_v19"] = {
         speed_curriculum_planar_bound_scale=2.0,
     ),
 }
+# destination_v20 trains the v10 model: destination_v19's reward and curriculum with the evaluator's own
+# planar bound in the walking checks, and the ghost_v10 inputs (the sideways distance to the ghost and the
+# body's velocity relative to it) in place of the full gap. Attempts 10 and 11 fell behind the ghost in the
+# first seconds at 0.15 m/s and, at their top speed, could not close the gap again.
+EXPERIMENTS["destination_v20"] = {
+    **EXPERIMENTS["destination_v19"],
+    "reward": replace(
+        EXPERIMENTS["destination_v19"]["reward"], speed_curriculum_planar_bound_scale=None
+    ),
+}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.
@@ -583,6 +593,8 @@ class DestinationTrainingTask(TrainingTask):
         self.hold_mean = torch.zeros(env.num_envs, 18, device=env.device)
         self.stop_pending = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
         self.stop_rest = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
+        # The root pose before the latest control, for the ghost_v10 velocity input.
+        self.control_start_pose = env.current["root"].detach().clone()
         self.gait = (
             None
             if chosen.gait_clock_scaling is None
@@ -632,7 +644,12 @@ class DestinationTrainingTask(TrainingTask):
         self.stop_pending[self._indices(indices)] = False
         if self.gait is not None:
             self.gait.reset(self._indices(indices))
-        return super().reset(indices)
+        output = super().reset(indices)
+        selected = self._indices(indices)
+        self.control_start_pose[selected] = (
+            self.env.current["root"][selected].detach().to(self.control_start_pose)
+        )
+        return output
 
     def reward_telemetry(self, command):
         telemetry = super().reward_telemetry(command)
@@ -909,6 +926,7 @@ class DestinationTrainingTask(TrainingTask):
         self.destination = advance_destination(self.destination, command)
 
     def _reward(self, command, terminated):
+        self.control_start_pose = self.previous_pose.detach().clone().to(self.control_start_pose)
         self._advance_destination(command)
         reward, components, telemetry = super()._reward(command, terminated)
         if self.gait is not None:

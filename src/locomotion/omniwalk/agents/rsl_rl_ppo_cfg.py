@@ -67,8 +67,8 @@ def ppo_config(
         )
     if type(steps_per_env) is not int or not 12 <= steps_per_env <= 96 or steps_per_env % 6:
         raise ValueError("The rollout length is a multiple of 6 from 12 to 96 controls per robot")
-    if destination_input not in ("none", "ghost"):
-        raise ValueError("The destination input is none or ghost")
+    if destination_input not in ("none", "ghost", "ghost_v10"):
+        raise ValueError("The destination input is none, ghost or ghost_v10")
     distribution = (
         "GaussianDistribution"
         if action_mean == "unbounded"
@@ -198,6 +198,7 @@ EXPERIMENT_INPUTS = {
     "destination_v17": "ghost",
     "destination_v18": "ghost",
     "destination_v19": "ghost",
+    "destination_v20": "ghost_v10",
 }
 
 

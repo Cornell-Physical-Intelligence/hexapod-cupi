@@ -62,10 +62,15 @@ class DeterministicPolicy:
         self.previous = None
         # The destination inputs follow each probe's command from the root pose, as play.py does.
         self.tracker = None
-        if options.get("destination_input", "none") == "ghost":
-            from locomotion.omniwalk.mdp.destination import DestinationTracker
+        if options.get("destination_input", "none") in ("ghost", "ghost_v10"):
+            from locomotion.omniwalk.mdp.destination import DestinationTracker, GhostV10Tracker
 
-            self.tracker = DestinationTracker(env.num_envs, "cpu")
+            tracker = (
+                GhostV10Tracker
+                if options["destination_input"] == "ghost_v10"
+                else DestinationTracker
+            )
+            self.tracker = tracker(env.num_envs, "cpu")
 
     def record(self, options):
         """The ``policy_path`` entry of the summary: the path that ran and the options that acted on it."""

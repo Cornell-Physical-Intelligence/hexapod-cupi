@@ -69,6 +69,11 @@ def evaluation_policy(env, args, config, identity, checkpoint_record, compatibil
         else require_learner_configuration
     )
     check(checkpoint_record, identity, config)
+    if config.get("environment_wrapper", {}).get("destination_input") == "ghost_v10":
+        raise ValueError(
+            "Native evaluation does not build the ghost_v10 inputs yet; "
+            "evaluate this checkpoint with locomotion.surrogate.evaluate"
+        )
     if config.get("environment_wrapper", {}).get("gait_clock_scaling") is not None:
         raise ValueError(
             "Native evaluation does not follow a speed-scaled gait clock yet; "

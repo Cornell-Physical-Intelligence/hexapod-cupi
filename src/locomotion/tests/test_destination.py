@@ -926,6 +926,84 @@ class GaitClockTests(unittest.TestCase):
         self.assertEqual(swing[0].tolist(), [False, True, False, True, False, True])
 
 
+class GhostV10Tests(unittest.TestCase):
+    def test_the_inputs_are_the_sideways_gap_and_the_velocity_relative_to_the_ghost(self):
+        from locomotion.omniwalk.mdp.destination import ghost_v10_features
+
+        # Heading 0: navigation forward is world -y and left is world +x. The ghost is 30 mm ahead and
+        # 10 mm to the left; the body moved 2 mm forward in the last control while the ghost walks 0.15 m/s.
+        pose, before = pose_at(0.0, 0.0, 0.0), pose_at(0.0, 0.002, 0.0)
+        destination = torch.tensor([[0.01, -0.03, 0.0]])
+        command = torch.tensor([[0.15, 0.0, 0.0]])
+        value = ghost_v10_features(pose, before, destination, torch.tensor([50]), command)
+        torch.testing.assert_close(
+            value[0], torch.tensor([0.0, 0.1, 0.0, 1.0, 0.2, -0.5, 0.0]), atol=1e-5, rtol=0
+        )
+        # Under a zero command the whole gap is the sideways input and the velocity is the body's own.
+        value = ghost_v10_features(pose, before, destination, torch.tensor([50]), command * 0)
+        torch.testing.assert_close(value[0, :2], torch.tensor([0.3, 0.1]), atol=1e-5, rtol=0)
+        torch.testing.assert_close(value[0, 5:], torch.tensor([1.0, 0.0]), atol=1e-5, rtol=0)
+
+    def wrapped(self):
+        twenty = EXPERIMENTS["destination_v20"]["reward"]
+        task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0), reward=twenty)
+        env = DestinationVecEnv(
+            task,
+            plain,
+            observation_scaling="fixed",
+            gait_clock=60,
+            gait_clock_scaling="speed_v1",
+            destination_input="ghost_v10",
+        )
+        native.commands[:] = FORWARD
+        task.remaining_controls[:] = 1000
+        native.current["root_velocity"] = torch.zeros(1, 6)  # read by the walking checks
+        return env, task, native
+
+    def test_destination_v20_gives_the_policy_seven_ghost_inputs_that_track_the_lag(self):
+        nineteen, twenty = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v19", "destination_v20")
+        )
+        changed = {k for k, v in asdict(twenty).items() if asdict(nineteen)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_planar_bound_scale"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v20"], "ghost_v10")
+        self.assertEqual(
+            ppo_config(7, gait_clock=60, destination_input="ghost_v10")["environment_wrapper"][
+                "destination_input"
+            ],
+            "ghost_v10",
+        )
+        env, task, native = self.wrapped()
+        first = env.get_observations()
+        self.assertEqual(
+            (first["policy"].shape[-1], first["critic"].shape[-1]), (231 + 2 + 7, 234 + 2 + 7)
+        )
+        for _ in range(100):
+            observation, *_ = env.step(torch.zeros(1, 18))
+        # Walking straight 0.02 m/s short of the command: no sideways gap, 0.2 below the ghost's speed.
+        torch.testing.assert_close(
+            observation["policy"][0, -7:],
+            torch.tensor([0.0, 0.0, 0.0, 1.0, 0.4, -0.2, 0.0]),
+            atol=1e-4,
+            rtol=0,
+        )
+        torch.testing.assert_close(observation["critic"][0, -7:], observation["policy"][0, -7:])
+
+    def test_evaluation_rebuilds_the_training_inputs(self):
+        from locomotion.omniwalk.mdp.destination import GhostV10Tracker
+
+        env, task, native = self.wrapped()
+        tracker, seen, trained = GhostV10Tracker(1, "cpu"), [], []
+        for _ in range(30):
+            seen.append(
+                tracker.inputs(native.current["root"], native.commands, native.episode_steps)[0]
+            )
+            observation, *_ = env.step(torch.zeros(1, 18))
+            trained.append(observation["policy"][0, -7:].clone())
+        for k in range(29):
+            torch.testing.assert_close(seen[k + 1], trained[k], atol=1e-5, rtol=0)
+
+
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):
         task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0))  # 0.02 m/s short
