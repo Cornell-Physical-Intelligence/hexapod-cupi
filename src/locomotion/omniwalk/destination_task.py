@@ -120,6 +120,7 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_backoff_distance_m: float | None = None
     speed_curriculum_pass_checks: bool | None = None
     speed_curriculum_planar_bound_scale: float | None = None
+    speed_curriculum_measure: str | None = None
     destination_linear_from_m: float | None = None
     destination_penalty_cap: float | None = None
     gait_clock_scaling: str | None = None
@@ -225,6 +226,10 @@ class DestinationRewardConfig(RewardConfig):
             and self.gait_clock_scaling not in GAIT_CLOCK_SCALINGS
         ):
             raise ValueError("gait_clock_scaling is None or a name in mdp/commands.py")
+        if self.speed_curriculum_measure not in (None, "drift") or (
+            self.speed_curriculum_measure is not None and self.speed_curriculum_threshold is None
+        ):
+            raise ValueError("The curriculum measure is None (the destination pay) or drift")
         scale = self.speed_curriculum_planar_bound_scale
         if scale is not None and (
             not self.speed_curriculum_pass_checks or not math.isfinite(scale) or scale <= 0
@@ -537,6 +542,15 @@ EXPERIMENTS["destination_v20"] = {
 # sideways gap and the relative velocity. At update 600 of destination_v20 the v10 model held 0.075 m/s
 # 4-10% off the command in most directions and ended 7-126 mm from the ghost; its window pay sat near 0.47.
 EXPERIMENTS["destination_v21"] = {**EXPERIMENTS["destination_v20"]}
+# destination_v22 is destination_v21 whose curriculum judges each walk by its drift instead of the destination
+# pay: how far the gap to the ghost moved between the walk's halfway control and its last, scored on the
+# destination kernel (0.8 at 5 mm; a fall scores 0). The window mean over walks finished in the 30 updates
+# must pass 0.8. A lag left by the ghost's instant start no longer counts; holding the ghost's speed and
+# direction does. Attempts 10, 11 and 13 lost window pay at 0.15 m/s mostly by starting more slowly.
+EXPERIMENTS["destination_v22"] = {
+    **EXPERIMENTS["destination_v21"],
+    "reward": replace(EXPERIMENTS["destination_v21"]["reward"], speed_curriculum_measure="drift"),
+}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.
@@ -636,6 +650,18 @@ class DestinationTrainingTask(TrainingTask):
             self.walk_sums = torch.zeros(n, 5, dtype=torch.float64, device=device)
             self.walk_fast = torch.zeros(n, dtype=torch.bool, device=device)
             self.walk_fell = torch.zeros(n, dtype=torch.bool, device=device)
+            # Each walk's planned length, its gap to the ghost at halfway and now, and whether it fell.
+            self.drift_plan = torch.zeros(n, dtype=torch.long, device=device)
+            self.drift_walking = torch.zeros(n, dtype=torch.bool, device=device)
+            self.drift_middle = torch.zeros(n, 2, dtype=torch.float64, device=device)
+            self.drift_halfway = torch.zeros(n, dtype=torch.bool, device=device)
+            self.drift_end = torch.zeros(n, 2, dtype=torch.float64, device=device)
+            self.drift_fell = torch.zeros(n, dtype=torch.bool, device=device)
+            # Walks finished per control over the window, the sum of their scores and of their drift.
+            self.curriculum_scored = torch.zeros_like(self.curriculum_window)
+            self.curriculum_score = torch.zeros_like(self.curriculum_window)
+            self.curriculum_drift = torch.zeros_like(self.curriculum_window)
+            self.pending_scored = self.pending_score = self.pending_drift = 0.0
         super().__init__(env, config, output_dir, chosen)
 
     @property
@@ -668,6 +694,9 @@ class DestinationTrainingTask(TrainingTask):
     def _resample(self, indices):
         if self.reward_config.speed_curriculum_pass_checks and len(indices):
             self._finish_walks(indices)
+        drift = self.reward_config.speed_curriculum_measure == "drift"
+        if drift and len(indices):
+            self._finish_drift(indices)
         super()._resample(indices)
         if len(indices):
             if self.reward_config.speed_curriculum_start_mps is not None:
@@ -677,6 +706,12 @@ class DestinationTrainingTask(TrainingTask):
                 self.remaining_controls[indices] = self.reward_config.command_controls
             if self.reward_config.stop_fraction is not None:
                 self._schedule_stops(indices)
+            if drift:
+                moving = (self.env.commands[indices] != 0).any(-1).to(self.drift_walking.device)
+                self.drift_walking[indices] = moving
+                self.drift_plan[indices] = self.remaining_controls[indices].to(self.drift_plan)
+                self.drift_halfway[indices] = False
+                self.drift_fell[indices] = False
 
     def _curriculum_walks(self, indices):
         """Give each fresh walk a uniform direction and the top or a slower curriculum speed."""
@@ -737,6 +772,35 @@ class DestinationTrainingTask(TrainingTask):
         self.walk_fast |= fast.to(counted.device) & counted
         self.walk_fell |= terminated.to(moving.device) & moving
 
+    def _record_drift(self, telemetry, terminated):
+        """Keep each walk's gap to its ghost at its halfway control and at its latest control."""
+        actual = planar_pose(telemetry["root_pose_xyzw"]).to(self.drift_end)
+        gap = self.destination[:, :2].to(self.drift_end) - actual[:, :2]
+        halfway = self.command_elapsed.to(self.drift_plan.device) == (
+            self.drift_plan // 2
+        ).clamp_min(1)
+        self.drift_middle = torch.where(halfway[:, None], gap, self.drift_middle)
+        self.drift_halfway |= halfway
+        self.drift_end = gap
+        self.drift_fell |= terminated.to(self.drift_fell.device)
+
+    def _finish_drift(self, indices):
+        """Score the walks that end at these rows: the destination kernel of the gap's movement from halfway
+        to the end, or 0 after a fall. Walks that neither reached halfway nor fell are not scored."""
+        indices = torch.as_tensor(indices, dtype=torch.long, device=self.drift_walking.device)
+        rows = indices[
+            self.drift_walking[indices] & (self.drift_halfway[indices] | self.drift_fell[indices])
+        ]
+        if len(rows):
+            config = self.reward_config
+            drift = torch.linalg.vector_norm(self.drift_end[rows] - self.drift_middle[rows], dim=-1)
+            score = 1 / (1 + (drift / config.destination_distance_m).pow(config.destination_power))
+            score = torch.where(self.drift_fell[rows], torch.zeros_like(score), score)
+            self.pending_scored += len(rows)
+            self.pending_score += float(score.sum())
+            self.pending_drift += float(drift.sum())
+        self.drift_walking[indices] = False
+
     def _record_top_speed(self, command, telemetry, terminated):
         """Add the speed along the command of each standing robot commanded at the top level (a report only)."""
         command = command.to(self.top_speed_sum)
@@ -796,6 +860,12 @@ class DestinationTrainingTask(TrainingTask):
                 standing = ~terminated.to(distance.device)
             lost = ((distance.detach() > limit) & standing).sum()
         self.curriculum_lost[self.curriculum_filled % window] = lost
+        if config.speed_curriculum_measure == "drift":
+            slot = self.curriculum_filled % window
+            self.curriculum_scored[slot] = self.pending_scored
+            self.curriculum_score[slot] = self.pending_score
+            self.curriculum_drift[slot] = self.pending_drift
+            self.pending_scored = self.pending_score = self.pending_drift = 0.0
         if config.speed_curriculum_pass_checks:
             self.curriculum_walks[self.curriculum_filled % window] = self.pending_walks
             self.curriculum_failed[self.curriculum_filled % window] = self.pending_failed
@@ -811,6 +881,9 @@ class DestinationTrainingTask(TrainingTask):
         if self.curriculum_filled < window or self.curriculum_filled % max(1, window // 50):
             return
         mean = float(self.curriculum_window.mean())
+        if config.speed_curriculum_measure == "drift":
+            scored = float(self.curriculum_scored.sum())
+            mean = float(self.curriculum_score.sum()) / scored if scored else 0.0
         first = round(config.speed_curriculum_start_mps + config.speed_curriculum_step_mps, 6)
         backoff = config.speed_curriculum_backoff_threshold
         judged = mean
@@ -867,6 +940,20 @@ class DestinationTrainingTask(TrainingTask):
         if config.speed_curriculum_pass_checks:
             self.check_failures = dict.fromkeys(WALK_CHECKS, 0)
 
+    def _drift_status(self, filled):
+        """Under the drift measure ``window_mean`` is the window's drift score; the pay moves to
+        ``window_pay``."""
+        scored = float(self.curriculum_scored[:filled].sum())
+        return {
+            "window_measure": "drift",
+            "window_mean": float(self.curriculum_score[:filled].sum()) / scored if scored else None,
+            "window_pay": float(self.curriculum_window[:filled].mean()) if filled else None,
+            "window_drift_walks": int(scored),
+            "window_drift_mm": 1000 * float(self.curriculum_drift[:filled].sum()) / scored
+            if scored
+            else None,
+        }
+
     def curriculum_status(self):
         if self.reward_config.speed_curriculum_start_mps is None:
             return None
@@ -878,6 +965,7 @@ class DestinationTrainingTask(TrainingTask):
             "window_mean": float(self.curriculum_window[:filled].mean()) if filled else None,
             "window_falls": int(self.curriculum_falls[:filled].sum()),
             "window_lost": int(self.curriculum_lost[:filled].sum()),
+            **(self._drift_status(filled) if self.reward_config.speed_curriculum_measure else {}),
             "top_speed_controls": int(self.top_speed_controls),
             "top_speed_along_command_sum_mps": float(self.top_speed_sum),
             **(
@@ -939,6 +1027,8 @@ class DestinationTrainingTask(TrainingTask):
             self._record_walks(command, telemetry, terminated)
         if self.reward_config.speed_curriculum_start_mps is not None:
             self._record_top_speed(command, telemetry, terminated)
+        if self.reward_config.speed_curriculum_measure == "drift":
+            self._record_drift(telemetry, terminated)
         config = self.reward_config
         if config.destination_weight > 0:
             distance = destination_distance(telemetry["root_pose_xyzw"], self.destination)

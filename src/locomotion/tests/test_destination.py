@@ -1055,6 +1055,59 @@ class GhostV10Tests(unittest.TestCase):
         )
 
 
+class DriftTests(unittest.TestCase):
+    def walk(self, motion):
+        """One 200-control forward walk at 0.05 m/s under destination_v22; returns the task after it ends."""
+        task, native = moving_task(motion, reward=EXPERIMENTS["destination_v22"]["reward"])
+        native.current["root_velocity"] = torch.zeros(1, 6)
+        task.remaining_controls[:] = 200
+        task.drift_walking[:], task.drift_plan[:], task.drift_halfway[:] = True, 200, False
+        for _ in range(200):
+            task.step(torch.zeros(1, 18))
+        return task
+
+    def test_destination_v22_judges_the_curriculum_on_drift_from_halfway_to_the_end(self):
+        twentyone, twentytwo = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v21", "destination_v22")
+        )
+        changed = {k for k, v in asdict(twentytwo).items() if asdict(twentyone)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_measure"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v22"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(twentytwo, speed_curriculum_measure="pay").validate()
+        # A walk that starts a second late and then holds the ghost's speed keeps a steady 50 mm gap: no drift.
+        late = self.walk(lambda k: (0.0, -0.05 * 0.02 * max(0, k - 50), 0.0))
+        self.assertEqual(late.pending_scored, 1)
+        self.assertAlmostEqual(late.pending_drift, 0.0, places=5)
+        self.assertAlmostEqual(late.pending_score, 1.0, places=4)
+        # A walk 0.02 m/s slow drifts 40 mm over its second half and scores the kernel there (0.25).
+        slow = self.walk(lambda k: (0.0, -0.03 * 0.02 * k, 0.0))
+        self.assertAlmostEqual(slow.pending_drift, 0.04, places=5)
+        self.assertAlmostEqual(slow.pending_score, 1 / (1 + (0.04 / 0.015874) ** 1.2), places=3)
+
+    def test_the_window_rises_on_the_mean_drift_score_of_finished_walks(self):
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(
+            native, TaskConfig(), None, EXPERIMENTS["destination_v22"]["reward"]
+        )
+        none = torch.zeros(4, dtype=torch.bool)
+        # High pay with no scored walks never rises; walks scoring 0.7 hold it; walks scoring 0.9 raise it.
+        for _ in range(1092):
+            task.pending_walks += 1
+            task._curriculum_step(torch.full((4,), 0.95), none)
+        self.assertEqual(task.curriculum_level, 0.075)
+        for score in (0.7, 0.9):
+            for _ in range(1092):
+                task.pending_walks += 1
+                task.pending_scored, task.pending_score, task.pending_drift = 1.0, score, 0.004
+                task._curriculum_step(torch.full((4,), 0.3), none)
+        # It rises once the rolling mean of scored walks passes 0.8, while 0.9s replace the 0.7s.
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertGreater(task.curriculum_advances[-1]["window_mean"], 0.8)
+        self.assertLess(task.curriculum_advances[-1]["window_mean"], 0.81)
+
+
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):
         task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0))  # 0.02 m/s short
