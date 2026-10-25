@@ -1300,6 +1300,27 @@ class DriftTests(unittest.TestCase):
             task.last_components["end_destination"], torch.tensor([0.5, 0.25, 0.0, -0.5])
         )
 
+    def test_destination_v30_is_the_v25_curriculum_with_the_linear_run_end_pay(self):
+        thirty = EXPERIMENTS["destination_v30"]["reward"]
+        nine = EXPERIMENTS["destination_v29"]["reward"]
+        end = ("end_destination_weight", "end_destination_distance_m", "end_destination_kernel")
+        self.assertEqual([getattr(thirty, k) for k in end], [getattr(nine, k) for k in end])
+        self.assertEqual(
+            replace(thirty, end_destination_weight=None, end_destination_distance_m=None,
+                    end_destination_kernel=None, end_destination_floor=None, termination_weight=42.0),
+            EXPERIMENTS["destination_v25"]["reward"],
+        )
+        self.assertEqual(EXPERIMENTS["destination_v30"]["episode_seconds"], 20.0)
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, thirty)
+        task.reset()
+        self.assertEqual(task.curriculum_status()["level_mps"], 0.075)
+        self.assertTrue(bool((task.run_length == 1000).all()))
+        native.current["root_velocity"] = torch.zeros(64, 6)
+        task.step(torch.zeros(64, 18))
+        self.assertIn("end_destination", task.last_components)
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 

@@ -712,6 +712,22 @@ EXPERIMENTS["destination_v29"] = {
         end_destination_floor=1.0,
     ),
 }
+# destination_v30 is destination_v25's speed curriculum (walks only, a fifth stopping, judged by drift and
+# the evaluator's checks, to 0.15 m/s) with destination_v29's linear run-end pay, share * max(1 - d / 25 mm,
+# -1), over each 20 s run. Fine-tuned from v9, destination_v29 tracked the ghost to 1-2 mm at 0.05 to
+# 0.1 m/s and closed its starting lag, where the destination_v25 curriculum lineage held a steady lag.
+# Termination 52 keeps ten times the 5.15 tracking ceiling.
+EXPERIMENTS["destination_v30"] = {
+    **EXPERIMENTS["destination_v25"],
+    "reward": replace(
+        EXPERIMENTS["destination_v25"]["reward"],
+        end_destination_weight=1.0,
+        end_destination_distance_m=0.025,
+        end_destination_kernel="linear",
+        end_destination_floor=1.0,
+        termination_weight=52.0,
+    ),
+}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.
