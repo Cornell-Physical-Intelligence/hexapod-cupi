@@ -1198,6 +1198,25 @@ class DriftTests(unittest.TestCase):
             task._planar_error(command, telemetry), torch.tensor([0.0, -0.5, -1.0, 0.0])
         )
 
+    def test_destination_v26_walks_at_uniform_speeds_and_stops_half_the_walks(self):
+        twentysix = EXPERIMENTS["destination_v26"]["reward"]
+        self.assertIsNone(twentysix.speed_curriculum_start_mps)
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v26"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(twentysix, walk_speed_min_mps=0.2).validate()
+        native = GaitDouble(4096)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentysix)
+        task.reset()
+        command = native.commands
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        # Every row walks without yaw at 0.05 to 0.15 m/s, spread across the range; about half will stop.
+        self.assertTrue(bool((speed >= 0.05 - 1e-6).all()) and bool((speed <= 0.15 + 1e-6).all()))
+        self.assertTrue(bool((command[:, 2] == 0).all()))
+        self.assertAlmostEqual(float(speed.mean()), 0.1, delta=0.003)
+        self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.5, delta=0.03)
+        self.assertIsNone(task.curriculum_status())
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 

@@ -123,6 +123,8 @@ class DestinationRewardConfig(RewardConfig):
     speed_curriculum_measure: str | None = None
     planar_error_weight: float | None = None
     planar_error_cap: float | None = None
+    walk_speed_min_mps: float | None = None
+    walk_speed_max_mps: float | None = None
     destination_linear_from_m: float | None = None
     destination_penalty_cap: float | None = None
     gait_clock_scaling: str | None = None
@@ -228,6 +230,16 @@ class DestinationRewardConfig(RewardConfig):
             and self.gait_clock_scaling not in GAIT_CLOCK_SCALINGS
         ):
             raise ValueError("gait_clock_scaling is None or a name in mdp/commands.py")
+        walk = (self.walk_speed_min_mps, self.walk_speed_max_mps)
+        if any(value is not None for value in walk) and (
+            any(value is None for value in walk)
+            or not all(math.isfinite(value) for value in walk)
+            or not 0 < self.walk_speed_min_mps < self.walk_speed_max_mps
+            or self.speed_curriculum_start_mps is not None
+        ):
+            raise ValueError(
+                "Uniform walk speeds need a positive minimum below the maximum and no speed curriculum"
+            )
         if self.planar_error_cap is not None and (
             self.planar_error_weight is None
             or not math.isfinite(self.planar_error_cap)
@@ -583,6 +595,30 @@ EXPERIMENTS["destination_v25"] = {
     **EXPERIMENTS["destination_v23"],
     "reward": replace(EXPERIMENTS["destination_v23"]["reward"], planar_error_cap=2.0),
 }
+# destination_v26 fine-tunes destination_v25's walking for stopping, as destination_v9 did for v8: every
+# command is a walk in a uniform direction at a uniform speed from 0.05 to 0.15 m/s, half of them stop
+# after 4 to 12 s for the rest of the 20 s, and there is no speed curriculum. The native destination_v25
+# update-1350 checkpoint walks 8/8 at 0.075 to 0.15 m/s but fidgets after a stop at 0.05 to 0.1 m/s
+# (joint motion 0.04-0.37 rad/s RMS against 0.03, target steps to 0.04 rad against 0.002).
+EXPERIMENTS["destination_v26"] = {
+    **EXPERIMENTS["destination_v25"],
+    "reward": replace(
+        EXPERIMENTS["destination_v25"]["reward"],
+        speed_curriculum_start_mps=None,
+        speed_curriculum_step_mps=None,
+        speed_curriculum_final_mps=None,
+        speed_curriculum_threshold=None,
+        speed_curriculum_window_controls=None,
+        speed_curriculum_new_share=None,
+        speed_curriculum_walks_only=None,
+        speed_curriculum_advance_without_falls=None,
+        speed_curriculum_pass_checks=None,
+        speed_curriculum_measure=None,
+        walk_speed_min_mps=0.05,
+        walk_speed_max_mps=0.15,
+        stop_fraction=0.5,
+    ),
+}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.
@@ -733,6 +769,8 @@ class DestinationTrainingTask(TrainingTask):
         if len(indices):
             if self.reward_config.speed_curriculum_start_mps is not None:
                 self._curriculum_walks(indices)
+            elif self.reward_config.walk_speed_min_mps is not None:
+                self._uniform_walks(indices)
             self.command_started[indices] = True
             if self.reward_config.command_controls:
                 self.remaining_controls[indices] = self.reward_config.command_controls
@@ -744,6 +782,20 @@ class DestinationTrainingTask(TrainingTask):
                 self.drift_plan[indices] = self.remaining_controls[indices].to(self.drift_plan)
                 self.drift_halfway[indices] = False
                 self.drift_fell[indices] = False
+
+    def _uniform_walks(self, indices):
+        """Make every fresh command a walk in a uniform direction at a uniform speed between the bounds."""
+        config = self.reward_config
+        indices = torch.as_tensor(indices, dtype=torch.long, device=self.env.commands.device)
+        draws = torch.rand(len(indices), 2, generator=self.rng).to(self.env.commands)
+        speed = (
+            config.walk_speed_min_mps
+            + (config.walk_speed_max_mps - config.walk_speed_min_mps) * draws[:, 0]
+        )
+        angle = draws[:, 1] * 2 * math.pi
+        self.env.commands[indices, 0] = speed * torch.cos(angle)
+        self.env.commands[indices, 1] = speed * torch.sin(angle)
+        self.env.commands[indices, 2] = 0
 
     def _curriculum_walks(self, indices):
         """Give each fresh walk a uniform direction and the top or a slower curriculum speed."""
