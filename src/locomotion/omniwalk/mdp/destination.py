@@ -88,9 +88,10 @@ GHOST_V10_FEATURES = 7
 VELOCITY_SCALE_MPS = 0.1
 
 
-def ghost_v10_features(pose, previous_pose, destination, elapsed, command):
+def ghost_v10_features(pose, previous_pose, destination, elapsed, command, along_track=False):
     """The seven ``ghost_v10`` inputs for root poses now and one control earlier, destinations, the controls
-    since each command began and the commands (forward, left, yaw rate)."""
+    since each command began and the commands (forward, left, yaw rate); ``along_track`` appends the two
+    ``ghost_v11`` values."""
     actual = planar_pose(pose).to(destination)
     before = planar_pose(previous_pose).to(destination)
     c, s = torch.cos(actual[:, 2]), torch.sin(actual[:, 2])
@@ -108,22 +109,25 @@ def ghost_v10_features(pose, previous_pose, destination, elapsed, command):
     )
     speed = torch.linalg.vector_norm(ghost, dim=-1, keepdim=True)
     direction = ghost / speed.clamp_min(1e-9)
-    side = torch.where(speed > 0, gap - (gap * direction).sum(-1, keepdim=True) * direction, gap)
+    along = torch.where(speed > 0, (gap * direction).sum(-1, keepdim=True) * direction, 0 * gap)
+    side = gap - along
     velocity = navigation((actual[:, :2] - before[:, :2]) / CONTROL_DT_S)
-    return torch.cat(
-        (
-            side / DISTANCE_SCALE_M,
-            torch.stack((torch.sin(turn), torch.cos(turn)), -1),
-            elapsed.to(destination)[:, None] / LONGEST_COMMAND_CONTROLS,
-            (velocity - ghost) / VELOCITY_SCALE_MPS,
-        ),
-        -1,
-    )
+    values = [
+        side / DISTANCE_SCALE_M,
+        torch.stack((torch.sin(turn), torch.cos(turn)), -1),
+        elapsed.to(destination)[:, None] / LONGEST_COMMAND_CONTROLS,
+        (velocity - ghost) / VELOCITY_SCALE_MPS,
+    ]
+    if along_track:
+        values.append(along / DISTANCE_SCALE_M)
+    return torch.cat(values, -1)
 
 
 class GhostV10Tracker(DestinationTracker):
     """``DestinationTracker`` that returns the seven ``ghost_v10`` inputs; the first control of an episode
     reads the body at rest."""
+
+    along_track = False
 
     def __init__(self, num_envs, device):
         super().__init__(num_envs, device)
@@ -134,4 +138,18 @@ class GhostV10Tracker(DestinationTracker):
         fresh = (episode_steps.to(pose.device) == 0)[:, None]
         previous = pose if self.pose is None else torch.where(fresh, pose, self.pose)
         self.pose = pose.clone()
-        return ghost_v10_features(pose, previous, self.destination, self.elapsed, self.command)
+        return ghost_v10_features(
+            pose, previous, self.destination, self.elapsed, self.command, self.along_track
+        )
+
+
+# ``ghost_v11`` inputs: the seven ``ghost_v10`` values, then the gap's part along the ghost's path in the
+# body's navigation axes over 0.1 m (zero under a zero command). Sideways plus along-track is the
+# ``ghost`` gap, so a start that gives both the ``ghost`` gap's weights computes what that model did.
+GHOST_V11_FEATURES = 9
+
+
+class GhostV11Tracker(GhostV10Tracker):
+    """``GhostV10Tracker`` that also returns the along-track gap (the nine ``ghost_v11`` inputs)."""
+
+    along_track = True

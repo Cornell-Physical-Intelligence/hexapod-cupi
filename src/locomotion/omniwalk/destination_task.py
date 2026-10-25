@@ -533,6 +533,10 @@ EXPERIMENTS["destination_v20"] = {
         EXPERIMENTS["destination_v19"]["reward"], speed_curriculum_planar_bound_scale=None
     ),
 }
+# destination_v21 is destination_v20 with the ghost_v11 inputs: the along-track gap returns beside the
+# sideways gap and the relative velocity. At update 600 of destination_v20 the v10 model held 0.075 m/s
+# 4-10% off the command in most directions and ended 7-126 mm from the ghost; its window pay sat near 0.47.
+EXPERIMENTS["destination_v21"] = {**EXPERIMENTS["destination_v20"]}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.

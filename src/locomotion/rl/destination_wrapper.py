@@ -30,8 +30,8 @@ class DestinationVecEnv(OmniVecEnv):
         gait_clock_scaling=None,
         **options,
     ):
-        if destination_input not in ("ghost", "ghost_v10"):
-            raise ValueError("DestinationVecEnv applies the ghost or ghost_v10 destination input")
+        if destination_input not in ("ghost", "ghost_v10", "ghost_v11"):
+            raise ValueError("DestinationVecEnv applies the ghost, ghost_v10 or ghost_v11 input")
         if not hasattr(task, "destination"):
             raise ValueError("The destination inputs need a DestinationTrainingTask")
         # A task's speed-scaled clock must be recorded so that evaluation rebuilds the same phase.
@@ -48,10 +48,10 @@ class DestinationVecEnv(OmniVecEnv):
 
     def destination_inputs(self, pending, command=None):
         """The task's inputs; rows in ``pending`` read a command that has not run a control yet: the neutral
-        values for ``ghost``, and a destination at the body for ``ghost_v10``. ``command`` defaults to the
+        values for ``ghost``, and a destination at the body for ``ghost_v10`` and ``ghost_v11``. ``command`` defaults to the
         task's current commands."""
         task = self.task
-        if self.destination_input == "ghost_v10":
+        if self.destination_input in ("ghost_v10", "ghost_v11"):
             pending = pending[:, None].to(task.destination.device)
             here = planar_pose(task.current["root"]).to(task.destination)
             return ghost_v10_features(
@@ -62,6 +62,7 @@ class DestinationVecEnv(OmniVecEnv):
                     pending[:, 0], torch.zeros_like(task.command_elapsed), task.command_elapsed
                 ),
                 task.commands if command is None else command,
+                along_track=self.destination_input == "ghost_v11",
             )
         current = destination_features(task.current["root"], task.destination, task.command_elapsed)
         neutral = torch.tensor(NEUTRAL_FEATURES, device=current.device).expand_as(current)

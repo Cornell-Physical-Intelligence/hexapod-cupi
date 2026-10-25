@@ -1003,6 +1003,57 @@ class GhostV10Tests(unittest.TestCase):
         for k in range(29):
             torch.testing.assert_close(seen[k + 1], trained[k], atol=1e-5, rtol=0)
 
+    def test_ghost_v11_adds_the_along_track_gap_and_rebuilds_in_evaluation(self):
+        from locomotion.omniwalk.mdp.destination import (
+            GhostV11Tracker,
+            destination_features,
+            ghost_v10_features,
+        )
+
+        self.assertEqual(EXPERIMENTS["destination_v21"], EXPERIMENTS["destination_v20"])
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v21"], "ghost_v11")
+        # Sideways plus along-track is the ghost gap; the first seven values are ghost_v10's.
+        pose, before = pose_at(0.0, 0.0, 0.3), pose_at(0.001, 0.002, 0.3)
+        destination = torch.tensor([[0.01, -0.03, 0.35]])
+        for command in (torch.tensor([[0.12, 0.05, 0.0]]), torch.zeros(1, 3)):
+            value = ghost_v10_features(pose, before, destination, torch.tensor([9]), command, True)
+            torch.testing.assert_close(
+                value[:, :7],
+                ghost_v10_features(pose, before, destination, torch.tensor([9]), command),
+            )
+            gap = destination_features(pose, destination, torch.tensor([9]))[:, :2]
+            torch.testing.assert_close(value[:, :2] + value[:, 7:], gap, atol=1e-6, rtol=0)
+        twenty = EXPERIMENTS["destination_v21"]["reward"]
+        task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0), reward=twenty)
+        env = DestinationVecEnv(
+            task,
+            plain,
+            observation_scaling="fixed",
+            gait_clock=60,
+            gait_clock_scaling="speed_v1",
+            destination_input="ghost_v11",
+        )
+        native.commands[:] = FORWARD
+        task.remaining_controls[:] = 1000
+        native.current["root_velocity"] = torch.zeros(1, 6)
+        self.assertEqual(env.get_observations()["policy"].shape[-1], 231 + 2 + 9)
+        tracker, seen, trained = GhostV11Tracker(1, "cpu"), [], []
+        for _ in range(100):
+            seen.append(
+                tracker.inputs(native.current["root"], native.commands, native.episode_steps)[0]
+            )
+            observation, *_ = env.step(torch.zeros(1, 18))
+            trained.append(observation["policy"][0, -9:].clone())
+        for k in range(99):
+            torch.testing.assert_close(seen[k + 1], trained[k], atol=1e-5, rtol=0)
+        # 100 controls 0.02 m/s short of the command: 40 mm behind along the path, 0.2 below its speed.
+        torch.testing.assert_close(
+            trained[-1],
+            torch.tensor([0.0, 0.0, 0.0, 1.0, 0.4, -0.2, 0.0, 0.4, 0.0]),
+            atol=1e-4,
+            rtol=0,
+        )
+
 
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):
