@@ -561,6 +561,9 @@ class DestinationTrainingTask(TrainingTask):
             self.curriculum_backoff_filled = 0
             self.curriculum_complete = False
             self.curriculum_advances = []
+            # Walking at the top speed since the level began: controls and their summed speed along the command.
+            self.top_speed_controls = torch.zeros((), dtype=torch.float64, device=env.device)
+            self.top_speed_sum = torch.zeros((), dtype=torch.float64, device=env.device)
             # Walks finished, and those that failed a check, per control over the window.
             self.curriculum_walks = torch.zeros_like(self.curriculum_window)
             self.curriculum_failed = torch.zeros_like(self.curriculum_window)
@@ -667,6 +670,23 @@ class DestinationTrainingTask(TrainingTask):
         self.walk_fast |= fast.to(counted.device) & counted
         self.walk_fell |= terminated.to(moving.device) & moving
 
+    def _record_top_speed(self, command, telemetry, terminated):
+        """Add the speed along the command of each standing robot commanded at the top level (a report only)."""
+        command = command.to(self.top_speed_sum)
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        top = (speed - self.curriculum_level).abs() < 1e-4
+        top &= ~terminated.to(top.device)
+        current = getattr(self.env, "current", {})
+        if "root_velocity" in current:
+            pose = telemetry["root_pose_xyzw"].to(self.top_speed_sum)
+            world = current["root_velocity"][:, :3].to(self.top_speed_sum)
+            planar = navigation(inverse_rotate(pose[:, 3:], world))[:, :2]
+        else:
+            planar = telemetry["linear_velocity_nav"].to(self.top_speed_sum)[:, :2]
+        along = (planar * command[:, :2]).sum(-1) / speed.clamp_min(1e-9)
+        self.top_speed_controls += top.sum()
+        self.top_speed_sum += (along * top).sum()
+
     def _finish_walks(self, indices):
         """Score the walks that end at these rows (their command is about to change) and clear their sums."""
         indices = torch.as_tensor(indices, dtype=torch.long, device=self.walk_sums.device)
@@ -749,6 +769,8 @@ class DestinationTrainingTask(TrainingTask):
             )
             self.curriculum_complete = False
             self.curriculum_filled = self.curriculum_backoff_filled = 0
+            self.top_speed_controls.zero_()
+            self.top_speed_sum.zero_()
             return
         # A robot past the back-off distance also holds the first level.
         if far or mean <= config.speed_curriculum_threshold:
@@ -772,6 +794,8 @@ class DestinationTrainingTask(TrainingTask):
         self.curriculum_advances.append(record)
         self.curriculum_level = round(self.curriculum_level + config.speed_curriculum_step_mps, 6)
         self.curriculum_filled = self.curriculum_backoff_filled = 0
+        self.top_speed_controls.zero_()
+        self.top_speed_sum.zero_()
         if config.speed_curriculum_pass_checks:
             self.check_failures = dict.fromkeys(WALK_CHECKS, 0)
 
@@ -786,6 +810,8 @@ class DestinationTrainingTask(TrainingTask):
             "window_mean": float(self.curriculum_window[:filled].mean()) if filled else None,
             "window_falls": int(self.curriculum_falls[:filled].sum()),
             "window_lost": int(self.curriculum_lost[:filled].sum()),
+            "top_speed_controls": int(self.top_speed_controls),
+            "top_speed_along_command_sum_mps": float(self.top_speed_sum),
             **(
                 {
                     "window_walks": int(self.curriculum_walks[:filled].sum()),
@@ -842,6 +868,8 @@ class DestinationTrainingTask(TrainingTask):
             self.gait.advance(command)
         if self.reward_config.speed_curriculum_pass_checks:
             self._record_walks(command, telemetry, terminated)
+        if self.reward_config.speed_curriculum_start_mps is not None:
+            self._record_top_speed(command, telemetry, terminated)
         config = self.reward_config
         if config.destination_weight > 0:
             distance = destination_distance(telemetry["root_pose_xyzw"], self.destination)

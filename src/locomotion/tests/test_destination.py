@@ -844,6 +844,29 @@ class GaitClockTests(unittest.TestCase):
             task._curriculum_step(torch.full((4,), 0.9), none)
         self.assertEqual(task.curriculum_level, 0.1)
 
+    def test_the_status_reports_the_speed_of_walks_at_the_top_level(self):
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(
+            native, TaskConfig(), None, EXPERIMENTS["destination_v18"]["reward"]
+        )
+        # Rows 0 and 1 walk at the 0.075 m/s level (forward, then left); row 2 walks slower; row 3 fell.
+        command = torch.tensor(
+            [[0.075, 0.0, 0.0], [0.0, 0.075, 0.0], [0.05, 0.0, 0.0], [0.075, 0.0, 0.0]]
+        )
+        nav = torch.tensor([[0.07, 0.01, 0.0], [0.0, 0.08, 0.0], [0.05, 0.0, 0.0], [0.0, 0.0, 0.0]])
+        fell = torch.tensor([False, False, False, True])
+        task._record_top_speed(command, {"linear_velocity_nav": nav}, fell)
+        status = task.curriculum_status()
+        self.assertEqual(status["top_speed_controls"], 2)
+        self.assertAlmostEqual(status["top_speed_along_command_sum_mps"], 0.15, places=6)
+        # A new level starts the count again.
+        for _ in range(1092):
+            task.pending_walks += 1
+            task._curriculum_step(torch.full((4,), 0.9), torch.zeros(4, dtype=torch.bool))
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertEqual(task.curriculum_status()["top_speed_controls"], 0)
+
     def test_the_wrapper_shows_the_task_phase_and_records_the_scaling(self):
         sixteen = EXPERIMENTS["destination_v16"]["reward"]
         task, native = moving_task(lambda k: (0.0, -0.125 * 0.02 * k, 0.0), reward=sixteen)
