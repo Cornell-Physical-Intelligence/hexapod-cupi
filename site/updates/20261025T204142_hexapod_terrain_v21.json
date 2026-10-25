@@ -1,0 +1,28 @@
+{
+  "id": "20261025T204142_hexapod_terrain_v21",
+  "date": "2026-10-25T20:41:42.000000Z",
+  "title": "Add a stairs-and-boxes terrain task for the original hexapod environment",
+  "summary": "A new task, Hexapod-Rough-v21-Direct-v0, trains the original hexapod environment blind over a 10-level course of rough ground, slopes, stairs up, pits and boxes, with a terrain curriculum, a swing-clearance reward and an optional command-speed curriculum. The original Flat and Rough tasks are unchanged.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train Hexapod-Rough-v21-Direct-v0 natively on the Spark from a flat BC + PPO checkpoint and compare it under the common evaluator.",
+  "changes": [
+    "src/locomotion/hexapod/terrain/__init__.py",
+    "src/locomotion/hexapod/terrain/agents.py",
+    "src/locomotion/hexapod/terrain/curriculum.py",
+    "src/locomotion/hexapod/terrain/env.py",
+    "src/locomotion/hexapod/terrain/env_cfg.py",
+    "src/locomotion/hexapod/terrain/terrains_cfg.py",
+    "src/locomotion/tests/test_hexapod_terrain.py",
+    "src/locomotion/README.md",
+    "configs/source_inventory.json",
+    "site/updates/20261025T204142_hexapod_terrain_v21.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_hexapod_terrain.py",
+    "https://github.com/ShauryaSen/hexapod-locomotion/blob/2d67e9ea082b467415ffa2541ab68c25a269848c/hexapod_terrains_cfg.py"
+  ],
+  "no_project_impact": true,
+  "reason": "An opt-in training task beside the original hexapod tasks; it changes no admitted model, gate, roadmap marker or the omniwalk runtime, and records no native result in this repository."
+}
