@@ -1135,6 +1135,15 @@ class DriftTests(unittest.TestCase):
             task._planar_error(command, telemetry), torch.tensor([0.0, -0.5, -2.0, 0.0])
         )
 
+    def test_destination_v24_continues_the_curriculum_to_0_175(self):
+        twentythree, twentyfour = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v23", "destination_v24")
+        )
+        changed = {k for k, v in asdict(twentyfour).items() if asdict(twentythree)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_final_mps"})
+        self.assertEqual(twentyfour.speed_curriculum_final_mps, 0.175)
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v24"], "ghost_v11")
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 

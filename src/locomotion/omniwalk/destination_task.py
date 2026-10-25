@@ -560,6 +560,13 @@ EXPERIMENTS["destination_v23"] = {
     **EXPERIMENTS["destination_v22"],
     "reward": replace(EXPERIMENTS["destination_v22"]["reward"], planar_error_weight=0.5),
 }
+# destination_v24 is destination_v23 whose speed curriculum continues to 0.175 m/s. Attempt 15 of
+# destination_v23 mastered 0.15 m/s at update 747. The speed_v1 gait clock holds its 40-control cycle above
+# 0.15 m/s, so 0.175 m/s needs 70 mm strides, beyond the 66 mm sideways reach of the action range.
+EXPERIMENTS["destination_v24"] = {
+    **EXPERIMENTS["destination_v23"],
+    "reward": replace(EXPERIMENTS["destination_v23"]["reward"], speed_curriculum_final_mps=0.175),
+}
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
 # at the start of each case; the surrogate clamps joints at the native speed limit.
