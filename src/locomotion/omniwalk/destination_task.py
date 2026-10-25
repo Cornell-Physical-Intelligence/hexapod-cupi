@@ -131,6 +131,8 @@ class DestinationRewardConfig(RewardConfig):
     end_destination_weight: float | None = None
     end_destination_distance_m: float | None = None
     end_destination_power: float | None = None
+    end_destination_kernel: str | None = None
+    end_destination_floor: float | None = None
     run_mix: tuple | None = None
     long_stand_controls: int | None = None
     command_controls: int = 0
@@ -307,15 +309,23 @@ class DestinationRewardConfig(RewardConfig):
             self.command_controls == 0 or 10 <= self.command_controls <= 5000
         ):
             raise ValueError("command_controls is 0 (the drawn durations) or 10 to 5000 controls")
-        end = (self.end_destination_weight, self.end_destination_distance_m, self.end_destination_power)
-        if any(value is not None for value in end) and (
+        # The run-end pay is rational (a power, no floor) or linear (a floor, no power).
+        linear = self.end_destination_kernel == "linear"
+        shape = self.end_destination_floor if linear else self.end_destination_power
+        unused = self.end_destination_power if linear else self.end_destination_floor
+        end = (self.end_destination_weight, self.end_destination_distance_m, shape)
+        if (
+            any(value is not None for value in end + (self.end_destination_kernel, unused))
+        ) and (
             any(value is None for value in end)
+            or unused is not None
+            or self.end_destination_kernel not in (None, "linear")
             or not all(math.isfinite(value) and value > 0 for value in end)
             or self.destination_weight <= 0
         ):
             raise ValueError(
-                "The run-end destination pay needs a positive finite weight, width and power "
-                "beside the destination pay"
+                "The run-end destination pay needs a positive finite weight and width beside the "
+                "destination pay, and a power (rational) or a floor (linear)"
             )
         mix = self.run_mix
         if mix is not None and (
@@ -686,6 +696,21 @@ EXPERIMENTS["destination_v28"] = {
         termination_weight=52.0,
     ),
     "episode_seconds": 32.0,
+}
+# destination_v29 is destination_v28 whose run-end pay is linear in the gap to the ghost,
+# share * max(1 - d / 25 mm, -1): 1 at the ghost, 0 at 25 mm and -1 from 50 mm, so each millimetre
+# closed pays the same at any lag up to 50 mm. destination_v28's narrow kernel paid about 0.07 at 30 mm
+# and barely changed there; its update-600 checkpoint falls 31 mm behind the ghost in the first second
+# of a 0.15 m/s walk and holds the lag (36 mm at 20 s; 0.05 m/s walk 5.08 mm against 2.82).
+EXPERIMENTS["destination_v29"] = {
+    **EXPERIMENTS["destination_v28"],
+    "reward": replace(
+        EXPERIMENTS["destination_v28"]["reward"],
+        end_destination_kernel="linear",
+        end_destination_distance_m=0.025,
+        end_destination_power=None,
+        end_destination_floor=1.0,
+    ),
 }
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
@@ -1264,7 +1289,11 @@ class DestinationTrainingTask(TrainingTask):
                 # The same gap on destination_v9's narrower kernel, weighted by the share of the run done.
                 scaled = distance / config.end_destination_distance_m
                 share = (self.run_elapsed.to(distance) / self.run_length.to(distance)).clamp(max=1)
-                closeness = share * alive / (1 + scaled.pow(config.end_destination_power))
+                if config.end_destination_kernel == "linear":
+                    shape = (1 - scaled).clamp_min(-config.end_destination_floor)
+                else:
+                    shape = 1 / (1 + scaled.pow(config.end_destination_power))
+                closeness = share * alive * shape
                 components["end_destination"] = (config.end_destination_weight * closeness).to(reward)
                 reward = reward + components["end_destination"]
         if config.planar_error_weight is not None:

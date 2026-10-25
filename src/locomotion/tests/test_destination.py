@@ -1276,6 +1276,30 @@ class DriftTests(unittest.TestCase):
         # The 60-control runs keep their command until the reset that the timeout calls for.
         self.assertTrue(bool((task.remaining_controls[length == 60] == 0).all()))
 
+    def test_destination_v29_pays_the_run_end_gap_linearly_down_to_a_floor(self):
+        nine = EXPERIMENTS["destination_v29"]["reward"]
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v29"], "ghost_v11")
+        for broken in ({"end_destination_floor": None}, {"end_destination_power": 1.2}):
+            with self.assertRaises(ValueError):
+                replace(nine, **broken).validate()
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 32.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, nine)
+        task.reset()
+        native.commands[:] = 0
+        task.stop_pending[:] = False
+        task.run_length[:] = 4
+        task.remaining_controls[:] = 4
+        task.step(torch.zeros(4, 18))
+        # At control 2 of 4, ghosts 0, 12.5, 25 and 75 mm from the body earn half of 1, 0.5, 0 and -1.
+        task.destination[:, :2] = native.current["root"][:, :2].to(task.destination)
+        task.destination[:, 0] += torch.tensor([0.0, 0.0125, 0.025, 0.075])
+        task.command_started[:] = False
+        task.step(torch.zeros(4, 18))
+        torch.testing.assert_close(
+            task.last_components["end_destination"], torch.tensor([0.5, 0.25, 0.0, -0.5])
+        )
+
     def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
         from locomotion.rl.ppo import CappedRatePPO
 
