@@ -11,6 +11,8 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
+      - name: Fetch pinned source evidence
+        run: git fetch --filter=blob:none --no-tags --depth=1 origin 02f551fd97c240d7ca1724618fa7f0429065f0e1 7d07566545d2bc9c6ebaa0e4dc3d49c626a1a258 077b98b1b6150e8cc54ad233c90198fdece0d7bb 877b004b13538dfe98ee7be7f1296d0de8da84a3 969ea5bc942df3122b2662650f29acd11644a41c 5dd66a09214848b7433c326125acad6263c893b7 467e7e101f0149d131b26ce84993347d8c77e233 b92f14ec39a933a83615dd65e08e1479161b989d e16a5975c3c981595fba8274ec4a7ef1e391fdbd
       - uses: astral-sh/setup-uv@v6
         with:
           enable-cache: true
@@ -18,19 +20,25 @@ jobs:
         run: uv python install
       - name: Sync the locked environment
         run: uv sync --locked
+      - name: Check Python lint and formatting
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
       - name: Test maintained packages and archive boundaries
         run: |
-          for suite in contracts navigation mission robot locomotion locomotion/priors locomotion/surrogate; do
-            uv run python -m unittest discover -s "$suite/tests"
+          for suite in src/contracts/tests src/navigation/tests src/mission/tests robot/tests src/locomotion/tests; do
+            uv run python -m unittest discover -s "$suite"
           done
+          uv run python -m unittest discover -s src/locomotion/amp/tests
+          uv run python -m unittest discover -s src/locomotion/surrogate/tests
           uv run python -m unittest discover -s tests
       - name: Verify source and canonical input identities
         run: |
           uv run python tools/source_inventory.py check
           uv run python tools/archive.py check
-          uv run python -m locomotion.inputs check
+          uv run python -m locomotion.spark.inputs check
           uv run python tools/check_pipeline_lineages.py current
-          uv run python -m locomotion.priors.dataset check --output locomotion/priors/datasets/amp_demonstrations_001
+          uv run python -m locomotion.amp.dataset check
       - name: Generate this revision's source manifest
         run: |
           ref=$(uv run python -c "from tools.check_pipeline_lineages import ARCHIVED_REF; print(ARCHIVED_REF)")
@@ -48,8 +56,9 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: viewer/package-lock.json
-      - name: Build the approved robot viewer
+      - name: Build the approved robot viewer and test its run files
         working-directory: viewer
         run: |
           npm ci
           npm run build
+          npm test

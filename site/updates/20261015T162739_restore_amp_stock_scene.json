@@ -1,0 +1,41 @@
+{
+  "id": "20261015T162739_restore_amp_stock_scene",
+  "date": "2026-10-15T16:27:39Z",
+  "title": "Restore AMP and separate the locomotion experiments",
+  "summary": "We restored motion-prior generation, AMP learning and CPU surrogate tools. We separated gait-clock PPO and behavior cloning, consolidated shared tools and replaced the proximity guard with stock Isaac Lab collision filtering. Native admission remains pending.",
+  "areas": [
+    "locomotion",
+    "documentation",
+    "developer map"
+  ],
+  "next": "Complete native qualification, then request full PR review.",
+  "changes": [
+    "locomotion/**",
+    "configs/source_inventory.json",
+    "tools/code_map.py",
+    "tools/check_pipeline_lineages.py",
+    "tests/**",
+    "site/test_code_map.mjs",
+    "site/updates/20261015T162739_restore_amp_stock_scene.json",
+    "pyproject.toml",
+    "uv.lock",
+    "CONTRIBUTING.md",
+    "ARCHITECTURE.md",
+    "SPARK.md",
+    "docs/TRAINING.md",
+    "docs/OPERATIONS.md",
+    "docs/PIPELINE_LINEAGES.md",
+    ".github/workflows/tests.yml",
+    ".github/workflows/pages.yml",
+    "docs/RS05_SPEC_REVIEW.md",
+    "AGENTS.md"
+  ],
+  "evidence": [
+    "locomotion/README.md",
+    "locomotion/priors/README.md",
+    "locomotion/surrogate/README.md",
+    "locomotion/tests/test_direct_environment.py",
+    "locomotion/tests/test_amp_ppo.py"
+  ],
+  "no_project_impact": false
+}

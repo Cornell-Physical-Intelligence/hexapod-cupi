@@ -31,13 +31,8 @@ function roadmap() {
 const layout = () => narrow.matches ? NARROW : WIDE;
 const place = (n) => narrow.matches ? {c: n.row, r: n.column} : {c: n.column, r: n.row};
 const box = (n) => { const l = layout(), p = place(n); return {x: l.pad + p.c * l.gx, y: l.pad + p.r * l.gy}; };
-function adjacent() {
-  const near = new Set([selected]);
-  for (const [a, b] of data.edges) if (a === selected || b === selected) { near.add(a); near.add(b); }
-  return near;
-}
 function graph() {
-  const near = adjacent(), l = layout(), W = l.w, H = l.h;
+  const l = layout(), W = l.w, H = l.h;
   const width = l.pad * 2 + Math.max(...data.nodes.map((n) => place(n).c)) * l.gx + W;
   const height = l.pad * 2 + Math.max(...data.nodes.map((n) => place(n).r)) * l.gy + H;
   const paths = data.edges.map(([a, b]) => {
@@ -58,7 +53,7 @@ function graph() {
   const markers = ['', '-active'].map((s) => `<marker id="arrow${s}" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L8 4L0 8"/></marker>`).join('');
   const buttons = data.nodes.map((n) => {
     const {x, y} = box(n);
-    const role = n.id === selected ? 'selected' : near.has(n.id) ? 'connected' : '';
+    const role = n.id === selected ? 'selected' : '';
     return `<button class="node ${esc(n.state)} ${role}" style="left:${x}px;top:${y}px;width:${W}px;height:${H}px" data-node="${esc(n.id)}" aria-pressed="${n.id === selected}" aria-controls="detail" aria-label="${esc(n.title)}, ${esc(nodeStates[n.state])}">${esc(n.title)}</button>`;
   }).join('');
   return `<div class="graph-canvas" style="width:${width}px;height:${height}px"><svg class="wires" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" aria-hidden="true"><defs>${markers}</defs>${paths}</svg>${buttons}</div>`;
@@ -76,7 +71,7 @@ function system() {
 }
 
 function leg(r) {
-  return `<svg viewBox="0 0 530 270" role="img" aria-label="One leg: ${esc(r.coxa_mm)} mm from the swing joint to the hip, ${esc(r.femur_mm)} mm from hip to knee and ${esc(r.tibia_mm)} mm from knee to foot."><defs><marker id="dim" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse"><path d="M0 0 L6 3 L0 6"/></marker></defs><path class="limb-shadow" d="M45 95 L145 95 L285 65 L450 205"/><path class="limb" d="M45 95 L145 95 L285 65 L450 205"/>${[[45,95],[145,95],[285,65],[450,205]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="8"/>`).join('')}${['M50 142 H140', 'M154 44 L275 20', 'M330 75 L472 196'].map((d) => `<path class="dimension" d="${d}" marker-start="url(#dim)" marker-end="url(#dim)"/>`).join('')}<text x="66" y="166">${esc(r.coxa_mm)} mm</text><text x="160" y="16">${esc(Number(r.femur_mm).toFixed(1))} mm</text><text x="388" y="104" transform="rotate(40 388 104)">${esc(r.tibia_mm)} mm</text><text x="18" y="77">swing</text><text x="130" y="122">hip</text><text x="265" y="106">knee</text><text x="440" y="244">foot</text></svg>`;
+  return `<svg viewBox="0 0 530 270" role="img" aria-label="One leg: ${esc(r.coxa_mm)} mm from the swing joint to the hip, ${esc(r.femur_mm)} mm from hip to knee and ${esc(r.tibia_mm)} mm from knee to foot."><defs><marker id="dim" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto-start-reverse"><path d="M0 0 L6 3 L0 6"/></marker></defs><path class="limb" d="M45 95 L145 95 L285 65 L450 205"/>${[[45,95],[145,95],[285,65],[450,205]].map(([x,y]) => `<circle cx="${x}" cy="${y}" r="8"/>`).join('')}${['M50 142 H140', 'M154 44 L275 20', 'M330 75 L472 196'].map((d) => `<path class="dimension" d="${d}" marker-start="url(#dim)" marker-end="url(#dim)"/>`).join('')}<text x="66" y="166">${esc(r.coxa_mm)} mm</text><text x="160" y="16">${esc(Number(r.femur_mm).toFixed(1))} mm</text><text x="388" y="104" transform="rotate(40 388 104)">${esc(r.tibia_mm)} mm</text><text x="18" y="77">swing</text><text x="130" y="122">hip</text><text x="265" y="106">knee</text><text x="440" y="244">foot</text></svg>`;
 }
 function robot() {
   const r = data.robot, cad = data.media.find((m) => m.id === r.media_id);
@@ -87,6 +82,18 @@ function terms() {
   return `<section id="terms" class="section" aria-labelledby="terms-heading"><h2 id="terms-heading">Terms used on this page</h2><dl class="terms">${data.glossary.map((g) => `<div><dt>${esc(g.term)}</dt><dd>${esc(g.meaning)}</dd></div>`).join('')}</dl></section>`;
 }
 
+// Between the phone breakpoint and the full canvas width, scale the diagram down so no box is cut off.
+function fit() {
+  const scroll = $('.graph-scroll'), canvas = $('.graph-canvas');
+  if (!scroll?.clientWidth || !canvas?.style) return;
+  const width = parseFloat(canvas.style.width), height = parseFloat(canvas.style.height);
+  const scale = Math.min(1, scroll.clientWidth / width);
+  canvas.style.transformOrigin = '0 0';
+  canvas.style.transform = scale < 1 ? `scale(${scale})` : '';
+  scroll.style.height = scale < 1 ? `${Math.ceil(height * scale)}px` : '';
+  scroll.style.overflow = scale < 1 ? 'hidden' : '';  // Both axes: the scaled canvas keeps its layout height.
+}
+
 function render() {
   $('#poster').innerHTML = `<section class="intro"><h1>${esc(data.title)}</h1><p>${esc(data.mission)}</p></section>${latest()}${roadmap()}${system()}${robot()}${terms()}`;
   $('#graph').addEventListener('click', (e) => {
@@ -95,9 +102,12 @@ function render() {
     selected = button.dataset.node;
     $('#graph').innerHTML = graph();
     $('#detail').innerHTML = detail();
+    fit();
     $(`[data-node="${selected}"]`).focus({preventScroll: true});
   });
-  narrow.addEventListener('change', () => { $('#graph').innerHTML = graph(); });
+  narrow.addEventListener('change', () => { $('#graph').innerHTML = graph(); fit(); });
+  globalThis.addEventListener?.('resize', fit);
+  fit();
 }
 
 try {

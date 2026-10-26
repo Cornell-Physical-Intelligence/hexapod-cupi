@@ -3,7 +3,7 @@
 Start with the [contributor workflow](../SPARK.md) for account access and
 personal worktrees. This guide owns the runtime and recovery details.
 
-You use [`locomotion.launch`](../locomotion/launch.py) for canonical allocations.
+You use [`locomotion.spark.launch`](../src/locomotion/spark/launch.py) for canonical allocations.
 It supervises one named module from a frozen package and cleans its exact
 container. Read [ownership](#ownership-and-cleanup) and the
 [retained reservation](#retained-reservation-and-recovery) first.
@@ -36,6 +36,20 @@ parent inherits a default ACL that grants its submitting user write access to
 container-created files and CUPI read access. Preserve that ACL when you copy
 a pack. Reconnect SSH after an administrator changes group membership.
 
+The recorded Isaac image runs as UID 1000, which maps to `orionh` on Spark.
+That account has no `cupi` group membership. On a fresh attempt, grant that UID
+read access to the frozen pack and a default write ACL for new output files:
+
+```sh
+setfacl -R -m u:1000:rX "$attempt"
+setfacl -m d:u:1000:rwx "$attempt"
+```
+
+Check the image UID before use. Preserve the existing CUPI ACL entries. The
+launcher mounts source and inputs read-only; the output mount permits writes.
+Grant the same UID read access to new admission and compatibility bundles before
+you mount them. A CPU admission process can create files under your host UID.
+
 Use a fresh input bundle and attempt name. Pack a committed worktree, transfer
 the frozen source, then run its launcher. You can edit the worktree after that
 copy. The launcher verifies the frozen copy before execution and cleanup.
@@ -57,7 +71,7 @@ You can inspect the prepared pilot at
 records source commit `620d9aa9b23e0c9547893c513b57f77335eb4ef3` for these packages.
 The input declaration is
 `/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128/inputs.json`.
-The learner arguments retain the [frozen pilot constraints](TRAINING.md#frozen-flat-pilot-issues-50-and-51).
+The learner arguments retain the [frozen pilot constraints](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#frozen-flat-pilot-issues-50-and-51).
 
 You can read the inventory and file relocation map in
 `/srv/cupi/hexapod/maintenance/cleanup_20260930_001/`. Use `relocation.json` to
@@ -93,18 +107,18 @@ reservation or coordination file, so any account with access to the run tree
 and Docker can launch. Never alter an admitted source pack or reuse an
 attempt's output directory.
 
-Use `python -m locomotion.inputs pack` with a fresh local output and explicit
+Use `uv run python -m locomotion.spark.inputs pack` with a fresh local output and explicit
 remote input root under `/srv/cupi/hexapod/inputs/`.
 Transfer that directory, then pass its `inputs.json` to
-[`prepare`](../locomotion/prepare.py). The pack hashes canonical assets and
+[`prepare`](../src/locomotion/spark/prepare.py). The pack hashes canonical assets and
 starts no compute. The default binding declares `foundation_inputs_001` under the guarded restart
 root. It does not claim those remote files exist. Transport with Python `tarfile` or disable macOS copy metadata;
 extra files fail the frozen-tree check. From the frozen `source` directory,
-invoke `python3 -B -m locomotion.launch` with the binding path and SHA-256.
+invoke `python3 -B -m locomotion.spark.launch` with the binding path and SHA-256.
 The `--preflight-only` flag checks the host without starting native simulation.
 Keep `PYTHONDONTWRITEBYTECODE=1` so imports cannot mutate the frozen tree.
 
-For the [frozen flat pilot](TRAINING.md#frozen-flat-pilot-issues-50-and-51),
+For the [frozen flat pilot](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#frozen-flat-pilot-issues-50-and-51),
 prepare training and probe evaluation with `--allocation-profile flat_pilot_v1
 --max-wall-seconds 21600`. A standing diagnostic above 128 robots takes the
 same profile, since its capture grows at about 9 s per robot. Preparation binds that native deadline and the
@@ -115,7 +129,7 @@ locks or cleanup targets. A timeout retains its last complete training update
 and fails the allocation unless the requested update count has completed.
 
 Training and evaluation require matching one-robot and batch standing admission.
-Use [`admission`](../locomotion/admission.py) to recompute the captures and create
+Use [`admission`](../src/locomotion/evaluation/admission.py) to recompute the captures and create
 the subsequent input declaration. A launcher success does not pass a physical
 gate or qualify a policy. A source manifest does not grant admission.
 

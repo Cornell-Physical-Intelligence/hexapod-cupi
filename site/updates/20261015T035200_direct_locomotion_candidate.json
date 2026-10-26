@@ -1,0 +1,33 @@
+{
+  "id": "20261015T035200_direct_locomotion_candidate",
+  "date": "2026-10-15T03:52:00Z",
+  "title": "Add a Direct environment candidate and shared BC warmstart",
+  "summary": "Prepare an Isaac Lab Direct environment for comparison with the admitted policy. Add scripted behavior cloning through the shared PPO actor. Keep full review and native qualification pending.",
+  "areas": [
+    "locomotion",
+    "docs"
+  ],
+  "changes": [
+    "locomotion/backends/isaac/direct_*.py",
+    "locomotion/learning/bc.py",
+    "locomotion/runs/launch.py",
+    "locomotion/runs/prepare.py",
+    "locomotion/runs/sources.py",
+    "locomotion/runs/train.py",
+    "locomotion/tests/test_direct_*.py",
+    "locomotion/tests/native_parity.py",
+    "locomotion/README.md",
+    "configs/source_inventory.json",
+    ".github/workflows/tests.yml",
+    ".github/workflows/pages.yml"
+  ],
+  "evidence": [
+    "locomotion/README.md",
+    "locomotion/tests/test_direct_binding.py",
+    "locomotion/tests/test_direct_bc.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/tree/969ea5bc942df3122b2662650f29acd11644a41c/hexapod"
+  ],
+  "next": "Obtain permission for full PR review, then qualify native standing and unchanged-checkpoint parity before replacing the admitted backend.",
+  "no_project_impact": true,
+  "reason": "The draft keeps the admitted backend as the default and blocks unreviewed candidate launch. It adds no locomotion qualification evidence."
+}
