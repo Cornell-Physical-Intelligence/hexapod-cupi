@@ -14,7 +14,10 @@ limits are untouched; the output is a new file next to the original (relative re
 Run inside the Isaac Lab container (needs pxr), from the Isaac Lab root:
   ./isaaclab.sh -p <repo>/src/locomotion/hexapod/tools/make_simple_collision.py [--visible] [--radius_scale 1.0]
 It writes robot_simple.usda next to the club's robot.usda (gitignored, regenerate on demand; the approved asset is
-not modified). Train on it with:  HEXAPOD_USD=<repo>/robot/hexapod_mkii_updated_v1/usd/robot_simple.usda
+not modified, and the tool refuses an --out that resolves to --src). Each primitive carries the PhysxCollisionAPI
+contact and rest offsets of the SDF parts it replaces (the approved recipe authors contactOffset 0.001, restOffset 0).
+The variant has no native admission, so `training_policy` in robot/active_model.json forbids new training on it. It
+serves throughput and fidelity diagnostics until it is admitted; HEXAPOD_USD=<path> selects it for those.
 Results (speed-up, fidelity checks): site/assets/collision_simplification_20261015_001/README.md.
 """
 
@@ -33,6 +36,7 @@ parser.add_argument("--radius_quantile", type=float, default=0.95, help="cross-s
 parser.add_argument("--visible", action="store_true", help="render the shapes (for a visual check); otherwise purpose=guide")
 args = parser.parse_args()
 out = args.out or os.path.join(os.path.dirname(args.src), "robot_simple_visible.usda" if args.visible else "robot_simple.usda")
+assert os.path.realpath(out) != os.path.realpath(args.src), f"--out {out} would overwrite the source asset {args.src}"
 
 stage = Usd.Stage.Open(args.src)
 robot = stage.GetPrimAtPath("/Robot")
@@ -50,6 +54,14 @@ for link in links:
         pts.append((np.c_[p, np.ones(len(p))] @ M)[:, :3])
     pts = np.vstack(pts)
     lo, hi = pts.min(0), pts.max(0)
+    # contact / rest offsets of the replaced parts; without them PhysX picks its automatic contact offset and the
+    # tibia capsule reports ground contact ~2 cm before touchdown
+    offsets = {
+        tuple(part.GetAttribute(f"physxCollision:{name}").Get() for name in ("contactOffset", "restOffset"))
+        for part in parts
+    }
+    assert len(offsets) == 1 and None not in next(iter(offsets)), f"{link.GetName()}: parts disagree on offsets {offsets}"
+    contact_offset, rest_offset = next(iter(offsets))
     for part in parts:
         stage.RemovePrim(part.GetPath())
     shape_path = col.GetPath().AppendChild("shape")
@@ -75,13 +87,16 @@ for link in links:
         desc = f"capsule r={r:.4f} x=[{lo[0]:.4f},{hi[0]:.4f}] (cylinder {x1 - x0:.4f})"
         prim = cap.GetPrim()
     UsdPhysics.CollisionAPI.Apply(prim)
+    prim.AddAppliedSchema("PhysxCollisionAPI")
+    prim.CreateAttribute("physxCollision:contactOffset", Sdf.ValueTypeNames.Float, custom=False).Set(contact_offset)
+    prim.CreateAttribute("physxCollision:restOffset", Sdf.ValueTypeNames.Float, custom=False).Set(rest_offset)
     gp = UsdGeom.Gprim(prim)
     if args.visible:
         gp.GetDisplayColorAttr().Set(Vt.Vec3fArray([Gf.Vec3f(0.9, 0.3, 0.1)]))
         gp.GetDisplayOpacityAttr().Set(Vt.FloatArray([0.5]))
     else:
         gp.GetPurposeAttr().Set(UsdGeom.Tokens.guide)
-    report.append(f"{link.GetName():10s} {len(parts):3d} parts -> {desc}")
+    report.append(f"{link.GetName():10s} {len(parts):3d} parts -> {desc}, contactOffset {contact_offset}, restOffset {rest_offset}")
 
 # The fitted femur capsules (their motor housings, r ~3 cm) overlap the body box at rest. PhysX already ignores
 # contacts between links joined by a joint (body-coxa, coxa-femur), but body-femur is two joints apart and would

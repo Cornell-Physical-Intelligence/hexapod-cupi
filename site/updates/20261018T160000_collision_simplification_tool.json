@@ -2,7 +2,7 @@
   "id": "20261018T160000_collision_simplification_tool",
   "date": "2026-10-18T16:00:00Z",
   "title": "Add the simplified collision asset generator and its throughput study",
-  "summary": "A tool writes a variant of the approved USD with one primitive collider per link (19 shapes) in place of the 153 SDF meshes; the approved asset is unchanged and the variant is gitignored. On the Spark the hexapod Direct task trains 2.4x faster at 128 robots and 4.5x at 2048, and a policy trained on the SDF asset walks on the variant with the same speed and no falls. The variant has no standing admission and is not used by omniwalk.",
+  "summary": "A tool writes a variant of the approved USD with one primitive collider per link (19 shapes) in place of the 153 SDF meshes, with the same contact offsets; the approved asset is unchanged and the variant is gitignored. On the Spark the hexapod Direct task steps 2.4x faster at 128 robots and 4.5x at 2048. Over five repetitions, a policy trained on the SDF asset walks on the variant within 3% of its speed and without falls, but with about 1 degree more heading error and 2.6 times as many joints at the torque cap. The variant has no native admission, so new training on it is not permitted; it serves diagnostics.",
   "areas": [
     "locomotion",
     "robot"
