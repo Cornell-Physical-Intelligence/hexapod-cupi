@@ -219,9 +219,10 @@ def prepare(
     ):
         raise ValueError("A video case applies to a learning-probe evaluation")
     if type(episode_seconds) is not float or (
-        episode_seconds != 20.0 and (mode != "train" or not 5.0 <= episode_seconds <= 20.0)
+        episode_seconds != 20.0 and (mode != "train" or not 5.0 <= episode_seconds <= 32.0)
     ):
-        raise ValueError("Episode length selection applies to training, between 5 and 20 seconds")
+        # 32 s, the evaluator's longest probe, lets destination_v28 and later train its long stands.
+        raise ValueError("Episode length selection applies to training, between 5 and 32 seconds")
     if initialize_from is not None and (mode != "train" or learner != "ppo"):
         raise ValueError("A starting checkpoint applies to PPO training")
     starting = (initialize_from, initialize_from_sha, initialize_from_declaration_sha)

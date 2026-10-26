@@ -464,6 +464,8 @@ class LearnerOptionTests(unittest.TestCase):
                 json.loads((root / "short/PACK.json").read_text())["episode_seconds"], 10.0
             )
             self.assertNotIn("--episode-seconds", defaults["command_args"])
+            long = prepare(root / "long", REMOTE, mode="train", episode_seconds=32.0)
+            self.assertEqual(long["command_args"][-2:], ["--episode-seconds", "32.0"])
             video = prepare(
                 root / "video",
                 REMOTE,
@@ -481,6 +483,7 @@ class LearnerOptionTests(unittest.TestCase):
                     dict(recipe="none", action_noise_correlation=0.9),
                     dict(gait_clock=5),
                     dict(episode_seconds=2.0),
+                    dict(episode_seconds=33.0),
                     dict(episode_seconds=10),
                     dict(mode="evaluate", episode_seconds=10.0, **checkpoint),
                     dict(video_case="learning:quiet_20s"),
