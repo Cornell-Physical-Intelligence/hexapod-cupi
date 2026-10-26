@@ -1,6 +1,6 @@
 """Anatomical axes: forward -body Y, left +body X, up +body Z."""
-from __future__ import annotations
 
+from __future__ import annotations
 
 __all__ = [
     "BODY_TO_NAVIGATION_MATRIX",

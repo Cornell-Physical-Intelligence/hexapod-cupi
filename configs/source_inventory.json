@@ -206,6 +206,20 @@
       "purpose": "Build the 42-value proprioception frame, the 231-value actor observation and the 234-value critic observation."
     },
     {
+      "path": "src/locomotion/omniwalk/mdp/destination.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Follow each command's destination, the pose the command would have reached, and describe the gap to it for experiments destination_v1 to destination_v9."
+    },
+    {
+      "path": "src/locomotion/omniwalk/destination_task.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Experiments destination_v1 to destination_v9: the canonical task plus per-control pay for staying near each command's destination and fixed command lengths."
+    },
+    {
       "path": "src/locomotion/omniwalk/mdp/rewards.py",
       "previous_path": "locomotion/omni/task.py",
       "classification": "current",
@@ -302,6 +316,13 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "Extend stock RSL-RL PPO with command bootstraps, a rate cap, bounded means and a deviation schedule, and load a recorded actor."
+    },
+    {
+      "path": "src/locomotion/rl/destination_wrapper.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Append the gap to each command's destination and the time since the command began to the actor and critic inputs for experiments destination_v1 to destination_v9."
     },
     {
       "path": "src/locomotion/rl/wrapper.py",
@@ -469,49 +490,49 @@
       "previous_path": "locomotion/behavior_cloning/__init__.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Register Shaurya’s original flat and rough Direct tasks."
+      "purpose": "Register Shaurya\u2019s original flat and rough Direct tasks."
     },
     {
       "path": "src/locomotion/hexapod/agents/__init__.py",
       "previous_path": "locomotion/behavior_cloning/agents/__init__.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Declare Shaurya’s learner configuration package."
+      "purpose": "Declare Shaurya\u2019s learner configuration package."
     },
     {
       "path": "src/locomotion/hexapod/agents/rsl_rl_ppo_cfg.py",
       "previous_path": "locomotion/behavior_cloning/agents/rsl_rl_ppo_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Preserve Shaurya’s flat and rough PPO configurations."
+      "purpose": "Preserve Shaurya\u2019s flat and rough PPO configurations."
     },
     {
       "path": "src/locomotion/hexapod/hexapod_env.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_env.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Preserve Shaurya’s observations, reward, resets and stock Direct environment."
+      "purpose": "Preserve Shaurya\u2019s observations, reward, resets and stock Direct environment."
     },
     {
       "path": "src/locomotion/hexapod/hexapod_env_cfg.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_env_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Preserve Shaurya’s scene, randomization and task settings."
+      "purpose": "Preserve Shaurya\u2019s scene, randomization and task settings."
     },
     {
       "path": "src/locomotion/hexapod/hexapod_robot_cfg.py",
       "previous_path": "locomotion/behavior_cloning/hexapod_robot_cfg.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Preserve Shaurya’s implicit PD actuator and robot configuration."
+      "purpose": "Preserve Shaurya\u2019s implicit PD actuator and robot configuration."
     },
     {
       "path": "src/locomotion/hexapod/tools/bc_clone.py",
       "previous_path": "locomotion/behavior_cloning/tools/bc_clone.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Run Shaurya’s original teacher, BC, DAgger and checkpoint splice."
+      "purpose": "Run Shaurya\u2019s original teacher, BC, DAgger and checkpoint splice."
     },
     {
       "path": "src/locomotion/hexapod/tools/make_simple_collision.py",
@@ -525,7 +546,7 @@
       "previous_path": "locomotion/behavior_cloning/tools/diag_policy_rollout.py",
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Run Shaurya’s original standing-start policy diagnostic."
+      "purpose": "Run Shaurya\u2019s original standing-start policy diagnostic."
     },
     {
       "path": "src/mission/__init__.py",
@@ -1495,6 +1516,522 @@
     "navigation/waypoint.py": {
       "source_commit": "b92f14ec39a933a83615dd65e08e1479161b989d",
       "sha256": "3a8f25c96e69946c5d35ca49ef1bf1a38253fd81a41dc719a2f007afe13946be"
+    },
+    "robot/tests/test_prepared_usd.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "cfa29e147fac1b9444f72286450befa42e46df9498fe7b5dc0c6c52c9f98a41e"
+    },
+    "src/contracts/command.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "7bcc91c87716c4e77a85eb993356734452f7b8a4d0a6c8679138fdcbddfb365c"
+    },
+    "src/contracts/frames.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "7d68b04cbd49bcef3b4a33a34d6e9d02b6b7c79dfbf0331abf71e4d365aa3a51"
+    },
+    "src/contracts/pose.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e2af1c7852b437035830c7c1a737f4d26393567c461574acd3337ec579c1c299"
+    },
+    "src/contracts/release.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b76c902b67d70833cb2a71aaa354b22a5e085b691e8d9201382db222a47d8cae"
+    },
+    "src/contracts/tests/test_contracts.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "33ab0a9d3e874f622fdb6a5182fb0f1450b3032fba4b325fb4ffc62bfe9300da"
+    },
+    "src/locomotion/amp/amp.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "70036f501a84d716fd8588fdbeb3e12b53e6f6bb1e828cec86d1d5b7f6288a58"
+    },
+    "src/locomotion/amp/dataset.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a190d574b2e7abc4e9a1992f068f82acce39fdd312c9e8749a5d6c0e826612a9"
+    },
+    "src/locomotion/amp/discriminator.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "be3b01118ba2458c886a7ee5c0c3f8bf5923551509973a67a06af07f1cfaf810"
+    },
+    "src/locomotion/amp/features.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "d0b6070e18479cd2786c36b7fcbc112493dd21e717edefa10326031a028eda46"
+    },
+    "src/locomotion/amp/model.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e6cf1343ab382e89b16454503ae0a7ae3dfd199954d47ef72a29ebd2e7c71bad"
+    },
+    "src/locomotion/amp/networks.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3e40e5f9c59b69bb3134b884c69cc08ecdb2c477185effd68cdfd30a34af6a77"
+    },
+    "src/locomotion/amp/optimize.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "179470033448a7867fc7f59e5e528c96c74b8fecfbf048619ab572473a960437"
+    },
+    "src/locomotion/amp/prepare.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "11582db79b1f21f3040bd469c87fe14b9ead05dafe6c7c75276e6a649c004665"
+    },
+    "src/locomotion/amp/replay_native.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "15988ecdc8766d5a10c2a46c458a57fdf43af64fde2ca35c209a345e62b5ac47"
+    },
+    "src/locomotion/amp/tests/test_dataset.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "52920e21a64e6eacf742cd434faa11ea1e0c41ed31276982088f859f4ca421c9"
+    },
+    "src/locomotion/amp/tests/test_model.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "c600afdc33eec0f359839e2dc028924da132c6efc77ba8fc1efd4bdd4386d2c2"
+    },
+    "src/locomotion/amp/tests/test_omni.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "2721dcd5c2ed44d3fe7e1646cb4451671181479c7d3c9bd38d21a274dc80f5b2"
+    },
+    "src/locomotion/amp/tests/test_optimization.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "f1ec2f6da1bc47a6210a09ba1c06aaa9503866527e2ee557a91f472c89b69d42"
+    },
+    "src/locomotion/evaluation/__init__.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3318335432018ab7dbf7f7900d4f9a80a19b0dd3dfd47644eb73065f5233a49d"
+    },
+    "src/locomotion/evaluation/admission.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "fbea5d446e333bac33f79459b22a21fc2aabffd525ff3a88dbf3914bdd0ec627"
+    },
+    "src/locomotion/evaluation/camera.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "1a91af3b8b29b318d5a45614c5b303fa098cf31b44b7ace9a118cb7e0b789c94"
+    },
+    "src/locomotion/evaluation/capture.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "216789ccc22abceaa500156813d8c7a2330b6c82eebe50293976cde6458c174f"
+    },
+    "src/locomotion/evaluation/checkpoint.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "515786c68057bdf972b298d17a588e2a975de520c954093ed07a498dea1bb8ee"
+    },
+    "src/locomotion/evaluation/force_metrics.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "2a4ea6671d9cbd02e10740ccf0ce54b9f9e09878b47ff478eeba1f99113b4787"
+    },
+    "src/locomotion/evaluation/loads.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3592cdaccc8943d31f34c20c1f2e13f36051bf1f5a08b20501082c1ea330db62"
+    },
+    "src/locomotion/evaluation/noise_probe.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b2a3dc5ea62c1f3c7297279bc79e88ca60e55e23a9bd5c49cf3db7705a26a962"
+    },
+    "src/locomotion/evaluation/ppo_diagnostics.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "cab27126c3eedfb252607483d58b59a078b9c4fefb197636d13a2b7d41e57d26"
+    },
+    "src/locomotion/evaluation/runner.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "d6231c197e5362fe2acae2c114bf1aa04cab3bb7cd47335e512af1ddb23b48fb"
+    },
+    "src/locomotion/evaluation/task_metrics.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "cc0091625932dee8dabc76ff2844bba81d6b94a5bfbf26bbc0158e0e3e9283ba"
+    },
+    "src/locomotion/omniwalk/adapter.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "508fb11b97c707a5aba9bd83d8cdfafa27a77b0b8d4fcd4e9814dc96148dd20c"
+    },
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "204f44c93df916042ddb975d9a301602a44c27363b81e2d886df5b9029dbbb82"
+    },
+    "src/locomotion/omniwalk/env.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "8a99d173a00a7c156c2d061773aed97801c103f601dc6885db59565f8914420d"
+    },
+    "src/locomotion/omniwalk/env_cfg.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "05d7a6a30509b217b1162c96af2d4e412d67238b2ad7ec8d29527c12babac946"
+    },
+    "src/locomotion/omniwalk/mdp/actions.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b9a0248fa2fbb956af30f07e6ebb6e68e5c8fa29dee8548473422b6473544d1e"
+    },
+    "src/locomotion/omniwalk/mdp/commands.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "06d6d7b0cbbe2ee88c90039f06a8b08032cbec8b5196587b8f604620ffd9b070"
+    },
+    "src/locomotion/omniwalk/mdp/frames.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "60fab28ee99a677aad4e92d00b0eaf7a9d7fff553ec66971518a01251db7b8ac"
+    },
+    "src/locomotion/omniwalk/mdp/observations.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e4a1a305ca396242844a25c6ad5a19c23a140822206317914360c5297bc4e3c3"
+    },
+    "src/locomotion/omniwalk/mdp/rewards.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "156f1892d28abbc24c6519992eefa652314605cecde78ab782fd2a4794371f37"
+    },
+    "src/locomotion/omniwalk/task.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a22c9275b5c4866637320ea6a356030cdde407f6e3b961472375717eb3708d1a"
+    },
+    "src/locomotion/rl/ppo.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b02948bffa6c66d1990c48e002c56b4a101685cc6d03e0c651fa9d7a3b7e44b6"
+    },
+    "src/locomotion/rl/wrapper.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3938aeba1e6a90c94ed072f090e0985de203d96347c6eaeed5439e4caa230d2e"
+    },
+    "src/locomotion/robots/actuator.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "37256260bfc0566b64170894584f046d620de3a13414f2287daf5d6c8e140371"
+    },
+    "src/locomotion/robots/hexapod.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b8a95e2451c61532f9ad6199d1f7cd1f5105cce66c8f787510783275470b85d8"
+    },
+    "src/locomotion/robots/rs05.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a2254f1c070d48619bac72d6bf3030423cab9baa84229b9ff74e5ac572a5462a"
+    },
+    "src/locomotion/scripts/cli.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "0cff0642158b0dd99bc62db2d4cadbd35ba5116482134d4e9ca38fe4eac02c8d"
+    },
+    "src/locomotion/scripts/diagnose.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "84b88e4ff87b8c960a79478abc81aaf17952d146bfdfdf5d6d4ac75f1128ca7a"
+    },
+    "src/locomotion/scripts/play.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "81dd01760153e813b93da6d6dbde9c3a9999b49cc435dbae623c02f234dd8724"
+    },
+    "src/locomotion/scripts/train.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3bf377590f4e8fa0e5ecf07e3ed364fb5ae6dde41de32acbbda5a3f615355c89"
+    },
+    "src/locomotion/spark/inputs.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "09d229493a0b6768f1a118f923ef8584a881f30d5b5d49f364f6d5e79c46e494"
+    },
+    "src/locomotion/spark/launch.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3d7539b2af554c85da980b3260b3a2a54bdbb08199b16a068eab2e3d4f55d39d"
+    },
+    "src/locomotion/spark/pack.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e749775bb2ae67d49213877ea0907fc2c617b65d78c34bf76500b66b63b45b0b"
+    },
+    "src/locomotion/spark/prepare.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "1a4bd28876afabd03fcf9f4b968cb2e01aa7dcaa821155add59c1f11b4941af6"
+    },
+    "src/locomotion/spark/safety.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a6aa9f9fbec449f90f39f505b817e1444af1a48416b1201c833c56b185437bda"
+    },
+    "src/locomotion/spark/sources.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "8bb0655892d406cbe7c8ae6daf680390f0b35d8b81a1900322785f0d84e4d2ef"
+    },
+    "src/locomotion/spark/validation.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "0175bf3a1aa59d1026a032943ab65aded4d4bd9f32d34f8ea52f57e818f8a577"
+    },
+    "src/locomotion/surrogate/env.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e49357ca92102fe7bb0f45e3cf2df5fc2e4d155e6c8bea8cca59d95c0e08e793"
+    },
+    "src/locomotion/surrogate/evaluate.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "7cac96a6944e1e1ecab836a01ccaf98a1d78e4dd84363e63ef3a4d84ea5e0ea2"
+    },
+    "src/locomotion/surrogate/replay.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "9f5c602a78c39c463cf182b96b79b249387b061bc5a9971cd4f05b9b1c1a35b9"
+    },
+    "src/locomotion/surrogate/tests/test_amp.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "7224ad31e4a3f28db5145207812548189c71489ad93be2947859f332bcdecc0b"
+    },
+    "src/locomotion/surrogate/tests/test_env.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "ef97554b91ee3f074745a49e06445dfd248b38823feea854a1fb52add8eac28c"
+    },
+    "src/locomotion/surrogate/tests/test_learner.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "955c2816f982992bc97eb15786768da2e8889f259e5b2e822b87e1d35b8ffeb2"
+    },
+    "src/locomotion/surrogate/tests/test_resume.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "eb9ae913544ed1137ce2f667c0252c7da9127cdd5c7c7ac491dd775a8f1ad5e0"
+    },
+    "src/locomotion/surrogate/tests/test_tools.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "c650a06870771c7243eadd6f35b469ed151e146b8d687ccf669ccbf49ebda18d"
+    },
+    "src/locomotion/surrogate/train.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "ab021d8889318a5fee1fb3f24320ffdf392076ce2298600464908f61669bcb12"
+    },
+    "src/locomotion/tests/native_parity.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b082037f3cbbfeae8804eb635ab99582ec5f25211481d88661fef5bb3f7473aa"
+    },
+    "src/locomotion/tests/native_parity_pack.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "81455df09a65be830b0bd4aaf24340024ffe5d5d633a650dc1bbc547ea631fe3"
+    },
+    "src/locomotion/tests/native_ranges.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "1d1c5639a9a26fb270a8b45fd05e33f51bef5b070b017d609c87d5eff5629105"
+    },
+    "src/locomotion/tests/task_double.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a79cd322497efe93ab342e4fe02d2c26c8ac284903aa89436d610c3ca1acee54"
+    },
+    "src/locomotion/tests/test_action_distribution.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "fe38bb6c848dd6124a4af4138315a7bf7dde92e5ae0dc807e46ac2c45aaaa76e"
+    },
+    "src/locomotion/tests/test_admission.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "45a14ac8196555c44550d9b5569bbf79f51d1372b0eae8642b77e46094446f99"
+    },
+    "src/locomotion/tests/test_allocation_deadlines.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "7dbe778561df67524796a604d325d2fc5f01c5be98599ce1224b3528eb078ccf"
+    },
+    "src/locomotion/tests/test_amp.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "89b7f65a0e75769678e68df87b14b51b11601e819b4450ac8e126d4d262e1099"
+    },
+    "src/locomotion/tests/test_amp_discriminator.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "76c84f78deb8f01a71d04ffe0dbff4ab412d189c6df653530171e74e19c408c4"
+    },
+    "src/locomotion/tests/test_amp_discriminator_width.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b538f04c90fa3f4911e479ef8990e228983832fb37a37e7c121009a5b3811069"
+    },
+    "src/locomotion/tests/test_amp_ppo.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e7a20fb2291513a2878738a2f7cbb6fafbc6b014eb0f6bbaf6419d0cf23103cb"
+    },
+    "src/locomotion/tests/test_camera.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e7451ada3870ce423ad2eeff8bfbbe49d350c917db464126426fe7050ca19148"
+    },
+    "src/locomotion/tests/test_checkpoint_compat.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "9fdf5aee667469f25e8465dffae1aeee661c04f7f8fcd2c9706099ab2793a2b0"
+    },
+    "src/locomotion/tests/test_command_bootstrap.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "6a4c976e50495db9c1ac62ee5825c50b66364f6bcefcb93acb3f6d101b40caf3"
+    },
+    "src/locomotion/tests/test_dataset.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "687605b8235c8db2df1f56ec254eba6be6b76c30b94bd3ed899e8e7dabc3f9f0"
+    },
+    "src/locomotion/tests/test_dependency_identity.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "41a09aa075d7186bb465a033178c9c08cf2ab0a1b53d3cc6999e101aab8d12ce"
+    },
+    "src/locomotion/tests/test_direct_environment.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "029228ca51b457b4a2c3721a91276d9e92a3c9e8b7ac9c4eb3098268a2470d42"
+    },
+    "src/locomotion/tests/test_env.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "4ca20a0d316275216c81dc36a573da0df2ad2e0d091cb018044ca5cf6289c2dc"
+    },
+    "src/locomotion/tests/test_evaluate.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "485d16d894c3454f6612a4979c98bf6078ac70ba759b366fac9d65baea80fcdc"
+    },
+    "src/locomotion/tests/test_evaluation.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b573565e429d929a23c22930658ddfe0fe8b4a5f9fe98cd8401011d6bb42a7ec"
+    },
+    "src/locomotion/tests/test_force_metrics.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "2282dfec54d9c09d211e73fc92cb402787533ce22d9f173e807a561dd55f8f40"
+    },
+    "src/locomotion/tests/test_frozen_baseline_parity.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "598a941f6a745fba6236983bb820f8af496aea8ef2e18b08892f57bf93e0178d"
+    },
+    "src/locomotion/tests/test_guarded_paths.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "390ed6b238c35756ef6e535bdaf7e135c6757418e3f3ae0f6858c2dbb05876c1"
+    },
+    "src/locomotion/tests/test_hexapod_bc.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a9816f5faa9a3e80df226125764332ce78de740308bb6ef66421488550b6d4a4"
+    },
+    "src/locomotion/tests/test_hexapod_environment.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "898f64236511bf93feffac84ee5fd4695341674a1bdd7136cf7d9457533a1a2b"
+    },
+    "src/locomotion/tests/test_inputs.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e8d8a19d5d198847a11c8605bf75bacd1a7a5361ac8d5e1a1a12188f91397516"
+    },
+    "src/locomotion/tests/test_launch.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "2c5852657e81c08d9703215eddb4c85ceeb0ffb7f56e0bb643d58840f58c5415"
+    },
+    "src/locomotion/tests/test_launch_cleanup.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "16d19bb9a2415e318ae905a0261353058c1305be4750458fb31dc0b3bb9a8da6"
+    },
+    "src/locomotion/tests/test_launch_lock.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "cc42a5b7a5821982640d1c39a14779754c04737db2bae5d97234026cf196a0be"
+    },
+    "src/locomotion/tests/test_learner_options.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "89a5a718354876887507ea279e18eb2082f190559f64685caeab01424a76624f"
+    },
+    "src/locomotion/tests/test_motor_force.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "f17d24e4cc948b205ca519cf25de120b4d62ccf2108314933ebb09ce5fc6a41b"
+    },
+    "src/locomotion/tests/test_native_ranges.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "0b6809da115abd0b95da52c44c4b2a8b27f602d473deaba78d185ba389566719"
+    },
+    "src/locomotion/tests/test_noise_probe.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "553de371444e18bb57d0832b688d32079ce78fcadaca6b40e7eb6d9632075e55"
+    },
+    "src/locomotion/tests/test_pack_binding.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "ba2c3cb8b3a0dec9d832585987195030985e044dd40d5be7fbd9cf6119878650"
+    },
+    "src/locomotion/tests/test_paper_networks.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "5deef69963a22d48d55872ba8f216ce7a1718eb8dea84f1756cd60b7336131ef"
+    },
+    "src/locomotion/tests/test_parity_pack.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "2b5394203598073071d049b3a85e3d8461600324fcc0bbf5123564fbec08bcee"
+    },
+    "src/locomotion/tests/test_policy_inference.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "d3baadaec80d25259c8852599b9331f4d018f022ac3c1612fdb0800d0be0722c"
+    },
+    "src/locomotion/tests/test_ppo_observability.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "32ed45cdee64e4dcb0ceaf40253ef34f17d66241678950bae7394e1fa61cd740"
+    },
+    "src/locomotion/tests/test_recipe.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b06911af296b6ff76798ba5aa661f19fbc5377be86be24c138f90895631a45a4"
+    },
+    "src/locomotion/tests/test_recorded_trace.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b3b5c3511fa752f23fb1e5609e50911e738f4cf4f0fd5b12e2f1f9f0092303d2"
+    },
+    "src/locomotion/tests/test_task.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "1fbfdbd6ae5dc101bc4347a22e7595eed4d40af6969e2633c891c806e0b6d37e"
+    },
+    "src/locomotion/tests/test_training_binding.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "32e86723f2999ad98cd8daac72e80e31328b3fa59fb519e3ea0d9801cb770ab3"
+    },
+    "src/locomotion/tests/test_training_budget.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "7cc118227bdf43516601ca61d554528887e9d06aeb70e1a2d3da718500c13ed5"
+    },
+    "src/locomotion/tests/test_wandb_logging.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "1724f5a495b6018fca154105c84bd7cd0eb04fa3cbfc7e84430b4341ec120996"
+    },
+    "src/locomotion/tests/test_wrapper.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "984493923c78c2be041b5ab16f0b4b1d081f92d472c990a799d2183f6ace3dbc"
+    },
+    "src/locomotion/tests/test_yaw_sign.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "37626aa223dcfa6bd1f3d9b76782e03031fc05b6a38017d93be267c1321a8b9d"
+    },
+    "src/mission/sensors/mid360_pattern.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "d560a7b60d34f28e8563a345c528e5457a1a96cb2efde30ae9125569737977e0"
+    },
+    "src/mission/sensors/sensor_model.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "b35c37152c2a7875a26acb47467e26c9102cb6f082d5dcf592a86b3410ea5a7a"
+    },
+    "src/mission/tests/test_sensor_transport.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "9ca668b7246faad1ffa6785379edaf5af73e81b9cc1fe1aab8c4297065461374"
+    },
+    "src/navigation/__init__.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "99c9df95abe3d3632992006793e49cc24c826bac5b5240385bc1ad4d0dd64287"
+    },
+    "src/navigation/producer.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3fd42e76ddcc5529a309856e063ca18033496ffde64151376f01b39b04269227"
+    },
+    "src/navigation/tests/test_producer.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a4022ffe5297346d7a0b11370ceb7b0327e5248393400a7e4fcbb2a235a4c761"
+    },
+    "src/navigation/waypoint.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "3a8f25c96e69946c5d35ca49ef1bf1a38253fd81a41dc719a2f007afe13946be"
+    },
+    "tests/test_archive.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "dbad72ff8c715e655ddccccd6d39ff4343c756db060867610aa0f1127d9379ae"
+    },
+    "tests/test_code_map.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "a07d7eb662bbf2985521ab49741d391a51edbe2b6596e112305724c579e4aa3c"
+    },
+    "tests/test_pipeline_lineages.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "bdee2e49aed47e9c2191b6ae1f124395cd5ca20c878098eaf36802a9c12b3ef9"
+    },
+    "tests/test_project_progress.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "cc3683a357db64f9249c653b45b50f4561e78faa1dc20b29738c18e8eba8478e"
+    },
+    "tests/test_project_site.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "c7d32c1c21647af3ba677008136cb381535e7975d147ba729adece7b04392370"
+    },
+    "tests/test_source_inventory.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "e38fde462bd8247c6a837b2dc4d6050f23c29b4b785a6a0aba1d1fbebf192a22"
+    },
+    "tools/archive.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "4c7e0b75a6febfa1a241aa5d573f49372cfdabc6f10423cea7d1786e0d68d43a"
+    },
+    "tools/assets/prepare_geometry.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "61b80fb6193ffc5628d661667ab33b29389d31da12c3484853c0462a0df800d4"
+    },
+    "tools/assets/prepare_updated_usd.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "d722011ee4f4cca3da778ba87fdb9157be819331afa3ba7c04b2826d8de2a80b"
+    },
+    "tools/project_site.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "20ca935add302effc73d853e976dc22462af0a8e1bd0192fa1e2b9a1d7a48488"
+    },
+    "tools/source_inventory.py": {
+      "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
+      "sha256": "bf39dc5919b7563003cda9d4024c1414599126098b775ab45749011e38ec6686"
     }
   }
 }

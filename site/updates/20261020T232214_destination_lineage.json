@@ -1,0 +1,35 @@
+{
+  "id": "20261020T232214_destination_lineage",
+  "date": "2026-10-20T23:22:14.442750Z",
+  "title": "Walk to where the command leads: the destination_v9 locomotion model",
+  "summary": "We gave the walking policy a ghost: the pose each command would reach, with its heading, as input and as reward, then tightened that reward, added a matching heading reward and doubled the joint penalties, and finally fine-tuned it on stopping after a walk. The resulting destination_v9 checkpoint passes all 13 native learning probes (seed 20260917, one trial per probe); after 20 s walks it ends 0.57 mm (median) and 0.94 mm (worst) from where the command leads and its heading drifts 0.09 degrees, against 152 mm, 299 mm and 16 degrees for the PR 71 model it started from. Five native Spark trainings lead to it, each from the previous checkpoint; the 96-case manifest has not run yet.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Run the 96-case manifest on the destination_v9 checkpoint with unchanged thresholds (queued on Spark on 23 October 2026, its evaluation pack built from the training commit); the 13 learning probes are diagnostic, so accept or reject destination_v9 as the locomotion model from that run, then record it in the registry.",
+  "changes": [
+    "configs/source_inventory.json",
+    "site/assets/destination_lineage_20261020_001/*",
+    "site/test_code_map.mjs",
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/omniwalk/mdp/destination.py",
+    "src/locomotion/rl/destination_wrapper.py",
+    "src/locomotion/rl/ppo.py",
+    "src/locomotion/scripts/cli.py",
+    "src/locomotion/scripts/play.py",
+    "src/locomotion/scripts/train.py",
+    "src/locomotion/spark/prepare.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/surrogate/train.py",
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "evidence": [
+    "site/assets/destination_lineage_20261020_001/provenance.json",
+    "site/assets/destination_lineage_20261020_001/results.json",
+    "site/assets/destination_lineage_20261020_001/build_results.py",
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": false
+}

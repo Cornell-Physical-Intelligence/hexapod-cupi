@@ -17,6 +17,7 @@ dev = [
     "rsl-rl-lib==5.0.1",
     "casadi==3.7.2",
     "mujoco==3.14.0",
+    "ruff==0.17.1",
 ]
 # Matches the Spark image, which writes W&B runs; use it to log in and sync offline runs.
 tracking = [
@@ -38,3 +39,28 @@ torch = [{ index = "pytorch-cpu", marker = "sys_platform == 'linux'" }]
 name = "pytorch-cpu"
 url = "https://download.pytorch.org/whl/cpu"
 explicit = true
+
+[tool.ruff]
+required-version = "==0.17.1"
+target-version = "py312"
+line-length = 100
+force-exclude = true
+# These files are immutable evidence, including the byte-identical scoring oracle.
+extend-exclude = [
+    "**/tests/fixtures/**",
+    "src/locomotion/evaluation/scoring.py",
+    "src/locomotion/hexapod/**",
+    "site/assets/**",
+    "graphify-out/**",
+    "artifacts/**",
+    "runs/**",
+    "tmp/**",
+]
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+line-ending = "lf"

@@ -1,4 +1,5 @@
 """Fit a least-squares discriminator and score paired 61-value motion states."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -18,7 +19,7 @@ class TrainConfig:
     steps: int = 3000
     batch_size: int = 512
     learning_rate: float = 1e-4
-    gradient_penalty: float = 10.
+    gradient_penalty: float = 10.0
     hidden: tuple = (1024, 512)
 
 
@@ -39,7 +40,10 @@ class Discriminator(nn.Module):
 
 def transitions(before, after):
     """Concatenate (s_t, s_t+1) AMP states into discriminator inputs."""
-    before, after = torch.as_tensor(before, dtype=torch.float32), torch.as_tensor(after, dtype=torch.float32)
+    before, after = (
+        torch.as_tensor(before, dtype=torch.float32),
+        torch.as_tensor(after, dtype=torch.float32),
+    )
     if before.shape != after.shape or before.shape[-1] != AMP_WIDTH:
         raise ValueError(f"AMP states must be matching (..., {AMP_WIDTH}) arrays")
     return torch.cat((before, after), dim=-1).reshape(-1, 2 * AMP_WIDTH)
@@ -51,16 +55,19 @@ def trace_transitions(trace):
 
 def style_reward(scores):
     """Eq. (2): max(0, 1 - 0.25 (D - 1)^2), in [0, 1]."""
-    return (1 - .25 * (scores - 1).square()).clamp_min(0)
+    return (1 - 0.25 * (scores - 1).square()).clamp_min(0)
 
 
-def discriminator_loss(discriminator, prior, policy, gradient_penalty=10.):
+def discriminator_loss(discriminator, prior, policy, gradient_penalty=10.0):
     """Eq. (1): least-squares targets +1 for prior and -1 for policy transitions, plus a gradient penalty."""
     prior = prior.clone().requires_grad_(True)
     prior_scores = discriminator(prior)
-    gradient, = torch.autograd.grad(prior_scores.sum(), prior, create_graph=True)
-    terms = {"prior": (prior_scores - 1).square().mean(), "policy": (discriminator(policy) + 1).square().mean(),
-             "gradient_penalty": .5 * gradient_penalty * gradient.square().sum(-1).mean()}
+    (gradient,) = torch.autograd.grad(prior_scores.sum(), prior, create_graph=True)
+    terms = {
+        "prior": (prior_scores - 1).square().mean(),
+        "policy": (discriminator(policy) + 1).square().mean(),
+        "gradient_penalty": 0.5 * gradient_penalty * gradient.square().sum(-1).mean(),
+    }
     return sum(terms.values()), {key: float(value.detach()) for key, value in terms.items()}
 
 
@@ -68,14 +75,22 @@ def train(prior, policy, config=TrainConfig()):
     """Fit a frozen discriminator: prior transitions against recorded policy transitions."""
     generator = torch.Generator().manual_seed(config.seed)
     torch.manual_seed(config.seed)
-    prior, policy = torch.as_tensor(prior, dtype=torch.float32), torch.as_tensor(policy, dtype=torch.float32)
+    prior, policy = (
+        torch.as_tensor(prior, dtype=torch.float32),
+        torch.as_tensor(policy, dtype=torch.float32),
+    )
     std = prior.std(0).clamp_min(1e-3)
     discriminator = Discriminator(prior.mean(0), std, config.hidden)
     optimizer = torch.optim.Adam(discriminator.parameters(), lr=config.learning_rate)
     history = []
     for step in range(config.steps):
-        batch = lambda data: data[torch.randint(len(data), (config.batch_size,), generator=generator)]
-        loss, terms = discriminator_loss(discriminator, batch(prior), batch(policy), config.gradient_penalty)
+
+        def batch(data):
+            return data[torch.randint(len(data), (config.batch_size,), generator=generator)]
+
+        loss, terms = discriminator_loss(
+            discriminator, batch(prior), batch(policy), config.gradient_penalty
+        )
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
@@ -85,8 +100,14 @@ def train(prior, policy, config=TrainConfig()):
 
 
 def save(discriminator, path, metadata):
-    torch.save({"state_dict": discriminator.state_dict(), "hidden": list(metadata["config"]["hidden"]),
-                "metadata": metadata}, path)
+    torch.save(
+        {
+            "state_dict": discriminator.state_dict(),
+            "hidden": list(metadata["config"]["hidden"]),
+            "metadata": metadata,
+        },
+        path,
+    )
 
 
 def load(path):

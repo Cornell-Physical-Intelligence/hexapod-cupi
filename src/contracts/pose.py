@@ -1,6 +1,8 @@
 """Finite planar poses in the named navigation frame."""
+
 import math
 from dataclasses import dataclass
+
 
 @dataclass(frozen=True)
 class Pose2D:
