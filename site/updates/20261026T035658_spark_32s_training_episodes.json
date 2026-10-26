@@ -2,12 +2,13 @@
   "id": "20261026T035658_spark_32s_training_episodes",
   "date": "2026-10-26T03:56:58.000000Z",
   "title": "Let native training packs choose episodes up to 32 s",
-  "summary": "locomotion.spark.prepare accepted training episodes of 5 to 20 s; it now accepts up to 32 s, the evaluator's longest probe, so destination_v28 and destination_v29 can train their 32 s stands natively. scripts/train.py already requires each named experiment's own episode length, and the native environment allows up to 60 s.",
+  "summary": "locomotion.spark.prepare and the native training script (scripts/cli.py) accepted training episodes of 5 to 20 s; both now accept up to 32 s, the evaluator's longest probe, so destination_v28 and destination_v29 can train their 32 s stands natively. scripts/train.py already requires each named experiment's own episode length, and the native environment allows up to 60 s. The first native destination_v29 launch stopped in cli.py's check before training.",
   "areas": [
     "locomotion"
   ],
   "next": "Queue the destination_v29 fine-tune of the native destination_v25 update-1350 checkpoint on the Spark.",
   "changes": [
+    "src/locomotion/scripts/cli.py",
     "src/locomotion/spark/prepare.py",
     "src/locomotion/tests/test_learner_options.py",
     "site/updates/20261026T035658_spark_32s_training_episodes.json"

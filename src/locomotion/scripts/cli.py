@@ -328,9 +328,10 @@ def validate(args):
     if args.video_case is not None and (args.mode != "evaluate" or args.eval_scope == "full"):
         raise ValueError("A video case applies to a learning-probe evaluation")
     if args.episode_seconds != 20.0 and (
-        args.mode != "train" or not 5.0 <= args.episode_seconds <= 20.0
+        args.mode != "train" or not 5.0 <= args.episode_seconds <= 32.0
     ):
-        raise ValueError("Episode length selection applies to training, between 5 and 20 seconds")
+        # 32 s, the evaluator's longest probe, as locomotion.spark.prepare allows.
+        raise ValueError("Episode length selection applies to training, between 5 and 32 seconds")
     if args.action_std_decay_updates is not None and args.action_std_final is None:
         raise ValueError("The deviation decay length needs a final action deviation")
     validate_decay(args.mode, args.updates, args.action_std_decay_updates)
