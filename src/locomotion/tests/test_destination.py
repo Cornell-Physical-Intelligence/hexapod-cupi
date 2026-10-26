@@ -1219,7 +1219,9 @@ class DriftTests(unittest.TestCase):
 
     def test_destination_v27_stops_a_quarter_of_the_walks(self):
         twentyseven = EXPERIMENTS["destination_v27"]["reward"]
-        self.assertEqual(replace(twentyseven, stop_fraction=0.5), EXPERIMENTS["destination_v26"]["reward"])
+        self.assertEqual(
+            replace(twentyseven, stop_fraction=0.5), EXPERIMENTS["destination_v26"]["reward"]
+        )
         self.assertEqual(EXPERIMENT_INPUTS["destination_v27"], "ghost_v11")
         native = GaitDouble(4096)
         native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
@@ -1246,7 +1248,9 @@ class DriftTests(unittest.TestCase):
         stands = (command == 0).all(-1)
         walks = planar > 0
         self.assertTrue(bool((command[turns, 2].abs() == 0.2).all()))
-        self.assertTrue(bool((planar[walks] >= 0.05 - 1e-6).all() & (planar[walks] <= 0.15 + 1e-6).all()))
+        self.assertTrue(
+            bool((planar[walks] >= 0.05 - 1e-6).all() & (planar[walks] <= 0.15 + 1e-6).all())
+        )
         for share, rows in ((0.1, turns), (0.1, stands), (0.5, task.stop_pending), (0.8, walks)):
             self.assertAlmostEqual(float(rows.double().mean()), share, delta=0.015)
         long = task.run_length == 1600
@@ -1255,7 +1259,10 @@ class DriftTests(unittest.TestCase):
 
         # Shortened runs: walks stop after 10 to 20 controls of 60 and long stands last 90.
         short = replace(
-            eight, command_controls=60, long_stand_controls=90, stop_after_min_controls=10,
+            eight,
+            command_controls=60,
+            long_stand_controls=90,
+            stop_after_min_controls=10,
             stop_after_max_controls=20,
         )
         native = GaitDouble(512)
@@ -1306,8 +1313,14 @@ class DriftTests(unittest.TestCase):
         end = ("end_destination_weight", "end_destination_distance_m", "end_destination_kernel")
         self.assertEqual([getattr(thirty, k) for k in end], [getattr(nine, k) for k in end])
         self.assertEqual(
-            replace(thirty, end_destination_weight=None, end_destination_distance_m=None,
-                    end_destination_kernel=None, end_destination_floor=None, termination_weight=42.0),
+            replace(
+                thirty,
+                end_destination_weight=None,
+                end_destination_distance_m=None,
+                end_destination_kernel=None,
+                end_destination_floor=None,
+                termination_weight=42.0,
+            ),
             EXPERIMENTS["destination_v25"]["reward"],
         )
         self.assertEqual(EXPERIMENTS["destination_v30"]["episode_seconds"], 20.0)

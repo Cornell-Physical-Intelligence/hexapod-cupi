@@ -314,9 +314,7 @@ class DestinationRewardConfig(RewardConfig):
         shape = self.end_destination_floor if linear else self.end_destination_power
         unused = self.end_destination_power if linear else self.end_destination_floor
         end = (self.end_destination_weight, self.end_destination_distance_m, shape)
-        if (
-            any(value is not None for value in end + (self.end_destination_kernel, unused))
-        ) and (
+        if (any(value is not None for value in end + (self.end_destination_kernel, unused))) and (
             any(value is None for value in end)
             or unused is not None
             or self.end_destination_kernel not in (None, "linear")
@@ -1310,7 +1308,9 @@ class DestinationTrainingTask(TrainingTask):
                 else:
                     shape = 1 / (1 + scaled.pow(config.end_destination_power))
                 closeness = share * alive * shape
-                components["end_destination"] = (config.end_destination_weight * closeness).to(reward)
+                components["end_destination"] = (config.end_destination_weight * closeness).to(
+                    reward
+                )
                 reward = reward + components["end_destination"]
         if config.planar_error_weight is not None:
             components["planar_error"] = self._planar_error(command, telemetry).to(reward)
