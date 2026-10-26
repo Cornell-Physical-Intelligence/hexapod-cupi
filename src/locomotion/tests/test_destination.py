@@ -493,6 +493,857 @@ class TaskTests(unittest.TestCase):
         self.assertIsInstance(SETTINGS["reward"], DestinationRewardConfig)
 
 
+class CurriculumTests(unittest.TestCase):
+    def test_destination_v10_is_v9_with_a_walking_speed_curriculum(self):
+        nine, ten = (
+            EXPERIMENTS["destination_v9"]["reward"],
+            EXPERIMENTS["destination_v10"]["reward"],
+        )
+        changed = {key for key, value in asdict(ten).items() if asdict(nine)[key] != value}
+        self.assertEqual(
+            changed,
+            {
+                "speed_curriculum_start_mps",
+                "speed_curriculum_step_mps",
+                "speed_curriculum_final_mps",
+                "speed_curriculum_threshold",
+                "speed_curriculum_window_controls",
+                "speed_curriculum_new_share",
+            },
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v10"], "ghost")
+        for bad in (
+            dict(speed_curriculum_final_mps=0.16),
+            dict(speed_curriculum_threshold=1.5),
+            dict(speed_curriculum_window_controls=0),
+            dict(speed_curriculum_new_share=None),
+        ):
+            with self.subTest(bad=bad), self.assertRaises(ValueError):
+                replace(ten, **bad).validate()
+
+    def test_walks_take_the_top_or_a_slower_speed_and_the_top_rises_past_the_threshold(self):
+        native = GaitDouble(4096)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        reward = EXPERIMENTS["destination_v10"]["reward"]
+        task = DestinationTrainingTask(native, TaskConfig(), None, reward)
+        task.reset()
+        command = native.commands
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        walks = (speed > 0) & (command[:, 2] == 0)
+        levels = torch.round(speed[walks] / 0.025).long()
+        self.assertEqual(task.curriculum_level, 0.075)
+        self.assertEqual(set(levels.tolist()), {1, 2, 3})
+        self.assertAlmostEqual(float((levels == 3).double().mean()), 0.5, delta=0.05)
+        # Walks point every way; arcs keep v9's 0.04 m/s.
+        angle = torch.atan2(command[walks, 1], command[walks, 0])
+        self.assertEqual(int(torch.histc(angle, 4, -math.pi, math.pi).min() > 0), 1)
+        self.assertTrue(
+            torch.allclose(speed[(speed > 0) & (command[:, 2] != 0)], torch.tensor(0.04))
+        )
+        # A window below the threshold holds the level; one above it raises the level and refills.
+        window = reward.speed_curriculum_window_controls
+        for _ in range(window):
+            task._curriculum_step(torch.full((4096,), 0.79))
+        self.assertEqual(task.curriculum_status()["level_mps"], 0.075)
+        for level in (0.1, 0.125, 0.15, 0.15):
+            for _ in range(window):
+                task._curriculum_step(torch.full((4096,), 0.85))
+            self.assertEqual(task.curriculum_status()["level_mps"], level)
+        status = task.curriculum_status()
+        self.assertTrue(status["complete"])
+        self.assertEqual([a["level_mps"] for a in status["advances"]], [0.075, 0.1, 0.125, 0.15])
+
+
+class BackoffTests(unittest.TestCase):
+    def test_destination_v11_rehearses_more_and_backs_off_a_falling_level(self):
+        ten, eleven = (EXPERIMENTS[n]["reward"] for n in ("destination_v10", "destination_v11"))
+        changed = {k for k, v in asdict(eleven).items() if asdict(ten)[k] != v}
+        self.assertEqual(
+            changed, {"speed_curriculum_new_share", "speed_curriculum_backoff_threshold"}
+        )
+        with self.assertRaises(ValueError):
+            replace(eleven, speed_curriculum_backoff_threshold=0.9).validate()
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, eleven)
+        window = eleven.speed_curriculum_window_controls
+        # The first level never backs off; a raised level that falls below 0.65 drops one step.
+        for _ in range(window):
+            task._curriculum_step(torch.full((64,), 0.5))
+        self.assertEqual(task.curriculum_level, 0.075)
+        for pay, level in ((0.85, 0.1), (0.85, 0.125), (0.6, 0.1)):
+            for _ in range(window):
+                task._curriculum_step(torch.full((64,), pay))
+            self.assertEqual(task.curriculum_level, level)
+        self.assertTrue(task.curriculum_status()["advances"][-1]["back_off"])
+
+    def test_destination_v13_walks_everywhere_and_pays_0_8_at_5_mm(self):
+        twelve, thirteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v12", "destination_v13")
+        )
+        changed = {k for k, v in asdict(thirteen).items() if asdict(twelve)[k] != v}
+        self.assertEqual(
+            changed,
+            {
+                "destination_distance_m",
+                "speed_curriculum_walks_only",
+                "speed_curriculum_window_controls",
+            },
+        )
+        self.assertEqual(thirteen.speed_curriculum_window_controls, 360)
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v13"], "ghost")
+        width, power = thirteen.destination_distance_m, thirteen.destination_power
+        self.assertAlmostEqual(1 / (1 + (0.005 / width) ** power), 0.8)
+        with self.assertRaises(ValueError):
+            replace(thirteen, speed_curriculum_walks_only=False).validate()
+        native = GaitDouble(2048)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, thirteen)
+        task.reset()
+        command = native.commands
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        # Every row walks without yaw; about a fifth are due to stop.
+        self.assertTrue(bool((speed > 0).all()) and bool((command[:, 2] == 0).all()))
+        self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.2, delta=0.03)
+        stopping = torch.nonzero(task.stop_pending).flatten()
+        task._resample(stopping)
+        self.assertTrue(bool((native.commands[stopping] == 0).all()))
+
+    def test_destination_v14_backs_off_only_after_50_updates_at_a_level(self):
+        thirteen, fourteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v13", "destination_v14")
+        )
+        changed = {k for k, v in asdict(fourteen).items() if asdict(thirteen)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_backoff_window_controls"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v14"], "ghost")
+        with self.assertRaises(ValueError):
+            replace(fourteen, speed_curriculum_backoff_window_controls=100).validate()
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, fourteen)
+        # 10 updates above 0.8 raise the level each time, up to 0.125 m/s; the window is read every 7
+        # controls, so the first read after 360 controls comes at 364.
+        for level in (0.1, 0.125):
+            for _ in range(364):
+                task._curriculum_step(torch.full((64,), 0.9))
+            self.assertEqual(task.curriculum_level, level)
+        # Low pay holds the level until 1800 controls have passed there, then lowers it once.
+        for _ in range(1799):
+            task._curriculum_step(torch.full((64,), 0.5))
+        self.assertEqual(task.curriculum_level, 0.125)
+        for _ in range(7):
+            task._curriculum_step(torch.full((64,), 0.5))
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertTrue(task.curriculum_status()["advances"][-1]["back_off"])
+
+    def test_destination_v15_rises_only_after_a_window_without_falls(self):
+        fourteen, fifteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v14", "destination_v15")
+        )
+        changed = {k for k, v in asdict(fifteen).items() if asdict(fourteen)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_advance_without_falls"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v15"], "ghost")
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, fifteen)
+        none, one = torch.zeros(64, dtype=torch.bool), torch.zeros(64, dtype=torch.bool)
+        one[3] = True
+        # High pay with one fall at control 100 holds the level at the read after 364 controls; the fall
+        # leaves the 360-control window at control 460 and the level rises at the next read (462).
+        for k in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), one if k == 99 else none)
+        self.assertEqual(task.curriculum_level, 0.075)
+        self.assertEqual(task.curriculum_status()["window_falls"], 1)
+        for _ in range(98):
+            task._curriculum_step(torch.full((64,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.1)
+
+    def test_destination_v12_is_v10_with_the_back_off(self):
+        ten, twelve = (EXPERIMENTS[n]["reward"] for n in ("destination_v10", "destination_v12"))
+        changed = {k for k, v in asdict(twelve).items() if asdict(ten)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_backoff_threshold"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v12"], "ghost")
+
+
+class GaitClockTests(unittest.TestCase):
+    def test_speed_v1_is_the_fixed_clock_up_to_0_075_and_shortens_the_cycle_above(self):
+        from locomotion.omniwalk.mdp.gait import GaitPhase, gait_cycle
+        from locomotion.omniwalk.mdp.rewards import scheduled_swing
+        from locomotion.rl.wrapper import clock_features
+
+        command = torch.tensor([[0.0, 0.05, 0.0], [-0.075, 0.0, 0.0], [0.0, 0.0, 0.2]])
+        gait = GaitPhase(3, "speed_v1", "cpu")
+        for k in range(600):
+            steps = torch.full((3,), k)
+            swing, period = gait.swing(command)
+            self.assertTrue(bool((swing == scheduled_swing(steps)).all()), k)
+            torch.testing.assert_close(period, torch.full((3,), 1.2, dtype=torch.float64))
+            torch.testing.assert_close(
+                clock_features(steps, 60, command, gait.phase),
+                clock_features(steps, 60, command),
+                atol=1e-5,
+                rtol=0,
+            )
+            gait.advance(command)
+        walks = torch.tensor([[0.0875, 0.0, 0.0], [0.0, -0.1, 0.0], [0.125, 0.0, 0.0], [0.3, 0, 0]])
+        period, swing = gait_cycle(walks, "speed_v1")
+        torch.testing.assert_close(
+            period, torch.tensor([56.0, 52.0, 44.0, 40.0], dtype=torch.float64)
+        )
+        torch.testing.assert_close(swing, torch.tensor([0.44, 0.48, 0.5, 0.5], dtype=torch.float64))
+
+    def test_evaluation_follows_the_phase_the_training_task_kept(self):
+        from locomotion.omniwalk.mdp.gait import GaitPhase
+
+        trained, followed = GaitPhase(1, "speed_v1", "cpu"), GaitPhase(1, "speed_v1", "cpu")
+        speeds = [0.1] * 70 + [0.125] * 50 + [0.0] * 30 + [0.15] * 40
+        for k, speed in enumerate(speeds):
+            command = torch.tensor([[speed, 0.0, 0.0]])
+            seen = followed.follow(command, torch.tensor([k])).clone()
+            torch.testing.assert_close(seen, trained.phase)
+            trained.advance(command)
+        # A 0.125 m/s walk crosses half its 44-control cycle in 22 controls.
+        gait = GaitPhase(1, "speed_v1", "cpu")
+        for _ in range(22):
+            gait.advance(torch.tensor([[0.125, 0.0, 0.0]]))
+        self.assertAlmostEqual(float(gait.phase[0]), 0.5)
+
+    def test_destination_v16_scales_the_clock_and_backs_off_a_robot_5_cm_from_its_ghost(self):
+        fifteen, sixteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v15", "destination_v16")
+        )
+        changed = {k for k, v in asdict(sixteen).items() if asdict(fifteen)[k] != v}
+        self.assertEqual(changed, {"gait_clock_scaling", "speed_curriculum_backoff_distance_m"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v16"], "ghost")
+        with self.assertRaises(ValueError):
+            replace(sixteen, gait_clock_scaling="speed_v0").validate()
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, sixteen)
+        near, none = torch.zeros(64), torch.zeros(64, dtype=torch.bool)
+        for _ in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), none, near)
+        self.assertEqual(task.curriculum_level, 0.1)
+        # A fallen robot's distance does not count (its fall holds the level); a standing one 6 cm away
+        # lowers it at the next read of a full window, however high the pay.
+        far, fell = near.clone(), none.clone()
+        far[5], fell[5] = 0.2, True
+        for k in range(364):
+            task._curriculum_step(
+                torch.full((64,), 0.9), fell if k == 10 else none, far if k == 10 else near
+            )
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertEqual(task.curriculum_status()["window_lost"], 0)
+        far[5] = 0.06
+        for _ in range(7):
+            task._curriculum_step(torch.full((64,), 0.9), none, far)
+        self.assertEqual(task.curriculum_level, 0.075)
+        # The first level holds while any robot stands that far away, and rises once none has for a window.
+        for _ in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), none, far)
+        self.assertEqual(task.curriculum_level, 0.075)
+        for _ in range(364):
+            task._curriculum_step(torch.full((64,), 0.9), none, near)
+        self.assertEqual(task.curriculum_level, 0.1)
+        record = task.curriculum_status()["advances"][-2]
+        self.assertEqual((record["back_off"], record["reason"]), (True, "distance"))
+
+    def test_destination_v17_never_backs_off_and_rises_after_30_updates(self):
+        sixteen, seventeen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v16", "destination_v17")
+        )
+        changed = {k for k, v in asdict(seventeen).items() if asdict(sixteen)[k] != v}
+        self.assertEqual(
+            changed,
+            {
+                "speed_curriculum_window_controls",
+                "speed_curriculum_backoff_threshold",
+                "speed_curriculum_backoff_window_controls",
+                "speed_curriculum_backoff_distance_m",
+            },
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v17"], "ghost")
+        self.assertEqual(seventeen.gait_clock_scaling, "speed_v1")
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, seventeen)
+        none = torch.zeros(64, dtype=torch.bool)
+        # The window is read every 21 controls: 1071 controls are too few, the read at 1092 raises the level.
+        for _ in range(1071):
+            task._curriculum_step(torch.full((64,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.075)
+        for _ in range(21):
+            task._curriculum_step(torch.full((64,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.1)
+        # Low pay, falls and far robots hold the level and never lower it.
+        fell, far = none.clone(), torch.full((64,), 0.5)
+        fell[0] = True
+        for _ in range(5000):
+            task._curriculum_step(torch.full((64,), 0.1), fell, far)
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertFalse(any(a.get("back_off") for a in task.curriculum_status()["advances"]))
+
+    def test_destination_v18_rises_only_when_every_finished_walk_passes_the_checks(self):
+        from locomotion.omniwalk.destination_task import WALK_CHECKS, walk_failures
+
+        seventeen, eighteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v17", "destination_v18")
+        )
+        changed = {k for k, v in asdict(eighteen).items() if asdict(seventeen)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_pass_checks"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v18"], "ghost")
+        # The evaluator's bounds: 0.0316 m/s of mean planar error fails a 0.125 m/s walk (bound 0.03125)
+        # and torque above 1.6 Nm in 0.6% of joint-controls fails any walk.
+        sums = torch.tensor([[0.0316, 0.0, 0.0, 0.0, 0.0], [0.031, 0.0, 0.0, 0.0, 0.006]])
+        failed = walk_failures(
+            sums,
+            torch.ones(2),
+            torch.full((2,), 0.125),
+            torch.zeros(2, dtype=torch.bool),
+            torch.zeros(2, dtype=torch.bool),
+        )
+        named = [[c for c, f in zip(WALK_CHECKS, row) if f] for row in failed.tolist()]
+        self.assertEqual(named, [["planar_error_mps"], ["computed_demand_over_rating_fraction"]])
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, eighteen)
+        task.reset()
+        command = torch.tensor([[0.1, 0.0, 0.0]]).repeat(4, 1)
+        native.commands[:] = command
+        # Row 0 walks on the command; row 1 lags 0.05 m/s; both are scored when their commands end.
+        velocity = torch.tensor(
+            [[0.0, -0.1, 0.0], [0.0, -0.05, 0.0], [0.0, -0.1, 0.0], [0.0, -0.1, 0.0]]
+        )
+        native.current["root_velocity"] = torch.cat((velocity, torch.zeros(4, 3)), -1)
+        identity = torch.tensor([[0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 1.0]]).repeat(4, 1)
+        telemetry = {
+            "root_pose_xyzw": identity,
+            "angular_velocity_body": torch.zeros(4, 3),
+            "computed_torque_nm": torch.zeros(4, 18),
+            "joint_velocity_rad_s": torch.zeros(4, 18),
+        }
+        task.command_elapsed[:] = 0
+        for _ in range(150):
+            task.command_elapsed += 1
+            task._record_walks(command, telemetry, torch.zeros(4, dtype=torch.bool))
+        self.assertEqual(task.walk_counted.tolist(), [50.0] * 4)
+        task._finish_walks(torch.tensor([0, 1]))
+        self.assertEqual((task.pending_walks, task.pending_failed), (2, 1))
+        self.assertEqual(task.check_failures["planar_error_mps"], 1)
+        # A failed walk in the window holds the level however high the pay; a clean window raises it.
+        none = torch.zeros(4, dtype=torch.bool)
+        task.pending_walks = task.pending_failed = 0
+        for k in range(1092):
+            if k == 100:
+                task.pending_walks, task.pending_failed = 2, 1
+            task._curriculum_step(torch.full((4,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.075)
+        self.assertEqual(task.curriculum_status()["window_walks_failed"], 1)
+        for k in range(1092):
+            task.pending_walks += k == 5
+            task._curriculum_step(torch.full((4,), 0.9), none)
+        self.assertEqual(task.curriculum_level, 0.1)
+
+    def test_the_status_reports_the_speed_of_walks_at_the_top_level(self):
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(
+            native, TaskConfig(), None, EXPERIMENTS["destination_v18"]["reward"]
+        )
+        # Rows 0 and 1 walk at the 0.075 m/s level (forward, then left); row 2 walks slower; row 3 fell.
+        command = torch.tensor(
+            [[0.075, 0.0, 0.0], [0.0, 0.075, 0.0], [0.05, 0.0, 0.0], [0.075, 0.0, 0.0]]
+        )
+        nav = torch.tensor([[0.07, 0.01, 0.0], [0.0, 0.08, 0.0], [0.05, 0.0, 0.0], [0.0, 0.0, 0.0]])
+        fell = torch.tensor([False, False, False, True])
+        task._record_top_speed(command, {"linear_velocity_nav": nav}, fell)
+        status = task.curriculum_status()
+        self.assertEqual(status["top_speed_controls"], 2)
+        self.assertAlmostEqual(status["top_speed_along_command_sum_mps"], 0.15, places=6)
+        # A new level starts the count again.
+        for _ in range(1092):
+            task.pending_walks += 1
+            task._curriculum_step(torch.full((4,), 0.9), torch.zeros(4, dtype=torch.bool))
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertEqual(task.curriculum_status()["top_speed_controls"], 0)
+
+    def test_destination_v19_charges_a_growing_lag_and_doubles_the_planar_bound(self):
+        from locomotion.omniwalk.destination_task import WALK_CHECKS, linear_tail, walk_failures
+
+        eighteen, nineteen = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v18", "destination_v19")
+        )
+        changed = {k for k, v in asdict(nineteen).items() if asdict(eighteen)[k] != v}
+        self.assertEqual(
+            changed,
+            {
+                "destination_linear_from_m",
+                "destination_penalty_cap",
+                "speed_curriculum_planar_bound_scale",
+            },
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v19"], "ghost")
+        with self.assertRaises(ValueError):
+            replace(nineteen, destination_kernel="linear", destination_power=None).validate()
+        # The rational kernel up to 20 mm, then its tangent: zero near 49 mm and -1 from 117 mm on.
+        distance = torch.tensor([0.005, 0.02, 0.0201, 0.0493, 0.1, 0.2])
+        kernel = 1 / (1 + (distance / nineteen.destination_distance_m).pow(1.2))
+        pay = linear_tail(distance, kernel, nineteen)
+        torch.testing.assert_close(pay[:2], kernel[:2])
+        torch.testing.assert_close(
+            pay, torch.tensor([0.8, 0.4311, 0.4297, 0.0, -0.7457, -1.0]), atol=2e-3, rtol=0
+        )
+        # At 0.125 m/s the walking check now allows 62.5 mm/s of mean planar error.
+        failed = walk_failures(
+            torch.tensor([[0.06, 0, 0, 0, 0], [0.065, 0, 0, 0, 0]]),
+            torch.ones(2),
+            torch.full((2,), 0.125),
+            torch.zeros(2, dtype=torch.bool),
+            torch.zeros(2, dtype=torch.bool),
+            nineteen.speed_curriculum_planar_bound_scale,
+        )
+        self.assertEqual(failed[:, WALK_CHECKS.index("planar_error_mps")].tolist(), [False, True])
+
+    def test_the_wrapper_shows_the_task_phase_and_records_the_scaling(self):
+        sixteen = EXPERIMENTS["destination_v16"]["reward"]
+        task, native = moving_task(lambda k: (0.0, -0.125 * 0.02 * k, 0.0), reward=sixteen)
+        with self.assertRaises(ValueError):
+            DestinationVecEnv(task, plain, observation_scaling="fixed", gait_clock=60)
+        env = DestinationVecEnv(
+            task, plain, observation_scaling="fixed", gait_clock=60, gait_clock_scaling="speed_v1"
+        )
+        native.commands[:] = torch.tensor([[0.125, 0.0, 0.0]])
+        task.remaining_controls[:] = 1000
+        env.get_observations()
+        for _ in range(22):
+            observation, *_ = env.step(torch.zeros(1, 18))
+        torch.testing.assert_close(
+            observation["policy"][0, 231:233], torch.tensor([0.0, -1.0]), atol=1e-5, rtol=0
+        )
+        # The reward scheduled tripod B's swing at the half cycle, not the fixed clock's control 22.
+        self.assertEqual(task.last_components["gait_schedule"].shape, (1,))
+        swing, _ = task.gait.swing(native.commands)
+        self.assertEqual(swing[0].tolist(), [False, True, False, True, False, True])
+
+
+class GhostV10Tests(unittest.TestCase):
+    def test_the_inputs_are_the_sideways_gap_and_the_velocity_relative_to_the_ghost(self):
+        from locomotion.omniwalk.mdp.destination import ghost_v10_features
+
+        # Heading 0: navigation forward is world -y and left is world +x. The ghost is 30 mm ahead and
+        # 10 mm to the left; the body moved 2 mm forward in the last control while the ghost walks 0.15 m/s.
+        pose, before = pose_at(0.0, 0.0, 0.0), pose_at(0.0, 0.002, 0.0)
+        destination = torch.tensor([[0.01, -0.03, 0.0]])
+        command = torch.tensor([[0.15, 0.0, 0.0]])
+        value = ghost_v10_features(pose, before, destination, torch.tensor([50]), command)
+        torch.testing.assert_close(
+            value[0], torch.tensor([0.0, 0.1, 0.0, 1.0, 0.2, -0.5, 0.0]), atol=1e-5, rtol=0
+        )
+        # Under a zero command the whole gap is the sideways input and the velocity is the body's own.
+        value = ghost_v10_features(pose, before, destination, torch.tensor([50]), command * 0)
+        torch.testing.assert_close(value[0, :2], torch.tensor([0.3, 0.1]), atol=1e-5, rtol=0)
+        torch.testing.assert_close(value[0, 5:], torch.tensor([1.0, 0.0]), atol=1e-5, rtol=0)
+
+    def wrapped(self):
+        twenty = EXPERIMENTS["destination_v20"]["reward"]
+        task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0), reward=twenty)
+        env = DestinationVecEnv(
+            task,
+            plain,
+            observation_scaling="fixed",
+            gait_clock=60,
+            gait_clock_scaling="speed_v1",
+            destination_input="ghost_v10",
+        )
+        native.commands[:] = FORWARD
+        task.remaining_controls[:] = 1000
+        native.current["root_velocity"] = torch.zeros(1, 6)  # read by the walking checks
+        return env, task, native
+
+    def test_destination_v20_gives_the_policy_seven_ghost_inputs_that_track_the_lag(self):
+        nineteen, twenty = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v19", "destination_v20")
+        )
+        changed = {k for k, v in asdict(twenty).items() if asdict(nineteen)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_planar_bound_scale"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v20"], "ghost_v10")
+        self.assertEqual(
+            ppo_config(7, gait_clock=60, destination_input="ghost_v10")["environment_wrapper"][
+                "destination_input"
+            ],
+            "ghost_v10",
+        )
+        env, task, native = self.wrapped()
+        first = env.get_observations()
+        self.assertEqual(
+            (first["policy"].shape[-1], first["critic"].shape[-1]), (231 + 2 + 7, 234 + 2 + 7)
+        )
+        for _ in range(100):
+            observation, *_ = env.step(torch.zeros(1, 18))
+        # Walking straight 0.02 m/s short of the command: no sideways gap, 0.2 below the ghost's speed.
+        torch.testing.assert_close(
+            observation["policy"][0, -7:],
+            torch.tensor([0.0, 0.0, 0.0, 1.0, 0.4, -0.2, 0.0]),
+            atol=1e-4,
+            rtol=0,
+        )
+        torch.testing.assert_close(observation["critic"][0, -7:], observation["policy"][0, -7:])
+
+    def test_evaluation_rebuilds_the_training_inputs(self):
+        from locomotion.omniwalk.mdp.destination import GhostV10Tracker
+
+        env, task, native = self.wrapped()
+        tracker, seen, trained = GhostV10Tracker(1, "cpu"), [], []
+        for _ in range(30):
+            seen.append(
+                tracker.inputs(native.current["root"], native.commands, native.episode_steps)[0]
+            )
+            observation, *_ = env.step(torch.zeros(1, 18))
+            trained.append(observation["policy"][0, -7:].clone())
+        for k in range(29):
+            torch.testing.assert_close(seen[k + 1], trained[k], atol=1e-5, rtol=0)
+
+    def test_ghost_v11_adds_the_along_track_gap_and_rebuilds_in_evaluation(self):
+        from locomotion.omniwalk.mdp.destination import (
+            GhostV11Tracker,
+            destination_features,
+            ghost_v10_features,
+        )
+
+        self.assertEqual(EXPERIMENTS["destination_v21"], EXPERIMENTS["destination_v20"])
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v21"], "ghost_v11")
+        # Sideways plus along-track is the ghost gap; the first seven values are ghost_v10's.
+        pose, before = pose_at(0.0, 0.0, 0.3), pose_at(0.001, 0.002, 0.3)
+        destination = torch.tensor([[0.01, -0.03, 0.35]])
+        for command in (torch.tensor([[0.12, 0.05, 0.0]]), torch.zeros(1, 3)):
+            value = ghost_v10_features(pose, before, destination, torch.tensor([9]), command, True)
+            torch.testing.assert_close(
+                value[:, :7],
+                ghost_v10_features(pose, before, destination, torch.tensor([9]), command),
+            )
+            gap = destination_features(pose, destination, torch.tensor([9]))[:, :2]
+            torch.testing.assert_close(value[:, :2] + value[:, 7:], gap, atol=1e-6, rtol=0)
+        twenty = EXPERIMENTS["destination_v21"]["reward"]
+        task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0), reward=twenty)
+        env = DestinationVecEnv(
+            task,
+            plain,
+            observation_scaling="fixed",
+            gait_clock=60,
+            gait_clock_scaling="speed_v1",
+            destination_input="ghost_v11",
+        )
+        native.commands[:] = FORWARD
+        task.remaining_controls[:] = 1000
+        native.current["root_velocity"] = torch.zeros(1, 6)
+        self.assertEqual(env.get_observations()["policy"].shape[-1], 231 + 2 + 9)
+        tracker, seen, trained = GhostV11Tracker(1, "cpu"), [], []
+        for _ in range(100):
+            seen.append(
+                tracker.inputs(native.current["root"], native.commands, native.episode_steps)[0]
+            )
+            observation, *_ = env.step(torch.zeros(1, 18))
+            trained.append(observation["policy"][0, -9:].clone())
+        for k in range(99):
+            torch.testing.assert_close(seen[k + 1], trained[k], atol=1e-5, rtol=0)
+        # 100 controls 0.02 m/s short of the command: 40 mm behind along the path, 0.2 below its speed.
+        torch.testing.assert_close(
+            trained[-1],
+            torch.tensor([0.0, 0.0, 0.0, 1.0, 0.4, -0.2, 0.0, 0.4, 0.0]),
+            atol=1e-4,
+            rtol=0,
+        )
+
+
+class DriftTests(unittest.TestCase):
+    def walk(self, motion):
+        """One 200-control forward walk at 0.05 m/s under destination_v22; returns the task after it ends."""
+        task, native = moving_task(motion, reward=EXPERIMENTS["destination_v22"]["reward"])
+        native.current["root_velocity"] = torch.zeros(1, 6)
+        task.remaining_controls[:] = 200
+        task.drift_walking[:], task.drift_plan[:], task.drift_halfway[:] = True, 200, False
+        for _ in range(200):
+            task.step(torch.zeros(1, 18))
+        return task
+
+    def test_destination_v22_judges_the_curriculum_on_drift_from_halfway_to_the_end(self):
+        twentyone, twentytwo = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v21", "destination_v22")
+        )
+        changed = {k for k, v in asdict(twentytwo).items() if asdict(twentyone)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_measure"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v22"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(twentytwo, speed_curriculum_measure="pay").validate()
+        # A walk that starts a second late and then holds the ghost's speed keeps a steady 50 mm gap: no drift.
+        late = self.walk(lambda k: (0.0, -0.05 * 0.02 * max(0, k - 50), 0.0))
+        self.assertEqual(late.pending_scored, 1)
+        self.assertAlmostEqual(late.pending_drift, 0.0, places=5)
+        self.assertAlmostEqual(late.pending_score, 1.0, places=4)
+        # A walk 0.02 m/s slow drifts 40 mm over its second half and scores the kernel there (0.25).
+        slow = self.walk(lambda k: (0.0, -0.03 * 0.02 * k, 0.0))
+        self.assertAlmostEqual(slow.pending_drift, 0.04, places=5)
+        self.assertAlmostEqual(slow.pending_score, 1 / (1 + (0.04 / 0.015874) ** 1.2), places=3)
+
+    def test_the_window_rises_on_the_mean_drift_score_of_finished_walks(self):
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(
+            native, TaskConfig(), None, EXPERIMENTS["destination_v22"]["reward"]
+        )
+        none = torch.zeros(4, dtype=torch.bool)
+        # High pay with no scored walks never rises; walks scoring 0.7 hold it; walks scoring 0.9 raise it.
+        for _ in range(1092):
+            task.pending_walks += 1
+            task._curriculum_step(torch.full((4,), 0.95), none)
+        self.assertEqual(task.curriculum_level, 0.075)
+        for score in (0.7, 0.9):
+            for _ in range(1092):
+                task.pending_walks += 1
+                task.pending_scored, task.pending_score, task.pending_drift = 1.0, score, 0.004
+                task._curriculum_step(torch.full((4,), 0.3), none)
+        # It rises once the rolling mean of scored walks passes 0.8, while 0.9s replace the 0.7s.
+        self.assertEqual(task.curriculum_level, 0.1)
+        self.assertGreater(task.curriculum_advances[-1]["window_mean"], 0.8)
+        self.assertLess(task.curriculum_advances[-1]["window_mean"], 0.81)
+
+    def test_destination_v23_charges_the_evaluators_planar_error_each_walking_control(self):
+        twentytwo, twentythree = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v22", "destination_v23")
+        )
+        changed = {k for k, v in asdict(twentythree).items() if asdict(twentytwo)[k] != v}
+        self.assertEqual(changed, {"planar_error_weight"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v23"], "ghost_v11")
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentythree)
+        # At heading 0 navigation forward is world -y. Rows: on the command; one bound (37.5 mm/s) off at
+        # 0.15 m/s; 0.05 m/s off a 0.05 m/s walk (bound 25 mm/s); a zero command, never charged.
+        command = torch.tensor(
+            [[0.15, 0.0, 0.0], [0.15, 0.0, 0.0], [0.05, 0.0, 0.0], [0.0, 0.0, 0.0]]
+        )
+        native.current["root_velocity"] = torch.tensor(
+            [
+                [0.0, -0.15, 0, 0, 0, 0],
+                [0.0375, -0.15, 0, 0, 0, 0],
+                [0.0, -0.1, 0, 0, 0, 0],
+                [0.3, 0.0, 0, 0, 0, 0],
+            ]
+        )
+        telemetry = {"root_pose_xyzw": torch.tensor([[0.0, 0, 0.1, 0, 0, 0, 1.0]]).repeat(4, 1)}
+        torch.testing.assert_close(
+            task._planar_error(command, telemetry), torch.tensor([0.0, -0.5, -2.0, 0.0])
+        )
+
+    def test_destination_v24_continues_the_curriculum_to_0_175(self):
+        twentythree, twentyfour = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v23", "destination_v24")
+        )
+        changed = {k for k, v in asdict(twentyfour).items() if asdict(twentythree)[k] != v}
+        self.assertEqual(changed, {"speed_curriculum_final_mps"})
+        self.assertEqual(twentyfour.speed_curriculum_final_mps, 0.175)
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v24"], "ghost_v11")
+
+    def test_named_experiment_clocks_match_their_rewards_and_reach_the_learner_configuration(self):
+        from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_CLOCKS
+
+        for name, settings in EXPERIMENTS.items():
+            self.assertEqual(
+                EXPERIMENT_CLOCKS.get(name), settings["reward"].gait_clock_scaling, name
+            )
+        config = ppo_config(
+            7,
+            action_mean="tanh",
+            learning_rate_max=1e-4,
+            learning_rate_min=2e-5,
+            gait_clock=60,
+            destination_input="ghost_v11",
+            gait_clock_scaling="speed_v1",
+        )
+        self.assertEqual(config["algorithm"]["learning_rate_min"], 2e-5)
+        self.assertEqual(config["environment_wrapper"]["gait_clock_scaling"], "speed_v1")
+        self.assertNotIn("learning_rate_min", ppo_config(7, learning_rate_max=1e-4)["algorithm"])
+        for options in (
+            {"learning_rate_min": 2e-5},
+            {"learning_rate_max": 1e-4, "learning_rate_min": 2e-4},
+            {"gait_clock_scaling": "speed_v1"},
+        ):
+            with self.assertRaises(ValueError):
+                ppo_config(7, **options)
+
+    def test_destination_v25_caps_a_linear_planar_error_charge(self):
+        twentythree, twentyfive = (
+            EXPERIMENTS[n]["reward"] for n in ("destination_v23", "destination_v25")
+        )
+        changed = {k for k, v in asdict(twentyfive).items() if asdict(twentythree)[k] != v}
+        self.assertEqual(changed, {"planar_error_cap"})
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v25"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(twentyfive, planar_error_weight=None).validate()
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentyfive)
+        # At 0.15 m/s (bound 37.5 mm/s): on the command, at the bound, at three bounds (capped), stopped.
+        command = torch.tensor([[0.15, 0.0, 0.0]] * 3 + [[0.0, 0.0, 0.0]])
+        native.current["root_velocity"] = torch.tensor(
+            [
+                [0.0, -0.15, 0, 0, 0, 0],
+                [0.0375, -0.15, 0, 0, 0, 0],
+                [0.1125, -0.15, 0, 0, 0, 0],
+                [0.3, 0.0, 0, 0, 0, 0],
+            ]
+        )
+        telemetry = {"root_pose_xyzw": torch.tensor([[0.0, 0, 0.1, 0, 0, 0, 1.0]]).repeat(4, 1)}
+        torch.testing.assert_close(
+            task._planar_error(command, telemetry), torch.tensor([0.0, -0.5, -1.0, 0.0])
+        )
+
+    def test_destination_v26_walks_at_uniform_speeds_and_stops_half_the_walks(self):
+        twentysix = EXPERIMENTS["destination_v26"]["reward"]
+        self.assertIsNone(twentysix.speed_curriculum_start_mps)
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v26"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(twentysix, walk_speed_min_mps=0.2).validate()
+        native = GaitDouble(4096)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentysix)
+        task.reset()
+        command = native.commands
+        speed = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        # Every row walks without yaw at 0.05 to 0.15 m/s, spread across the range; about half will stop.
+        self.assertTrue(bool((speed >= 0.05 - 1e-6).all()) and bool((speed <= 0.15 + 1e-6).all()))
+        self.assertTrue(bool((command[:, 2] == 0).all()))
+        self.assertAlmostEqual(float(speed.mean()), 0.1, delta=0.003)
+        self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.5, delta=0.03)
+        self.assertIsNone(task.curriculum_status())
+
+    def test_destination_v27_stops_a_quarter_of_the_walks(self):
+        twentyseven = EXPERIMENTS["destination_v27"]["reward"]
+        self.assertEqual(
+            replace(twentyseven, stop_fraction=0.5), EXPERIMENTS["destination_v26"]["reward"]
+        )
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v27"], "ghost_v11")
+        native = GaitDouble(4096)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, twentyseven)
+        task.reset()
+        self.assertAlmostEqual(float(task.stop_pending.double().mean()), 0.25, delta=0.03)
+
+    def test_destination_v28_mixes_runs_and_pays_the_ghost_gap_more_towards_each_runs_end(self):
+        settings = EXPERIMENTS["destination_v28"]
+        eight = settings["reward"]
+        self.assertEqual(settings["episode_seconds"], 32.0)
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v28"], "ghost_v11")
+        with self.assertRaises(ValueError):
+            replace(eight, run_mix=(0.5, 0.5, 0.5, 0.0)).validate()
+        with self.assertRaises(ValueError):
+            replace(eight, termination_weight=42.0).validate()
+        native = GaitDouble(8192)
+        native.cfg.episode_seconds, native.cfg.declaration = 32.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, eight)
+        task.reset()
+        command = native.commands
+        planar = torch.linalg.vector_norm(command[:, :2], dim=-1)
+        turns = (planar == 0) & (command[:, 2] != 0)
+        stands = (command == 0).all(-1)
+        walks = planar > 0
+        self.assertTrue(bool((command[turns, 2].abs() == 0.2).all()))
+        self.assertTrue(
+            bool((planar[walks] >= 0.05 - 1e-6).all() & (planar[walks] <= 0.15 + 1e-6).all())
+        )
+        for share, rows in ((0.1, turns), (0.1, stands), (0.5, task.stop_pending), (0.8, walks)):
+            self.assertAlmostEqual(float(rows.double().mean()), share, delta=0.015)
+        long = task.run_length == 1600
+        self.assertTrue(bool((long == (stands & (task.remaining_controls == 1600))).all()))
+        self.assertAlmostEqual(float(long.double().mean()), 0.05, delta=0.01)
+
+        # Shortened runs: walks stop after 10 to 20 controls of 60 and long stands last 90.
+        short = replace(
+            eight,
+            command_controls=60,
+            long_stand_controls=90,
+            stop_after_min_controls=10,
+            stop_after_max_controls=20,
+        )
+        native = GaitDouble(512)
+        native.cfg.episode_seconds, native.cfg.declaration = 32.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, short)
+        task.reset()
+        stopping, length = task.stop_pending.clone(), task.run_length.clone()
+        still = (native.commands == 0).all(-1)
+        for k in range(1, 61):
+            result = task.step(torch.zeros(512, 18))
+            # The body stays at the origin, so a stand is at its ghost and earns the run's share done.
+            torch.testing.assert_close(
+                task.last_components["end_destination"][still], (k / length[still]).float()
+            )
+            self.assertTrue(bool((result["truncated"] == (length == k)).all()))
+            if k == 30:
+                self.assertTrue(bool((native.commands[stopping] == 0).all()))
+        # The 60-control runs keep their command until the reset that the timeout calls for.
+        self.assertTrue(bool((task.remaining_controls[length == 60] == 0).all()))
+
+    def test_destination_v29_pays_the_run_end_gap_linearly_down_to_a_floor(self):
+        nine = EXPERIMENTS["destination_v29"]["reward"]
+        self.assertEqual(EXPERIMENT_INPUTS["destination_v29"], "ghost_v11")
+        for broken in ({"end_destination_floor": None}, {"end_destination_power": 1.2}):
+            with self.assertRaises(ValueError):
+                replace(nine, **broken).validate()
+        native = GaitDouble(4)
+        native.cfg.episode_seconds, native.cfg.declaration = 32.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, nine)
+        task.reset()
+        native.commands[:] = 0
+        task.stop_pending[:] = False
+        task.run_length[:] = 4
+        task.remaining_controls[:] = 4
+        task.step(torch.zeros(4, 18))
+        # At control 2 of 4, ghosts 0, 12.5, 25 and 75 mm from the body earn half of 1, 0.5, 0 and -1.
+        task.destination[:, :2] = native.current["root"][:, :2].to(task.destination)
+        task.destination[:, 0] += torch.tensor([0.0, 0.0125, 0.025, 0.075])
+        task.command_started[:] = False
+        task.step(torch.zeros(4, 18))
+        torch.testing.assert_close(
+            task.last_components["end_destination"], torch.tensor([0.5, 0.25, 0.0, -0.5])
+        )
+
+    def test_destination_v30_is_the_v25_curriculum_with_the_linear_run_end_pay(self):
+        thirty = EXPERIMENTS["destination_v30"]["reward"]
+        nine = EXPERIMENTS["destination_v29"]["reward"]
+        end = ("end_destination_weight", "end_destination_distance_m", "end_destination_kernel")
+        self.assertEqual([getattr(thirty, k) for k in end], [getattr(nine, k) for k in end])
+        self.assertEqual(
+            replace(
+                thirty,
+                end_destination_weight=None,
+                end_destination_distance_m=None,
+                end_destination_kernel=None,
+                end_destination_floor=None,
+                termination_weight=42.0,
+            ),
+            EXPERIMENTS["destination_v25"]["reward"],
+        )
+        self.assertEqual(EXPERIMENTS["destination_v30"]["episode_seconds"], 20.0)
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, thirty)
+        task.reset()
+        self.assertEqual(task.curriculum_status()["level_mps"], 0.075)
+        self.assertTrue(bool((task.run_length == 1000).all()))
+        native.current["root_velocity"] = torch.zeros(64, 6)
+        task.step(torch.zeros(64, 18))
+        self.assertIn("end_destination", task.last_components)
+
+    def test_the_capped_rate_learner_can_hold_a_learning_rate_floor(self):
+        from locomotion.rl.ppo import CappedRatePPO
+
+        learner = CappedRatePPO.__new__(CappedRatePPO)
+        learner.learning_rate_max, learner.learning_rate_min = 1e-4, 2e-5
+        for value, kept in ((1e-5, 2e-5), (5e-5, 5e-5), (1e-3, 1e-4)):
+            learner.learning_rate = value
+            self.assertAlmostEqual(learner.learning_rate, kept)
+
+
 class WrapperTests(unittest.TestCase):
     def wrapped(self, **options):
         task, native = moving_task(lambda k: (0.0, -0.03 * 0.02 * k, 0.0))  # 0.02 m/s short

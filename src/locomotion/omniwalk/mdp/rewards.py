@@ -416,12 +416,17 @@ def measured_reward(telemetry, commands, terminated, config=REWARD_CONFIG, nomin
         wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack(
             (-toe[..., 1], toe[..., 0]), -1
         )
-        period = config.schedule_period_controls * CONTROL_DT_S
+        # A speed-scaled gait clock gives each row its own cycle (``schedule_period_s``); each stride then
+        # pays in proportion to its cycle, so the stride pay per second stays that of the fixed clock.
+        fixed = config.schedule_period_controls * CONTROL_DT_S
+        period = telemetry.get("schedule_period_s")
+        period = fixed if period is None else period.to(device, torch.float32)[:, None]
         ratio = (travel.to(device, torch.float32) * wanted).sum(-1) / (
             wanted.square().sum(-1).clamp_min(1e-8) * period
         )
         moving = (commands != 0).any(-1).to(torch.float32)
         paid = landed.to(device, torch.bool).to(torch.float32) * ratio.clamp(0, 1).square()
+        paid = paid * (period / fixed)
         components["stride_length"] = config.stride_length_weight * moving * paid.sum(-1)
         reward = reward + components["stride_length"]
     if not bool(torch.isfinite(reward).all()):

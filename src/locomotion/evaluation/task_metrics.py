@@ -317,6 +317,9 @@ class TaskMetrics:
             "cumulative_metrics": summary(self.metric_totals, self.metric_rows),
             "interval_metrics": summary(self.metric_interval, self.metric_interval_rows),
         }
+        curriculum = getattr(task, "curriculum_status", None)
+        if curriculum is not None and curriculum() is not None:
+            result["curriculum"] = curriculum()
         if reset_interval:
             self.metric_interval, self.metric_interval_rows = {}, 0
 

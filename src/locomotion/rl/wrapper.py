@@ -27,9 +27,13 @@ def scale_observation(value, scaling, *, critic=False):
     return value * torch.as_tensor(scales, dtype=value.dtype, device=value.device)
 
 
-def clock_features(episode_steps, period, command):
-    """Sine and cosine of the gait phase while a motion command is held; zeros under a zero command."""
-    phase = 2 * math.pi * (episode_steps.to(torch.float32) % period) / period
+def clock_features(episode_steps, period, command, cycles=None):
+    """Sine and cosine of the gait phase while a motion command is held; zeros under a zero command.
+    ``cycles``, a speed-scaled phase in cycles (``omniwalk/mdp/gait.py``), replaces the control count."""
+    if cycles is None:
+        phase = 2 * math.pi * (episode_steps.to(torch.float32) % period) / period
+    else:
+        phase = (2 * math.pi * torch.remainder(cycles, 1.0)).to(torch.float32)
     moving = (command != 0).any(-1, keepdim=True).to(torch.float32)
     return torch.stack((torch.sin(phase), torch.cos(phase)), -1) * moving.to(phase.device)
 
@@ -93,12 +97,15 @@ class OmniVecEnv:
                 block = policy[:, 42 * frame + 24 : 42 * frame + 42]
                 block += torch.randn_like(block) * self.velocity_noise * scale
         if self.gait_clock:
-            # The phase restarts with each episode, so evaluation can rebuild it from the control count.
-            clock = clock_features(
-                self.task.episode_steps, self.gait_clock, output["obs"][:, 210:213]
-            ).to(policy)
+            # The phase restarts with each episode, so evaluation can rebuild it from the commands seen.
+            clock = self.clock(output["obs"][:, 210:213]).to(policy)
             policy, critic = torch.cat((policy, clock), -1), torch.cat((critic, clock), -1)
         return self.tensor_dict({"policy": policy, "critic": critic}, batch_size=[self.num_envs])
+
+    def clock(self, command):
+        """The clock inputs: the task's speed-scaled phase when it keeps one, else the control count."""
+        cycles = getattr(self.task, "gait_clock_phase", None)
+        return clock_features(self.task.episode_steps, self.gait_clock, command, cycles)
 
     def get_observations(self):
         return self.observations(self.current)
@@ -125,10 +132,7 @@ class OmniVecEnv:
                 critic[:, 210:213] = held
                 critic = scale_observation(critic, self.observation_scaling, critic=True)
                 if self.gait_clock:
-                    clock = clock_features(self.task.episode_steps, self.gait_clock, held).to(
-                        critic
-                    )
-                    critic = torch.cat((critic, clock), -1)
+                    critic = torch.cat((critic, self.clock(held).to(critic)), -1)
                 extras["command_time_outs"] = switched
                 extras["command_bootstrap_observation"] = self.tensor_dict(
                     {"critic": critic}, batch_size=[self.num_envs]

@@ -1,0 +1,21 @@
+{
+  "id": "20261024T222031_destination_v14_backoff_window",
+  "date": "2026-10-24T22:20:31.970171Z",
+  "title": "Add destination_v14: back off a speed level only after 50 updates there",
+  "summary": "On the surrogate, destination_v13's 10-update window reached 0.15 m/s within 40 updates but lowered it again after 10, and usually lowered 0.125 m/s after the next 10, so 0.15 m/s never trained for more than about 10 updates at a time. destination_v14 keeps the 10-update window for raising the level and judges the back-off on the last 50 updates at the level.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v14 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261024T222031_destination_v14_backoff_window.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task and reward are unchanged."
+}

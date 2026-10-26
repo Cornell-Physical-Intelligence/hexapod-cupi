@@ -1,0 +1,21 @@
+{
+  "id": "20261025T044718_destination_v22_drift_measure",
+  "date": "2026-10-25T04:47:18.000000Z",
+  "title": "Add destination_v22: the speed curriculum judges each walk's drift from halfway to the end",
+  "summary": "destination_v22 is destination_v21 whose speed curriculum judges walks by drift instead of the destination pay: for each walk, how far the planar gap to the ghost moved between the walk's halfway control and its last, scored on the destination kernel (0.8 at 5 mm, 0 after a fall). The level rises when the mean score of walks finished in the 30-update window passes 0.8, with no fall in the window and every finished walk passing the evaluator's checks. A lag left by the ghost's instant start no longer lowers the measure; a steady course at the ghost's speed and direction raises it. The reward is unchanged. In attempts 10, 11 and 13 the destination pay at 0.15 m/s fell mostly because the robots started more slowly and, at their top speed, could not close the gap.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v22 on the surrogate from the v9 ghost_v11 start and test it against v9.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T044718_destination_v22_drift_measure.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and evaluator are unchanged."
+}
