@@ -1,0 +1,33 @@
+:root {
+  --bg: #14161a; --card: #1d2026; --ink: #ecebe6; --muted: #a3a19a; --line: #343841; --grid: #2c3038;
+  --legA: #e8d44d; --legB: #b9a3f0; --body: #b4b2a9; --trail: #b4b2a9; --cmd: #f0997b; --pass: #5dcaa5; --fail: #f0997b;
+  --run-0: #6cc4de; --run-1: #f2b45a; --run-2: #5dcaa5; --run-3: #f08aae;
+}
+.runs-page { height: 100%; overflow: auto; background: var(--bg); color: var(--ink); font: 14px/1.5 system-ui, -apple-system, 'Segoe UI', sans-serif; }
+.runs-page main { max-width: 1320px; margin: 0 auto; padding: 16px 16px 40px; }
+.runs-page h1 { font-size: 20px; font-weight: 600; margin: 0 0 4px; }
+.runs-page .sub { color: var(--muted); margin: 0 0 10px; max-width: 920px; }
+.runs-page code { font-size: 12px; }
+.runs-page .open { display: inline-block; padding: 6px 12px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); cursor: pointer; }
+.runs-page .open input { display: none; }
+.runs-page .error { color: var(--fail); }
+.run-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0; }
+.run-chip { border: 2px solid; border-radius: 10px; padding: 6px 10px; }
+.cases { width: 100%; border-collapse: collapse; font-size: 13px; margin: 6px 0; display: block; overflow-x: auto; }
+.cases th { text-align: left; color: var(--muted); font-weight: 500; padding: 4px 8px; }
+.cases td { padding: 3px 8px; border-top: 1px solid var(--line); vertical-align: top; }
+.cases tr { cursor: pointer; }
+.cases tr.on td { background: var(--card); }
+.pass { color: var(--pass); font-weight: 600; }
+.fail { color: var(--fail); font-weight: 600; }
+.bar { display: flex; flex-wrap: wrap; gap: 8px 12px; align-items: center; position: sticky; top: 0; background: var(--bg); padding: 8px 0; z-index: 2; border-bottom: 1px solid var(--line); }
+.bar button, .bar select { font: inherit; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--card); color: var(--ink); cursor: pointer; }
+.bar button.on { border-color: var(--ink); font-weight: 600; }
+.bar input[type=range] { flex: 1; min-width: 140px; }
+.bar .clock { min-width: 52px; font-variant-numeric: tabular-nums; }
+.panels { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(380px, 100%), 1fr)); gap: 12px; margin-top: 12px; }
+.panel { background: var(--card); border: 1px solid var(--line); border-top: 5px solid; border-radius: 12px; padding: 10px; }
+.panel h2 { font-size: 15px; font-weight: 600; margin: 0; }
+.panel .meta { font-size: 12px; color: var(--muted); margin: 2px 0 6px; }
+.panel canvas.view { width: 100%; aspect-ratio: 4 / 3; display: block; border-radius: 8px; touch-action: none; cursor: grab; }
+.panel canvas.chart { width: 100%; height: 130px; display: block; margin-top: 6px; }
