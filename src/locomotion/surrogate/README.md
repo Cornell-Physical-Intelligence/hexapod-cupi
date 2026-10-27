@@ -40,6 +40,23 @@ The evaluator's `--randomization` sets the probe conditions apart from the
 checkpoint's training; it needs `--no-contact-consensus`, because the draw sets
 the friction that the consensus varies.
 
+`sweep --checkpoint ... --output ... --grid table2_v1_grid --jobs N` screens a
+checkpoint over the 27 fixed-condition cells, one
+`evaluate --grid table2_v1_grid --cell <id>` process per cell under
+`<output>/cells/`; `sweep --list` prints the cell ids. A cell holds its friction,
+payload and motor strength across resets and applies no push; its friction also
+reaches the touchdown correction. Quiet and stop probes then use the
+relative-friction consensus: elliptic μ, pyramidal μ and elliptic 0.9 μ of the
+cell's own coefficient. The evaluator without `--grid` keeps the historical
+consensus. `grid_summary.json` lists each probe's pass, fail or unresolved
+verdict per cell with its failed bounds. `--continue` finishes an interrupted
+sweep and renames incomplete cells to `<id>.attempt_<n>`.
+
+The probe runner verifies each substep against the nominal motor law, so a
+cell with motor strength 0.8 or 1.2, and `evaluate --randomization table2_v1`,
+stop at that check with an acquisition failure. The sweep records those cells as
+`acquisition_failure`, not as evaluated.
+
 The evaluator reconstructs the recorded actor inputs with no observation noise.
 You can test joint-velocity input gains or force a two-control action mean. Static
 probe consensus compares the default contact model with two sensitivity models;

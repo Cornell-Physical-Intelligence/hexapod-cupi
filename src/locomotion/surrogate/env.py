@@ -39,6 +39,8 @@ NATIVE_JOINT_NAMES = [
     f"{leg}_{joint}" for joint in ("coxa_yaw", "femur_pitch", "tibia_pitch") for leg in LEGS
 ]
 MAX_JOINT_SPEED = 50.26548245743669
+# A push time that a replica never reaches.
+NEVER = np.iinfo(np.int64).max
 TOE_CAP_LOWER_X = 0.115
 # One floor-contact sensor per collision geom: 13 single-geom links, then each tibia's cap and shaft.
 CONTACT_GEOMS = (
@@ -402,14 +404,20 @@ class SurrogateEnv:
         contact=None,
         substep_state=True,
         randomization="none",
+        condition=None,
     ):
         """The constructor ignores ``asset`` (the native USD). ``reference_metadata``
         defaults to the repository stance.json, which native training passes.
-        ``randomization`` names a ``locomotion.randomization`` declaration."""
+        ``randomization`` names a ``locomotion.randomization`` declaration. ``condition`` is a
+        fixed ``randomization.ReplicaDraw`` that every reset applies to every replica, with no
+        push; a fixed-grid cell uses it under ``randomization="none"``."""
         if randomization not in rnd.NAMES:
             raise ValueError("Unknown randomization: " + str(randomization))
+        if condition is not None and randomization != "none":
+            raise ValueError("A fixed condition replaces the draws; use randomization='none'")
         self.randomization = randomization
-        self.randomized = randomization != "none"
+        self.condition = condition
+        self.randomized = randomization != "none" or condition is not None
         self.cfg = SurrogateConfig() if cfg is None else cfg
         cfg = self.cfg
         self.device, self.num_envs = cfg.device, cfg.num_envs
@@ -606,12 +614,19 @@ class SurrogateEnv:
             "config": cfg.declaration(),
             "randomization": rnd.identity(randomization),
         }
+        if condition is not None:
+            self.native_readback["condition"] = condition.as_json()
         self.reset()
-        if self.randomized:
-            # The first draw; later resets redraw and log nothing.
+        if self.condition is not None:
+            # A fixed condition applies the same masses at every reset.
             self.native_readback["mass_per_replica_kg"] = [
                 float(x.body_mass.sum()) for x in self._models
             ]
+        elif self.randomized:
+            # Every reset redraws, and the first task reset replaces this draw; runs log no draws.
+            self.native_readback["mass_per_replica_kg_scope"] = (
+                "nominal ledger; each reset redraws link masses and payload, and runs log no draws"
+            )
         if self.output is not None:
             self.save("native_readback.json", self.native_readback)
 
@@ -645,14 +660,15 @@ class SurrogateEnv:
         ]
         self._body_ids = np.array([body(name) for name in BODY_NAMES])
         self._base_id = body("body")
-        # MuJoCo takes the larger geom coefficient, so the floor and the six toe caps carry the draw.
-        self._friction_geoms = np.array(
-            [geom("floor")] + [geom(leg + "_tibia_toe") for leg in LEGS]
-        )
+        # MuJoCo takes the larger geom coefficient of a contact pair. A zero floor coefficient
+        # leaves each pair at the robot geom's own value: the six toe caps carry the draw and the
+        # shafts and hulls keep 1.0, as PhysX gives with a floor material of 1.0.
+        self._friction_geoms = np.array([geom(leg + "_tibia_toe") for leg in LEGS])
         self._nominal = {
             key: getattr(m, key).copy()
             for key in ("body_mass", "body_inertia", "body_ipos", "body_iquat", "geom_friction")
         }
+        self._nominal["geom_friction"][geom("floor"), 0] = 0.0
         self._nominal_qpos0 = qpos0
         self._nominal_toe_low = self._lowest_toe(qpos0)
         self._neutral64, self._lower64, self._upper64 = (
@@ -688,31 +704,38 @@ class SurrogateEnv:
 
     def _redraw(self, i):
         """Draw replica ``i``'s conditions from its own generator and apply them to its model."""
-        draw = rnd.draw(self.randomization, self._generators[i])
+        draw = (
+            self.condition
+            if self.condition is not None
+            else rnd.draw(self.randomization, self._generators[i])
+        )
         model, base = self._models[i], self._base_id
         for key, value in self._nominal.items():
             getattr(model, key)[:] = value
         model.body_mass[self._body_ids] *= draw.link_mass_scale
         model.body_inertia[self._body_ids] *= draw.link_mass_scale[:, None]
         # Payload: the base tensor in the base frame, the point mass added, then principal axes again.
-        rotation = np.zeros(9)
-        mujoco.mju_quat2Mat(rotation, model.body_iquat[base])
-        rotation = rotation.reshape(3, 3)
-        tensor = rotation @ np.diag(model.body_inertia[base]) @ rotation.T
-        mass, centre, tensor = rnd.combined_base_inertial(
-            model.body_mass[base],
-            model.body_ipos[base],
-            tensor,
-            draw.payload_mass_kg,
-            draw.payload_position_m,
-        )
-        principal, axes = np.linalg.eigh(tensor)
-        if np.linalg.det(axes) < 0:
-            axes[:, 0] *= -1
-        quaternion = np.zeros(4)
-        mujoco.mju_mat2Quat(quaternion, axes.flatten())
-        model.body_mass[base], model.body_ipos[base] = mass, centre
-        model.body_inertia[base], model.body_iquat[base] = principal, quaternion
+        # Without a payload the base keeps its inertial frame, so a nominal cell is the nominal model.
+        centre = model.body_ipos[base].copy()
+        if draw.payload_mass_kg > 0:
+            rotation = np.zeros(9)
+            mujoco.mju_quat2Mat(rotation, model.body_iquat[base])
+            rotation = rotation.reshape(3, 3)
+            tensor = rotation @ np.diag(model.body_inertia[base]) @ rotation.T
+            mass, centre, tensor = rnd.combined_base_inertial(
+                model.body_mass[base],
+                model.body_ipos[base],
+                tensor,
+                draw.payload_mass_kg,
+                draw.payload_position_m,
+            )
+            principal, axes = np.linalg.eigh(tensor)
+            if np.linalg.det(axes) < 0:
+                axes[:, 0] *= -1
+            quaternion = np.zeros(4)
+            mujoco.mju_mat2Quat(quaternion, axes.flatten())
+            model.body_mass[base], model.body_ipos[base] = mass, centre
+            model.body_inertia[base], model.body_iquat[base] = principal, quaternion
         model.geom_friction[self._friction_geoms, 0] = draw.foot_friction
         # Masses set the constants that scale constraint softness (invweight) and the solver tolerance.
         mujoco.mj_setConst(model, self._impact_data)
@@ -737,6 +760,11 @@ class SurrogateEnv:
     def _schedule_push(self, i, after, first):
         """Draw replica ``i``'s next push, timed in physics steps from its reset."""
         push = rnd.next_push(self.randomization, self._generators[i], first)
+        if push is None or self.condition is not None:
+            # No push: the window never opens, so the push end never arrives either.
+            self._push_start[i] = self._push_end[i] = NEVER
+            self._push_force[i] = 0.0
+            return
         self._push_start[i] = after + self._steps(push.delay_s)
         self._push_end[i] = self._push_start[i] + self._steps(push.duration_s)
         self._push_force[i] = push.force_body_n

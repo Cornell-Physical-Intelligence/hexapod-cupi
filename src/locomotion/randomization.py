@@ -174,9 +174,11 @@ TABLE2_V1 = Table2(
         "effective contact coefficient",
         "shared",
         "[0.1, 2.5]",
-        "One coefficient per replica for all six toes and that replica's floor. MuJoCo takes the "
-        "larger of the two geom coefficients, so the floor and toe geoms both carry the draw; PhysX "
-        "multiplies the toe material by the floor material 1.0. Each gives the drawn value.",
+        "One coefficient per replica for the six toe caps; every other robot contact keeps 1.0. "
+        "MuJoCo takes the larger of the two geom coefficients, so the surrogate sets that replica's "
+        "floor coefficient to zero and the toe caps carry the draw. PhysX multiplies the toe "
+        "material by the floor material 1.0. Each gives the drawn value at the toes and 1.0 at "
+        "shafts and hulls.",
     ),
     motor_strength=Row(
         "kept",
@@ -404,3 +406,85 @@ def wrench_mean(forces_body_n, torques_body_nm):
     if forces.shape != (SUBSTEPS, 3) or torques.shape != (SUBSTEPS, 3):
         raise ValueError("A control's wrench holds one force and one torque per physics step")
     return np.concatenate((forces.mean(0), torques.mean(0)))
+
+
+# ----- Fixed-condition grid ------------------------------------------------------------------
+GRID_SCHEMA = "hexapod_table2_fixed_grid_v1"
+
+
+@dataclass(frozen=True)
+class FixedGrid:
+    """Fixed conditions that screen a checkpoint: every cell holds across resets and draws nothing."""
+
+    name: str
+    randomization: str
+    foot_friction: tuple
+    payload_mass_kg: tuple
+    motor_strength: tuple
+    payload_position_m: tuple
+    pushes: bool
+    nominal: str
+    reason: str
+
+
+TABLE2_V1_GRID = FixedGrid(
+    name="table2_v1_grid",
+    randomization="table2_v1",
+    foot_friction=(0.1, 1.0, 2.5),
+    payload_mass_kg=(0.0, PAYLOAD_MAX_KG / 2.0, PAYLOAD_MAX_KG),
+    motor_strength=(0.8, 1.0, 1.2),
+    payload_position_m=(0.0, 0.0, 0.04),
+    pushes=False,
+    nominal="Joint gains, reset pose and link masses keep their nominal values; one strength "
+    "factor applies to all 18 joints.",
+    reason="Issue #67 milestone 2: the ends and centre of the table2_v1 friction, payload and "
+    "motor-strength ranges. The payload sits centred on the base at the declared deck height; "
+    "pushes stay off so that each cell isolates its three conditions.",
+)
+GRIDS = {"table2_v1_grid": TABLE2_V1_GRID}
+
+
+def grid_declaration(name="table2_v1_grid"):
+    """Canonical JSON of a fixed grid and its SHA-256, bound to the declaration it screens."""
+    grid = GRIDS[name]
+    value = {
+        "schema": GRID_SCHEMA,
+        "grid": asdict(grid),
+        "randomization_sha256": declaration(grid.randomization)["sha256"],
+        "base": base_values(),
+        "cells": [cell_id for cell_id, _ in grid_cells(name)],
+    }
+    text = canonical(value)
+    return {"name": name, "json": text, "sha256": hashlib.sha256(text.encode()).hexdigest()}
+
+
+def grid_cells(name="table2_v1_grid"):
+    """The cells in friction, payload, strength order: ``(cell_id, (friction, payload_kg, strength))``."""
+    grid = GRIDS[name]
+    return [
+        (
+            f"mu{friction:g}_payload{payload:.3f}kg_strength{strength:g}",
+            (friction, payload, strength),
+        )
+        for friction in grid.foot_friction
+        for payload in grid.payload_mass_kg
+        for strength in grid.motor_strength
+    ]
+
+
+def cell_draw(name, cell_id):
+    """The fixed draw of one cell: its friction, payload and strength, with nominal values elsewhere."""
+    cells = dict(grid_cells(name))
+    if cell_id not in cells:
+        raise ValueError(f"Unknown cell of {name}: {cell_id}")
+    friction, payload, strength = cells[cell_id]
+    return ReplicaDraw(
+        1.0,
+        1.0,
+        np.zeros(18),
+        np.ones(19),
+        float(payload),
+        np.array(GRIDS[name].payload_position_m, dtype=float),
+        float(friction),
+        np.full(18, float(strength)),
+    )

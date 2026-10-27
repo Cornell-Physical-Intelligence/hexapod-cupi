@@ -17,7 +17,7 @@ while retaining accepted flat-ground behavior. Define the conditions and pass
 criteria before training. Issue
 [#67](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67)
 declares the Table II randomization `table2_v1`, SHA-256
-`533c9a4161a67867ffd5ab32a5dc480d2f73d78dc1b27fcdde95ea219f7d71c0`, in the
+`730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c`, in the
 [implementation guide](../src/locomotion/README.md#step-7-domain-randomization-declaration). Keep the policy's inputs compatible with the sensors
 you intend to use on the robot; privileged simulation inputs belong in the critic.
 

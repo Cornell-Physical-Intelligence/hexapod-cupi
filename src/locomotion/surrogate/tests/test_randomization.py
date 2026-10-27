@@ -72,6 +72,11 @@ class RandomizedEnvTests(unittest.TestCase):
                 self.assertTrue(
                     np.all(model.geom_friction[env._friction_geoms, 0] == draw.foot_friction)
                 )
+                # Only the toe caps carry the draw: the floor is zero and other geoms keep 1.0.
+                friction = model.geom_friction[:, 0].copy()
+                friction[env._friction_geoms] = 1.0
+                self.assertEqual(float(friction[0]), 0.0)
+                self.assertTrue(np.all(friction[1:] == 1.0))
                 self.assertAlmostEqual(float(env.ground_friction[i]), draw.foot_friction, places=6)
                 self.assertAlmostEqual(float(env._kp[i]), rnd.KP * draw.kp_scale, places=5)
                 self.assertTrue(torch.allclose(env._kd[i], torch.tensor(KD) * draw.kd_scale))
@@ -84,10 +89,12 @@ class RandomizedEnvTests(unittest.TestCase):
                     env._lowest_toe(env._qpos0[i]), env._nominal_toe_low, places=12
                 )
             self.assertEqual(env.native_readback["randomization"], rnd.identity("table2_v1"))
+            # Runs log no draws: the readback keeps the nominal ledger and says so.
             self.assertEqual(
                 env.native_readback["mass_per_replica_kg"],
-                [float(m.body_mass.sum()) for m in env._models],
+                [float(env.mj_model.body_mass.sum())] * 3,
             )
+            self.assertIn("log no draws", env.native_readback["mass_per_replica_kg_scope"])
         finally:
             env.close()
 

@@ -32,6 +32,22 @@ CONSENSUS_VARIANTS = {
     "pyramidal_cone": {"cone": "pyramidal"},
     "friction_0.9": {"friction": (0.9, 0.005, 0.0001)},
 }
+CONSENSUS_SCOPE = (
+    "The default, pyramidal-cone and friction-0.9 runs differ in two contact settings. Agreement shows "
+    "that a surrogate verdict does not rest on those settings. It is no native verdict: "
+    "locomotion/surrogate/README.md records static probes that pass in each run and fail on native."
+)
+# A fixed-grid cell sets the toe and floor friction, so its friction variant scales the cell's own
+# coefficient: elliptic mu (the default run), pyramidal mu and elliptic 0.9 mu.
+RELATIVE_FRICTION_VARIANTS = {
+    "pyramidal_cone": ({"cone": "pyramidal"}, 1.0),
+    "friction_0.9mu": ({}, 0.9),
+}
+RELATIVE_FRICTION_SCOPE = (
+    "Relative-friction consensus: the default (elliptic cone, cell friction mu), pyramidal-cone mu and "
+    "elliptic 0.9 mu runs differ in two contact settings. Agreement shows that a surrogate verdict "
+    "does not rest on those settings. It is no native verdict."
+)
 BOUNDS_SCOPE = (
     "Unverified on the surrogate. The native check counts 400 Hz joint positions beyond a limit and joint "
     "speeds above 50.27 rad/s. The surrogate holds a loaded joint 0.5 mrad beyond its stop where native "
@@ -311,7 +327,7 @@ def case_summary(result, batch, limits=None, joint_names=None):
     return row
 
 
-def consensus(results):
+def consensus(results, scope=CONSENSUS_SCOPE):
     """Verdict and checks of one probe across contact models: a value where all agree, else ``unresolved``."""
     verdicts = {name: bool(result["pass"]) for name, result in results.items()}
     names = sorted(set().union(*(result.get("checks", {}) for result in results.values())))
@@ -340,9 +356,7 @@ def consensus(results):
             check: statuses[check] for check, value in agreed.items() if value == "unresolved"
         },
         "checks": agreed,
-        "scope": "The default, pyramidal-cone and friction-0.9 runs differ in two contact settings. Agreement shows "
-        "that a surrogate verdict does not rest on those settings. It is no native verdict: "
-        "locomotion/surrogate/README.md records static probes that pass in each run and fail on native.",
+        "scope": scope,
     }
 
 
@@ -401,6 +415,15 @@ def build_parser():
         default="none",
         help="Step 7 declaration for the probes, independent of the checkpoint's training; "
         "each probe reset draws new conditions.",
+    )
+    parser.add_argument(
+        "--grid",
+        choices=["table2_v1_grid"],
+        help="Fixed-condition grid in locomotion/randomization.py; needs --cell. The cell holds across "
+        "resets, and the quiet/stop consensus becomes the relative-friction consensus.",
+    )
+    parser.add_argument(
+        "--cell", help="One cell id of --grid, as locomotion.surrogate.sweep lists them."
     )
     parser.add_argument(
         "--no-contact-consensus",
@@ -468,6 +491,13 @@ def evaluate_checkpoint(args):
         sha,
     )
 
+    grid = getattr(args, "grid", None)
+    cell = getattr(args, "cell", None)
+    if (grid is None) != (cell is None):
+        raise ValueError("--grid and --cell go together")
+    if grid is not None and args.randomization != "none":
+        raise ValueError("A grid cell fixes the conditions; leave --randomization at none")
+    condition = rnd.cell_draw(grid, cell) if grid is not None else None
     if args.randomization != "none" and not args.no_contact_consensus:
         # The draw sets the toe and floor friction, so the friction variant would not change the toe contact.
         raise ValueError(
@@ -516,7 +546,7 @@ def evaluate_checkpoint(args):
     (args.output / "videos").mkdir()
     started = time.monotonic()
 
-    def run(model, cases, directory, videos, record_loads=False):
+    def run(model, cases, directory, videos, record_loads=False, condition=condition):
         """One probe suite under one contact model: the suite summary, the per-case rows, the videos and the loads."""
         torch.manual_seed(seed)
         np.random.seed(seed)
@@ -533,6 +563,7 @@ def evaluate_checkpoint(args):
             threads=0,
             contact=model,
             randomization=args.randomization,
+            condition=condition,
         )
         task = resolve(task_spec)(env, task_module.TaskConfig(seed=seed), None)
         wrapped = build_wrapper(resolve(wrapper_spec), task, options)
@@ -638,12 +669,23 @@ def evaluate_checkpoint(args):
     variants = {}
     if static and not args.no_contact_consensus:
         results = {"default": {result["case_id"]: result for result in summary["results"]}}
-        for name, fields in CONSENSUS_VARIANTS.items():
+        if condition is None:
+            plan = {name: (fields, None) for name, fields in CONSENSUS_VARIANTS.items()}
+        else:
+            plan = {
+                name: (fields, replace(condition, foot_friction=condition.foot_friction * scale))
+                for name, (fields, scale) in RELATIVE_FRICTION_VARIANTS.items()
+            }
+        for name, (fields, variant_condition) in plan.items():
             directory = args.output / "contact_consensus" / name
             directory.mkdir(parents=True)
-            variant_summary, variant_rows = run(replace(contact, **fields), static, directory, [])[
-                :2
-            ]
+            variant_summary, variant_rows = run(
+                replace(contact, **fields),
+                static,
+                directory,
+                [],
+                condition=variant_condition,
+            )[:2]
             results[name] = {result["case_id"]: result for result in variant_summary["results"]}
             variants[name] = {
                 "contact_model_fields": {
@@ -652,6 +694,8 @@ def evaluate_checkpoint(args):
                 },
                 "cases": variant_rows,
             }
+            if variant_condition is not None:
+                variants[name]["foot_friction"] = variant_condition.foot_friction
             if not args.keep_variant_captures:
                 for capture in directory.glob("evaluation/batch_*/native400hz"):
                     shutil.rmtree(capture)
@@ -660,7 +704,8 @@ def evaluate_checkpoint(args):
                 row["case_id"] in value for value in results.values()
             ):
                 row["contact_consensus"] = consensus(
-                    {name: value[row["case_id"]] for name, value in results.items()}
+                    {name: value[row["case_id"]] for name, value in results.items()},
+                    CONSENSUS_SCOPE if condition is None else RELATIVE_FRICTION_SCOPE,
                 )
     unresolved = [
         row["case_id"]
@@ -687,6 +732,15 @@ def evaluate_checkpoint(args):
         "repository": repository_state(),
         "randomization": randomization_identity(rnd, args.randomization),
         "checkpoint_randomization": identity.get("randomization"),
+        "condition": None
+        if condition is None
+        else {
+            "grid": grid,
+            "grid_sha256": rnd.grid_declaration(grid)["sha256"],
+            "cell": cell,
+            "draw": condition.as_json(),
+            "consensus": "relative_friction",
+        },
         "identity": {
             "source_files": source_files(ROOT / "src/locomotion"),
             "surrogate_files": {

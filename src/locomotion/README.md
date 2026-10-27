@@ -104,7 +104,7 @@ overrides. Use the common evaluator for acceptance.
 [issue #67](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67):
 one field per Table II row with its status, this project's range, the draw
 granularity and the reason. `declaration("table2_v1")` returns the canonical
-JSON and its SHA-256, `533c9a4161a67867ffd5ab32a5dc480d2f73d78dc1b27fcdde95ea219f7d71c0`.
+JSON and its SHA-256, `730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c`.
 Run identities, packs and admission bind that hash; `none` declares the nominal
 properties and draws nothing. The first milestone-1 review freezes these ranges
 with the push schedule. No row is excluded.
@@ -117,7 +117,7 @@ with the push schedule. No row is excluded.
 | Link mass | 0.9–1.1 × nominal | 0.9–1.1 × each ledger mass, inertia scaled with it | per link | kept |
 | Payload mass | 0–5 kg | 0–1.464 kg, the paper's share of a 7.466 kg robot | per replica | adapted |
 | Payload position | ±0.15 m | X and Y ±0.15 m; Z fixed 0.04 m above the base origin | per replica | kept |
-| Foot friction | 0.1–2.5 | 0.1–2.5 effective coefficient on the toes and that replica's floor | per replica | kept |
+| Foot friction | 0.1–2.5 | 0.1–2.5 effective coefficient on the six toe caps; shafts and hulls keep 1.0 | per replica | kept |
 | Motor strength | 0.8–1.2 | 0.8–1.2 × the speed-dependent ceiling, capped at 1.6 N·m | per joint | kept |
 
 - **Joint position.** The paper scales the default pose at reset. The six coxa
@@ -139,8 +139,10 @@ with the push schedule. No row is excluded.
   1.6 N·m reference. `randomization.motor_force` applies a draw's gain and
   strength to the unchanged `robots/rs05.py` law.
 - **Foot friction.** MuJoCo takes the larger of the two geom coefficients, so
-  the floor and toe geoms of a replica both carry the draw. PhysX multiplies
-  the toe material by the floor material 1.0. Each gives the drawn value.
+  the surrogate sets a randomized replica's floor coefficient to zero and its
+  toe caps carry the draw; tibia shafts and hulls keep 1.0. PhysX multiplies
+  the toe material by the floor material 1.0. Each gives the drawn value at the
+  toes and 1.0 elsewhere.
 - **Gains.** Both factors act through the explicit motor law. The implicit
   PhysX drive and the MuJoCo joint damping stay at zero.
 - **Pushes, adapted.** Section V-B applies velocity perturbations at
@@ -162,6 +164,15 @@ The surrogate applies these draws under `--randomization table2_v1`
 ([surrogate guide](surrogate/README.md)). The native implementation and the
 `none` against `table2_v1` comparison follow under #67. This declaration admits
 nothing.
+
+`grid_declaration("table2_v1_grid")` declares the fixed-condition screen of
+issue #67, SHA-256
+`7d631f12e8abefd8141f0dc515eaa446b90b5563315fe41ea608db0ab2822882`. It crosses
+foot friction 0.1, 1.0 and 2.5, payload 0, 0.732 and 1.464 kg, and one motor
+strength factor 0.8, 1.0 or 1.2 on all joints: 27 cells. The payload sits
+centred at the 0.04 m deck height, pushes stay off and every other property
+keeps its nominal value. A cell holds across resets. The nominal cell steps as
+the nominal robot bit for bit.
 
 ## Verification
 

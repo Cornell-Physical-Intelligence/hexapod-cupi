@@ -226,5 +226,47 @@ class HelperTests(unittest.TestCase):
             rnd.wrench_mean(np.zeros((7, 3)), np.zeros((8, 3)))
 
 
+class GridTests(unittest.TestCase):
+    def test_the_grid_crosses_the_issue_values_in_a_fixed_order(self):
+        cells = rnd.grid_cells("table2_v1_grid")
+        self.assertEqual(len(cells), 27)
+        self.assertEqual(len({cell for cell, _ in cells}), 27)
+        values = [value for _, value in cells]
+        self.assertEqual(sorted({v[0] for v in values}), [0.1, 1.0, 2.5])
+        self.assertEqual(sorted({v[2] for v in values}), [0.8, 1.0, 1.2])
+        payloads = sorted({v[1] for v in values})
+        self.assertEqual(payloads, [0.0, rnd.PAYLOAD_MAX_KG / 2, rnd.PAYLOAD_MAX_KG])
+        self.assertAlmostEqual(payloads[-1], MASS_KG * 5 / 25.5)
+        self.assertEqual(values[0], (0.1, 0.0, 0.8))
+        self.assertEqual(values[-1], (2.5, rnd.PAYLOAD_MAX_KG, 1.2))
+
+    def test_a_cell_changes_its_three_conditions_and_nothing_else(self):
+        draw = rnd.cell_draw("table2_v1_grid", "mu0.1_payload1.464kg_strength0.8")
+        nominal = rnd.nominal_draw()
+        self.assertEqual((draw.foot_friction, draw.payload_mass_kg), (0.1, rnd.PAYLOAD_MAX_KG))
+        self.assertTrue(np.array_equal(draw.motor_strength, np.full(18, 0.8)))
+        self.assertTrue(np.array_equal(draw.payload_position_m, [0.0, 0.0, 0.04]))
+        self.assertEqual((draw.kp_scale, draw.kd_scale), (1.0, 1.0))
+        self.assertTrue(np.array_equal(draw.joint_offset_rad, nominal.joint_offset_rad))
+        self.assertTrue(np.array_equal(draw.link_mass_scale, nominal.link_mass_scale))
+        middle = rnd.cell_draw("table2_v1_grid", "mu1_payload0.000kg_strength1")
+        self.assertEqual(middle.as_json(), nominal.as_json())
+        with self.assertRaises(ValueError):
+            rnd.cell_draw("table2_v1_grid", "mu0.5_payload0.000kg_strength1")
+
+    def test_the_grid_hash_binds_the_screened_declaration_and_leaves_it_unchanged(self):
+        grid = rnd.grid_declaration("table2_v1_grid")
+        value = json.loads(grid["json"])
+        self.assertEqual(value["randomization_sha256"], rnd.declaration("table2_v1")["sha256"])
+        self.assertEqual(
+            rnd.declaration("table2_v1")["sha256"],
+            "730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c",
+        )
+        self.assertFalse(value["grid"]["pushes"])
+        self.assertEqual(len(value["cells"]), 27)
+        guide = (ROOT / "src/locomotion/README.md").read_text()
+        self.assertIn(grid["sha256"], guide)
+
+
 if __name__ == "__main__":
     unittest.main()
