@@ -45,6 +45,13 @@
       "purpose": "Locomotion on the approved direct-drive hexapod."
     },
     {
+      "path": "src/locomotion/randomization.py",
+      "previous_path": "locomotion/randomization.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Liu et al. Table II domain randomization: the frozen table2_v1 declaration with its hash, per-replica uniform draws, the training push schedule, the payload helpers and the randomized motor law over rs05."
+    },
+    {
       "path": "src/locomotion/evaluation/__init__.py",
       "previous_path": "locomotion/tools/__init__.py",
       "classification": "current",
@@ -470,6 +477,13 @@
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate."
+    },
+    {
+      "path": "src/locomotion/surrogate/sweep.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Screen a checkpoint over the Step 7 fixed-condition grid: one surrogate evaluation per cell and a per-cell verdict summary."
     },
     {
       "path": "src/locomotion/surrogate/replay.py",
@@ -2025,6 +2039,38 @@
     "tools/source_inventory.py": {
       "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
       "sha256": "bf39dc5919b7563003cda9d4024c1414599126098b775ab45749011e38ec6686"
+    },
+    "locomotion/randomization.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "ab69d56ac49d2f10b8302b4aafc76f0766410f744c5d051a8688dd2bba231e0e"
+    },
+    "locomotion/surrogate/provenance.json": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "14e5ecc823fc63ccb7c3993eddac0c1ec215dc9143834f97e3bf3a76b2f629bd"
+    },
+    "locomotion/surrogate/records/self_check_step7_20261017_001.json": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "20b6ceed57974f407c0530536a88e1db7e0836505f65209aaae1839dbb7118b4"
+    },
+    "locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.json": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "90b5c45223d19ad4ab26aafd00db450d15601442f813361b150fe0b5e239a4ed"
+    },
+    "locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.npz": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "3d136b16c6bfe831d95d56b345b5b8344290225712e545899d9dbb684b740e8d"
+    },
+    "locomotion/surrogate/tests/test_randomization.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "63ff2d0c8bb9c148b450ec7ee90d88cd3525cd3855fcaa296e50eb1c8c1fd6f7"
+    },
+    "locomotion/surrogate/tests/test_step7_oracle.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "c80eb86c05a3716306859852641180182d7b5334c5e6f0adbf5b67f936a93fd0"
+    },
+    "locomotion/tests/test_randomization.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "1d750ebba59dc1d857f0ca609cb55f6f4ce71802bbf3a2613d258b82424bb0c6"
     }
   }
 }

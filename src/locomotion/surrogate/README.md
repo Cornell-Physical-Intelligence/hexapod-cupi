@@ -30,6 +30,33 @@ checkpoint, pass its recipe values as flags and `--ppo-config-overrides`.
 identity. The update count and deviation schedule continue; simulator state and
 random generators restart from the recorded seed.
 
+`--randomization table2_v1` trains under the Step 7 declaration in
+`src/locomotion/randomization.py`; the default `none` keeps the nominal robot
+and reproduces the pre-change trajectory bit for bit. Each reset redraws that
+replica's masses, payload, friction, gains, motor strength and reset pose, and
+schedules its pushes. The identity records the declaration, its ranges and its
+SHA-256, so resume refuses a different declaration. Runs log no drawn values.
+The evaluator's `--randomization` sets the probe conditions apart from the
+checkpoint's training; it needs `--no-contact-consensus`, because the draw sets
+the friction that the consensus varies.
+
+`sweep --checkpoint ... --output ... --grid table2_v1_grid --jobs N` screens a
+checkpoint over the 27 fixed-condition cells, one
+`evaluate --grid table2_v1_grid --cell <id>` process per cell under
+`<output>/cells/`; `sweep --list` prints the cell ids. A cell holds its friction,
+payload and motor strength across resets and applies no push; its friction also
+reaches the touchdown correction. Quiet and stop probes then use the
+relative-friction consensus: elliptic μ, pyramidal μ and elliptic 0.9 μ of the
+cell's own coefficient. The evaluator without `--grid` keeps the historical
+consensus. `grid_summary.json` lists each probe's pass, fail or unresolved
+verdict per cell with its failed bounds. `--continue` finishes an interrupted
+sweep and renames incomplete cells to `<id>.attempt_<n>`.
+
+The probe runner verifies each substep against the nominal motor law, so a
+cell with motor strength 0.8 or 1.2, and `evaluate --randomization table2_v1`,
+stop at that check with an acquisition failure. The sweep records those cells as
+`acquisition_failure`, not as evaluated.
+
 The evaluator reconstructs the recorded actor inputs with no observation noise.
 You can test joint-velocity input gains or force a two-control action mean. Static
 probe consensus compares the default contact model with two sensitivity models;
@@ -53,5 +80,13 @@ captures. Native source packs exclude this package and its MuJoCo dependency.
 and results. Those records used their recorded reward versions and sources.
 Git revision `077b98b1` retains the calibration and machine self-check commands;
 they depend on retired reward implementations and native extract formats.
+`records/self_check_step7_20261017_001.json` is the self check of 2026-10-17 at
+revision `232e19f0`, after the Step 7 code entered this package; it adds no
+parity measurement. `tests/fixtures/step7_baseline_*` hold the pre-change
+trajectory of main `7478fca8` that `--randomization none` reproduces bit for bit.
+NumPy's OpenBLAS kernels round differently by CPU, so each fixture names its
+kernel and the test replays it in a subprocess pinned to that kernel:
+`step7_baseline_haswell_20261027_001` (AVX2) runs on any x86-64 host and
+`step7_baseline_20261013_001` (AVX-512 SkylakeX) runs where the CPU has AVX-512.
 Current tests retain control gates, exercise stock PPO updates/resume and
 compare live versus replay reward values.
