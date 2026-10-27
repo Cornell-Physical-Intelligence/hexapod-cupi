@@ -82,7 +82,11 @@ Git revision `077b98b1` retains the calibration and machine self-check commands;
 they depend on retired reward implementations and native extract formats.
 `records/self_check_step7_20261017_001.json` is the self check of 2026-10-17 at
 revision `232e19f0`, after the Step 7 code entered this package; it adds no
-parity measurement. `tests/fixtures/step7_baseline_20261013_001.*` hold the
-pre-change trajectory of main `7478fca8` that `--randomization none` reproduces.
+parity measurement. `tests/fixtures/step7_baseline_*` hold the pre-change
+trajectory of main `7478fca8` that `--randomization none` reproduces bit for bit.
+NumPy's OpenBLAS kernels round differently by CPU, so each fixture names its
+kernel and the test replays it in a subprocess pinned to that kernel:
+`step7_baseline_haswell_20261027_001` (AVX2) runs on any x86-64 host and
+`step7_baseline_20261013_001` (AVX-512 SkylakeX) runs where the CPU has AVX-512.
 Current tests retain control gates, exercise stock PPO updates/resume and
 compare live versus replay reward values.
