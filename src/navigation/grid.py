@@ -46,25 +46,17 @@ class OccupancyGrid:
     def __post_init__(self) -> None:
         origin = self.origin_m
         if isinstance(origin, (str, bytes)) or not isinstance(origin, Sequence):
-            raise TypeError(
-                f"origin_m must be an (east, north) pair, got {type(origin).__name__}"
-            )
+            raise TypeError(f"origin_m must be an (east, north) pair, got {type(origin).__name__}")
         pair = tuple(float(value) for value in origin)
         if len(pair) != 2 or not all(math.isfinite(value) for value in pair):
-            raise ValueError(
-                f"origin_m must be a finite (east, north) pair, got {origin!r}"
-            )
+            raise ValueError(f"origin_m must be a finite (east, north) pair, got {origin!r}")
         cell_size = float(self.cell_size_m)
         if not math.isfinite(cell_size) or cell_size <= 0.0:
-            raise ValueError(
-                f"cell_size_m must be finite and positive, got {self.cell_size_m!r}"
-            )
+            raise ValueError(f"cell_size_m must be finite and positive, got {self.cell_size_m!r}")
         for name in ("width_cells", "height_cells"):
             value = getattr(self, name)
             if type(value) is not int or value <= 0:
-                raise ValueError(
-                    f"{name} must be a positive int, got {value!r}"
-                )
+                raise ValueError(f"{name} must be a positive int, got {value!r}")
         expected = self.width_cells * self.height_cells
         values = tuple(bool(value) for value in self.passable)
         if len(values) != expected:
@@ -114,12 +106,8 @@ class OccupancyGrid:
     def cell_of(self, point: Point) -> Cell:
         """Cell containing ``point``. May be off-grid; check with :meth:`in_bounds`."""
 
-        east = math.floor(
-            (float(point[0]) - self.origin_m[0]) / self.cell_size_m
-        )
-        north = math.floor(
-            (float(point[1]) - self.origin_m[1]) / self.cell_size_m
-        )
+        east = math.floor((float(point[0]) - self.origin_m[0]) / self.cell_size_m)
+        north = math.floor((float(point[1]) - self.origin_m[1]) / self.cell_size_m)
         return (int(east), int(north))
 
     @classmethod
@@ -142,9 +130,7 @@ class OccupancyGrid:
         """
         cell_size = float(cell_size_m)
         if not math.isfinite(cell_size) or cell_size <= 0.0:
-            raise ValueError(
-                f"cell_size_m must be finite and positive, got {cell_size_m!r}"
-            )
+            raise ValueError(f"cell_size_m must be finite and positive, got {cell_size_m!r}")
 
         # Create grid width / height parameters based on bounding box
         min_east, min_north, max_east, max_north = region.bounds_m
@@ -157,9 +143,7 @@ class OccupancyGrid:
 
         # Determine which grid centers are within the feasible region
         east_grid, north_grid = np.meshgrid(easts, norths)
-        inside = shapely.contains_xy(
-            region.feasible(margin), east_grid.ravel(), north_grid.ravel()
-        )
+        inside = shapely.contains_xy(region.feasible(margin), east_grid.ravel(), north_grid.ravel())
 
         return cls(
             origin_m=(min_east, min_north),

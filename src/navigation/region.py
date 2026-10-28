@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import math
 from dataclasses import dataclass, field
-from typing import Sequence, Literal
+from typing import Literal, Sequence
 
 import shapely
 from shapely.geometry.base import BaseGeometry
@@ -89,9 +89,7 @@ class PlanMargin:
         ):
             value = float(getattr(self, name))
             if not math.isfinite(value) or value < 0.0:
-                raise ValueError(
-                    f"{name} must be finite and non-negative, got {value!r}"
-                )
+                raise ValueError(f"{name} must be finite and non-negative, got {value!r}")
         if float(self.footprint_radius_m) <= 0.0:
             raise ValueError(
                 f"footprint_radius_m must be positive, got {self.footprint_radius_m!r}"
@@ -140,24 +138,17 @@ class SurveyRegion:
             ("boundary", None, self.boundary),
             ("corridor", None, self.corridor),
         ]
-        parts.extend(
-            ("exclusions", index, exclusion)
-            for index, exclusion in enumerate(exclusions)
-        )
+        parts.extend(("exclusions", index, exclusion) for index, exclusion in enumerate(exclusions))
         for part, index, polygon in parts:
             if polygon is None and part == "corridor":
                 continue
             if not isinstance(polygon, shapely.Polygon):
                 name = part if index is None else f"{part}[{index}]"
-                raise TypeError(
-                    f"{name} must be a shapely.Polygon, got {type(polygon).__name__}"
-                )
+                raise TypeError(f"{name} must be a shapely.Polygon, got {type(polygon).__name__}")
             if polygon.is_empty:
                 raise RegionRejected(part, "is empty: nothing was drawn", index)
             if not polygon.is_valid:
-                raise RegionRejected(
-                    part, f"is not valid: {explain_validity(polygon)}", index
-                )
+                raise RegionRejected(part, f"is not valid: {explain_validity(polygon)}", index)
         object.__setattr__(self, "exclusions", exclusions)
 
         area = self.boundary
@@ -165,9 +156,7 @@ class SurveyRegion:
             area = area.union(self.corridor)
             # Disjoint, or touching at a single point, gives a MultiPolygon.
             if not isinstance(area, shapely.Polygon):
-                raise RegionRejected(
-                    "corridor", "does not share an edge with the boundary"
-                )
+                raise RegionRejected("corridor", "does not share an edge with the boundary")
         blocked = shapely.union_all(exclusions)
         # The corridor is only a way in, so the boundary is what must survive.
         if self.boundary.difference(blocked).is_empty:

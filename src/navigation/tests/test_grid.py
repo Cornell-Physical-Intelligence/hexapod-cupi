@@ -18,7 +18,6 @@ from shapely import Point, box
 from navigation.grid import OccupancyGrid
 from navigation.region import PlanMargin, SurveyRegion
 
-
 DEMONSTRATION_AREA = box(0.0, 0.0, 6.0, 4.0)
 
 # Unfrozen placeholders. #20's "Before implementation" block still has to freeze
@@ -150,9 +149,7 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
         # that on every side leaves nothing at all: 6 - 7.1 and 4 - 7.1 are both
         # negative. This is the plain-GPS decision of #38 meeting the 6 x 4 m
         # demonstration of #20, and it is why one of the two has to move.
-        grid = OccupancyGrid.from_region(
-            _demonstration_region(), _margin(3.0), cell_size_m=0.25
-        )
+        grid = OccupancyGrid.from_region(_demonstration_region(), _margin(3.0), cell_size_m=0.25)
         self.assertEqual(
             grid.passable_cell_count,
             0,
@@ -162,21 +159,15 @@ class EmptyFeasibleRegionTests(unittest.TestCase):
     def test_an_empty_region_is_reported_not_raised(self) -> None:
         # The grid still exists and still describes the area; it simply has nowhere
         # to go. Callers report that, so no exception may escape.
-        grid = OccupancyGrid.from_region(
-            _demonstration_region(), _margin(3.0), cell_size_m=0.5
-        )
+        grid = OccupancyGrid.from_region(_demonstration_region(), _margin(3.0), cell_size_m=0.5)
         self.assertGreater(grid.cell_count, 0)
         self.assertEqual(grid.passable_cell_count, 0)
 
     def test_ideal_poses_leave_a_usable_region(self) -> None:
         # With the GPS term at zero the margin is 0.55 m, leaving a 4.9 x 2.9 m
         # interior. This is the rehearsal case #20 actually specifies.
-        grid = OccupancyGrid.from_region(
-            _demonstration_region(), _margin(0.0), cell_size_m=0.25
-        )
-        self.assertGreater(
-            grid.passable_cell_count, 0, "ideal poses must leave somewhere to go"
-        )
+        grid = OccupancyGrid.from_region(_demonstration_region(), _margin(0.0), cell_size_m=0.25)
+        self.assertGreater(grid.passable_cell_count, 0, "ideal poses must leave somewhere to go")
 
     def test_larger_error_bound_never_adds_passable_cells(self) -> None:
         # Clearance is fixed by geometry, so raising the bound can only raise the
@@ -227,9 +218,7 @@ class RasterizationTests(unittest.TestCase):
                     for east in range(grid.width_cells):
                         cell = (east, north)
                         clearance = _clearance_m(region, grid.cell_center_m(cell))
-                        with self.subTest(
-                            bound=bound, exclusion=with_exclusion, cell=cell
-                        ):
+                        with self.subTest(bound=bound, exclusion=with_exclusion, cell=cell):
                             if clearance >= margin.total_m + BUFFER_TOLERANCE_M:
                                 self.assertTrue(grid.is_passable(cell))
                             elif clearance < margin.total_m - BUFFER_TOLERANCE_M:

@@ -16,7 +16,6 @@ from shapely import Point, Polygon, box
 
 from navigation.region import PlanMargin, RegionRejected, SurveyRegion
 
-
 # A 6 x 4 m rectangle: the demonstration area named in issue #20.
 DEMONSTRATION_AREA = box(0.0, 0.0, 6.0, 4.0)
 
@@ -97,9 +96,7 @@ class SurveyRegionValidationTests(unittest.TestCase):
                 self.assertEqual(caught.exception.part, "boundary")
                 with self.assertRaises(RegionRejected) as caught:
                     SurveyRegion(boundary=DEMONSTRATION_AREA, exclusions=(bad,))
-                self.assertEqual(
-                    (caught.exception.part, caught.exception.index), ("exclusions", 0)
-                )
+                self.assertEqual((caught.exception.part, caught.exception.index), ("exclusions", 0))
                 with self.assertRaises(RegionRejected) as caught:
                     SurveyRegion(boundary=DEMONSTRATION_AREA, corridor=bad)
                 self.assertEqual(caught.exception.part, "corridor")
@@ -118,9 +115,7 @@ class SurveyRegionValidationTests(unittest.TestCase):
             SurveyRegion(
                 boundary=DEMONSTRATION_AREA, exclusions=(box(1.0, 1.0, 2.0, 2.0), Polygon())
             )
-        self.assertEqual(
-            (caught.exception.part, caught.exception.index), ("exclusions", 1)
-        )
+        self.assertEqual((caught.exception.part, caught.exception.index), ("exclusions", 1))
         self.assertEqual(str(caught.exception), "exclusions[1] is empty: nothing was drawn")
         with self.assertRaises(RegionRejected) as caught:
             SurveyRegion(boundary=DEMONSTRATION_AREA, corridor=Polygon())
@@ -161,30 +156,22 @@ class SurveyRegionValidationTests(unittest.TestCase):
     def test_a_concave_area_is_accepted(self) -> None:
         # Concavity is legal; only crossing is not. An L-shaped survey area is an
         # ordinary request and must not be refused.
-        ell = Polygon(
-            ((0.0, 0.0), (6.0, 0.0), (6.0, 2.0), (3.0, 2.0), (3.0, 4.0), (0.0, 4.0))
-        )
+        ell = Polygon(((0.0, 0.0), (6.0, 0.0), (6.0, 2.0), (3.0, 2.0), (3.0, 4.0), (0.0, 4.0)))
         SurveyRegion(boundary=ell)
 
     def test_exclusions_default_to_empty_and_normalise_to_a_tuple(self) -> None:
         region = SurveyRegion(boundary=DEMONSTRATION_AREA)
         self.assertEqual(region.exclusions, ())
-        listed = SurveyRegion(
-            boundary=DEMONSTRATION_AREA, exclusions=[box(1.0, 1.0, 2.0, 2.0)]
-        )
+        listed = SurveyRegion(boundary=DEMONSTRATION_AREA, exclusions=[box(1.0, 1.0, 2.0, 2.0)])
         self.assertIsInstance(listed.exclusions, tuple)
 
 
 class FreeSpaceTests(unittest.TestCase):
     def test_a_point_inside_an_exclusion_is_not_free(self) -> None:
         # The second map of #20: the same area with one blocked region drawn in it.
-        region = SurveyRegion(
-            boundary=DEMONSTRATION_AREA, exclusions=(box(2.0, 1.0, 4.0, 3.0),)
-        )
+        region = SurveyRegion(boundary=DEMONSTRATION_AREA, exclusions=(box(2.0, 1.0, 4.0, 3.0),))
         self.assertTrue(region.free_space.contains(Point(1.0, 2.0)))
-        self.assertFalse(
-            region.free_space.contains(Point(3.0, 2.0)), "drawn exclusions are no-go"
-        )
+        self.assertFalse(region.free_space.contains(Point(3.0, 2.0)), "drawn exclusions are no-go")
 
     def test_a_corridor_extends_the_free_space_and_the_bounds(self) -> None:
         corridor = box(-2.0, 1.5, 0.5, 2.5)

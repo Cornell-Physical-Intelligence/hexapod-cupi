@@ -75,9 +75,7 @@ class GridGraph:
 
     def __init__(self, grid: OccupancyGrid) -> None:
         if not isinstance(grid, OccupancyGrid):
-            raise TypeError(
-                f"grid must be an OccupancyGrid, got {type(grid).__name__}"
-            )
+            raise TypeError(f"grid must be an OccupancyGrid, got {type(grid).__name__}")
         self.grid = grid
 
     def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
@@ -127,10 +125,7 @@ class GridGraph:
         if (
             d_east
             and d_north
-            and not (
-                self.grid.is_passable((a[0], b[1]))
-                and self.grid.is_passable((b[0], a[1]))
-            )
+            and not (self.grid.is_passable((a[0], b[1])) and self.grid.is_passable((b[0], a[1])))
         ):
             return math.inf
         return math.hypot(d_east, d_north) * self.grid.cell_size_m
@@ -150,7 +145,5 @@ class GridGraph:
         """
 
         d_east, d_north = abs(a[0] - b[0]), abs(a[1] - b[1])
-        octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(
-            d_east, d_north
-        )
+        octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(d_east, d_north)
         return octile_cells * self.grid.cell_size_m

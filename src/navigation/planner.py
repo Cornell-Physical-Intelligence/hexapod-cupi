@@ -2,13 +2,13 @@
 
 from __future__ import annotations
 
-import math
 import heapq  # TODO: Is there a cinvention for ordering of imports?
+import math
 from collections import deque  # TODO: I added this manually
 from dataclasses import dataclass
 
-from .grid import Cell, OccupancyGrid
 from .graph import CostGraph
+from .grid import Cell, OccupancyGrid
 from .region import Point
 
 __all__ = ["Route", "a_star"]
@@ -32,16 +32,10 @@ class Route:
             raise ValueError("cells must hold at least the start cell")
         cost = float(self.cost)
         if not math.isfinite(cost) or cost < 0.0:
-            raise ValueError(
-                f"cost must be finite and non-negative, got {self.cost!r}"
-            )
+            raise ValueError(f"cost must be finite and non-negative, got {self.cost!r}")
         if type(self.expansions) is not int or self.expansions < 0:
-            raise ValueError(
-                f"expansions must be a non-negative int, got {self.expansions!r}"
-            )
-        object.__setattr__(
-            self, "cells", tuple((int(e), int(n)) for e, n in self.cells)
-        )
+            raise ValueError(f"expansions must be a non-negative int, got {self.expansions!r}")
+        object.__setattr__(self, "cells", tuple((int(e), int(n)) for e, n in self.cells))
         object.__setattr__(self, "cost", cost)
 
     # NOTE: Check this spec definition
@@ -115,12 +109,7 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
         expansions += 1
 
         for neighbor, cost in graph.successors(node):
-            dist = (
-                f
-                + cost
-                - graph.heuristic(node, goal)
-                + graph.heuristic(neighbor, goal)
-            )
+            dist = f + cost - graph.heuristic(node, goal) + graph.heuristic(neighbor, goal)
             notDiscovered = neighbor not in discovered
             if notDiscovered or dist < discovered[neighbor][0]:
                 # Update weight
@@ -132,9 +121,7 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
                 ###              :         = [distFromDjikstra(x) + c(x,y)] + h(y)
                 ###              :         = distFromDjikstra(y) + h(y)
                 discovered[neighbor] = (dist, node)
-                heapq.heappush(
-                    frontier, (dist, graph.heuristic(neighbor, goal), neighbor)
-                )
+                heapq.heappush(frontier, (dist, graph.heuristic(neighbor, goal), neighbor))
 
     if goal not in settled:
         return None

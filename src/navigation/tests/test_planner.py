@@ -127,9 +127,7 @@ class SeamTests(unittest.TestCase):
             "successor order is part of the contract",
         )
         # A corner has only the three in-bounds steps.
-        self.assertEqual(
-            {cell for cell, _ in graph.successors((0, 0))}, {(1, 0), (0, 1), (1, 1)}
-        )
+        self.assertEqual({cell for cell, _ in graph.successors((0, 0))}, {(1, 0), (0, 1), (1, 1)})
 
     def test_successors_are_exactly_the_finite_cost_steps(self) -> None:
         # East of (0, 0) is blocked, which also forbids the north-east diagonal.
@@ -174,9 +172,7 @@ class CornerRuleTests(unittest.TestCase):
 
     def test_an_open_diagonal_costs_its_euclidean_length(self) -> None:
         graph = GridGraph(_open_grid(2, 2))
-        self.assertAlmostEqual(
-            graph.edge_cost((0, 0), (1, 1)), math.sqrt(2.0), places=12
-        )
+        self.assertAlmostEqual(graph.edge_cost((0, 0), (1, 1)), math.sqrt(2.0), places=12)
 
     def test_an_orthogonal_step_costs_one_cell_size(self) -> None:
         graph = GridGraph(_open_grid(2, 2))
@@ -206,9 +202,7 @@ class CornerRuleTests(unittest.TestCase):
             math.inf,
             "a diagonal may not squeeze between two blocked cells",
         )
-        self.assertIsNone(
-            a_star(graph, (0, 1), (1, 0)), "so the two cells are not connected"
-        )
+        self.assertIsNone(a_star(graph, (0, 1), (1, 0)), "so the two cells are not connected")
 
     def test_a_single_blocked_corner_also_forbids_the_diagonal(self) -> None:
         # Only one of the two shared orthogonals is blocked, which still clips the
@@ -281,9 +275,7 @@ class OptimalityTests(unittest.TestCase):
         total = 0.0
         for previous, current in zip(route.cells, route.cells[1:]):
             step = graph.edge_cost(previous, current)
-            self.assertTrue(
-                math.isfinite(step), f"{previous} -> {current} is not traversable"
-            )
+            self.assertTrue(math.isfinite(step), f"{previous} -> {current} is not traversable")
             total += step
         self.assertAlmostEqual(route.cost, total, places=12, msg="cost must be the sum")
 
@@ -299,9 +291,7 @@ class DeterminismTests(unittest.TestCase):
     def test_equal_cost_paths_resolve_deterministically(self) -> None:
         grid = _open_grid(3, 2)
         forward = a_star(GridGraph(grid), self.TIE_START, self.TIE_GOAL)
-        reversed_order = a_star(
-            _ReversedSuccessors(GridGraph(grid)), self.TIE_START, self.TIE_GOAL
-        )
+        reversed_order = a_star(_ReversedSuccessors(GridGraph(grid)), self.TIE_START, self.TIE_GOAL)
         self.assertIsNotNone(forward)
         self.assertIsNotNone(reversed_order)
         assert forward is not None and reversed_order is not None
