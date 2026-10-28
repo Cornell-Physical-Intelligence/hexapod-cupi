@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import math
 import heapq  # TODO: Is there a cinvention for ordering of imports?
+from collections import deque  # TODO: I added this manually
 from dataclasses import dataclass
 
 from .grid import Cell, OccupancyGrid
@@ -85,7 +86,7 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
     if start == goal:
         # TODO: Arbitrary CostGraph has no notion of passability (?)
         # What should we do? see is passable (see :class:`OccupancyGrid`)
-        return Route((goal), 0.0, 0)
+        return Route((goal,), 0.0, 0)
 
         # else (if not passable? see question above):
         #   return None
@@ -94,19 +95,19 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
     frontier = []
     g = 0.0
     h = graph.heuristic(start, goal)
-    heapq.heappush(frontier, (g + h, h, start))
+    f = g + h
+    heapq.heappush(frontier, (f, h, start))
 
     # Value: (cost (f), prev (None if start))
-    discovered = {start: (0.0, None)}
+    discovered = {start: (f, None)}
 
     settled = set()
     expansions = 0
 
-    while not (goal in settled or not frontier):
+    while goal not in settled and frontier:
         # Pop next node in frontier
         f, h, node = heapq.heappop(frontier)
         # (LAZY DELETION): if popped node is in settled:
-        #   # continue
         if node in settled:
             continue
         # Add popped node to settled
@@ -114,8 +115,14 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
         expansions += 1
 
         for neighbor, cost in graph.successors(node):
-            dist = f + cost - graph.heuristic(node) + graph.heuristic(neighbor)
-            if neighbor in frontier and dist < discovered[neighbor][0]:
+            dist = (
+                f
+                + cost
+                - graph.heuristic(node, goal)
+                + graph.heuristic(neighbor, goal)
+            )
+            notDiscovered = neighbor not in discovered
+            if notDiscovered or dist < discovered[neighbor][0]:
                 # Update weight
                 ### Commentary: This is A*, so be careful about the edge costs...
                 ### I think for (x,y) is should be new cost = c(x,y) - h(x) + h(y)
@@ -126,20 +133,41 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
                 ###              :         = distFromDjikstra(y) + h(y)
                 discovered[neighbor] = (dist, node)
                 heapq.heappush(
-                    frontier, (dist, graph.heuristic(neighbor), neighbor)
+                    frontier, (dist, graph.heuristic(neighbor, goal), neighbor)
                 )
 
-            elif neighbor not in discovered:
-                # Add to frontier with appropriate weight (see above)
-                heapq.heappush(
-                    frontier, (dist, graph.heuristic(neighbor), neighbor)
-                )
-
-    # If goal is not settled:
-    # return None
     if goal not in settled:
         return None
-    # else:
-    #   return Route
     else:
-        return ...
+        return _backtrack(goal, discovered, expansions)
+
+
+def _backtrack(
+    goal: Cell,
+    discovered: dict[Cell, tuple[float, Cell | None]],
+    expansions: int,
+) -> Route:
+    """
+    Creates a route object by backtracking from ``end`` to ``start``.
+
+    Args:
+        goal: The node to backtrack from, creating a s -> ``goal`` Route. [s being defined by djikstra iteration...]
+        info: [Dictionary w/ appropriate structure of data] (maybe precondition on
+        djikstra's settling?)
+
+    Returns:
+        [Route, finish later]
+
+    """
+    route = deque()
+    route.appendleft(goal)
+
+    curr = discovered[goal][1]
+    while curr is not None:
+        # Append next
+        route.appendleft(curr)
+
+        # Update
+        curr = discovered[curr][1]
+
+    return Route(tuple(route), discovered[goal][0], expansions)
