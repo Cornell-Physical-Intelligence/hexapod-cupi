@@ -1,0 +1,25 @@
+{
+  "id": "20261011T185225_budget512_two_seeds",
+  "date": "2026-10-11T18:52:25Z",
+  "title": "Record two reward-v4 PPO seeds at 512 robots that pass 10 of 13 probes",
+  "summary": "Two reward-v4 seeds on the full 20-command bank trained at 512 robots for 2000 updates, 24.6 million transitions each, from source a45f5cda under the program lead's 512-robot budget. At update 2000 both pass 10 of 13 learning probes: all eight 0.05 m/s translations, the +0.20 rad/s turn and the forward-to-stop probe, with tracking error E 0.267 and 0.222. Both fail the -0.20 rad/s turn by 0.012 and 0.004 rad/s against the 0.06 bound and both quiet probes on the 0.020 rad joint position range alone. At update 1000 the seeds passed 5 and 6 probes. The best 128-robot policy passed 7 of 13 with E 0.445. Hash-checked verification recomputes every probe's contact-normal force and torque summary from the raw 400 Hz chunks without difference. Walking remains unqualified for Stage 2.",
+  "areas": [
+    "locomotion",
+    "research",
+    "site"
+  ],
+  "next": "Decide the next 512-robot arm: close the -0.20 rad/s turn and the quiet joint drift, or run the AMP comparison at 512 robots first.",
+  "changes": [
+    "site/assets/media/ppo_v4_omni512_seed20260917_stop_20261011*",
+    "site/assets/reward_v4_budget512_20261011_001/*",
+    "site/project.json"
+  ],
+  "evidence": [
+    "site/assets/reward_v4_budget512_20261011_001/results.json",
+    "site/assets/reward_v4_budget512_20261011_001/seed20260917_verification.json",
+    "site/assets/reward_v4_budget512_20261011_001/seed20260918_verification.json",
+    "site/assets/reward_v4_budget512_20261011_001/provenance.json"
+  ],
+  "no_project_impact": false,
+  "reason": "The two seeds change the recorded Stage 2 blocker and its selected video. No capability gains acceptance and walking remains unqualified."
+}

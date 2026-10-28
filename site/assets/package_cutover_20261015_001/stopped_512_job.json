@@ -1,0 +1,40 @@
+{
+  "status": "stopped",
+  "phase": "standing",
+  "container_name": "hexapod-reference-physics-fc0f9adb829f45d2936eb19572694c16",
+  "started_unix": 1792019031.3569388,
+  "deadline_seconds": 22000,
+  "app_ready_deadline_seconds": 90,
+  "no_policy_loaded": true,
+  "native_mode": "diagnostic",
+  "source_freeze_sha256": "535b226e4988455ba00e3cac168ee34083376f20da4aaf9e478cb234d7ea64ae",
+  "stage2_complete": false,
+  "physical_admission": false,
+  "preflight": {
+    "gpu_processes": [
+      "3289, /app/llama-server"
+    ],
+    "containers": [
+      "775b0e09edb0 qwen38-server ghcr.io/ggml-org/llama.cpp:server-cuda13-b10524"
+    ],
+    "available_memory_bytes": 117150748672
+  },
+  "container_id": "39d750722194fd137aa515a71f71377f070d03e7e6a62abc92ae5c10f7abd22e",
+  "other_gpu_processes_seen": [
+    {
+      "process": "3289, /app/llama-server",
+      "cgroup": "0::/system.slice/docker-775b0e09edb057eb1c3e25475a4a2530d50f1567020b21bb6c399c794b8bede6.scope"
+    },
+    {
+      "process": "3955616, /workspace/isaaclab/_isaac_sim/kit/python/bin/python3",
+      "cgroup": "0::/system.slice/docker-e72c5a82520fce0dafe7b82249d9227436eca5735778c78a3ff1c300724c6497.scope"
+    },
+    {
+      "process": "3965305, /workspace/isaaclab/_isaac_sim/kit/python/bin/python3",
+      "cgroup": "0::/system.slice/docker-48fc257fda1837f0f640454da895d436e57452e9e1ef9cf939b342ab9ee037da.scope"
+    }
+  ],
+  "error": "InterruptedError('Stop requested')",
+  "cleanup_checked": true,
+  "finished_unix": 1792020644.599559
+}

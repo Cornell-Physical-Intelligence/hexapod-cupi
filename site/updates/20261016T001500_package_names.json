@@ -1,0 +1,30 @@
+{
+  "id": "20261016T001500_package_names",
+  "date": "2026-10-16T00:15:00Z",
+  "title": "Name the locomotion packages hexapod and amp",
+  "summary": "Rename tripod to hexapod, the stock Isaac Lab task on the hexapod with scripted-tripod behavior cloning, after the robot as Isaac Lab names its task packages and as its gym ids read. Rename priors to amp, the method the package implements end to end. The admitted demonstration bank stays at locomotion/priors/datasets/amp_demonstrations_001, the path the admission records cite, and its manifest bytes and recorded source keys are unchanged.",
+  "areas": [
+    "locomotion",
+    "developer map"
+  ],
+  "next": "Push the branch so CI runs on the exact revision, then schedule native standing admission and the 13-probe parity of c48_long.",
+  "changes": [
+    "locomotion/**",
+    "configs/source_inventory.json",
+    "tools/code_map.py",
+    "tools/check_pipeline_lineages.py",
+    "site/test_code_map.mjs",
+    "tests/fixtures.json",
+    "tests/test_code_map.py",
+    ".github/workflows/tests.yml",
+    ".ignore",
+    "CONTRIBUTING.md",
+    "site/updates/20261016T001500_package_names.json"
+  ],
+  "evidence": [
+    "src/locomotion/README.md",
+    "src/locomotion/priors/datasets/amp_demonstrations_001/manifest.json"
+  ],
+  "no_project_impact": true,
+  "reason": "Package names change no robot, training code path, gate or recorded result; native admission stays pending."
+}

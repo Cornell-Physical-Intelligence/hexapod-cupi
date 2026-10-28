@@ -1,0 +1,21 @@
+{
+  "id": "20261023T182056_receipts_bind_717548d5",
+  "date": "2026-10-23T18:20:56.268659Z",
+  "title": "State which runtime bytes the two c48_long receipts bind",
+  "summary": "The locomotion guide said scripts/play.py accepts either compatibility receipt. Both receipts bind the runtime bytes of source 717548d5, and the loader accepts a receipt only when the running runtime files match it; after the Ruff reformat of the runtime merged (PR 86), 11 of the 50 bound files still match main. The guide now says so and that the reformatted runtime's certified receipt is pending. No evidence file changes.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Certify the reformatted runtime's c48_long replay (native_ranges certify) and publish its receipt under site/assets with the guide pointer.",
+  "changes": [
+    "src/locomotion/README.md",
+    "site/updates/20261023T182056_receipts_bind_717548d5.json"
+  ],
+  "evidence": [
+    "src/locomotion/README.md",
+    "src/locomotion/evaluation/checkpoint.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A guide wording change; evidence, gates and recorded results are unchanged."
+}

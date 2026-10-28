@@ -1,0 +1,25 @@
+{
+  "id": "20261012T234330_rollout_transitions",
+  "date": "2026-10-12T23:43:30+00:00",
+  "title": "Count transitions by the rollout length and accept word values in reward options",
+  "summary": "Native training recorded transitions as update x 24 x robots whatever --steps-per-env selected, so metrics rows, state and checkpoint sidecars understated longer rollouts: the 2500-update, 48-control run recorded 7,680,000 transitions and collected 15,360,000. Training now counts update x the configured rollout x robots. native_results.json states each run's collected count beside the recorded one. locomotion.prepare's reward-option check accepted numeric values alone and refused yaw_gate_on=none and yaw_gate_on=all; it now accepts lowercase words and checks every key and value against the selected task's reward configuration, as the trainer does, so plain v4 still refuses schedule_weight=none.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/train.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_learner_options.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "site/assets/yaw_gated_stride_native_20261012_001/*",
+    "site/updates/20261012T234330_rollout_transitions.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_learner_options.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "site/assets/yaw_gated_stride_native_20261012_001/native_results.json"
+  ],
+  "next": "Results records of runs trained from 1b4d67a1 or 55bfbe7f with another rollout length state the collected transition count.",
+  "no_project_impact": true,
+  "reason": "The fix corrects a recorded count and an option check; it changes no reward, gate or result verdict."
+}

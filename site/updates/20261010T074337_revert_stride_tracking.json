@@ -1,0 +1,20 @@
+{
+  "id": "20261010T074337_revert_stride_tracking",
+  "date": "2026-10-10T07:43:37+00:00",
+  "title": "Remove the stride-window tracking term from the experimental yaw-gated reward",
+  "summary": "locomotion.task_v4_yaw_gate returns to the threshold, bonus and floor version; stride_tracking_weight and stride_window_controls are removed. On the surrogate, seed 20260917, with 30 percent turn draws, a 120-control gate window, a 0.18 rad/s threshold, bonus 0.25 and floor 0.5: stride weight 0.3 passed 11 of 13 learning probes at 5000 updates against 8 of 13 without the term, walked at a median 0.85 of the commanded speed against 0.70, and turned at 0.196 and -0.168 rad/s, but its heading drifted 36 to 51 degrees on three translation probes that the rate-based yaw check passes, against at most 18 degrees without the term. Stride weight 1 with termination weight 30 fell 957 times in the last 1500 updates and passed none. One seed; native runs remain the acceptance evidence.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v4_yaw_gate.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "site/updates/20261010T074337_revert_stride_tracking.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v4_yaw_gate.py"
+  ],
+  "next": "Run a second surrogate seed of turn-heavy sampling with and without the bonus-and-floor gate, report total heading drift beside the probe verdicts, then propose one configuration for a native 5000-update run.",
+  "no_project_impact": true,
+  "reason": "Removing an opt-in option of an experimental task changes no native result, gate or default reward."
+}

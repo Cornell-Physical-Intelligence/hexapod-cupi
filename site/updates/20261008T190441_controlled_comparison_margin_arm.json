@@ -1,0 +1,22 @@
+{
+  "id": "20261008T190441_controlled_comparison_margin_arm",
+  "date": "2026-10-08T19:04:41Z",
+  "title": "Record the joint-margin arm of the controlled reward v4 comparison: mixed",
+  "summary": "Both joint-margin seeds (weight 3) trained 5000 updates and ran the 13 learning probes at updates 2000, 3500 and 5000. Against the budget arm with the matched seed, neither seed meets every margin requirement and each meets at least one, so the margin hypothesis is mixed. Seed 20260917 lowers the joint-limit rate over updates 601 to 2000 by 62 percent (371 to 140 terminal rows per million controls) and raises translation speed by 5.1 percent, but its rate over updates 4801 to 5000 rises from 4.9 to 8.1 and it loses the quiet 32 s and forward-to-stop passes. Seed 20260918 lowers the early rate by 31 percent (143 to 98), short of the 50 percent requirement; its translation speed falls 11.7 percent, and it loses three passes and adds two torque failures. Its late rate falls from 238 to 169. The budget run of seed 20260918 is unstable late in training: its joint-limit rate rises from 49 per million controls over updates 1801 to 2000 to 238 over updates 4801 to 5000, and three of its update-5000 probes end at a joint limit. That instability makes the late-rate requirement easier for seed 20260918 to meet and shortens two of the eight baseline speed windows. On the five translation probes that complete in both runs the margin arm is still 7.1 percent slower, so the speed result stands. The verdict word does not depend on the instability: without the late-rate result seed 20260918 meets no outcome, and seed 20260917 still meets two of three. Each verification record recomputes every probe's contact-normal force and torque summary from the raw 400 Hz chunks without difference.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "next": "Record the yaw-weight arm with both seeds and compute the yaw verdict against the matched budget arm.",
+  "changes": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/*",
+    "site/updates/20261008T190441_controlled_comparison_margin_arm.json"
+  ],
+  "evidence": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/comparison_after_margin.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/J_seed20260917_verification.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/J_seed20260918_verification.json"
+  ],
+  "no_project_impact": true,
+  "reason": "The margin comparison leaves Stage 2 incomplete and changes no capability state; the yaw comparison remains pending."
+}

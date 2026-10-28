@@ -1,0 +1,46 @@
+{
+  "id": "20261015T150750_preserve_both_experiments",
+  "date": "2026-10-15T15:07:50Z",
+  "title": "Preserve both walking experiments",
+  "summary": "We restored Shaurya\u2019s original environment and BC/PPO workflow beside the c48_long PPO setup. We removed the hybrid BC path and kept the two observation, reward and actuator contracts separate.",
+  "areas": [
+    "locomotion",
+    "training"
+  ],
+  "changes": [
+    ".github/workflows/pages.yml",
+    ".github/workflows/tests.yml",
+    "configs/source_inventory.json",
+    "docs/TRAINING.md",
+    "locomotion/README.md",
+    "locomotion/learning/bc.py",
+    "locomotion/runs/prepare.py",
+    "locomotion/runs/sources.py",
+    "locomotion/runs/train.py",
+    "locomotion/shaurya/__init__.py",
+    "locomotion/shaurya/agents/__init__.py",
+    "locomotion/shaurya/agents/rsl_rl_ppo_cfg.py",
+    "locomotion/shaurya/hexapod_env.py",
+    "locomotion/shaurya/hexapod_env_cfg.py",
+    "locomotion/shaurya/hexapod_robot_cfg.py",
+    "locomotion/shaurya/tools/bc_clone.py",
+    "locomotion/shaurya/tools/diag_policy_rollout.py",
+    "locomotion/tests/test_direct_bc.py",
+    "locomotion/tests/test_direct_binding.py",
+    "locomotion/tests/test_shaurya_bc.py",
+    "locomotion/tests/test_shaurya_environment.py",
+    "site/test_code_map.mjs",
+    "site/updates/20261015T150750_preserve_both_experiments.json",
+    "tools/check_pipeline_lineages.py",
+    "tools/code_map.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_shaurya_environment.py",
+    "locomotion/tests/test_shaurya_bc.py",
+    "locomotion/tests/test_task.py",
+    "locomotion/README.md"
+  ],
+  "next": "Obtain the user\u2019s go-ahead for full PR review and qualify both native paths before accepting new results.",
+  "no_project_impact": true,
+  "reason": "Source restoration and CPU comparisons add no native acceptance result."
+}

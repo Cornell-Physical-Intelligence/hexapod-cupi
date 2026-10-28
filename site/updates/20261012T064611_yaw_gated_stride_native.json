@@ -1,0 +1,21 @@
+{
+  "id": "20261012T064611_yaw_gated_stride_native",
+  "date": "2026-10-12T06:46:11+00:00",
+  "title": "Record native training and learning probes of the yaw-gated stride reward",
+  "summary": "Source 1b4d67a1 trained reward v4 with the yaw-gated task natively at seed 20260917: turn-heavy sampling (30 percent of moving draws become turns), the yaw gate on turns with a 0.25 bonus and a 0.5 floor, stride tracking 0.3, stride length 2 and termination 22, 128 robots. At 48,000 controls per robot, 24, 36 and 48 controls per update for 2000, 1333 and 1000 updates passed 0, 0 and 2 of 13 learning probes and walked at about 0.4 to 0.5 of the command. At 120,000 controls per robot, 48 controls per update for 2500 updates passed all 13: turns at +0.199 and -0.226 rad/s against 0.2, all eight 0.05 m/s walks and both quiet probes and the stop, with heading drift of 16.0 degrees on average and 32.6 at most over the walks. One seed; learning probes are diagnostics and Stage 2 remains incomplete. The first c24 launch failed before training because the container user could not read the pack.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "changes": [
+    "site/assets/yaw_gated_stride_native_20261012_001/*",
+    "site/updates/20261012T064611_yaw_gated_stride_native.json"
+  ],
+  "evidence": [
+    "site/assets/yaw_gated_stride_native_20261012_001/native_results.json",
+    "site/assets/yaw_gated_stride_native_20261012_001/collect.py"
+  ],
+  "next": "Repeat the 48-control, 2500-update launch at seed 20260918 and review the native videos and force and torque records with the program lead.",
+  "no_project_impact": true,
+  "reason": "One seed of learning-probe diagnostics; the record changes no capability state and admits no Stage 2 result."
+}

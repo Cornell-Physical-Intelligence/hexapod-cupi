@@ -1,0 +1,20 @@
+{
+  "id": "20261010T044857_yaw_gate_bonus_floor",
+  "date": "2026-10-10T04:48:57+00:00",
+  "title": "Add a command threshold, a turn bonus and a pay floor to the experimental yaw gate",
+  "summary": "locomotion.task_v4_yaw_gate gains yaw_gate_min_command_rad_s, which limits the gate to commands that turn at least that fast, yaw_gate_bonus, which pays a turn that matches its command up to 1 + bonus times v4's schedule pay, and yaw_gate_floor, which keeps that share of the schedule pay on a covered command whatever the turn. On the surrogate, seed 20260917, 5000 updates, with 30 percent turn draws, a 120-control gate window and a 0.18 rad/s threshold: bonus 0.5 passed 8 of 13 learning probes and turned left at 0.206 rad/s but right at -0.090; bonus 0.25 with floor 0.5 passed 8 of 13, turned at 0.189 and -0.166 rad/s and held heading within 0.039 rad/s on every translation. Turn-heavy sampling without the gate passed 10 of 13 and turned at 0.161 and -0.197 rad/s; the v4 control passed 5 of 13. The defaults keep earlier behaviour; native runs remain the acceptance evidence.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v4_yaw_gate.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "site/updates/20261010T044857_yaw_gate_bonus_floor.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v4_yaw_gate.py"
+  ],
+  "next": "Run a second surrogate seed of turn-heavy sampling with and without the bonus-and-floor gate, then propose one configuration for a native 5000-update run.",
+  "no_project_impact": true,
+  "reason": "Opt-in options of an experimental task with surrogate design evidence change no native result, gate or default reward."
+}

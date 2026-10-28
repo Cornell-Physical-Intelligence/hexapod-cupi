@@ -38,15 +38,15 @@ The catalog's 48 V torque-speed points include 1.6 N·m at 450 rpm and 5.5 N·m 
 
 ## Current direct-drive implementation
 
-Use [`motor_force`](../locomotion/env.py) and [`EnvConfig`](../locomotion/env_config.py)
+Use [`motor_force`](../src/locomotion/robots/rs05.py) and [`EnvConfig`](../src/locomotion/omniwalk/env_cfg.py)
 for the maintained implementation. At each 400 Hz physics step, the controller
-computes `12 * (target - position) - kd * velocity`, using the per-joint `KD`
-values in `env_config.py`. It clips that demand against a provisional 48 V
+computes `12 * (target - position) - kd * velocity`, using per-joint `KD`
+from `robots/hexapod.py`. It clips that demand against a provisional 48 V
 speed curve and the 1.6 N·m cap. The curve reaches zero at 480 rpm. The native
 readback checks zero implicit drive and armature; this controller applies effort.
 
 You observe requested and applied torque through
-[`force_metrics.py`](../locomotion/force_metrics.py). Demand above 1.6 N·m and
+[`force_metrics.py`](../src/locomotion/evaluation/force_metrics.py). Demand above 1.6 N·m and
 speed-dependent clipping are distinct quantities. The controller has no measured
 voltage, current, temperature or burst-recovery state. A 5.5 N·m URDF field
 cannot authorize unlimited peak operation. Vendor torque and speed refer to

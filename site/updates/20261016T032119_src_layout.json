@@ -1,0 +1,45 @@
+{
+  "id": "20261016T032119_src_layout",
+  "date": "2026-10-16T03:21:19Z",
+  "title": "Move the Python packages under src",
+  "summary": "Move locomotion, navigation, mission and contracts under src/ and install them in editable mode through uv_build, so imports resolve from any directory and the checkout no longer doubles as the import root. robot/, tools/, tests/, configs/, docs/ and site/ stay at the root as data, tooling and publication. Native packs keep their flat layout, so src/ mirrors a pack's /source root and every recorded identity key keeps its string. Pushed records that cite moved files resolve through archived sources at the previous branch head.",
+  "areas": [
+    "locomotion",
+    "navigation",
+    "mission",
+    "contracts",
+    "developer map"
+  ],
+  "next": "Push the branch so CI runs on the exact revision, then run native standing admission and the 13-probe parity of c48_long on Spark.",
+  "changes": [
+    "src/**",
+    "locomotion/**",
+    "navigation/**",
+    "mission/**",
+    "contracts/**",
+    "pyproject.toml",
+    "uv.lock",
+    "configs/source_inventory.json",
+    "tools/*.py",
+    "tests/*",
+    "site/test_code_map.mjs",
+    "site/project.json",
+    ".github/workflows/*.yml",
+    ".ignore",
+    ".graphifyignore",
+    "README.md",
+    "CONTRIBUTING.md",
+    "ARCHITECTURE.md",
+    "AGENTS.md",
+    "docs/*.md",
+    "robot/hexapod_mkii_updated_v1/README.md",
+    "site/updates/20261016T032119_src_layout.json"
+  ],
+  "evidence": [
+    "pyproject.toml",
+    "src/locomotion/README.md",
+    ".github/workflows/tests.yml"
+  ],
+  "no_project_impact": true,
+  "reason": "The layout changes no robot, training code path, gate or recorded result; native admission stays pending."
+}

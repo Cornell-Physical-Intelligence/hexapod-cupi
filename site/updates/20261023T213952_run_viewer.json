@@ -1,0 +1,38 @@
+{
+  "id": "20261023T213952_run_viewer",
+  "date": "2026-10-23T21:39:52.872526Z",
+  "title": "Replay native and surrogate evaluation runs in the viewer",
+  "summary": "The viewer gains a Runs page beside the robot inspector. viewer/run_view.py turns any native Spark or surrogate evaluation folder into a run file, and the page replays its cases side by side: the robot from the top, in 3D or from the side, its body path, foot contacts, the commanded direction, the ghost where the command leads, heading against commanded heading, distance to the ghost and the evaluator's own failed checks. Its end gaps reproduce the destination_v9 lineage results exactly (0.59, 0.571 and 0.936 mm mean, median and worst).",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Use the Runs page to look into the destination_v9 96-case failures, starting with 0.10 m/s walks that fail forward and right but pass left and backward.",
+  "changes": [
+    ".github/workflows/tests.yml",
+    "CONTRIBUTING.md",
+    "README.md",
+    "tests/test_run_view.py",
+    "viewer/README.md",
+    "viewer/package.json",
+    "viewer/run_view.py",
+    "viewer/src/App.jsx",
+    "viewer/src/runs/RunViewer.jsx",
+    "viewer/src/runs/draw.js",
+    "viewer/src/runs/runFile.js",
+    "viewer/src/runs/runs.css",
+    "viewer/test/fixtures/sample_run.json",
+    "viewer/test/runFile.test.mjs",
+    "site/assets/run_viewer_20261023_001/*",
+    "site/updates/20261023T213952_run_viewer.json"
+  ],
+  "evidence": [
+    "tests/test_run_view.py",
+    "viewer/test/runFile.test.mjs",
+    "site/assets/run_viewer_20261023_001/runs_table.jpg",
+    "site/assets/run_viewer_20261023_001/runs_native_cases.jpg",
+    "site/assets/run_viewer_20261023_001/runs_surrogate_case.jpg"
+  ],
+  "no_project_impact": true,
+  "reason": "An offline viewer for evaluation outputs; it changes no runtime source, trained network, reward, threshold or roadmap marker."
+}

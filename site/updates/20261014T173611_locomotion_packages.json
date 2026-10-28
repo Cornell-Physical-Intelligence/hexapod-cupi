@@ -1,0 +1,35 @@
+{
+  "id": "20261014T173611_locomotion_packages",
+  "date": "2026-10-14T17:36:11.418016+00:00",
+  "title": "Organize locomotion code and add regression gates",
+  "summary": "We grouped locomotion code into six packages and kept the command entry points. CPU tests compare the refactor with frozen main sources. Pages builds a separate developer code map. Native parity checks remain required before merge.",
+  "areas": [
+    "locomotion",
+    "developer tools"
+  ],
+  "changes": [
+    "locomotion/*.py",
+    "locomotion/tests/fixtures/refactor_b2a6168c.tar.gz",
+    "locomotion/README.md",
+    "configs/source_inventory.json",
+    "docs/TRAINING.md",
+    "docs/PROJECT_SITE.md",
+    "tools/code_map.py",
+    "tools/project_site.py",
+    "tools/source_inventory.py",
+    "tools/check_pipeline_lineages.py",
+    "tests/test_code_map.py",
+    ".github/workflows/pages.yml",
+    "CONTRIBUTING.md",
+    "site/test_code_map.mjs"
+  ],
+  "evidence": [
+    "locomotion/tests/test_refactor_parity.py",
+    "locomotion/tests/test_native_ranges.py",
+    "locomotion/tests/native_parity.py",
+    "tests/test_code_map.py"
+  ],
+  "next": "Complete native standing admission and checkpoint parity before merge.",
+  "no_project_impact": true,
+  "reason": "This refactor preserves runtime behavior and makes no new locomotion result claim."
+}

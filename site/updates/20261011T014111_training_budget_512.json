@@ -1,0 +1,23 @@
+{
+  "id": "20261011T014111_training_budget_512",
+  "date": "2026-10-11T01:41:11Z",
+  "title": "Open a 512-robot training budget for the reward v4 arms",
+  "summary": "The program lead opened a 512-robot training budget on 11 October after the throughput profiles placed the knee at 512 robots: 512 robots, 24 controls per robot and update, 2000 updates and the pilot deadline, with standing admission from the replicas input root. The pack preparer and trainer accept 128 and 512 robots for training and probes; 1024 stays a profiling count. No run has started under the new budget, and a test covers the accepted and rejected counts.",
+  "areas": [
+    "locomotion",
+    "compute"
+  ],
+  "next": "Prepare the first two reward v4 full-command-bank seeds at 512 robots and dispatch them when the Spark lead confirms the GPU is free.",
+  "changes": [
+    "docs/TRAINING.md",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_throughput.py",
+    "locomotion/train.py"
+  ],
+  "evidence": [
+    "locomotion/tests/test_throughput.py",
+    "site/assets/throughput_profile_20261011_001/summary.json"
+  ],
+  "no_project_impact": true,
+  "reason": "A budget guard change establishes no native result or accepted capability."
+}

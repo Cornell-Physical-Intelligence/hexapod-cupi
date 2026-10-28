@@ -1,0 +1,22 @@
+{
+  "id": "20261010T173140_steps_per_env",
+  "date": "2026-10-10T17:31:40+00:00",
+  "title": "Add an opt-in rollout length to PPO training and evaluation",
+  "summary": "locomotion/ppo.py, locomotion/train.py and locomotion/prepare.py gain --steps-per-env, the controls each robot collects per PPO update: 24 by default, or a multiple of 6 from 12 to 96. Mini-batches scale to steps / 6, so each keeps 768 samples at 128 robots. Like the other learner options it applies to PPO training and evaluation, and enters the PPO configuration, binding and PACK.json only when it differs from 24, so existing packages and checkpoints keep their recorded configuration. On the surrogate, 36 controls per update reached the same experience in 3350 updates as 24 controls in 5000 and did better on two seeds. Native arm B collected 24 controls in 3.13 s per update, so 36 controls for 3500 updates should take about 4.7 to 5.1 hours of the 6-hour flat pilot allocation.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/ppo.py",
+    "locomotion/train.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_learner_options.py",
+    "site/updates/20261010T173140_steps_per_env.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_learner_options.py"
+  ],
+  "next": "With run-lead approval, train the stride-term configuration natively at 36 controls per update for 3500 updates.",
+  "no_project_impact": true,
+  "reason": "An opt-in learner option changes no default, gate, existing package or result."
+}

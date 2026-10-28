@@ -1,0 +1,21 @@
+{
+  "id": "20261009T172758_yaw_gated_schedule",
+  "date": "2026-10-09T17:27:58+00:00",
+  "title": "Add an experimental yaw-gated contact schedule on top of reward v4",
+  "summary": "locomotion.task_v4_yaw_gate adds one term to reward v4: on commands with a nonzero yaw rate it withholds the contact schedule's pay in proportion to the squared error between the body's stride-mean yaw rate (60 controls) and the command, so stepping without turning earns no schedule reward. Unloaded stance feet keep their full charge. On surrogate replays of native probe actions, reward v4 ranks the slowest native turner above the fastest, and the gated reward ranks them by turn rate. A 2000-update surrogate training with the gate learned no turn in place and walked slower than the v4 control; the module stays experimental.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v4_yaw_gate.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "configs/source_inventory.json",
+    "site/updates/20261009T172758_yaw_gated_schedule.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v4_yaw_gate.py"
+  ],
+  "next": "Test turn-heavy command sampling on the surrogate, with and without the gate, against the v4 control.",
+  "no_project_impact": true,
+  "reason": "An experimental opt-in reward variant with surrogate design evidence changes no native result, gate or default reward."
+}

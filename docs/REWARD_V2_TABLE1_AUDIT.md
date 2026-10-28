@@ -10,11 +10,11 @@ proposal for the named reviewer; nothing here changes `locomotion/task.py`.
 checks each number in sections 4 and 5.
 
 Sources: Table I, read at 400 DPI from the source PDF; version 1,
-`measured_reward` in [`locomotion/task.py`](../locomotion/task.py)
+`measured_reward` in [`locomotion/task.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/task.py)
 (`canonical_quiet_quadratic_log_tail_v2`); the motor model and target limiter in
-[`locomotion/env.py`](../locomotion/env.py) and
-[`locomotion/env_config.py`](../locomotion/env_config.py). The candidate
-[`locomotion/paper_reward.py`](../locomotion/paper_reward.py) implements the
+[`locomotion/env.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/env.py) and
+[`locomotion/env_config.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/env_config.py). The candidate
+[`locomotion/paper_reward.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/paper_reward.py) implements the
 paper reward with the adaptations in section 3.
 
 ## 1. Table I as printed
@@ -39,7 +39,7 @@ Penalty r^l
 
 `||.||_2` is the unsquared Euclidean norm; on the scalar yaw error it is an
 absolute value. The style term needs the AMP discriminator
-([`locomotion/amp_discriminator.py`](../locomotion/amp_discriminator.py), Step 5) and stays outside reward v2
+([`locomotion/amp_discriminator.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/amp_discriminator.py), Step 5) and stays outside reward v2
 until the AMP owner agrees its inputs.
 
 ## 2. Findings on the printed formulas
@@ -76,7 +76,7 @@ The reward reads only what `env.py` exports after a control. A change to
 
 ## 4. Stationary-translation criterion
 
-[TRAINING](TRAINING.md#step-1-tracking-reward-criterion) asks for an under-10%
+[TRAINING](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#step-1-tracking-reward-criterion) asks for an under-10%
 condition on the commanded translation component. Criterion: for every nonzero
 translation command in `command_bank`, a motionless robot earns under 10% of the
 translation tracking term's maximum. The audit applies the same condition to
@@ -182,7 +182,7 @@ action-rate term reads raw actions, and neither the 1.6 N·m cap nor the
    (0.721 / (1 - 0.99) = 72.1).
 3. A new `REWARD_VERSION` beside version 1, which stays selectable and
    unchanged. `test_recorded_parity` freezes `task.py` byte for byte, so version
-   2 lives in [`locomotion/task_v2.py`](../locomotion/task_v2.py) as a subclass
+   2 lives in [`locomotion/task_v2.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/task_v2.py) as a subclass
    of `TrainingTask`; `train.py --reward-version 2` selects it. Its defaults
    (variant C, `k` = 0.4, the section 4 floors, calibrated penalties, the
    termination term) are decided in the review of
@@ -583,7 +583,7 @@ The other numbers come from the retained captures and metric files of the
 attempts that the run ledger names. Every native training run and noise probe
 uses 128 robots, each evaluation uses one, and all keep the approved robot,
 limiter and gates.
-A CPU MuJoCo surrogate, [`locomotion/surrogate`](../locomotion/surrogate/README.md),
+A CPU MuJoCo surrogate, [`locomotion/surrogate`](../src/locomotion/surrogate/README.md),
 guided the choices between native runs. Its numbers carry no acceptance weight
 and we label each one. Its forward probes match native on four checkpoints; its
 default contact model passes five of the eight quiet and stop probes that
@@ -601,7 +601,7 @@ reads the raw sample (`locomotion/task_v2.py` line 189).
 
 The [noise ledger](../site/assets/ppo_walking_diagnosis_20261005_001/noise_ledger.json) separates pose from noise with no
 optimizer. One native probe holds four fixed poses under four deviations
-([`noise_probe.py`](../locomotion/noise_probe.py)); the ledger scores the same
+([`noise_probe.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/noise_probe.py)); the ledger scores the same
 rollout under each reward version. For a motionless robot under the forward
 0.05 m/s command:
 
@@ -759,7 +759,7 @@ record. Each one except `--episode-seconds` also enters the evaluation command.
 
 ### Reward version 4 and its departures from the paper
 
-[`task_v4.py`](../locomotion/task_v4.py) holds the formulas, and each run copies
+[`task_v4.py`](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/b2a6168c35156dfe0a8202201aa574b8d9e43fb1/locomotion/task_v4.py) holds the formulas, and each run copies
 them into its task definition. `DEPARTURES` in that file states each change
 from Table I with its reason:
 
@@ -832,7 +832,7 @@ You can use the retained runs as an adapted PPO baseline. The paper supplies gai
 structure through the AMP discriminator and demonstration transitions
 ([sections III-B and V-A](https://arxiv.org/html/2511.03167v1#S3.SS2)).
 These runs use a prescribed tripod contact schedule and swing-travel reward.
-The native AMP comparison remains pending in [TRAINING](TRAINING.md#proposed-reproduction-sequence).
+The native AMP comparison remains pending in [TRAINING](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/df551b9018505daef56f48e0078282b608d9db45/docs/TRAINING.md#proposed-reproduction-sequence).
 Forward and stop passes establish those probe results; they do not establish the
 necessity of each added reward or learner option.
 
@@ -878,8 +878,8 @@ for seed in 20260917 20260918; do
     --attempt ppo_v4_settle_seed${seed}_20261006_001 \
     --workspace "$HOME/hexapod-evidence/section-15/verification_$seed" --fetch
 done
-uv run python -m unittest discover -s locomotion/tests
-uv run python -m unittest discover -s locomotion/surrogate/tests
+uv run python -m unittest discover -s src/locomotion/tests
+uv run python -m unittest discover -s src/locomotion/surrogate/tests
 ```
 
 A native rerun uses `prepare --mode train --reward-version 4 --updates 2000

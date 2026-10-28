@@ -1,0 +1,24 @@
+{
+  "id": "20261012T194554_admission_reference_by_source",
+  "date": "2026-10-12T19:45:54Z",
+  "title": "Name the standing admission that matches each pack's source",
+  "summary": "The frozen flat pilot section of docs/TRAINING.md told contributors to freeze the input declaration from the 29 September 128-robot admission, and SPARK.md named that declaration as current. PR 65 changed env.py and env_config.py, so a pack from current main fails the admission check with that record. Both guides now name the admission by the source it matches: the four prepared packages hold source 620d9aa9 and keep the 29 September admission, and a pack from current main takes the 10 October 128-robot admission under /srv/cupi/hexapod/inputs/replicas_20261010_001. The pilot's budget, seeds, arms and gates stay as they were.",
+  "areas": [
+    "documentation",
+    "training",
+    "compute"
+  ],
+  "next": "Prepare new flat pilot packs from main with the 10 October declaration. A later physics change needs a new matching admission and a new line in these two guides.",
+  "changes": [
+    "docs/TRAINING.md",
+    "SPARK.md"
+  ],
+  "evidence": [
+    "site/assets/throughput_profile_20261010_001/admission_128.json",
+    "site/assets/throughput_profile_20261010_001/provenance.json",
+    "site/assets/throughput_profile_20260929_001/admission_128.json",
+    "locomotion/admission.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A documentation correction establishes no native result or accepted capability."
+}

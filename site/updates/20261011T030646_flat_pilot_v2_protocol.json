@@ -1,0 +1,22 @@
+{
+  "id": "20261011T030646_flat_pilot_v2_protocol",
+  "date": "2026-10-11T03:06:46Z",
+  "title": "Declare the flat pilot v2 protocol on reward v4 without its gait terms",
+  "summary": "TRAINING.md adds protocol flat_pilot_v2 for the native AMP comparison. Every arm trains reward v4 with the contact schedule and swing-travel terms off and the full command bank, 128 robots, 2000 updates and seeds 20260917 and 20260918, with the retained v4 learner options and no gait clock. The reward v2 control under flat_pilot_v1 failed for penalty-sizing and learner causes unrelated to gait, so it could not test the style reward. The section records a prerequisite: the AMP wrapper and configuration take the action-mean option alone today and must take the control arm's options before any pack. No native run starts from this change.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "next": "Record the program lead's approval on #50, close #51 as the reward v2 control record, and extend the AMP wrapper to the control arm's learner options before preparing any pack.",
+  "changes": [
+    "docs/TRAINING.md"
+  ],
+  "evidence": [
+    "docs/TRAINING.md",
+    "docs/REWARD_V2_TABLE1_AUDIT.md",
+    "locomotion/amp_ppo.py",
+    "locomotion/paper_networks.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A protocol declaration starts no native run and establishes no result or accepted capability."
+}

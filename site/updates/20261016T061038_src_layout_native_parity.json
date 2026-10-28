@@ -1,0 +1,26 @@
+{
+  "id": "20261016T061038_src_layout_native_parity",
+  "date": "2026-10-16T06:10:38Z",
+  "title": "Replay c48_long on the src layout and attribute the probe failure to the stock ground plane",
+  "summary": "The src layout passed standing admission at one and 128 robots. The unchanged c48_long checkpoint then passed 12 of its 13 probes; the backward probe exceeds the joint speed limit for one 400 Hz substep during startup. A control replay of the pushed head b92f14ec reproduced all 8,088 measurements and both standing reports byte for byte, so the layout and the package renames change no native behavior. The stock ground plane that replaced the recorded mesh floor at b92f14ec moves 7,566 of the 8,088 measurements outside the three-baseline ranges and causes the failure, so loader certification against the frozen ranges fails for the branch as pushed. The pack review tool and the parity pack builder that ran this campaign are added.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Decide the floor: restore the recorded mesh floor on the refactored source and repeat the replay to certify the loader, or re-baseline standing admission and the probe ranges on the stock ground plane after removing the startup contact spike.",
+  "changes": [
+    "site/assets/src_layout_native_20261016_001/*",
+    "src/locomotion/README.md",
+    "src/locomotion/spark/pack.py",
+    "src/locomotion/tests/native_parity_pack.py",
+    "src/locomotion/tests/test_parity_pack.py",
+    "configs/source_inventory.json",
+    "site/updates/20261016T061038_src_layout_native_parity.json"
+  ],
+  "evidence": [
+    "site/assets/src_layout_native_20261016_001/verification.json",
+    "src/locomotion/tests/native_ranges.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The retained policy measurements stay recorded and no qualification claim changes; the roadmap stays at Stage 2."
+}

@@ -1,0 +1,1556 @@
+{
+ "schema": "hexapod_destination_lineage_results_v1",
+ "scope": "Native Isaac learning probes on Spark, one robot per probe, the actor mean without sampling noise, one trial per probe. Pass/fail and check values copy each probe report; the walk measures are computed from each probe's control trace as the module docstring of build_results.py states.",
+ "chain": [
+  {
+   "step": 0,
+   "experiment": "pr_model",
+   "description": "Learn to walk clumsily",
+   "evaluation_attempt": "eval_v4_stride_c48_u2500_seed20260917_20261011_001",
+   "summary_sha256": "213903a6d16414663df317eea59431445e7c2514c165b135e6adec8198d26ada",
+   "probes_passed": 13,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 175.967,
+     "median": 152.056,
+     "worst": 298.99
+    },
+    "facing_change_deg": {
+     "mean": 15.949,
+     "worst": 32.601
+    },
+    "path_angle_deg": {
+     "mean": 8.743,
+     "worst": 15.513
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 147.742,
+     "facing_change_2s_to_end_deg": 12.239,
+     "path_angle_2s_to_end_deg": 6.991,
+     "speed_over_command": 0.9992
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 207.598,
+     "facing_change_2s_to_end_deg": -5.626,
+     "path_angle_2s_to_end_deg": -12.813,
+     "speed_over_command": 0.9619
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 285.319,
+     "facing_change_2s_to_end_deg": -27.612,
+     "path_angle_2s_to_end_deg": -14.034,
+     "speed_over_command": 0.8532
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 298.99,
+     "facing_change_2s_to_end_deg": -32.601,
+     "path_angle_2s_to_end_deg": -15.513,
+     "speed_over_command": 1.0433
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 63.069,
+     "facing_change_2s_to_end_deg": -6.356,
+     "path_angle_2s_to_end_deg": -0.699,
+     "speed_over_command": 0.9594
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 156.37,
+     "facing_change_2s_to_end_deg": -21.854,
+     "path_angle_2s_to_end_deg": -6.861,
+     "speed_over_command": 0.9451
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 101.432,
+     "facing_change_2s_to_end_deg": -8.296,
+     "path_angle_2s_to_end_deg": -4.092,
+     "speed_over_command": 0.9801
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 147.218,
+     "facing_change_2s_to_end_deg": 13.007,
+     "path_angle_2s_to_end_deg": 8.942,
+     "speed_over_command": 0.9961
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2265
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.1989
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00363,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00102,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.02124,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00853,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00104,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.02074,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.01554,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00086,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.01179,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "step": 1,
+   "experiment": "destination_v1",
+   "description": "Get the optimal walk (the ghost) as input",
+   "evaluation_attempt": "eval_dest_v1_c36_u3500_seed20260917_20261017_001",
+   "summary_sha256": "91cb03a9037254b0050bb83f8b0971051f03cdfd93eb456dbf6a0a8799082526",
+   "probes_passed": 11,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 54.517,
+     "median": 43.432,
+     "worst": 103.126
+    },
+    "facing_change_deg": {
+     "mean": 8.517,
+     "worst": 15.953
+    },
+    "path_angle_deg": {
+     "mean": 2.412,
+     "worst": 6.29
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 41.482,
+     "facing_change_2s_to_end_deg": 9.256,
+     "path_angle_2s_to_end_deg": -0.586,
+     "speed_over_command": 1.0376
+    },
+    "translate_0.05_45deg": {
+     "pass": false,
+     "failed_bounds": {
+      "native_capture_or_original_physical_bounds": null
+     },
+     "destination_distance_at_end_mm": 103.126,
+     "facing_change_2s_to_end_deg": -15.953,
+     "path_angle_2s_to_end_deg": -6.29,
+     "speed_over_command": 1.0587
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 45.382,
+     "facing_change_2s_to_end_deg": 5.897,
+     "path_angle_2s_to_end_deg": 1.78,
+     "speed_over_command": 1.0363
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 50.827,
+     "facing_change_2s_to_end_deg": 6.796,
+     "path_angle_2s_to_end_deg": 3.245,
+     "speed_over_command": 1.0391
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 24.494,
+     "facing_change_2s_to_end_deg": 0.441,
+     "path_angle_2s_to_end_deg": 1.083,
+     "speed_over_command": 1.0305
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 34.568,
+     "facing_change_2s_to_end_deg": -2.462,
+     "path_angle_2s_to_end_deg": -1.316,
+     "speed_over_command": 1.03
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 34.277,
+     "facing_change_2s_to_end_deg": 12.012,
+     "path_angle_2s_to_end_deg": -2.058,
+     "speed_over_command": 1.0281
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 101.976,
+     "facing_change_2s_to_end_deg": 15.32,
+     "path_angle_2s_to_end_deg": 2.935,
+     "speed_over_command": 1.0539
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2157
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.216
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.01328,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00023,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00965,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_position_range_rad": {
+       "value": 0.03899112343788147,
+       "bound": 0.02
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.03899,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00029,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.01087,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00703,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00036,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.009,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "step": 2,
+   "experiment": "destination_v2",
+   "description": "Tighten the reward for following the ghost",
+   "evaluation_attempt": "eval_dest_v2_c36_u3500_seed20260917_20261018_001",
+   "summary_sha256": "5a4b821f13fa855354858007182d0dbbaee8db155b2fb4045106d9b377e8c9f3",
+   "probes_passed": 11,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 16.264,
+     "median": 14.332,
+     "worst": 41.942
+    },
+    "facing_change_deg": {
+     "mean": 5.313,
+     "worst": 12.686
+    },
+    "path_angle_deg": {
+     "mean": 0.935,
+     "worst": 1.997
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 4.438,
+     "facing_change_2s_to_end_deg": 0.023,
+     "path_angle_2s_to_end_deg": -1.213,
+     "speed_over_command": 1.0054
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 15.992,
+     "facing_change_2s_to_end_deg": -3.708,
+     "path_angle_2s_to_end_deg": -1.786,
+     "speed_over_command": 1.0222
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 20.645,
+     "facing_change_2s_to_end_deg": 7.034,
+     "path_angle_2s_to_end_deg": -0.01,
+     "speed_over_command": 1.0168
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 41.942,
+     "facing_change_2s_to_end_deg": 12.686,
+     "path_angle_2s_to_end_deg": 1.997,
+     "speed_over_command": 1.0204
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 19.072,
+     "facing_change_2s_to_end_deg": 10.372,
+     "path_angle_2s_to_end_deg": 0.881,
+     "speed_over_command": 1.006
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 4.784,
+     "facing_change_2s_to_end_deg": -1.299,
+     "path_angle_2s_to_end_deg": -0.401,
+     "speed_over_command": 1.0126
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 10.566,
+     "facing_change_2s_to_end_deg": 1.289,
+     "path_angle_2s_to_end_deg": -0.752,
+     "speed_over_command": 1.0165
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 12.672,
+     "facing_change_2s_to_end_deg": 6.096,
+     "path_angle_2s_to_end_deg": -0.441,
+     "speed_over_command": 1.0127
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2115
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2298
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00832,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.0002,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.01108,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_position_range_rad": {
+       "value": 0.026560917496681213,
+       "bound": 0.02
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.02656,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00022,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.0121,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_position_range_rad": {
+       "value": 0.038119345903396606,
+       "bound": 0.02
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.03812,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00049,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.01351,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "step": 3,
+   "experiment": "destination_v8",
+   "description": "Tighten the reward for following the ghost and solve heading and joint problems",
+   "evaluation_attempt": "eval_dest_v8_c36_u3500_seed20260917_20261020_001",
+   "summary_sha256": "357663c37fa111429c489c0aa4c49ff520cd4d0301a4848007a1ffd0c3a21ad6",
+   "probes_passed": 12,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 0.425,
+     "median": 0.392,
+     "worst": 0.836
+    },
+    "facing_change_deg": {
+     "mean": 0.087,
+     "worst": 0.244
+    },
+    "path_angle_deg": {
+     "mean": 0.115,
+     "worst": 0.288
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.405,
+     "facing_change_2s_to_end_deg": -0.067,
+     "path_angle_2s_to_end_deg": -0.01,
+     "speed_over_command": 1.005
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.31,
+     "facing_change_2s_to_end_deg": 0.061,
+     "path_angle_2s_to_end_deg": 0.137,
+     "speed_over_command": 1.005
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.34,
+     "facing_change_2s_to_end_deg": 0.244,
+     "path_angle_2s_to_end_deg": 0.288,
+     "speed_over_command": 1.0038
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.424,
+     "facing_change_2s_to_end_deg": 0.043,
+     "path_angle_2s_to_end_deg": 0.162,
+     "speed_over_command": 1.0023
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.624,
+     "facing_change_2s_to_end_deg": 0.025,
+     "path_angle_2s_to_end_deg": 0.085,
+     "speed_over_command": 1.0044
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.086,
+     "facing_change_2s_to_end_deg": 0.045,
+     "path_angle_2s_to_end_deg": 0.048,
+     "speed_over_command": 1.0038
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.379,
+     "facing_change_2s_to_end_deg": 0.116,
+     "path_angle_2s_to_end_deg": -0.045,
+     "speed_over_command": 1.0026
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.836,
+     "facing_change_2s_to_end_deg": -0.099,
+     "path_angle_2s_to_end_deg": -0.146,
+     "speed_over_command": 1.0033
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2038
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2042
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00186,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00013,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00613,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00344,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00011,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00582,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_velocity_rms_rad_s": {
+       "value": 0.4283639192581177,
+       "bound": 0.03
+      },
+      "max_joint_position_range_rad": {
+       "value": 0.024471640586853027,
+       "bound": 0.02
+      },
+      "max_target_step_abs_p95_rad_per_20ms": {
+       "value": 0.03999999910593033,
+       "bound": 0.002
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.02447,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.04,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.42836,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "step": 4,
+   "experiment": "destination_v9",
+   "description": "Small fine-tune to learn to stop",
+   "evaluation_attempt": "eval_dest_v9_u600_seed20260917_20261020_001",
+   "summary_sha256": "49d3d9079a4a06b81c69c8ea1ce29c94639a238c483db8827047f2f7e4d65516",
+   "probes_passed": 13,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 0.59,
+     "median": 0.571,
+     "worst": 0.936
+    },
+    "facing_change_deg": {
+     "mean": 0.085,
+     "worst": 0.261
+    },
+    "path_angle_deg": {
+     "mean": 0.148,
+     "worst": 0.301
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.795,
+     "facing_change_2s_to_end_deg": -0.026,
+     "path_angle_2s_to_end_deg": 0.163,
+     "speed_over_command": 1.0042
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.936,
+     "facing_change_2s_to_end_deg": 0.015,
+     "path_angle_2s_to_end_deg": 0.035,
+     "speed_over_command": 1.0056
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.6,
+     "facing_change_2s_to_end_deg": 0.005,
+     "path_angle_2s_to_end_deg": -0.09,
+     "speed_over_command": 1.0039
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.11,
+     "facing_change_2s_to_end_deg": -0.083,
+     "path_angle_2s_to_end_deg": -0.066,
+     "speed_over_command": 1.0022
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.541,
+     "facing_change_2s_to_end_deg": 0.079,
+     "path_angle_2s_to_end_deg": 0.055,
+     "speed_over_command": 1.0043
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.386,
+     "facing_change_2s_to_end_deg": 0.099,
+     "path_angle_2s_to_end_deg": 0.212,
+     "speed_over_command": 1.0048
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.466,
+     "facing_change_2s_to_end_deg": 0.261,
+     "path_angle_2s_to_end_deg": 0.26,
+     "speed_over_command": 1.003
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.884,
+     "facing_change_2s_to_end_deg": 0.111,
+     "path_angle_2s_to_end_deg": 0.301,
+     "speed_over_command": 1.0025
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2037
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2046
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00349,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 9e-05,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00617,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00673,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 8e-05,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.0061,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00339,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.0001,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00716,
+      "bound": 0.03
+     }
+    }
+   }
+  }
+ ],
+ "other_attempts": [
+  {
+   "experiment": "destination_v3",
+   "evaluation_attempt": "eval_dest_v3_c36_u3500_seed20260917_20261019_001",
+   "summary_sha256": "cd37961b258306cab132027b5e087f694c72c56a04cea4d264ecc05e747c54d3",
+   "probes_passed": 12,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 81.001,
+     "median": 83.505,
+     "worst": 124.985
+    },
+    "facing_change_deg": {
+     "mean": 6.157,
+     "worst": 9.463
+    },
+    "path_angle_deg": {
+     "mean": 2.679,
+     "worst": 5.46
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 40.028,
+     "facing_change_2s_to_end_deg": -7.302,
+     "path_angle_2s_to_end_deg": -1.015,
+     "speed_over_command": 1.0179
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 85.344,
+     "facing_change_2s_to_end_deg": 0.428,
+     "path_angle_2s_to_end_deg": 2.157,
+     "speed_over_command": 1.0912
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 103.14,
+     "facing_change_2s_to_end_deg": 9.046,
+     "path_angle_2s_to_end_deg": 3.708,
+     "speed_over_command": 1.0877
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 81.667,
+     "facing_change_2s_to_end_deg": 9.463,
+     "path_angle_2s_to_end_deg": 2.743,
+     "speed_over_command": 1.0755
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 50.206,
+     "facing_change_2s_to_end_deg": 8.835,
+     "path_angle_2s_to_end_deg": 2.072,
+     "speed_over_command": 1.0443
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 49.876,
+     "facing_change_2s_to_end_deg": -0.821,
+     "path_angle_2s_to_end_deg": -0.356,
+     "speed_over_command": 1.0588
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 112.76,
+     "facing_change_2s_to_end_deg": -5.551,
+     "path_angle_2s_to_end_deg": -3.919,
+     "speed_over_command": 1.0739
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 124.985,
+     "facing_change_2s_to_end_deg": -7.812,
+     "path_angle_2s_to_end_deg": -5.46,
+     "speed_over_command": 1.0319
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2148
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2162
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00814,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00037,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00615,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.01839,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00039,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00603,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": false,
+     "failed_bounds": {
+      "missing_six_toe_count_400hz": {
+       "value": 1,
+       "bound": 0
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.01031,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00132,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00765,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "experiment": "destination_v4",
+   "evaluation_attempt": "eval_dest_v4_c36_u3500_seed20260917_20261019_002",
+   "summary_sha256": "8511bb4fcf2af8090620ff8ca7e238a089422ace9f0018070b2abe6d1530f083",
+   "probes_passed": 12,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 72.501,
+     "median": 81.718,
+     "worst": 110.29
+    },
+    "facing_change_deg": {
+     "mean": 3.447,
+     "worst": 6.802
+    },
+    "path_angle_deg": {
+     "mean": 1.633,
+     "worst": 4.741
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 28.622,
+     "facing_change_2s_to_end_deg": -6.802,
+     "path_angle_2s_to_end_deg": -1.549,
+     "speed_over_command": 1.0282
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 73.892,
+     "facing_change_2s_to_end_deg": -1.048,
+     "path_angle_2s_to_end_deg": -0.611,
+     "speed_over_command": 1.0785
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 110.29,
+     "facing_change_2s_to_end_deg": -0.548,
+     "path_angle_2s_to_end_deg": -1.44,
+     "speed_over_command": 1.0998
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 89.544,
+     "facing_change_2s_to_end_deg": 2.736,
+     "path_angle_2s_to_end_deg": -1.057,
+     "speed_over_command": 1.0756
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 12.683,
+     "facing_change_2s_to_end_deg": 6.487,
+     "path_angle_2s_to_end_deg": 1.103,
+     "speed_over_command": 1.0194
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 65.111,
+     "facing_change_2s_to_end_deg": 0.119,
+     "path_angle_2s_to_end_deg": 0.284,
+     "speed_over_command": 1.075
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 95.681,
+     "facing_change_2s_to_end_deg": -3.539,
+     "path_angle_2s_to_end_deg": -2.281,
+     "speed_over_command": 1.0864
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 104.187,
+     "facing_change_2s_to_end_deg": -6.298,
+     "path_angle_2s_to_end_deg": -4.741,
+     "speed_over_command": 1.0344
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2131
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2183
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.008,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00027,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.01267,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.01715,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00024,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.01105,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_position_range_rad": {
+       "value": 0.04867357015609741,
+       "bound": 0.02
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.04867,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.0008,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.0191,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "experiment": "destination_v5",
+   "evaluation_attempt": "eval_dest_v5_c36_u3500_seed20260917_20261019_001",
+   "summary_sha256": "aa0673b30b0097152fda2bc001fb4474ed0389c7a30c1cf7add26903c1830f36",
+   "probes_passed": 11,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 0.867,
+     "median": 0.894,
+     "worst": 1.36
+    },
+    "facing_change_deg": {
+     "mean": 2.312,
+     "worst": 4.51
+    },
+    "path_angle_deg": {
+     "mean": 0.699,
+     "worst": 1.41
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.903,
+     "facing_change_2s_to_end_deg": -0.21,
+     "path_angle_2s_to_end_deg": 0.311,
+     "speed_over_command": 1.0048
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.752,
+     "facing_change_2s_to_end_deg": 1.976,
+     "path_angle_2s_to_end_deg": 0.475,
+     "speed_over_command": 1.0049
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 1.124,
+     "facing_change_2s_to_end_deg": 4.301,
+     "path_angle_2s_to_end_deg": 1.41,
+     "speed_over_command": 1.0032
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.33,
+     "facing_change_2s_to_end_deg": 0.512,
+     "path_angle_2s_to_end_deg": 1.291,
+     "speed_over_command": 1.0023
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.478,
+     "facing_change_2s_to_end_deg": -2.313,
+     "path_angle_2s_to_end_deg": 0.671,
+     "speed_over_command": 1.0035
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 1.101,
+     "facing_change_2s_to_end_deg": -4.065,
+     "path_angle_2s_to_end_deg": 0.357,
+     "speed_over_command": 1.0055
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 1.36,
+     "facing_change_2s_to_end_deg": -4.51,
+     "path_angle_2s_to_end_deg": 0.692,
+     "speed_over_command": 1.0043
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.885,
+     "facing_change_2s_to_end_deg": -0.612,
+     "path_angle_2s_to_end_deg": 0.388,
+     "speed_over_command": 1.0039
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2112
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2162
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.01094,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00039,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00678,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_position_range_rad": {
+       "value": 0.02150442823767662,
+       "bound": 0.02
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.0215,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.0004,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00686,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": false,
+     "failed_bounds": {
+      "max_target_step_abs_p95_rad_per_20ms": {
+       "value": 0.003363370895385742,
+       "bound": 0.002
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.00748,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00336,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.02202,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "experiment": "destination_v7",
+   "evaluation_attempt": "eval_dest_v7_c36_u3500_seed20260917_20261020_001",
+   "summary_sha256": "37aa25f8e9ce4be3973653d3bc2290c4b37ad842c9c2c675653279178f8a2126",
+   "probes_passed": 11,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 0.393,
+     "median": 0.431,
+     "worst": 0.497
+    },
+    "facing_change_deg": {
+     "mean": 0.128,
+     "worst": 0.255
+    },
+    "path_angle_deg": {
+     "mean": 0.127,
+     "worst": 0.297
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.241,
+     "facing_change_2s_to_end_deg": 0.014,
+     "path_angle_2s_to_end_deg": 0.089,
+     "speed_over_command": 1.0039
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.336,
+     "facing_change_2s_to_end_deg": 0.04,
+     "path_angle_2s_to_end_deg": 0.015,
+     "speed_over_command": 1.0037
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.497,
+     "facing_change_2s_to_end_deg": 0.255,
+     "path_angle_2s_to_end_deg": 0.106,
+     "speed_over_command": 1.0039
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.483,
+     "facing_change_2s_to_end_deg": -0.138,
+     "path_angle_2s_to_end_deg": -0.075,
+     "speed_over_command": 1.0025
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.247,
+     "facing_change_2s_to_end_deg": -0.192,
+     "path_angle_2s_to_end_deg": -0.297,
+     "speed_over_command": 1.0043
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.398,
+     "facing_change_2s_to_end_deg": -0.121,
+     "path_angle_2s_to_end_deg": -0.207,
+     "speed_over_command": 1.0045
+    },
+    "translate_0.05_270deg": {
+     "pass": false,
+     "failed_bounds": {
+      "native_capture_or_original_physical_bounds": null
+     },
+     "destination_distance_at_end_mm": 0.481,
+     "facing_change_2s_to_end_deg": -0.079,
+     "path_angle_2s_to_end_deg": -0.144,
+     "speed_over_command": 1.0036
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.464,
+     "facing_change_2s_to_end_deg": -0.188,
+     "path_angle_2s_to_end_deg": -0.08,
+     "speed_over_command": 1.0042
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2039
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2041
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00533,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00012,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00705,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00946,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.00016,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00655,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_velocity_rms_rad_s": {
+       "value": 0.6951093077659607,
+       "bound": 0.03
+      },
+      "max_joint_position_range_rad": {
+       "value": 0.03105643391609192,
+       "bound": 0.02
+      },
+      "max_target_step_abs_p95_rad_per_20ms": {
+       "value": 0.03999999910593033,
+       "bound": 0.002
+      },
+      "missing_six_toe_count_400hz": {
+       "value": 20,
+       "bound": 0
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.03106,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.04,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.69511,
+      "bound": 0.03
+     }
+    }
+   }
+  },
+  {
+   "experiment": "destination_v9_update300",
+   "evaluation_attempt": "eval_dest_v9_u300_seed20260917_20261020_001",
+   "summary_sha256": "bc792d5ef8307e21270de293a962c5640c1875a618f3f7093e4e243318b41540",
+   "probes_passed": 12,
+   "probes": 13,
+   "walks": {
+    "destination_distance_at_end_mm": {
+     "mean": 0.484,
+     "median": 0.453,
+     "worst": 0.983
+    },
+    "facing_change_deg": {
+     "mean": 0.078,
+     "worst": 0.153
+    },
+    "path_angle_deg": {
+     "mean": 0.076,
+     "worst": 0.139
+    }
+   },
+   "probe_results": {
+    "translate_0.05_0deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.185,
+     "facing_change_2s_to_end_deg": -0.071,
+     "path_angle_2s_to_end_deg": -0.022,
+     "speed_over_command": 1.0042
+    },
+    "translate_0.05_45deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.563,
+     "facing_change_2s_to_end_deg": 0.081,
+     "path_angle_2s_to_end_deg": 0.085,
+     "speed_over_command": 1.0043
+    },
+    "translate_0.05_90deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.177,
+     "facing_change_2s_to_end_deg": 0.153,
+     "path_angle_2s_to_end_deg": 0.085,
+     "speed_over_command": 1.0035
+    },
+    "translate_0.05_135deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.341,
+     "facing_change_2s_to_end_deg": -0.037,
+     "path_angle_2s_to_end_deg": -0.126,
+     "speed_over_command": 1.0027
+    },
+    "translate_0.05_180deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.469,
+     "facing_change_2s_to_end_deg": 0.075,
+     "path_angle_2s_to_end_deg": -0.063,
+     "speed_over_command": 1.0049
+    },
+    "translate_0.05_225deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.716,
+     "facing_change_2s_to_end_deg": 0.074,
+     "path_angle_2s_to_end_deg": 0.139,
+     "speed_over_command": 1.0043
+    },
+    "translate_0.05_270deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.436,
+     "facing_change_2s_to_end_deg": 0.086,
+     "path_angle_2s_to_end_deg": 0.073,
+     "speed_over_command": 1.0027
+    },
+    "translate_0.05_315deg": {
+     "pass": true,
+     "failed_bounds": {},
+     "destination_distance_at_end_mm": 0.983,
+     "facing_change_2s_to_end_deg": -0.047,
+     "path_angle_2s_to_end_deg": 0.014,
+     "speed_over_command": 1.003
+    },
+    "yaw_-1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": -0.2045
+    },
+    "yaw_+1": {
+     "pass": true,
+     "failed_bounds": {},
+     "mean_yaw_rate_rad_s": 0.2042
+    },
+    "quiet_20s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.0041,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 9e-05,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.0053,
+      "bound": 0.03
+     }
+    },
+    "quiet_32s": {
+     "pass": true,
+     "failed_bounds": {},
+     "max_joint_position_range_rad": {
+      "value": 0.00795,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 9e-05,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.00463,
+      "bound": 0.03
+     }
+    },
+    "forward_0.05_to_stop": {
+     "pass": false,
+     "failed_bounds": {
+      "max_joint_velocity_rms_rad_s": {
+       "value": 0.3263547718524933,
+       "bound": 0.03
+      },
+      "max_target_step_abs_p95_rad_per_20ms": {
+       "value": 0.03999999910593033,
+       "bound": 0.002
+      }
+     },
+     "max_joint_position_range_rad": {
+      "value": 0.01043,
+      "bound": 0.02
+     },
+     "max_target_step_abs_p95_rad_per_20ms": {
+      "value": 0.04,
+      "bound": 0.002
+     },
+     "max_joint_velocity_rms_rad_s": {
+      "value": 0.32635,
+      "bound": 0.03
+     }
+    }
+   }
+  }
+ ]
+}

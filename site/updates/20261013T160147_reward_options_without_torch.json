@@ -1,0 +1,22 @@
+{
+  "id": "20261013T160147_reward_options_without_torch",
+  "date": "2026-10-13T16:01:47+00:00",
+  "title": "Check reward options in pack preparation without Torch",
+  "summary": "locomotion.prepare checked reward options by importing the selected task module, which imports Torch, so the SPARK preparation command failed on a host without Torch with ModuleNotFoundError. locomotion.reward_options now reads the task's reward configuration from its source with the standard library: the annotated fields of the dataclass and its bases, and the word choices that validate declares. Preparation refuses an unknown or repeated key, a value that does not convert to its field's type and a word outside its choices; the trainer still applies the task's reward_config before launch.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/reward_options.py",
+    "locomotion/prepare.py",
+    "locomotion/tests/test_reward_options.py",
+    "configs/source_inventory.json",
+    "site/updates/20261013T160147_reward_options_without_torch.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_reward_options.py"
+  ],
+  "next": "Prepare yaw-gated packs on a host without Torch with the SPARK command.",
+  "no_project_impact": true,
+  "reason": "The change moves a preparation check to the standard library; it changes no reward, pack or result."
+}

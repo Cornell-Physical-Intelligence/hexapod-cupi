@@ -1,0 +1,35 @@
+{
+  "id": "20261015T224843_isaac_lab_layout",
+  "date": "2026-10-15T22:48:43Z",
+  "title": "Lay out locomotion as an Isaac Lab project with separate scripts",
+  "summary": "We arranged the locomotion code the way Isaac Lab arranges a project: robots, the omniwalk task with its agents configuration, RSL-RL extensions and scripts. Separate scripts train, evaluate a checkpoint and run diagnostics, and each pack names the script for its mode. The default command line reproduces the recorded c48_long configuration, and the guides, inventory and code map describe the new layout.",
+  "areas": [
+    "locomotion",
+    "documentation",
+    "developer map"
+  ],
+  "next": "Run fresh native standing admission and the 13-probe parity of the unchanged c48_long checkpoint through its compatibility receipt on Spark.",
+  "changes": [
+    "locomotion/**",
+    "configs/source_inventory.json",
+    "configs/README.md",
+    "robot/hexapod_mkii_updated_v1/README.md",
+    "docs/RS05_SPEC_REVIEW.md",
+    "tools/code_map.py",
+    "tools/check_pipeline_lineages.py",
+    "tests/test_code_map.py",
+    "site/test_code_map.mjs",
+    "site/updates/20261015T224843_isaac_lab_layout.json"
+  ],
+  "evidence": [
+    "src/locomotion/README.md",
+    "configs/source_inventory.json",
+    "src/locomotion/spark/validation.py",
+    "src/locomotion/tests/test_recipe.py",
+    "src/locomotion/tests/test_dependency_identity.py",
+    "src/locomotion/tests/test_direct_environment.py",
+    "src/locomotion/tests/test_launch.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The change moves locomotion modules and splits the container entry point into train, play and diagnose scripts. It adds no motion result and changes no gate; native standing admission and the 13-probe parity of the changed physics identity stay pending."
+}

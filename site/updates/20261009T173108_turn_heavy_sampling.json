@@ -1,0 +1,20 @@
+{
+  "id": "20261009T173108_turn_heavy_sampling",
+  "date": "2026-10-09T17:31:08+00:00",
+  "title": "Add turn-heavy command sampling and a gate-off option to the yaw-gate experiment",
+  "summary": "The experimental task in locomotion.task_v4_yaw_gate gains turn_draw_fraction, which turns that share of the moving command draws into a turn in place at 0.2 rad/s with a random sign, and yaw_gate_on=none, which switches the yaw gate off. The bank holds two turns in place among twenty moving commands, so a policy otherwise practises a pure turn on one draw in ten. The default draws nothing extra from the task's generator, so earlier runs keep their command sequences.",
+  "areas": [
+    "locomotion"
+  ],
+  "changes": [
+    "locomotion/task_v4_yaw_gate.py",
+    "locomotion/tests/test_task_v4_yaw_gate.py",
+    "site/updates/20261009T173108_turn_heavy_sampling.json"
+  ],
+  "evidence": [
+    "locomotion/tests/test_task_v4_yaw_gate.py"
+  ],
+  "next": "Train turn-heavy sampling alone and with the turn-only gate on the surrogate and compare turn rate, translation speed and stopping with the v4 control.",
+  "no_project_impact": true,
+  "reason": "Opt-in options of an experimental task change no native result, gate or default reward."
+}

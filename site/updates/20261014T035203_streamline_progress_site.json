@@ -1,0 +1,38 @@
+{
+  "id": "20261014T035203_streamline_progress_site",
+  "date": "2026-10-14T03:52:03Z",
+  "title": "Cut the progress site and README down to current results and visuals",
+  "summary": "The progress site keeps five sections: the latest result with its videos, a roadmap with a dated list of accomplishments, a simpler system diagram, the robot and the terms used on the page. The test-result list, stage cards, evidence and change-history sections, earlier recordings and the explanation lines leave the page, and the registry shrinks from 104 KB to about 12 KB. The latest result is the 12 October run that passed all 13 learning probes; the page credits it to the new reward terms together with the longer training, and it describes the four-run control packet as two repeats and two comparison runs. A completed roadmap step needs a named acceptance and an evidence path. We rewrote the README to state where the project stands. Guide links that pointed at the removed results section now point at the registry of 13 October 2026, which keeps each earlier result with its evidence.",
+  "areas": [
+    "site",
+    "documentation"
+  ],
+  "changes": [
+    "site/project.json",
+    "site/index.html",
+    "site/poster.js",
+    "site/poster.css",
+    "site/test_render.mjs",
+    "tools/project_site.py",
+    "tests/test_project_site.py",
+    "tests/test_project_progress.py",
+    "docs/PROJECT_SITE.md",
+    "README.md",
+    "ARCHITECTURE.md",
+    "locomotion/README.md",
+    "docs/TRAINING.md",
+    "docs/OPERATIONS.md",
+    "docs/UPDATED_CAD_IMPORT.md",
+    ".github/pull_request_template.md"
+  ],
+  "evidence": [
+    "site/project.json",
+    "docs/PROJECT_SITE.md",
+    "site/assets/yaw_gated_stride_native_20261012_001/native_results.json",
+    "site/assets/reward_v4_budget512_20261011_001/results.json",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json"
+  ],
+  "next": "Update the latest result when the four-run yaw-gate control packet is scored, within the presentation standard in docs/PROJECT_SITE.md.",
+  "no_project_impact": true,
+  "reason": "The change edits the presentation and guides; it changes no experiment, model, gate, evidence file or recorded result."
+}

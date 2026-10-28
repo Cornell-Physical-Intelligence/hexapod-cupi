@@ -1,0 +1,112 @@
+{
+  "schema": "hexapod_locomotion_throughput_provenance_v1",
+  "source": {
+    "commit": "4e5c42be6234812d1d126eb8b453a059d7e9cb7c",
+    "branch": "jcc463/replica-counts-512-1024",
+    "composition": "PR #65 with the flat-pilot deadline extended to standing diagnostics; physics source files unchanged since e09bd17e",
+    "source_freeze_sha256": "8b1eacb3c5207ee05883b28ebfdf2ae6dcdd544f2964177e46ea8e1bcf1c9b3e"
+  },
+  "host": {
+    "device": "NVIDIA GB10",
+    "account": "james",
+    "launched": "2026-10-11",
+    "shared_gpu_workload": "qwen38-server (llama.cpp) stayed on the GPU; each host preflight lists it"
+  },
+  "authorization": "The program lead requested throughput at 512 and 1024 robots and approved the flat-pilot deadline for the 1024-robot standing capture in chat on 2026-10-10.",
+  "relation_to_earlier_record": "site/assets/throughput_profile_20261010_001 holds the first 128 and 512 profiles from source e09bd17e. This record repeats both counts from source 4e5c42be so the three profiles share one identity, which the summary requires.",
+  "standing_admission": {
+    "input_root": "/srv/cupi/hexapod/inputs/replicas_20261010_001",
+    "created_with": "locomotion.admission inside the Isaac image; each report recomputed from the raw capture",
+    "captures": {
+      "one": {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_one_20261010_002",
+        "num_envs": 1,
+        "wall_seconds": 122,
+        "state_sha256": "7f9c0542930aafd47e30bbfda373adf1926430c21833a4858a3da99bab1030ce",
+        "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33"
+      },
+      "batch_1024": {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch1024_20261010_004",
+        "num_envs": 1024,
+        "wall_seconds": 9401,
+        "allocation_profile": "flat_pilot_v1",
+        "max_wall_seconds": 21600,
+        "capture_bytes_approx": 87000000000.0,
+        "state_sha256": "6570b815c18af8a59c79fecf42e674e58ab3736b7b26b8756023365b394cff4a",
+        "report_sha256": "f406120367b476f0f6f45aaf4f1a680bd8546c8ab91e1191336cb67ee05fa11f"
+      }
+    },
+    "files": {
+      "admission_1024/admission.json": "c2fcaa89dc3f832312d2fae3731585865dbc9c73b3276a9bb9dc2324c6322c0c",
+      "admission_1024/inputs.json": "2eaf0823bc69a6072d295b96d8b47cf089bc0974bdd9c6fb66df0a3efcd5a8db"
+    },
+    "earlier_admissions": "admission_128 and admission_512 from the 2026-10-10 record remain valid: the physics source files did not change.",
+    "retained_failures": [
+      {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch1024_20261010_001",
+        "outcome": "container preflight rejected --num-envs 1024 at argument parsing; no native run",
+        "source_commit": "71e3ccbdbd79740f74af81875aa6990e72bcb869"
+      },
+      {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch1024_20261010_002",
+        "outcome": "stale pack from source 284e4ec8 with the standard deadline, launched through a name collision and stopped by request after about 90 s; no gate result",
+        "source_commit": "284e4ec8ce5309945606158ed3219476b641fbfb"
+      },
+      {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch1024_20261010_003",
+        "outcome": "Isaac Kit crashed in startup at 10.6 s (carb.tasking make_fcontext, exit 139) before the stage was built; retried as _004",
+        "source_commit": "4e5c42be6234812d1d126eb8b453a059d7e9cb7c"
+      }
+    ]
+  },
+  "allocations": {
+    "profile_128": {
+      "spark_path": "/srv/cupi/hexapod/runs/james/throughput_profile_128_20261010_002",
+      "binding_sha256": "a3bed42c66025474b532c51f011407d750a788d25f2c24865ed2df60682dcf49",
+      "source_freeze_sha256": "8b1eacb3c5207ee05883b28ebfdf2ae6dcdd544f2964177e46ea8e1bcf1c9b3e",
+      "input_declaration": "/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_128/inputs.json",
+      "job_status": "completed",
+      "contact_audit_passed": true,
+      "other_gpu_processes_seen": [
+        "3289, /app/llama-server"
+      ],
+      "state_sha256": "c37e2098329d224cfc5f6e1b1190e89e3217fd59d17fb1411654f22589504094",
+      "profile_sha256": "4f41320f6f8ee2fe7af3b4633ac2a7861bd35379fd27d9ed1fe32981fe79b980",
+      "measured_updates_per_pass": 20,
+      "training_transitions_per_second": 866.0169931243704,
+      "update_wall_seconds_mean": 3.5472745042992755
+    },
+    "profile_512": {
+      "spark_path": "/srv/cupi/hexapod/runs/james/throughput_profile_512_20261010_002",
+      "binding_sha256": "db3ce8e5237c202b0e826810ab277f31da65de5835b5350ce41025ca828cd8f7",
+      "source_freeze_sha256": "8b1eacb3c5207ee05883b28ebfdf2ae6dcdd544f2964177e46ea8e1bcf1c9b3e",
+      "input_declaration": "/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_512/inputs.json",
+      "job_status": "completed",
+      "contact_audit_passed": true,
+      "other_gpu_processes_seen": [
+        "3289, /app/llama-server"
+      ],
+      "state_sha256": "3a9ac1d93d8d0254e04efa4ad4fdf2d423040e1c4d936903f478af48239c46f7",
+      "profile_sha256": "9e699ed17210e6eb9cb6603904f46c2edc81fc7dc5502b43c79ecf1c2c187a6d",
+      "measured_updates_per_pass": 20,
+      "training_transitions_per_second": 1596.5507234770062,
+      "update_wall_seconds_mean": 7.696592296948074
+    },
+    "profile_1024": {
+      "spark_path": "/srv/cupi/hexapod/runs/james/throughput_profile_1024_20261010_001",
+      "binding_sha256": "57499d9087a9576b80b5ba5c718bf8436d90bffd7c99d8c6220c372dec8579b7",
+      "source_freeze_sha256": "8b1eacb3c5207ee05883b28ebfdf2ae6dcdd544f2964177e46ea8e1bcf1c9b3e",
+      "input_declaration": "/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_1024/inputs.json",
+      "job_status": "completed",
+      "contact_audit_passed": true,
+      "other_gpu_processes_seen": [
+        "3289, /app/llama-server"
+      ],
+      "state_sha256": "26700d11eb5077b5e8e79bc617c30d1cab1bc24e54700a7c8780a76c48b13ea6",
+      "profile_sha256": "eda931f330c99a6b1774ceff5e31d3b6ebd3b9d09d106652d4c96ba493568454",
+      "measured_updates_per_pass": 20,
+      "training_transitions_per_second": 1811.5760209180103,
+      "update_wall_seconds_mean": 13.56608815540967
+    }
+  }
+}

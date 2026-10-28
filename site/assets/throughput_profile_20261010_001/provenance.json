@@ -1,0 +1,101 @@
+{
+  "schema": "hexapod_locomotion_throughput_provenance_v1",
+  "source": {
+    "commit": "e09bd17e6d46b35fca2aa133602a24863d6ffab8",
+    "branch": "jcc463/replica-counts-512-1024",
+    "composition": "PR #65: replica counts 512 and 1024 for diagnostics and profiles, trainer parse, centred replica grid",
+    "source_freeze_sha256": "521dc40db73765f70110515ce02ceb79d53dc5091a21edc72ba3e805f5812051"
+  },
+  "host": {
+    "device": "NVIDIA GB10",
+    "account": "james",
+    "launched": "2026-10-10",
+    "shared_gpu_workload": "qwen38-server (llama.cpp) stayed on the GPU; each host preflight lists it"
+  },
+  "authorization": "The program lead requested throughput measurements at 512 and 1024 robots in chat on 2026-10-10. The 128 profile repeats the baseline from the same source.",
+  "standing_admission": {
+    "input_root": "/srv/cupi/hexapod/inputs/replicas_20261010_001",
+    "created_with": "locomotion.admission inside the Isaac image; each report recomputed from the raw capture",
+    "captures": {
+      "one": {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_one_20261010_002",
+        "num_envs": 1,
+        "wall_seconds": 122,
+        "state_sha256": "7f9c0542930aafd47e30bbfda373adf1926430c21833a4858a3da99bab1030ce",
+        "report_sha256": "c27dcae659baaa94442f7909ece847228f662818dcca4b51524504131f8d7d33"
+      },
+      "batch_128": {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch128_20261010_002",
+        "num_envs": 128,
+        "wall_seconds": 1236,
+        "state_sha256": "51c340b89e98b6b7d5b57ccd7f26596c9d34deba0297e71a41e67c76bcc391e2",
+        "report_sha256": "89e371772efa0439868e6ac5252c97d29edee05902639a8c708624ff6155252d"
+      },
+      "batch_512": {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch512_20261010_003",
+        "num_envs": 512,
+        "wall_seconds": 4744,
+        "state_sha256": "e3b3494e21db639ce42968edabc3f2b6439e6caac9189b4d9246cd1829bd6c80",
+        "report_sha256": "1c75ba9f2618b228c96b8e47c1ee55ce1590f86dcf34922f1a46351916aa2009"
+      }
+    },
+    "files": {
+      "admission_128/admission.json": "2fc4f470acabe5e9b69ab5141fe46f52ae81d46390de513a7b4fe3d29f78f27d",
+      "admission_512/admission.json": "f00a92c889d97f2e0808e63e667a114bd9e29081e174510e0fd19a9dc2c2acc1",
+      "admission_128/inputs.json": "76d17a17f09977cdd5d960a4c392aef24dc1e0f29b487a006b6eaf77b0c8331a",
+      "admission_512/inputs.json": "11d0d4d01d8fb9109b44fdc25c422f24f4d39ec41fec981657f51523b90c126b"
+    },
+    "retained_failures": [
+      {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch512_20261010_001",
+        "outcome": "container preflight rejected --num-envs 512 at argument parsing; no native run",
+        "source_commit": "71e3ccbdbd79740f74af81875aa6990e72bcb869"
+      },
+      {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_batch512_20261010_002",
+        "outcome": "clearance gate failed at control 2 on the 21 replicas of the column at x = 40 m, the floor mesh edge; the grid started at the origin",
+        "source_commit": "284e4ec8ce5309945606158ed3219476b641fbfb"
+      },
+      {
+        "spark_path": "/srv/cupi/hexapod/runs/james/standing_one_20261010_001 and standing_batch128_20261010_001",
+        "outcome": "passed from source 71e3ccbd; superseded when the centred grid changed env.py",
+        "source_commit": "71e3ccbdbd79740f74af81875aa6990e72bcb869"
+      }
+    ],
+    "not_run": "1024 robots: a standing capture projects to about 9500 s at 9.3 s per robot, above the 6600 s diagnostic deadline; the program lead decides."
+  },
+  "allocations": {
+    "profile_128": {
+      "spark_path": "/srv/cupi/hexapod/runs/james/throughput_profile_128_20261010_001",
+      "binding_sha256": "548fe5f84e39b12d3fc1c1e58bbd506acccb2c2daebefb678d640f63f5cd0cbe",
+      "source_freeze_sha256": "521dc40db73765f70110515ce02ceb79d53dc5091a21edc72ba3e805f5812051",
+      "input_declaration": "/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_128/inputs.json",
+      "job_status": "completed",
+      "contact_audit_passed": true,
+      "other_gpu_processes_seen": [
+        "3289, /app/llama-server"
+      ],
+      "state_sha256": "eacca8a4ac5701061556d079ed8cddf22b58a33a88a8b68ad370beb660add340",
+      "profile_sha256": "fe646673410f476b4f3683469283df9452b18151233f491eb4d69c3b0856099c",
+      "measured_updates_per_pass": 20,
+      "training_transitions_per_second": 839.5531197355037,
+      "update_wall_seconds_mean": 3.659089493905776
+    },
+    "profile_512": {
+      "spark_path": "/srv/cupi/hexapod/runs/james/throughput_profile_512_20261010_001",
+      "binding_sha256": "2f424195dc31e48a7b832858b6b1a2b5add361ff12f1b08f05675e54dda8b68b",
+      "source_freeze_sha256": "521dc40db73765f70110515ce02ceb79d53dc5091a21edc72ba3e805f5812051",
+      "input_declaration": "/srv/cupi/hexapod/inputs/replicas_20261010_001/admission_512/inputs.json",
+      "job_status": "completed",
+      "contact_audit_passed": true,
+      "other_gpu_processes_seen": [
+        "3289, /app/llama-server"
+      ],
+      "state_sha256": "08402489768f7363c7832e98b62b44f3f0fbbdea0466ced87af09626c58fcebf",
+      "profile_sha256": "a722cd6a1e7a48190391b90eb2fae1f5561d89bdd6617d1061807c8a39c09a5c",
+      "measured_updates_per_pass": 20,
+      "training_transitions_per_second": 1580.8908100833705,
+      "update_wall_seconds_mean": 7.772832836792804
+    }
+  }
+}

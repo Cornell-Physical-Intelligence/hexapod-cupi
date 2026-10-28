@@ -1,0 +1,25 @@
+{
+  "id": "20261017T021930_review_fixes_and_renewed_receipt",
+  "date": "2026-10-17T02:19:30Z",
+  "title": "Fix the two review defects and renew the c48_long receipt on the fixed source",
+  "summary": "Native AMP replay declared its own physics configuration with the ground plane and no collider offsets, so the current standing admission rejected it before simulation; replay, training, evaluation and admission now declare one physics identity. Paper-network evaluation returned the actor output before the two-control mean that training applies; both actor branches now pass through one smoothing wrapper. Tests pin both. The physics closure and the admission are unchanged; the runtime sources changed, so the harness replay and the certified evaluation ran again on the fixed source: 13 of 13 probes each, all 8,088 measurements equal to the recorded baselines, and a renewed compatibility receipt under a fresh evidence name; the earlier directory stays as pushed.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Review PR 84 for merge on green CI at the exact revision.",
+  "changes": [
+    "src/locomotion/**",
+    "site/assets/floor_contact_20261016_002/*",
+    "site/assets/floor_contact_20261016_002/compatibility/*",
+    "site/updates/20261017T021930_review_fixes_and_renewed_receipt.json"
+  ],
+  "evidence": [
+    "site/assets/floor_contact_20261016_002/verification.json",
+    "site/assets/floor_contact_20261016_002/compatibility/receipt.json",
+    "src/locomotion/tests/test_policy_inference.py",
+    "src/locomotion/tests/test_dependency_identity.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The retained policy measurements are reproduced exactly and no qualification claim changes; the roadmap stays at Stage 2."
+}

@@ -1,0 +1,18 @@
+{
+  "id": "20261015T004847_site_diagram_clip_both_axes",
+  "date": "2026-10-15T00:48:47Z",
+  "title": "Clip the scaled system diagram on both axes and remove the unused neighbour highlight",
+  "summary": "At laptop widths the scaled system diagram still scrolled 75 px into blank space, because the fit step hid horizontal overflow alone while the canvas kept its layout height. The region now clips both axes while scaled. The render test drives the fit step at a 900 px and a 1,400 px page and checks the scale, the clip and the region height. The neighbour highlight code had no style after the restyle and is removed.",
+  "areas": ["site"],
+  "changes": [
+    "site/poster.js",
+    "site/test_render.mjs"
+  ],
+  "evidence": [
+    "site/poster.js",
+    "site/test_render.mjs"
+  ],
+  "next": "Merge the restyle, then apply the palette and the no-cards rule to the locomotion code map.",
+  "no_project_impact": true,
+  "reason": "The change edits page layout code and its test; it changes no experiment, model, media file, gate or recorded result."
+}

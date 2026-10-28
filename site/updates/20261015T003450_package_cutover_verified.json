@@ -1,0 +1,26 @@
+{
+  "id": "20261015T003450_package_cutover_verified",
+  "date": "2026-10-15T00:34:50+00:00",
+  "title": "Verify package migration with the retained walking controller",
+  "summary": "We removed 37 flat wrappers and verified the migrated packages. The unchanged c48_long checkpoint passed 13/13 probes through both the parity harness and the certified production loader, with matching contact and torque measurements. We completed standing admission at 1/32/128 robots; the requester stopped 512 and deferred 1024.",
+  "areas": [
+    "locomotion",
+    "platform"
+  ],
+  "changes": [
+    "SPARK.md",
+    "docs/OPERATIONS.md",
+    "locomotion/README.md",
+    "locomotion/surrogate/README.md",
+    "site/assets/package_cutover_20261015_001/**",
+    "site/updates/20261015T003450_package_cutover_verified.json"
+  ],
+  "evidence": [
+    "site/assets/package_cutover_20261015_001/verification.json",
+    "site/assets/package_cutover_20261015_001/compatibility/receipt.json",
+    "locomotion/README.md"
+  ],
+  "next": "Use package commands and the certified receipt for c48_long evaluation. Renew 512-robot admission before fresh 512-robot training packs.",
+  "no_project_impact": true,
+  "reason": "This migration preserves the existing controller result and acceptance gates. It adds no walking qualification or physics change."
+}

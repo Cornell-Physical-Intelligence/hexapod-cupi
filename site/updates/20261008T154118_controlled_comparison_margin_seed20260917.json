@@ -1,0 +1,21 @@
+{
+  "id": "20261008T154118_controlled_comparison_margin_seed20260917",
+  "date": "2026-10-08T15:41:18Z",
+  "title": "Record the first joint-margin seed of the controlled reward v4 comparison",
+  "summary": "The joint-margin arm with weight 3, seed 20260917, trained 5000 updates and ran the 13 learning probes at updates 2000, 3500 and 5000; it passes 7 of 13 probes at update 5000, and 6 of the 8 translation probes. Against the budget arm with the same seed, its joint-limit rate over updates 601 to 2000 falls 62 percent, from 371 to 140 terminal rows per million controls, and its translation speed at update 5000 rises 5.1 percent, from 0.0435 to 0.0457 m/s. Its joint-limit rate over updates 4801 to 5000 rises from 4.9 to 8.1 per million controls, 3 against 5 terminal rows, and it loses the quiet 32 s and forward-to-stop passes of the budget arm, so this seed does not meet every margin requirement. The second margin seed is still training; the margin verdict stays open.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "next": "Record joint-margin seed 20260918 and compute the margin verdict across both seeds, then run the yaw-weight arm.",
+  "changes": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/*",
+    "site/updates/20261008T154118_controlled_comparison_margin_seed20260917.json"
+  ],
+  "evidence": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/comparison_after_margin_seed20260917.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/J_seed20260917_verification.json"
+  ],
+  "no_project_impact": true,
+  "reason": "One margin seed leaves the margin verdict open and Stage 2 incomplete; no capability state changes."
+}

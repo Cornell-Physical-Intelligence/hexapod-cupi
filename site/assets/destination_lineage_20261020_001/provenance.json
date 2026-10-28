@@ -1,0 +1,252 @@
+{
+ "schema": "hexapod_destination_lineage_provenance_v1",
+ "scope": "The five native Spark training attempts whose weights lead to the destination_v9 checkpoint, each started from the previous attempt's final checkpoint, and the native learning-probe evaluation of each. Every evaluation ran the source its training ran (equal source freeze hashes). Checkpoints and raw runs stay on Spark under /srv/cupi/hexapod/runs/julian.",
+ "seed": 20260917,
+ "robots_per_training": 128,
+ "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+ "motion_prior": false,
+ "standing_admission": "Steps 1 to 4 read the standing captures and admission candidate under /srv/cupi/hexapod/runs/james/python_standards_20261017_001 read-only; step 0 read /srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128.",
+ "final_model": {
+  "experiment": "destination_v9",
+  "checkpoint_sha256": "16048b8f7b31c61ba6630742475f796e24c4bc43bd17bc61f9b40bb0d37b6d33",
+  "path": "/srv/cupi/hexapod/runs/julian/dest_v9_from_dest_v8_c36_u600_finetune_seed20260917_20261020_001/run/standing/checkpoint_update000600.pt"
+ },
+ "chain": [
+  {
+   "step": 0,
+   "description": "Learn to walk clumsily",
+   "change": "Trained from scratch from the stance prior (no motion prior) with the reward submitted in PR 71: tracking, tripod schedule, yaw gate, stride tracking and stride length; termination 22; 48 controls per update.",
+   "training": {
+    "attempt": "ppo_v4_stride_c48_u2500_seed20260917_20261011_001",
+    "binding_sha256": "92f4868d8d924c34e2a8c4a21187c0bb839cf5f96a8f85680e77335fb923cd20",
+    "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+    "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+    "experiment": null,
+    "updates": 2500,
+    "status": "completed",
+    "exit_code": 0,
+    "started_from_checkpoint_sha256": null,
+    "starting_learning_rate": null,
+    "wall_hours": 4.62,
+    "learner_arguments": "--mode train --asset /asset --model /asset/source/model.json --geometry /geometry_source/geometry/geometry.json --geometry-extrema /geometry_source/geometry/geometry_extrema.npz --stance /prior/stance.json --num-envs 128 --source-freeze-sha256 1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912 --max-wall-seconds 21600 --headless --device cuda:0 --allocation-profile flat_pilot_v1 --standing-admission /admission/admission.json --updates 2500 --seed 20260917 --extended-updates --reward-version 4 --action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0003 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --steps-per-env 48 --episode-seconds 10.0 --reward-options forward_draw_fraction=0,joint_margin_weight=1.0,yaw_tracking_weight=0.5,turn_draw_fraction=0.3,gate_window_controls=120,yaw_gate_min_command_rad_s=0.18,yaw_gate_bonus=0.25,yaw_gate_floor=0.5,stride_tracking_weight=0.3,stride_length_weight=2,termination_weight=22 --reward-task v4_yaw_gate",
+    "checkpoint": {
+     "path": "/srv/cupi/hexapod/runs/julian/ppo_v4_stride_c48_u2500_seed20260917_20261011_001/run/standing/checkpoint_update002500.pt",
+     "sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+     "declaration_sha256": "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3"
+    },
+    "read_only_inputs": {
+     "/standing_one": "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/amp_20260923_001/standing_one/run/standing",
+     "/standing_batch": "/srv/cupi/hexapod/evidence/legacy_runs/restart_20260914/throughput_20260929_001/standing_batch128/run/standing",
+     "/admission": "/srv/cupi/hexapod/inputs/flat_pilot_20260930_001/admission_128"
+    }
+   },
+   "evaluation": {
+    "attempt": "eval_v4_stride_c48_u2500_seed20260917_20261011_001",
+    "binding_sha256": "b4ae5f6518a1bf0f660c945328ad740192ad54f49f0921d6aa3dd632dc6e97ab",
+    "source_commit": "1b4d67a1bf37d99a08953034c6df150c1b549c69",
+    "source_freeze_sha256": "1f613a998f310ef7060eb3777fb94dc69aa0169c6b53b3baa02b8363de476912",
+    "status": "completed",
+    "exit_code": 0,
+    "summary_sha256": "213903a6d16414663df317eea59431445e7c2514c165b135e6adec8198d26ada"
+   }
+  },
+  {
+   "step": 1,
+   "description": "Get the optimal walk (the ghost) as input",
+   "change": "Experiment destination_v1: five destination inputs (the network's first layers widened with zero columns, so it starts as the PR model), 1.0 * exp(-d / 3 cm) every control for the planar distance to the destination, 20 s commands and episodes, termination 32; noise and learning rate restarted.",
+   "training": {
+    "attempt": "dest_v1_from_c48long_c36_u3500_seed20260917_20261017_002",
+    "binding_sha256": "b8c878372480d043650c311117c05503e9e3f56822b563cafb2f1c9b56c543a9",
+    "source_commit": "02aaf05655fbff2a06169acaa97778bd9ae3c9f1",
+    "source_freeze_sha256": "2023a1c3f15e75e83f7f4f5bac0a941c367ce23484f5ac1f73635dc429583511",
+    "experiment": "destination_v1",
+    "updates": 3500,
+    "status": "completed",
+    "exit_code": 0,
+    "started_from_checkpoint_sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+    "starting_learning_rate": {
+     "value": 0.0003,
+     "source": "configured"
+    },
+    "wall_hours": 4.84,
+    "learner_arguments": "--asset /asset --model /asset/source/model.json --geometry /geometry_source/geometry/geometry.json --geometry-extrema /geometry_source/geometry/geometry_extrema.npz --stance /prior/stance.json --num-envs 128 --source-freeze-sha256 2023a1c3f15e75e83f7f4f5bac0a941c367ce23484f5ac1f73635dc429583511 --max-wall-seconds 21600 --headless --device cuda:0 --allocation-profile flat_pilot_v1 --standing-admission /admission/admission.json --updates 3500 --seed 20260917 --extended-updates --recipe none --action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0003 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --steps-per-env 36 --experiment destination_v1 --initialize-from /checkpoint/checkpoint_update002500.pt --initialize-from-sha256 bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+    "checkpoint": {
+     "path": "/srv/cupi/hexapod/runs/julian/dest_v1_from_c48long_c36_u3500_seed20260917_20261017_002/run/standing/checkpoint_update003500.pt",
+     "sha256": "e5c69a5012bee4f0ba52d78f7bef9077440c09801340f5870e2e9cba3813af17",
+     "declaration_sha256": "f10264d47efa0bf5b92b1457d2d3ca5b37e347febc4f47f54370a78641841e0c"
+    },
+    "read_only_inputs": {
+     "/standing_one": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_1/run/standing",
+     "/standing_batch": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_128/run/standing",
+     "/admission": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/admissions/candidate",
+     "/checkpoint": "/srv/cupi/hexapod/runs/julian/ppo_v4_stride_c48_u2500_seed20260917_20261011_001/run/standing"
+    },
+    "starting_checkpoint": {
+     "container_path": "/checkpoint/checkpoint_update002500.pt",
+     "path": "/srv/cupi/hexapod/runs/julian/ppo_v4_stride_c48_u2500_seed20260917_20261011_001/run/standing/checkpoint_update002500.pt",
+     "sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+     "declaration_sha256": "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3",
+     "declaration_source": "step 0 checkpoint record; this pack bound the .pt bytes only"
+    }
+   },
+   "evaluation": {
+    "attempt": "eval_dest_v1_c36_u3500_seed20260917_20261017_001",
+    "binding_sha256": "1a6d1492ade0809c9e7821e8bf15dec1542037176e06717222c3cd98ba03ffe8",
+    "source_commit": "02aaf05655fbff2a06169acaa97778bd9ae3c9f1",
+    "source_freeze_sha256": "2023a1c3f15e75e83f7f4f5bac0a941c367ce23484f5ac1f73635dc429583511",
+    "status": "completed",
+    "exit_code": 0,
+    "summary_sha256": "91cb03a9037254b0050bb83f8b0971051f03cdfd93eb456dbf6a0a8799082526"
+   }
+  },
+  {
+   "step": 2,
+   "description": "Tighten the reward for following the ghost",
+   "change": "Experiment destination_v2: the destination pay halves every centimetre, exp(-d / 1.443 cm).",
+   "training": {
+    "attempt": "dest_v2_from_dest_v1_c36_u3500_seed20260917_20261018_001",
+    "binding_sha256": "87f8c052beb35604c9d0c061e51d723f85e75d3662cd877c25e483b4c2cc42ac",
+    "source_commit": "272168bf091dc26f6d68cf7c8f38235710aabb65",
+    "source_freeze_sha256": "05d8b4784ccf8b734746bf6f4e1ef0643f82c70fa312b3cf61baca7b3b6546e7",
+    "experiment": "destination_v2",
+    "updates": 3500,
+    "status": "completed",
+    "exit_code": 0,
+    "started_from_checkpoint_sha256": "e5c69a5012bee4f0ba52d78f7bef9077440c09801340f5870e2e9cba3813af17",
+    "starting_learning_rate": {
+     "value": 0.0003,
+     "source": "configured"
+    },
+    "wall_hours": 5.07,
+    "learner_arguments": "--asset /asset --model /asset/source/model.json --geometry /geometry_source/geometry/geometry.json --geometry-extrema /geometry_source/geometry/geometry_extrema.npz --stance /prior/stance.json --num-envs 128 --source-freeze-sha256 05d8b4784ccf8b734746bf6f4e1ef0643f82c70fa312b3cf61baca7b3b6546e7 --max-wall-seconds 21600 --headless --device cuda:0 --allocation-profile flat_pilot_v1 --standing-admission /admission/admission.json --updates 3500 --seed 20260917 --extended-updates --recipe none --action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0003 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --steps-per-env 36 --experiment destination_v2 --initialize-from /checkpoint/checkpoint_update003500.pt --initialize-from-sha256 e5c69a5012bee4f0ba52d78f7bef9077440c09801340f5870e2e9cba3813af17",
+    "checkpoint": {
+     "path": "/srv/cupi/hexapod/runs/julian/dest_v2_from_dest_v1_c36_u3500_seed20260917_20261018_001/run/standing/checkpoint_update003500.pt",
+     "sha256": "9825ed3dd9a27bfc49705c2b340917ddda8ecae1c1f85933b6886ff18a482d57",
+     "declaration_sha256": "52b60364246c13f3782ee13023a5508f90d04552082c2304fb7391150096b188"
+    },
+    "read_only_inputs": {
+     "/standing_one": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_1/run/standing",
+     "/standing_batch": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_128/run/standing",
+     "/admission": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/admissions/candidate",
+     "/checkpoint": "/srv/cupi/hexapod/runs/julian/dest_v1_from_c48long_c36_u3500_seed20260917_20261017_002/run/standing"
+    },
+    "starting_checkpoint": {
+     "container_path": "/checkpoint/checkpoint_update003500.pt",
+     "path": "/srv/cupi/hexapod/runs/julian/dest_v1_from_c48long_c36_u3500_seed20260917_20261017_002/run/standing/checkpoint_update003500.pt",
+     "sha256": "e5c69a5012bee4f0ba52d78f7bef9077440c09801340f5870e2e9cba3813af17",
+     "declaration_sha256": "f10264d47efa0bf5b92b1457d2d3ca5b37e347febc4f47f54370a78641841e0c",
+     "declaration_source": "step 1 checkpoint record; this pack bound the .pt bytes only"
+    }
+   },
+   "evaluation": {
+    "attempt": "eval_dest_v2_c36_u3500_seed20260917_20261018_001",
+    "binding_sha256": "2be59fa105ad24121d1564e705248b32591c41ccd9c45deedd0a72df19a5ac22",
+    "source_commit": "272168bf091dc26f6d68cf7c8f38235710aabb65",
+    "source_freeze_sha256": "05d8b4784ccf8b734746bf6f4e1ef0643f82c70fa312b3cf61baca7b3b6546e7",
+    "status": "completed",
+    "exit_code": 0,
+    "summary_sha256": "5a4b821f13fa855354858007182d0dbbaee8db155b2fb4045106d9b377e8c9f3"
+   }
+  },
+  {
+   "step": 3,
+   "description": "Tighten the reward for following the ghost and solve heading and joint problems",
+   "change": "Experiment destination_v8: destination pay 1 / (1 + (d / 3.7 mm)^1.2) paid under every command (from destination_v5), heading pay 1 / (1 + (gap / 1 deg)^1.2) to the destination's heading with termination 42 (from destination_v7), and the ten joint penalties doubled.",
+   "training": {
+    "attempt": "dest_v8_from_dest_v2_c36_u3500_seed20260917_20261020_001",
+    "binding_sha256": "97092142e65b60b7624f7a5391cb53d6aa477c33e5216606f2341eca163afe75",
+    "source_commit": "18bfc31939df4e655556c6689c0f2db8d8367343",
+    "source_freeze_sha256": "37e5dbd07a0fc33bee0dca8dca3c753eae4e764354c101c3eff86301ddb1c0e2",
+    "experiment": "destination_v8",
+    "updates": 3500,
+    "status": "completed",
+    "exit_code": 0,
+    "started_from_checkpoint_sha256": "9825ed3dd9a27bfc49705c2b340917ddda8ecae1c1f85933b6886ff18a482d57",
+    "starting_learning_rate": {
+     "value": 0.0003,
+     "source": "configured"
+    },
+    "wall_hours": 4.94,
+    "learner_arguments": "--asset /asset --model /asset/source/model.json --geometry /geometry_source/geometry/geometry.json --geometry-extrema /geometry_source/geometry/geometry_extrema.npz --stance /prior/stance.json --num-envs 128 --source-freeze-sha256 37e5dbd07a0fc33bee0dca8dca3c753eae4e764354c101c3eff86301ddb1c0e2 --max-wall-seconds 21600 --headless --device cuda:0 --allocation-profile flat_pilot_v1 --standing-admission /admission/admission.json --updates 3500 --seed 20260917 --extended-updates --recipe none --action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0003 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --steps-per-env 36 --experiment destination_v8 --initialize-from /checkpoint/checkpoint_update003500.pt --initialize-from-sha256 9825ed3dd9a27bfc49705c2b340917ddda8ecae1c1f85933b6886ff18a482d57",
+    "checkpoint": {
+     "path": "/srv/cupi/hexapod/runs/julian/dest_v8_from_dest_v2_c36_u3500_seed20260917_20261020_001/run/standing/checkpoint_update003500.pt",
+     "sha256": "954388d461844f4f6f2a00542dbb6fc04ccbd47ffbe2e363dadf544400925cbd",
+     "declaration_sha256": "51fc988c2cc3be3b262af073918396046c5d2c047c8463ce45c98e0e025738b7"
+    },
+    "read_only_inputs": {
+     "/standing_one": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_1/run/standing",
+     "/standing_batch": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_128/run/standing",
+     "/admission": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/admissions/candidate",
+     "/checkpoint": "/srv/cupi/hexapod/runs/julian/dest_v2_from_dest_v1_c36_u3500_seed20260917_20261018_001/run/standing"
+    },
+    "starting_checkpoint": {
+     "container_path": "/checkpoint/checkpoint_update003500.pt",
+     "path": "/srv/cupi/hexapod/runs/julian/dest_v2_from_dest_v1_c36_u3500_seed20260917_20261018_001/run/standing/checkpoint_update003500.pt",
+     "sha256": "9825ed3dd9a27bfc49705c2b340917ddda8ecae1c1f85933b6886ff18a482d57",
+     "declaration_sha256": "52b60364246c13f3782ee13023a5508f90d04552082c2304fb7391150096b188",
+     "declaration_source": "step 2 checkpoint record; this pack bound the .pt bytes only"
+    }
+   },
+   "evaluation": {
+    "attempt": "eval_dest_v8_c36_u3500_seed20260917_20261020_001",
+    "binding_sha256": "0ef2c9dc415ca25b3412776426065e824ba5e018cd3fa82fc1b37a6ca6fc557d",
+    "source_commit": "18bfc31939df4e655556c6689c0f2db8d8367343",
+    "source_freeze_sha256": "37e5dbd07a0fc33bee0dca8dca3c753eae4e764354c101c3eff86301ddb1c0e2",
+    "status": "completed",
+    "exit_code": 0,
+    "summary_sha256": "357663c37fa111429c489c0aa4c49ff520cd4d0301a4848007a1ffd0c3a21ad6"
+   }
+  },
+  {
+   "step": 4,
+   "description": "Small fine-tune to learn to stop",
+   "change": "Experiment destination_v9: a fifth of the moving commands stop after 4 s to 12 s and stand for the rest of the 20 s; 600 updates continuing the checkpoint's learning rate (1e-5, ceiling 1e-4) at a fixed action deviation of 0.05.",
+   "training": {
+    "attempt": "dest_v9_from_dest_v8_c36_u600_finetune_seed20260917_20261020_001",
+    "binding_sha256": "6daf63e03f32c94c08437c9b63c755ee3264aaf1c6ce43d474b5c7a73cef26df",
+    "source_commit": "976344cb3405177954d8a223d88afbedce4417c2",
+    "source_freeze_sha256": "4e485f4021f95f91955f425c0627d0d2290d136e1a8e5b271ab23503d3e497ff",
+    "experiment": "destination_v9",
+    "updates": 600,
+    "status": "completed",
+    "exit_code": 0,
+    "started_from_checkpoint_sha256": "954388d461844f4f6f2a00542dbb6fc04ccbd47ffbe2e363dadf544400925cbd",
+    "starting_learning_rate": {
+     "value": 1e-05,
+     "source": "checkpoint"
+    },
+    "wall_hours": 0.85,
+    "learner_arguments": "--asset /asset --model /asset/source/model.json --geometry /geometry_source/geometry/geometry.json --geometry-extrema /geometry_source/geometry/geometry_extrema.npz --stance /prior/stance.json --num-envs 128 --source-freeze-sha256 4e485f4021f95f91955f425c0627d0d2290d136e1a8e5b271ab23503d3e497ff --max-wall-seconds 21600 --headless --device cuda:0 --allocation-profile flat_pilot_v1 --standing-admission /admission/admission.json --updates 600 --seed 20260917 --recipe none --action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0001 --action-std 0.05 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --steps-per-env 36 --experiment destination_v9 --initialize-from /checkpoint/checkpoint_update003500.pt --initialize-from-sha256 954388d461844f4f6f2a00542dbb6fc04ccbd47ffbe2e363dadf544400925cbd --initialize-rate checkpoint",
+    "checkpoint": {
+     "path": "/srv/cupi/hexapod/runs/julian/dest_v9_from_dest_v8_c36_u600_finetune_seed20260917_20261020_001/run/standing/checkpoint_update000600.pt",
+     "sha256": "16048b8f7b31c61ba6630742475f796e24c4bc43bd17bc61f9b40bb0d37b6d33",
+     "declaration_sha256": "a916268ccb15143547cb7d27ac30cd279bcf0ab4aa0de735e46ebac670c03de4"
+    },
+    "read_only_inputs": {
+     "/standing_one": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_1/run/standing",
+     "/standing_batch": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/standing_128/run/standing",
+     "/admission": "/srv/cupi/hexapod/runs/james/python_standards_20261017_001/admissions/candidate",
+     "/checkpoint": "/srv/cupi/hexapod/runs/julian/dest_v8_from_dest_v2_c36_u3500_seed20260917_20261020_001/run/standing"
+    },
+    "starting_checkpoint": {
+     "container_path": "/checkpoint/checkpoint_update003500.pt",
+     "path": "/srv/cupi/hexapod/runs/julian/dest_v8_from_dest_v2_c36_u3500_seed20260917_20261020_001/run/standing/checkpoint_update003500.pt",
+     "sha256": "954388d461844f4f6f2a00542dbb6fc04ccbd47ffbe2e363dadf544400925cbd",
+     "declaration_sha256": "51fc988c2cc3be3b262af073918396046c5d2c047c8463ce45c98e0e025738b7",
+     "declaration_source": "step 3 checkpoint record; this pack bound the .pt bytes only"
+    }
+   },
+   "evaluation": {
+    "attempt": "eval_dest_v9_u600_seed20260917_20261020_001",
+    "binding_sha256": "ddf45a7745d95b7b19edc34cf64ec31d55585ef306368440035f03b0b66aaa4c",
+    "source_commit": "976344cb3405177954d8a223d88afbedce4417c2",
+    "source_freeze_sha256": "4e485f4021f95f91955f425c0627d0d2290d136e1a8e5b271ab23503d3e497ff",
+    "status": "completed",
+    "exit_code": 0,
+    "summary_sha256": "49d3d9079a4a06b81c69c8ea1ce29c94639a238c483db8827047f2f7e4d65516"
+   }
+  }
+ ],
+ "other_attempts": "destination_v3 to destination_v7 trained from the destination_v2 checkpoint (v6 and a v5 control on the surrogate only); their results are in results.json and their code stays in the experiment registry.",
+ "learner_arguments": "Each training step's command line exactly as its approved pack binding declares it, container paths included; read_only_inputs maps each mounted container directory to its Spark path, and starting_checkpoint names the file each step loaded."
+}

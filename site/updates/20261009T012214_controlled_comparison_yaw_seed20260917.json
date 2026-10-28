@@ -1,0 +1,21 @@
+{
+  "id": "20261009T012214_controlled_comparison_yaw_seed20260917",
+  "date": "2026-10-09T01:22:14Z",
+  "title": "Record the first yaw-weight seed of the controlled reward v4 comparison",
+  "summary": "The yaw-weight arm (yaw tracking weight 1.0), seed 20260917, trained 5000 updates and ran the 13 learning probes at updates 2000, 3500 and 5000; it passes 5 of 13 probes at update 5000. Against the budget arm with the same seed at update 5000, its mean yaw rate has the commanded sign in both yaw probes (-0.044 and +0.020 rad/s), but the budget arm also achieves both signs (-0.065 and +0.051 rad/s), so that requirement does not separate the arms. Its yaw errors rise instead of falling 20 percent: 0.156 against 0.136 rad/s for the negative command (+14.8 percent) and 0.180 against 0.150 rad/s for the positive command (+20.1 percent). It loses the budget arm's passes on the 0 degree translation, quiet 20 s, quiet 32 s and forward-to-stop probes and adds two requested-torque saturation failures on the stop probe, so it fails the regression guard. This seed does not meet the yaw requirements; the second yaw seed is still training, and the yaw verdict stays open. The verification record recomputes every probe's contact-normal force and torque summary from the raw 400 Hz chunks without difference.",
+  "areas": [
+    "locomotion",
+    "research"
+  ],
+  "next": "Record yaw-weight seed 20260918 and compute the yaw verdict across both seeds.",
+  "changes": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/*",
+    "site/updates/20261009T012214_controlled_comparison_yaw_seed20260917.json"
+  ],
+  "evidence": [
+    "site/assets/reward_v4_controlled_comparison_20261007_001/comparison_after_yaw_seed20260917.json",
+    "site/assets/reward_v4_controlled_comparison_20261007_001/Y_seed20260917_verification.json"
+  ],
+  "no_project_impact": true,
+  "reason": "One yaw seed leaves the yaw verdict open and Stage 2 incomplete; no capability state changes."
+}
