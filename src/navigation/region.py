@@ -19,6 +19,9 @@ __all__ = ["PlanMargin", "Point", "RegionRejected", "SurveyRegion"]
 #: east-north frame.
 Point = tuple[float, float]
 
+#: A part of the operator's drawing that :class:`RegionRejected` can ask them to redraw.
+RegionPart = Literal["boundary", "corridor", "exclusions"]
+
 
 class RegionRejected(ValueError):
     """The operator's drawing cannot be accepted: ask them to redraw ``part``.
@@ -45,7 +48,7 @@ class RegionRejected(ValueError):
 
     def __init__(
         self,
-        part: Literal["boundary", "corridor", "exclusions"],
+        part: RegionPart,
         reason: str,
         index: int | None = None,
     ) -> None:
@@ -134,7 +137,7 @@ class SurveyRegion:
                 f"exclusions must be a sequence of shapely.Polygon, got {type(raw).__name__}"
             )
         exclusions = tuple(raw)
-        parts = [
+        parts: list[tuple[RegionPart, int | None, shapely.Polygon | None]] = [
             ("boundary", None, self.boundary),
             ("corridor", None, self.corridor),
         ]
@@ -170,8 +173,10 @@ class SurveyRegion:
     def bounds_m(self) -> tuple[float, float, float, float]:
         """``(min_east, min_north, max_east, max_north)`` of the boundary and corridor."""
 
-        bounds = shapely.total_bounds([self.boundary, self.corridor])
-        return tuple(float(value) for value in bounds)
+        min_east, min_north, max_east, max_north = shapely.total_bounds(
+            [self.boundary, self.corridor]
+        )
+        return float(min_east), float(min_north), float(max_east), float(max_north)
 
     def feasible(self, margin: PlanMargin) -> BaseGeometry:
         """Where the robot's center may go: free space shrunk by ``margin.total_m``.

@@ -13,7 +13,7 @@ from __future__ import annotations
 
 import unittest
 
-from shapely import Point, box
+from shapely import Point, Polygon, box
 
 from navigation.grid import OccupancyGrid
 from navigation.region import PlanMargin, SurveyRegion
@@ -40,7 +40,7 @@ def _margin(position_error_bound_m: float) -> PlanMargin:
 
 
 def _demonstration_region(with_exclusion: bool = False) -> SurveyRegion:
-    exclusions = ()
+    exclusions: tuple[Polygon, ...] = ()
     if with_exclusion:
         # #20's second map: the same area with one blocked region.
         exclusions = (box(2.5, 1.5, 3.5, 2.5),)

@@ -275,7 +275,7 @@ class OptimalityTests(unittest.TestCase):
         total = 0.0
         for previous, current in zip(route.cells, route.cells[1:]):
             step = graph.edge_cost(previous, current)
-            self.assertTrue(math.isfinite(step), f"{previous} -> {current} is not traversable")
+            self.assertTrue(math.isfinite(step), f"{previous} -> {current} has infinite cost")
             total += step
         self.assertAlmostEqual(route.cost, total, places=12, msg="cost must be the sum")
 

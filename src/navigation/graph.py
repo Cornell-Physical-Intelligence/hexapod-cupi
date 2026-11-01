@@ -14,22 +14,36 @@ __all__ = ["CostGraph", "GridGraph", "STEPS"]
 STEPS = ((1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
 
 # TODO: I don't see the point of having this as a Protocol... methods take in cells
-# which implies graph like structure... maybe if we want to incoporate risk weighting (?)
+# which implies grid like structure... maybe if we want to incoporate risk weighting (?)
 
 
 @runtime_checkable
 class CostGraph(Protocol):
     """A weighted directed graph that a route planner can search."""
 
+    def __contains__(self, node: Cell) -> bool:
+        """Returns whether a cell is a vertex of the graph.
+
+        Membership is independent of edges: a vertex may have no successors.
+
+        Args:
+            node: The cell to test.
+
+        Returns:
+            ``True`` if a route may occupy ``node``.
+        """
+        ...
+
     def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
-        """Yields the traversable steps out of a cell.
+        """Yields the steps out of a cell that have finite cost.
 
         Args:
             node: The cell to step from.
 
         Yields:
-            ``(successor, cost)`` for every cell one step from ``node`` with a
-            finite ``edge_cost(node, successor)``, where ``cost`` is that value.
+            ``(successor, cost)`` for every successor of ``node`` with a finite
+            ``edge_cost(node, successor)``, where ``cost`` is that value. Both
+            ``node`` and every ``successor`` are in the graph.
         """
         ...
 
@@ -41,7 +55,7 @@ class CostGraph(Protocol):
             b: The cell stepped to.
 
         Returns:
-            The step cost, or ``math.inf`` if the step is not traversable.
+            The step cost, or ``math.inf`` if the step can never be taken.
         """
         ...
 
@@ -75,14 +89,28 @@ class GridGraph:
 
     def __init__(self, grid: OccupancyGrid) -> None:
         if not isinstance(grid, OccupancyGrid):
-            raise TypeError(f"grid must be an OccupancyGrid, got {type(grid).__name__}")
+            raise TypeError(
+                f"grid must be an OccupancyGrid, got {type(grid).__name__}"
+            )
         self.grid = grid
 
-    def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
-        """Yields the traversable steps out of a cell, in :data:`STEPS` order.
+    def __contains__(self, node: Cell) -> bool:
+        """Returns whether a cell is a vertex: on the grid and passable.
 
-        A step is traversable exactly when :meth:`edge_cost` is finite, so
-        off-grid cells, blocked cells and corner-cutting diagonals are skipped.
+        Args:
+            node: The cell to test.
+
+        Returns:
+            ``self.grid.is_passable(node)``.
+        """
+
+        return self.grid.is_passable(node)
+
+    def successors(self, node: Cell) -> Iterable[tuple[Cell, float]]:
+        """Yields the steps out of a cell that have finite cost, in :data:`STEPS` order.
+
+        Off-grid cells, blocked cells and corner-cutting diagonals have infinite
+        :meth:`edge_cost`, so they are skipped.
 
         Args:
             node: The cell to step from.
@@ -125,7 +153,10 @@ class GridGraph:
         if (
             d_east
             and d_north
-            and not (self.grid.is_passable((a[0], b[1])) and self.grid.is_passable((b[0], a[1])))
+            and not (
+                self.grid.is_passable((a[0], b[1]))
+                and self.grid.is_passable((b[0], a[1]))
+            )
         ):
             return math.inf
         return math.hypot(d_east, d_north) * self.grid.cell_size_m
@@ -145,5 +176,7 @@ class GridGraph:
         """
 
         d_east, d_north = abs(a[0] - b[0]), abs(a[1] - b[1])
-        octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(d_east, d_north)
+        octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(
+            d_east, d_north
+        )
         return octile_cells * self.grid.cell_size_m
