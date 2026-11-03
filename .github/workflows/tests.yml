@@ -56,8 +56,9 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: viewer/package-lock.json
-      - name: Build the approved robot viewer
+      - name: Build the approved robot viewer and test its run files
         working-directory: viewer
         run: |
           npm ci
           npm run build
+          npm test

@@ -94,6 +94,6 @@ node site/test_code_map.mjs
 ```
 
 Use the actual integration-base commit for the site check. After asset or viewer
-changes, run `npm ci` and `npm run build` from `viewer/` and check the joint
+changes, run `npm ci`, `npm run build` and `npm test` from `viewer/` and check the joint
 controls in the rendered viewer. Historical Git-object verification is a
 separate archive maintenance check. Preserve existing tests and gate values.

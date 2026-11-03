@@ -1,0 +1,22 @@
+{
+  "id": "20261023T214907_run_viewer_fixture",
+  "date": "2026-10-23T21:49:07.335454Z",
+  "title": "Make run files byte-identical across hosts",
+  "summary": "Run files now carry a gzip header without the host's operating-system byte, and the run-file test compares the uncompressed data, so the shared fixture passes on Linux CI as it does on macOS.",
+  "areas": [
+    "verification"
+  ],
+  "next": "Use the Runs page to look into the destination_v9 96-case failures.",
+  "changes": [
+    "viewer/run_view.py",
+    "tests/test_run_view.py",
+    "viewer/test/fixtures/sample_run.json",
+    "site/updates/20261023T214907_run_viewer_fixture.json"
+  ],
+  "evidence": [
+    "tests/test_run_view.py",
+    "viewer/test/runFile.test.mjs"
+  ],
+  "no_project_impact": true,
+  "reason": "A test-fixture portability fix for an offline viewer; no measured result, runtime source or roadmap marker changes."
+}
