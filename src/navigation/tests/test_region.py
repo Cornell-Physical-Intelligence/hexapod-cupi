@@ -1,9 +1,9 @@
 """Boundary geometry and the clearance margin that decides feasibility.
 
 What is guarded here is the *request* side of route planning: an operator's drawing
-is rejected before approval rather than after motion, and the margin that R-05
-requires is assembled from three independently-owned terms rather than baked into a
-constant. Polygon geometry itself is Shapely's and is not re-tested here.
+is rejected before approval rather than after motion, and the margin that keeps the
+footprint inside the approved area (ARCHITECTURE.md, "Integration requirements") is
+assembled from three independently-owned terms rather than baked into a constant. Polygon geometry itself is Shapely's and is not re-tested here.
 Everything is closed-form. No grid, no search, no randomness.
 """
 

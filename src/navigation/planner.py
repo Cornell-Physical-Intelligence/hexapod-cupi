@@ -31,16 +31,10 @@ class Route:
             raise ValueError("cells must hold at least the start cell")
         cost = float(self.cost)
         if not math.isfinite(cost) or cost < 0.0:
-            raise ValueError(
-                f"cost must be finite and non-negative, got {self.cost!r}"
-            )
+            raise ValueError(f"cost must be finite and non-negative, got {self.cost!r}")
         if type(self.expansions) is not int or self.expansions < 0:
-            raise ValueError(
-                f"expansions must be a non-negative int, got {self.expansions!r}"
-            )
-        object.__setattr__(
-            self, "cells", tuple((int(e), int(n)) for e, n in self.cells)
-        )
+            raise ValueError(f"expansions must be a non-negative int, got {self.expansions!r}")
+        object.__setattr__(self, "cells", tuple((int(e), int(n)) for e, n in self.cells))
         object.__setattr__(self, "cost", cost)
 
     def waypoints_m(self, grid: OccupancyGrid) -> tuple[Point, ...]:
@@ -49,7 +43,7 @@ class Route:
         The result can be passed directly to ``WaypointFollower``, which takes a
         sequence of ``(x, y)`` pairs.
 
-        Note:
+        Notes:
             It should be noted that additional processing may be worthwile before
             passing into a follower. This method returns a tuple of cells, traversing
             along an eight-connected graph. Any route at any angle other than a
@@ -84,17 +78,15 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
         The cheapest route from ``start`` to ``goal``, with the number of cells
         expanded to find it (see :class:`Route`). ``None`` if no sequence of
         finite-cost steps leads from ``start`` to ``goal``, or if ``start`` or ``goal``
-        are not in ``graph``. Otherwise, if ``start == goal``, a
-        one-cell route of cost 0.0.
+        is not in ``graph`` (see :meth:`CostGraph.__contains__`). Otherwise, if
+        ``start == goal``, a one-cell route of cost 0.0.
     """
 
-    if start == goal:
-        # TODO: Arbitrary CostGraph has no notion of passability (?)
-        # What should we do? see is passable (see :class:`OccupancyGrid`)
-        return Route((goal,), 0.0, 0)
+    if start not in graph or goal not in graph:
+        return None
 
-        # else (if not passable? see question above):
-        #   return None
+    if start == goal:
+        return Route((goal,), 0.0, 0)
 
     # Initialize Frontier, add start
     # Entry: (f, h, cell). heapq pops the smallest f; if there is a tie, it is broken
@@ -141,9 +133,7 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
             if not_discovered or dist < discovered[neighbor][0]:
                 # Update if newly discovered or we found a better cost.
                 discovered[neighbor] = (dist, node)
-                heapq.heappush(
-                    frontier, (dist, graph.heuristic(neighbor, goal), neighbor)
-                )
+                heapq.heappush(frontier, (dist, graph.heuristic(neighbor, goal), neighbor))
 
     if goal not in settled:
         return None

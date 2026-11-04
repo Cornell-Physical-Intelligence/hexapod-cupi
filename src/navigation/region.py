@@ -13,8 +13,8 @@ from shapely.validation import explain_validity
 __all__ = ["PlanMargin", "Point", "RegionRejected", "SurveyRegion"]
 
 # TODO: Who decides the origin of the map frame? How is the frame represented?
-#   Both teams must agree (ARCHITECTURE.md section 3; Pose and Survey request
-#   contracts in section 4).
+#   See ARCHITECTURE.md, "Navigation and commands" (the frame) and "Code
+#   boundaries" (pose exchange with the payload team).
 #: An ``(east, north)`` pair in meters, in the map frame: the open map's local
 #: east-north frame.
 Point = tuple[float, float]
@@ -71,9 +71,12 @@ class PlanMargin:
     including localization and stopping uncertainty.
 
     Args:
-        ``footprint_radius_m``: Length of largest line fitting across the hexapod.
-        ``stop_tolerance_m``: Perscribed by the specifications of the controller + robot build.
-        ``position_error_bound_m``: the specificed GPS bound.
+        footprint_radius_m: Distance from the robot's center to the farthest point of
+            its footprint: the circle that contains the whole robot (#20). Not the
+            full width across it.
+        stop_tolerance_m: How far from a stop the robot may come to rest. Prescribed
+            by the specifications of the controller and robot build.
+        position_error_bound_m: The specified GPS error bound.
 
     Raises:
         ValueError: A term is negative or not finite, or ``footprint_radius_m`` is

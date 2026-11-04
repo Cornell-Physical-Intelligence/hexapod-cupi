@@ -13,13 +13,15 @@ __all__ = ["CostGraph", "GridGraph", "STEPS"]
 #: deterministic tie-break prefers a straight step to a diagonal of equal cost.
 STEPS = ((1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
 
-# TODO: I don't see the point of having this as a Protocol... methods take in cells
-# which implies grid like structure... maybe if we want to incoporate risk weighting (?)
-
 
 @runtime_checkable
 class CostGraph(Protocol):
-    """A weighted directed graph that a route planner can search."""
+    """A weighted directed graph over grid cells that a route planner can search.
+
+    Notes:
+        The planner depends only on this, so a different cost model (e.g. risk
+        weighting) or a test double needs no planner changes.
+    """
 
     def __contains__(self, node: Cell) -> bool:
         """Returns whether a cell is a vertex of the graph.
@@ -30,7 +32,7 @@ class CostGraph(Protocol):
             node: The cell to test.
 
         Returns:
-            ``True`` if a route may occupy ``node``.
+            ``True`` if ``node`` is in this graph.
         """
         ...
 
@@ -89,13 +91,11 @@ class GridGraph:
 
     def __init__(self, grid: OccupancyGrid) -> None:
         if not isinstance(grid, OccupancyGrid):
-            raise TypeError(
-                f"grid must be an OccupancyGrid, got {type(grid).__name__}"
-            )
+            raise TypeError(f"grid must be an OccupancyGrid, got {type(grid).__name__}")
         self.grid = grid
 
     def __contains__(self, node: Cell) -> bool:
-        """Returns whether a cell is a vertex: on the grid and passable.
+        """Returns whether a cell is a vertex, i.e. on the grid and passable.
 
         Args:
             node: The cell to test.
@@ -153,10 +153,7 @@ class GridGraph:
         if (
             d_east
             and d_north
-            and not (
-                self.grid.is_passable((a[0], b[1]))
-                and self.grid.is_passable((b[0], a[1]))
-            )
+            and not (self.grid.is_passable((a[0], b[1])) and self.grid.is_passable((b[0], a[1])))
         ):
             return math.inf
         return math.hypot(d_east, d_north) * self.grid.cell_size_m
@@ -176,7 +173,5 @@ class GridGraph:
         """
 
         d_east, d_north = abs(a[0] - b[0]), abs(a[1] - b[1])
-        octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(
-            d_east, d_north
-        )
+        octile_cells = max(d_east, d_north) + (math.sqrt(2.0) - 1.0) * min(d_east, d_north)
         return octile_cells * self.grid.cell_size_m

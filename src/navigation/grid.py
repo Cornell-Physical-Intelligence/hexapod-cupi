@@ -122,11 +122,12 @@ class OccupancyGrid:
         The grid covers ``region.bounds_m`` from its lower-left corner, rounding up
         so partial cells are included.
 
-        # TODO: This sucks. The issue doesn't specify to decline... If we rejected,
-        we need to decide when to notify + how to notify.
-
         A cell is passable when its center lies inside ``region.feasible(margin)``;
-        when that is empty, every cell is impassable and``passable_cell_count`` is 0.
+        when that is empty, every cell is impassable and ``passable_cell_count`` is 0.
+
+        Notes:
+            It is the responsibility of the caller to determine what to do in edge
+            cases such as ``passable_cell_count`` being 0.
         """
         cell_size = float(cell_size_m)
         if not math.isfinite(cell_size) or cell_size <= 0.0:

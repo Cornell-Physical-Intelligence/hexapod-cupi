@@ -92,6 +92,9 @@ class _ReversedSuccessors:
     def __init__(self, inner) -> None:
         self.inner = inner
 
+    def __contains__(self, node) -> bool:
+        return node in self.inner
+
     def successors(self, node):
         return tuple(reversed(tuple(self.inner.successors(node))))
 
@@ -144,6 +147,26 @@ class SeamTests(unittest.TestCase):
                         self.assertEqual(yielded.get(other), cost)
                     else:
                         self.assertNotIn(other, yielded)
+
+    def test_membership_is_passability(self) -> None:
+        graph = GridGraph(_grid(("..", ".#")))
+        for cell in ((0, 0), (0, 1), (1, 1)):
+            with self.subTest(cell=cell):
+                self.assertIn(cell, graph)
+        for cell in ((1, 0), (-1, 0), (2, 1), (0, 2)):
+            with self.subTest(cell=cell):
+                self.assertNotIn(cell, graph, "blocked or off-grid")
+
+    def test_successors_stay_in_the_graph(self) -> None:
+        # The CostGraph.successors contract, checked from on- and off-grid nodes.
+        graph = GridGraph(_grid(("..#", ".#.", "...")))
+        for east in range(-1, 4):
+            for north in range(-1, 4):
+                node = (east, north)
+                for successor, _ in graph.successors(node):
+                    with self.subTest(node=node, successor=successor):
+                        self.assertIn(node, graph)
+                        self.assertIn(successor, graph)
 
 
 class RouteTests(unittest.TestCase):
@@ -372,6 +395,19 @@ class UnreachableTests(unittest.TestCase):
 
     def test_start_equal_to_goal_is_a_single_cell_route(self) -> None:
         graph = GridGraph(_open_grid(3, 3))
+        route = a_star(graph, (1, 1), (1, 1))
+        self.assertIsNotNone(route)
+        assert route is not None
+        self.assertEqual(route.cells, ((1, 1),))
+        self.assertAlmostEqual(route.cost, 0.0, places=12)
+
+    def test_a_blocked_start_equal_to_goal_returns_none(self) -> None:
+        graph = GridGraph(_grid(("#.", "..")))
+        self.assertIsNone(a_star(graph, (0, 1), (0, 1)))
+
+    def test_a_walled_in_start_equal_to_goal_is_a_single_cell_route(self) -> None:
+        # Membership comes from the grid, not from having successors.
+        graph = GridGraph(_grid(("###", "#.#", "###")))
         route = a_star(graph, (1, 1), (1, 1))
         self.assertIsNotNone(route)
         assert route is not None

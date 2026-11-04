@@ -1,9 +1,9 @@
 """Rasterization, margin inflation, and when the feasible region is empty.
 
 The arithmetic in ``EmptyFeasibleRegionTests`` is the reason this module exists as
-its own reviewable unit: issue #20 fixes the demonstration at 6 x 4 m while R-03
-sets a plain-GPS error bound of several meters, and those two facts are mutually
-exclusive. The planner's correct response is an empty feasible region, reported --
+its own reviewable unit: issue #20 fixes the demonstration at 6 x 4 m while plain
+GPS without RTK (ARCHITECTURE.md, #38) has an error bound of several meters, and
+those two facts are mutually exclusive. The planner's correct response is an empty feasible region, reported --
 not an exception, and not a route that quietly leaves the approved area.
 
 Everything is closed-form. No search, no simulator, no randomness.

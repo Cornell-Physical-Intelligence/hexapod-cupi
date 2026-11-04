@@ -16,22 +16,23 @@ invalid (self-crossing) drawings on construction. `SurveyRegion.feasible(margin)
 shrinks the free space by the `PlanMargin` with a negative `buffer`, and
 `OccupancyGrid.from_region` marks a cell passable when its center lies inside that
 shape. Every passable cell is equally good: there is no risk weighting, so routes are
-shortest in meters. `CostGraph` in `graph.py` is the interface a planner searches and
-the contract other mission work builds against; `GridGraph` is its eight-connected
+shortest in meters. `CostGraph` in `graph.py` is the interface `a_star` searches; `GridGraph` is its eight-connected
 implementation over an `OccupancyGrid`, with octile distance as the heuristic and no
 diagonal cutting between blocked cells.
 
-The margin holds at cell centers only approximately. `buffer` approximates rounded
+The margin holds at cell centers only approximately. Shapely's `buffer` approximates rounded
 corners with straight segments, so a feasible point can fall short of the margin by
 up to about 1% of it. Straight steps between passable centers are not checked, so a
 step can pass closer still: up to about `cell_size² / (4 × margin)`, which is about
-3 cm at 0.25 m cells and 5 mm at 0.1 m. These are accepted because they are far
-smaller than the GPS and stop-tolerance terms in `PlanMargin`. If a route must keep
-the margin exactly, add the shortfall as a term in `PlanMargin` rather than changing
+3 cm at 0.25 m cells and 5 mm at 0.1 m. When considering whether these tolerances are /
+aren't acceptable, note that these may be much smaller than the GPS and stop-tolerance
+terms in `PlanMargin` (with the GPS tolerance in particular being on a scale of multiple
+meters). If a route must keep the margin exactly, add the shortfall as a term in `PlanMargin` rather than changing
 the geometry.
 
 `a_star` in `planner.py` searches one start cell to one goal cell and returns a
-`Route`, or `None` when the goal is unreachable. Chaining routes through the stop
+`Route`, or `None` when there is no route, including when either cell is blocked or
+off the grid. The caller decides what a blocked start or goal means. Chaining routes through the stop
 points remains pending.
 
 One property the tests enforce that is easy to miss: the tie-break must be a total
