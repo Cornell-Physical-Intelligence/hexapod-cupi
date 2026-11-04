@@ -16,7 +16,12 @@ from mujoco import rollout as mj_rollout
 from scipy.spatial import ConvexHull
 
 from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
-from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation, rotate
+from locomotion.omniwalk.mdp.frames import inverse_rotate, rotate
+from locomotion.omniwalk.mdp.loads import SubstepLoads, control_telemetry
+from locomotion.omniwalk.mdp.observations import observations as assemble_observations
+from locomotion.omniwalk.mdp.observations import proprio
+from locomotion.omniwalk.mdp.state import toe_points
+from locomotion.omniwalk.mdp.terminations import episode_timeout, physical_termination
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
 from locomotion.robots.rs05 import motor_force
 
@@ -496,17 +501,7 @@ class SurrogateEnv:
             ],
             dtype=torch.float64,
         )
-        default_toes = []
-        for leg in LEGS:
-            shape = next(x for x in self.geometry_meta["shapes"] if x["body"] == leg + "_tibia")
-            transform = np.asarray(shape["shape_to_link"])
-            bounds = np.asarray(shape["cap_bounds_m"])
-            default_toes.append((transform @ np.array([bounds[1, 0], 0.0, 0.0, 1.0]))[:3])
-        self.toe_local = self.torch(
-            np.asarray(self.reference_metadata.get("toe_local_points_m", default_toes))
-        )
-        if self.toe_local.shape != (6, 3) or not torch.isfinite(self.toe_local).all():
-            raise ValueError("Invalid reference toe points")
+        self.toe_local = self.torch(toe_points(self.geometry_meta, self.reference_metadata))
         self._toe_local64 = self.toe_local.to(torch.float64)
         # Batched stepping: one MjData per worker thread, one state row per replica.
         self.threads = max(0, int(threads))
@@ -803,21 +798,8 @@ class SurrogateEnv:
             )
         return result
 
-    def _proprio(self, state):
-        return torch.cat(
-            (
-                navigation(state["angular"]),
-                navigation(state["gravity"]),
-                state["q"] - self.neutral,
-                state["dq"],
-            ),
-            dim=-1,
-        )
-
     def observations(self, state):
-        obs = torch.cat((self.history.flatten(1), self.commands, self.previous_action), dim=-1)
-        critic = torch.cat((obs, navigation(state["linear"])), dim=-1)
-        return {"obs": obs, "critic": critic}
+        return assemble_observations(self.history, self.commands, self.previous_action, state)
 
     # ----- OmniEnv interface ---------------------------------------------------------------
     def reset(self, indices=None):
@@ -849,7 +831,7 @@ class SurrogateEnv:
             self.previous_action[indices] = 0
             self.episode_steps[indices] = 0
             state = self._read()
-            self.history[indices] = self._proprio(state)[indices, None].expand(-1, 5, -1)
+            self.history[indices] = proprio(state, self.neutral)[indices, None].expand(-1, 5, -1)
         else:
             state = self._read()
         self.current = state
@@ -868,12 +850,7 @@ class SurrogateEnv:
             self.cfg.action_scale_rad,
             self.cfg.target_slew_rad,
         )
-        saturation = torch.zeros_like(target, dtype=torch.long)
-        torque_square = torch.zeros_like(target)
-        requested_max = torch.zeros_like(target)
-        applied_max = torch.zeros_like(target)
-        other_force_max = torch.zeros(self.num_envs)
-        tibia_min_force = torch.full((self.num_envs, 6), torch.inf)
+        loads = SubstepLoads(target, self.toe_index, self._other_index)
         toe_cap_min = torch.full((self.num_envs, 6), torch.inf)
         shaft_max = torch.zeros((self.num_envs, 6))
         last = self.cfg.decimation - 1
@@ -892,15 +869,9 @@ class SurrogateEnv:
                 state = self._read(full=self.substep_state)
             else:
                 state = None
-            norms = torch.linalg.vector_norm(forces, dim=-1)
-            other_force_max = torch.maximum(other_force_max, norms[:, self._other_index].amax(-1))
-            tibia_min_force = torch.minimum(tibia_min_force, norms[:, self.toe_index])
+            loads.add(requested, applied, forces)
             toe_cap_min = torch.minimum(toe_cap_min, self._toe_cap)
             shaft_max = torch.maximum(shaft_max, self._shaft)
-            saturation += requested.abs() > 1.6
-            torque_square += applied.square()
-            requested_max = torch.maximum(requested_max, requested.abs())
-            applied_max = torch.maximum(applied_max, applied.abs())
             if self.capture is not None:
                 self.capture(
                     self,
@@ -919,47 +890,33 @@ class SurrogateEnv:
         self.previous_action = executed_action_feature(
             target, self.neutral, self.cfg.action_scale_rad
         ).clone()
-        self.history = torch.cat((self.history[:, 1:], self._proprio(state)[:, None]), dim=1)
+        self.history = torch.cat(
+            (self.history[:, 1:], proprio(state, self.neutral)[:, None]), dim=1
+        )
         self.episode_steps += 1
         self.total_controls += 1
-        velocity_nav = navigation(state["linear"])
-        joint_violation = ((state["q"] < self.lower - 2e-6) | (state["q"] > self.upper + 2e-6)).any(
-            -1
+        terminated = physical_termination(state, self.lower, self.upper)
+        truncated = episode_timeout(
+            self.episode_steps, self.cfg.episode_seconds, self.cfg.control_dt
         )
-        terminated = (
-            (state["root"][:, 2] < 0.045)
-            | (state["gravity"][:, 2] > -math.cos(0.85))
-            | joint_violation
-        )
-        truncated = self.episode_steps >= round(self.cfg.episode_seconds / self.cfg.control_dt)
         self.current = state
         self.contact_detail = {
             "toe_cap_force_n": state["toe_cap_force_n"].clone(),
             "shaft_force_n": state["shaft_force_n"].clone(),
         }
         self.telemetry = {
-            "root_pose_xyzw": state["root"].clone(),
-            "linear_velocity_body": state["linear"].clone(),
-            "linear_velocity_nav": velocity_nav.clone(),
-            "angular_velocity_body": state["angular"].clone(),
-            "joint_position_rad": state["q"].clone(),
-            "joint_velocity_rad_s": state["dq"].clone(),
-            "joint_target_rad": target.clone(),
-            "computed_torque_nm": requested.clone(),
-            "applied_torque_nm": applied.clone(),
-            "saturation_count_400hz": saturation,
-            "torque_square_sum_400hz": torque_square,
-            "requested_torque_abs_max_400hz": requested_max,
-            "applied_torque_abs_max_400hz": applied_max,
-            "tibia_floor_force_world_n": forces[:, self.toe_index].clone(),
-            "tibia_floor_force_min_norm_400hz": tibia_min_force,
-            "other_body_force_max_400hz": other_force_max,
-            "toe_xyz_world": state["toe_world"].clone(),
-            "toe_xyz_body": state["toe_body"].clone(),
-            "command": self.commands.clone(),
-            "action": action.clone(),
-            "terminated": terminated.clone(),
-            "truncated": truncated.clone(),
+            **control_telemetry(
+                state,
+                target,
+                requested,
+                applied,
+                forces,
+                loads,
+                self.commands,
+                action,
+                terminated,
+                truncated,
+            ),
             # Keys that the surrogate adds: the native compact telemetry does not separate toe cap from shaft.
             "surrogate_toe_cap_force_min_400hz": toe_cap_min,
             "surrogate_shaft_force_max_400hz": shaft_max,
