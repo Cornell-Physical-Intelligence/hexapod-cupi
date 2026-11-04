@@ -728,14 +728,18 @@ EXPERIMENTS["destination_v30"] = {
 }
 
 # The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
-# at the start of each case; the surrogate clamps joints at the native speed limit.
+# at the start of each case; the surrogate clamps joints at the native speed limit. Non-foot contact is any
+# non-tibia body over the evaluator's 1 N, and on the surrogate a tibia shaft too: native telemetry does not
+# separate a tibia's toe from its shaft, so native training cannot see the shaft contact the evaluator counts.
 WALK_SKIPPED_CONTROLS = 100
+NONFOOT_CONTACT_N = 1.0
 WALK_CHECKS = (
     "planar_error_mps",
     "yaw_error_rad_s",
     "tilt_rms_degrees",
     "vertical_velocity_rms_mps",
     "computed_demand_over_rating_fraction",
+    "nonfoot_fraction",
     "joint_speed_limit",
     "terminated",
 )
@@ -744,7 +748,8 @@ JOINT_SPEED_LIMIT_RAD_S = 50.26548245743669
 
 def walk_failures(sums, counted, speed, fast, fell, planar_scale=1.0):
     """Each row's failed walking checks, as booleans in ``WALK_CHECKS`` order, from the per-control sums of
-    planar error, yaw-rate error, squared tilt, squared vertical velocity and share of joints above 1.6 Nm.
+    planar error, yaw-rate error, squared tilt, squared vertical velocity, share of joints above 1.6 Nm and
+    non-foot contact.
     ``planar_scale`` multiplies the evaluator's planar-error bound."""
     mean = sums / counted.clamp_min(1)[:, None]
     return torch.stack(
@@ -754,6 +759,7 @@ def walk_failures(sums, counted, speed, fast, fell, planar_scale=1.0):
             torch.rad2deg(mean[:, 2].sqrt()) > 5.0,
             mean[:, 3].sqrt() > 0.04,
             mean[:, 4] > 0.005,
+            mean[:, 5] > 0.001,
             fast,
             fell,
         ),
@@ -827,7 +833,7 @@ class DestinationTrainingTask(TrainingTask):
             self.check_failures = dict.fromkeys(WALK_CHECKS, 0)
             n, device = env.num_envs, env.device
             self.walk_counted = torch.zeros(n, dtype=torch.float64, device=device)
-            self.walk_sums = torch.zeros(n, 5, dtype=torch.float64, device=device)
+            self.walk_sums = torch.zeros(n, 6, dtype=torch.float64, device=device)
             self.walk_fast = torch.zeros(n, dtype=torch.bool, device=device)
             self.walk_fell = torch.zeros(n, dtype=torch.bool, device=device)
             # Each walk's planned length, its gap to the ghost at halfway and now, and whether it fell.
@@ -1001,6 +1007,10 @@ class DestinationTrainingTask(TrainingTask):
             self.walk_sums
         )
         vertical = world[:, 2]
+        nonfoot = t["other_body_force_max_400hz"].to(self.walk_sums) > NONFOOT_CONTACT_N
+        if "surrogate_shaft_force_max_400hz" in t:
+            shaft = t["surrogate_shaft_force_max_400hz"].to(self.walk_sums).amax(-1)
+            nonfoot = nonfoot | (shaft > NONFOOT_CONTACT_N)
         values = torch.stack(
             (
                 torch.linalg.vector_norm(planar, dim=-1),
@@ -1010,6 +1020,7 @@ class DestinationTrainingTask(TrainingTask):
                 (t["computed_torque_nm"].to(self.walk_sums).abs() > 1.6)
                 .to(self.walk_sums)
                 .mean(-1),
+                nonfoot.to(self.walk_sums),
             ),
             -1,
         )

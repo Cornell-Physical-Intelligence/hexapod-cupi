@@ -794,7 +794,7 @@ class GaitClockTests(unittest.TestCase):
         self.assertEqual(EXPERIMENT_INPUTS["destination_v18"], "ghost")
         # The evaluator's bounds: 0.0316 m/s of mean planar error fails a 0.125 m/s walk (bound 0.03125)
         # and torque above 1.6 Nm in 0.6% of joint-controls fails any walk.
-        sums = torch.tensor([[0.0316, 0.0, 0.0, 0.0, 0.0], [0.031, 0.0, 0.0, 0.0, 0.006]])
+        sums = torch.tensor([[0.0316, 0.0, 0.0, 0.0, 0.0, 0.0], [0.031, 0.0, 0.0, 0.0, 0.006, 0.0]])
         failed = walk_failures(
             sums,
             torch.ones(2),
@@ -821,6 +821,7 @@ class GaitClockTests(unittest.TestCase):
             "angular_velocity_body": torch.zeros(4, 3),
             "computed_torque_nm": torch.zeros(4, 18),
             "joint_velocity_rad_s": torch.zeros(4, 18),
+            "other_body_force_max_400hz": torch.zeros(4),
         }
         task.command_elapsed[:] = 0
         for _ in range(150):
@@ -843,6 +844,64 @@ class GaitClockTests(unittest.TestCase):
             task.pending_walks += k == 5
             task._curriculum_step(torch.full((4,), 0.9), none)
         self.assertEqual(task.curriculum_level, 0.1)
+
+    def test_a_trace_with_non_foot_contact_fails_the_curriculum_as_it_fails_the_evaluator(self):
+        from locomotion.omniwalk.destination_task import WALK_CHECKS, walk_failures
+        from locomotion.tests.test_evaluation import fixture, score
+
+        # The limit of 0.1% of counted controls, on each side.
+        failed = walk_failures(
+            torch.tensor([[0.0, 0.0, 0.0, 0.0, 0.0, 0.001], [0.0, 0.0, 0.0, 0.0, 0.0, 0.0011]]),
+            torch.ones(2),
+            torch.full((2,), 0.1),
+            torch.zeros(2, dtype=torch.bool),
+            torch.zeros(2, dtype=torch.bool),
+        )
+        self.assertEqual(failed[:, WALK_CHECKS.index("nonfoot_fraction")].tolist(), [False, True])
+
+        def walk(contact, key="other_body_force_max_400hz"):
+            """The evaluator's and the curriculum's verdicts on a perfectly tracked 1,000-control walk."""
+            data = fixture(1000, (0.075, 0.0, 0.0))
+            data["nonfoot_contact"][:] = contact
+            result = score(data, "omni_static")
+            eighteen = EXPERIMENTS["destination_v18"]["reward"]
+            native = GaitDouble(1)
+            native.cfg.episode_seconds, native.cfg.declaration = 20.0, dict
+            task = DestinationTrainingTask(native, TaskConfig(), None, eighteen)
+            task.reset()
+            command = torch.tensor([[0.075, 0.0, 0.0]])
+            native.commands[:] = command
+            native.current["root_velocity"] = torch.tensor([[0.0, -0.075, 0.0, 0.0, 0.0, 0.0]])
+            telemetry = {
+                "root_pose_xyzw": torch.tensor([[0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 1.0]]),
+                "angular_velocity_body": torch.zeros(1, 3),
+                "computed_torque_nm": torch.zeros(1, 18),
+                "joint_velocity_rad_s": torch.zeros(1, 18),
+                "other_body_force_max_400hz": torch.zeros(1),
+            }
+            if key == "surrogate_shaft_force_max_400hz":
+                telemetry[key] = torch.zeros(1, 6)
+            telemetry[key] = telemetry[key] + 2.0 * contact
+            task.command_elapsed[:] = 0
+            none = torch.zeros(1, dtype=torch.bool)
+            for _ in range(1000):
+                task.command_elapsed += 1
+                task._record_walks(command, telemetry, none)
+            for k in range(1092):
+                if k == 100:
+                    task._finish_walks(torch.tensor([0]))
+                task._curriculum_step(torch.full((1,), 0.9), none)
+            return result, task
+
+        clean, climbs = walk(0)
+        self.assertNotIn("nonfoot_fraction", clean["failed_bounds"])
+        self.assertEqual(climbs.check_failures["nonfoot_fraction"], 0)
+        self.assertEqual(climbs.curriculum_level, 0.1)
+        for key in ("other_body_force_max_400hz", "surrogate_shaft_force_max_400hz"):
+            rejected, held = walk(1, key)
+            self.assertIn("nonfoot_fraction", rejected["failed_bounds"])
+            self.assertEqual(held.check_failures["nonfoot_fraction"], 1)
+            self.assertEqual(held.curriculum_level, 0.075)
 
     def test_the_status_reports_the_speed_of_walks_at_the_top_level(self):
         native = GaitDouble(4)
@@ -895,7 +954,7 @@ class GaitClockTests(unittest.TestCase):
         )
         # At 0.125 m/s the walking check now allows 62.5 mm/s of mean planar error.
         failed = walk_failures(
-            torch.tensor([[0.06, 0, 0, 0, 0], [0.065, 0, 0, 0, 0]]),
+            torch.tensor([[0.06, 0, 0, 0, 0, 0], [0.065, 0, 0, 0, 0, 0]]),
             torch.ones(2),
             torch.full((2,), 0.125),
             torch.zeros(2, dtype=torch.bool),
