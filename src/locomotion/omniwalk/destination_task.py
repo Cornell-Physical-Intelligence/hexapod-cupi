@@ -878,13 +878,12 @@ class DestinationTrainingTask(TrainingTask):
             telemetry["schedule_period_s"] = period.to(device, torch.float32)
         return telemetry
 
-    def step(self, action):
-        result = super().step(action)
-        if self.reward_config.run_mix is not None:
-            # A run shorter than the episode times out at its planned length.
-            ended = (self.run_elapsed >= self.run_length) & ~result["terminated"]
-            result["truncated"] = result["truncated"] | ended.to(result["truncated"].device)
-        return result
+    def _end_runs(self, output):
+        if self.reward_config.run_mix is None:
+            return output
+        # A run shorter than the episode times out at its planned length.
+        ended = (self.run_elapsed >= self.run_length) & ~output["terminated"]
+        return {**output, "truncated": output["truncated"] | ended.to(output["truncated"].device)}
 
     def _resample(self, indices):
         if self.reward_config.run_mix is not None:

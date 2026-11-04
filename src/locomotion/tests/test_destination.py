@@ -1342,6 +1342,38 @@ class DriftTests(unittest.TestCase):
         # The 60-control runs keep their command until the reset that the timeout calls for.
         self.assertTrue(bool((task.remaining_controls[length == 60] == 0).all()))
 
+    def test_the_observer_sees_the_short_runs_the_step_returns(self):
+        from locomotion.evaluation.task_metrics import TaskMetrics
+
+        short = replace(
+            EXPERIMENTS["destination_v29"]["reward"],
+            command_controls=60,
+            long_stand_controls=90,
+            stop_after_min_controls=10,
+            stop_after_max_controls=20,
+        )
+        native = GaitDouble(64)
+        native.cfg.episode_seconds, native.cfg.declaration = 32.0, dict
+        task = DestinationTrainingTask(native, TaskConfig(), None, short)
+        seen = []
+        metrics, step = TaskMetrics(task), task.observer.step
+
+        def observe(command, output, *rest):
+            seen.append(output["truncated"].clone())
+            step(command, output, *rest)
+
+        task.observer.step = observe
+        task.reset()
+        length = task.run_length.clone()
+        returned = [task.step(torch.zeros(64, 18))["truncated"].clone() for _ in range(60)]
+        self.assertTrue(bool((length == 60).any()))
+        for k, (flags, observed) in enumerate(zip(returned, seen), 1):
+            self.assertTrue(bool((flags == (length == k)).all()))
+            self.assertTrue(torch.equal(flags, observed))
+        self.assertEqual(
+            metrics.status()["cumulative_metrics"]["truncations"], int((length == 60).sum())
+        )
+
     def test_destination_v29_pays_the_run_end_gap_linearly_down_to_a_floor(self):
         nine = EXPERIMENTS["destination_v29"]["reward"]
         self.assertEqual(EXPERIMENT_INPUTS["destination_v29"], "ghost_v11")
