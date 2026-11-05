@@ -190,6 +190,12 @@ class WaypointFollowerTests(unittest.TestCase):
             self.assertEqual(command.wz_rad_s, 0.0)
         for pose in poses[first_drive:]:
             self.assertLess(abs(pose.heading_rad), gate)
+        # The correction converges without overshoot: the heading error shrinks
+        # on every turning tick and the pure-yaw commands stop once inside the gate.
+        errors = [abs(pose.heading_rad) for pose in poses[: first_drive + 1]]
+        self.assertAlmostEqual(errors[0], 0.30, places=12)
+        for earlier, later in zip(errors, errors[1:]):
+            self.assertLess(later, earlier, "heading error must shrink while turning")
 
     def test_heading_hold_turns_toward_the_nearest_bank_bearing(self) -> None:
         goal = [(3.0, 0.0)]
