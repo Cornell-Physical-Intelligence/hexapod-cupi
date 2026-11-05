@@ -1,4 +1,16 @@
-"""Example waypoint follower without obstacle avoidance or localization."""
+"""Waypoint follower whose every command is a training-bank entry or stand.
+
+The omniwalk policy was trained on a finite command bank: eight translation
+bearings at 45 degree spacing at two speeds, pure yaw at one rate, and two
+arcs. A command between bank entries asks the network for behaviour it has not
+seen, so this follower emits bank entries only. It holds the body heading at a
+multiple of 45 degrees in the map frame and drives holonomically, so an
+eight-connected grid route maps onto bank bearings without turning.
+
+Navigation must not import locomotion (ARCHITECTURE.md), so the bank values are
+restated here; ``tests/test_producer.py`` asserts they equal
+``locomotion.omniwalk.mdp.commands.command_bank(TaskConfig())``.
+"""
 
 from __future__ import annotations
 
@@ -13,28 +25,72 @@ from contracts.command import (
 
 from .producer import Pose2D, wrap_to_pi
 
-__all__ = ["WaypointFollower"]
+__all__ = [
+    "BANK_ARC_SPEED_MPS",
+    "BANK_ARC_YAW_RATE_RAD_S",
+    "BANK_ENVELOPE",
+    "BANK_SPEED_LEVELS_MPS",
+    "BANK_YAW_RATE_RAD_S",
+    "STAND",
+    "WaypointFollower",
+    "command_bank",
+]
 
-# Demonstration limits preserve the original follower; they qualify no policy.
-EXAMPLE_ENVELOPE = CommandEnvelope((-0.40, 0.60), (-0.35, 0.35), (-0.75, 0.75), name="example")
+# Restated from locomotion.omniwalk.mdp.commands.TaskConfig; the navigation
+# tests assert equality with command_bank(TaskConfig()).
+BANK_SPEED_LEVELS_MPS: tuple[float, ...] = (0.025, 0.05)
+BANK_YAW_RATE_RAD_S = 0.2
+BANK_ARC_SPEED_MPS = 0.04
+BANK_ARC_YAW_RATE_RAD_S = 0.15
+BANK_BEARINGS = 8
+BEARING_STEP_RAD = math.pi / 4
+
+
+def command_bank() -> list[list[float]]:
+    """The nonzero navigation-frame bank, in the training module's order and arithmetic."""
+
+    result: list[list[float]] = []
+    for speed in BANK_SPEED_LEVELS_MPS:
+        for bearing in range(BANK_BEARINGS):
+            angle = bearing * math.pi / 4
+            result.append([speed * math.cos(angle), speed * math.sin(angle), 0.0])
+    result.extend([[0.0, 0.0, -BANK_YAW_RATE_RAD_S], [0.0, 0.0, BANK_YAW_RATE_RAD_S]])
+    result.extend(
+        [
+            [BANK_ARC_SPEED_MPS, 0.0, -BANK_ARC_YAW_RATE_RAD_S],
+            [BANK_ARC_SPEED_MPS, 0.0, BANK_ARC_YAW_RATE_RAD_S],
+        ]
+    )
+    return result
+
+
+def _bank_envelope() -> CommandEnvelope:
+    bank = command_bank()
+    limits = []
+    for axis in range(3):
+        values = [entry[axis] for entry in bank]
+        limits.append((min(values), max(values)))
+    return CommandEnvelope(limits[0], limits[1], limits[2], name="bank")
+
+
+# Per-axis extremes of the bank. The envelope admits more than the bank (any
+# point inside the box); the follower itself only emits bank entries.
+BANK_ENVELOPE = _bank_envelope()
 
 STAND = VelocityCommand(vx_mps=0.0, vy_mps=0.0, wz_rad_s=0.0, frame=Frame.NAVIGATION)
 
 
 class WaypointFollower:
-    """Drive a sequence of ``(x, y)`` goals with forward speed and yaw rate."""
+    """Drive a sequence of ``(x, y)`` goals with bank translation and bank yaw."""
 
     def __init__(
         self,
         waypoints: Iterable[Sequence[float]],
         *,
-        cruise_speed_mps: float = 0.24,
         approach_gain_per_s: float = 0.60,
-        max_yaw_rate_rad_s: float = 0.40,
-        heading_gain_per_s: float = 1.20,
-        heading_gate_rad: float = math.pi / 3.0,
+        heading_gate_rad: float = 0.05,
         stop_radius_m: float = 0.12,
-        envelope: CommandEnvelope = EXAMPLE_ENVELOPE,
+        envelope: CommandEnvelope = BANK_ENVELOPE,
     ) -> None:
         self.waypoints: list[tuple[float, float]] = []
         for index, waypoint in enumerate(waypoints):
@@ -45,19 +101,20 @@ class WaypointFollower:
                 )
             self.waypoints.append((point[0], point[1]))
         for name, value in (
-            ("cruise_speed_mps", cruise_speed_mps),
             ("approach_gain_per_s", approach_gain_per_s),
-            ("max_yaw_rate_rad_s", max_yaw_rate_rad_s),
-            ("heading_gain_per_s", heading_gain_per_s),
             ("heading_gate_rad", heading_gate_rad),
             ("stop_radius_m", stop_radius_m),
         ):
             if not math.isfinite(float(value)) or float(value) <= 0.0:
                 raise ValueError(f"{name} must be finite and positive, got {value!r}")
-        self.cruise_speed_mps = float(cruise_speed_mps)
+        # The held heading is the nearest multiple of 45 degrees, so the error
+        # never exceeds 22.5 degrees; a gate at or past that never trips.
+        if float(heading_gate_rad) >= BEARING_STEP_RAD / 2.0:
+            raise ValueError(
+                f"heading_gate_rad must be below {BEARING_STEP_RAD / 2.0:.4f}, "
+                f"got {heading_gate_rad!r}"
+            )
         self.approach_gain_per_s = float(approach_gain_per_s)
-        self.max_yaw_rate_rad_s = float(max_yaw_rate_rad_s)
-        self.heading_gain_per_s = float(heading_gain_per_s)
         self.heading_gate_rad = float(heading_gate_rad)
         self.stop_radius_m = float(stop_radius_m)
         self.envelope = envelope
@@ -77,8 +134,14 @@ class WaypointFollower:
             return None
         return self.waypoints[self._index]
 
+    @staticmethod
+    def held_heading(heading_rad: float) -> float:
+        """The multiple of 45 degrees nearest ``heading_rad``, wrapped to ``(-pi, pi]``."""
+
+        return wrap_to_pi(round(float(heading_rad) / BEARING_STEP_RAD) * BEARING_STEP_RAD)
+
     def update(self, pose: Pose2D, t: float) -> VelocityCommand:
-        """Return the command for this tick. ``t`` is unused; see the module docstring."""
+        """Return the bank command for this tick. ``t`` is unused; see the module docstring."""
 
         del t  # memoryless: the follower's only state is the waypoint index
         if not isinstance(pose, Pose2D):
@@ -95,30 +158,26 @@ class WaypointFollower:
         if self.is_finished:
             return STAND
 
-        goal_x, goal_y = self.waypoints[self._index]
-        delta_x = goal_x - pose.x_m
-        delta_y = goal_y - pose.y_m
-        distance = math.hypot(delta_x, delta_y)
-        heading_error = wrap_to_pi(math.atan2(delta_y, delta_x) - pose.heading_rad)
-
-        yaw_rate = _clamp(
-            self.heading_gain_per_s * heading_error,
-            -self.max_yaw_rate_rad_s,
-            self.max_yaw_rate_rad_s,
-        )
+        heading_error = wrap_to_pi(self.held_heading(pose.heading_rad) - pose.heading_rad)
         if abs(heading_error) >= self.heading_gate_rad:
-            forward = 0.0
+            yaw_rate = BANK_YAW_RATE_RAD_S if heading_error > 0.0 else -BANK_YAW_RATE_RAD_S
+            command = VelocityCommand(0.0, 0.0, yaw_rate, frame=Frame.NAVIGATION)
         else:
-            forward = min(self.approach_gain_per_s * distance, self.cruise_speed_mps)
+            goal_x, goal_y = self.waypoints[self._index]
+            delta_x = goal_x - pose.x_m
+            delta_y = goal_y - pose.y_m
+            distance = math.hypot(delta_x, delta_y)
+            body_bearing = wrap_to_pi(math.atan2(delta_y, delta_x) - pose.heading_rad)
+            bearing = round(body_bearing / BEARING_STEP_RAD) % BANK_BEARINGS
+            angle = bearing * math.pi / 4
+            speed = _nearest_level(self.approach_gain_per_s * distance)
+            command = VelocityCommand(
+                vx_mps=speed * math.cos(angle),
+                vy_mps=speed * math.sin(angle),
+                wz_rad_s=0.0,
+                frame=Frame.NAVIGATION,
+            )
 
-        command = VelocityCommand(
-            vx_mps=forward,
-            vy_mps=0.0,
-            wz_rad_s=yaw_rate,
-            frame=Frame.NAVIGATION,
-        )
-        if command.is_stand():
-            return STAND
         command = self.envelope.clamp(command)
         # Cheap and worth it: a producer that emits an inadmissible command
         # should fail here, next to the bug, not inside the policy.
@@ -126,5 +185,7 @@ class WaypointFollower:
         return command
 
 
-def _clamp(value: float, low: float, high: float) -> float:
-    return min(max(float(value), float(low)), float(high))
+def _nearest_level(speed_mps: float) -> float:
+    """The bank speed level nearest ``speed_mps``; a tie takes the lower level."""
+
+    return min(BANK_SPEED_LEVELS_MPS, key=lambda level: (abs(level - speed_mps), level))
