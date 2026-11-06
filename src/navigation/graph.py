@@ -9,8 +9,7 @@ from .grid import Cell, OccupancyGrid
 
 __all__ = ["CostGraph", "GridGraph", "STEPS"]
 
-#: Eight-connected steps as ``(d_east, d_north)``, orthogonals first so that a
-#: deterministic tie-break prefers a straight step to a diagonal of equal cost.
+#: Eight-connected steps as ``(d_east, d_north)``.
 STEPS = ((1, 0), (0, 1), (-1, 0), (0, -1), (1, 1), (1, -1), (-1, 1), (-1, -1))
 
 

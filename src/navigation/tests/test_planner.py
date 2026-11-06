@@ -105,6 +105,13 @@ class _ReversedSuccessors:
         return self.inner.heuristic(a, b)
 
 
+class _ShiftedHeuristic(_ReversedSuccessors):
+    """A heuristic 1 too low everywhere: admissible and consistent, but not 0 at the goal."""
+
+    def heuristic(self, a, b) -> float:
+        return self.inner.heuristic(a, b) - 1.0
+
+
 class SeamTests(unittest.TestCase):
     """Structural conformance, mirroring ``test_producer.py``."""
 
@@ -127,7 +134,7 @@ class SeamTests(unittest.TestCase):
         self.assertEqual(
             tuple(cell for cell, _ in graph.successors((1, 1))),
             tuple((1 + de, 1 + dn) for de, dn in STEPS),
-            "successor order is part of the contract",
+            "GridGraph yields successors in STEPS order",
         )
         # A corner has only the three in-bounds steps.
         self.assertEqual({cell for cell, _ in graph.successors((0, 0))}, {(1, 0), (0, 1), (1, 1)})
@@ -287,6 +294,13 @@ class OptimalityTests(unittest.TestCase):
                 self.assertIsNotNone(route)
                 assert route is not None
                 self.assertAlmostEqual(route.cost, oracle[0], places=12)
+
+    def test_cost_is_true_when_the_heuristic_is_not_zero_at_the_goal(self) -> None:
+        graph = GridGraph(_grid(("....", ".##.", "....")))
+        oracle = _dijkstra(graph, (0, 0), (3, 2))
+        route = a_star(_ShiftedHeuristic(graph), (0, 0), (3, 2))
+        assert oracle is not None and route is not None
+        self.assertAlmostEqual(route.cost, oracle[0], places=12)
 
     def test_route_cells_are_contiguous_passable_and_priced_correctly(self) -> None:
         graph = GridGraph(_grid(("....", ".##.", "....")))

@@ -44,13 +44,13 @@ class Route:
         sequence of ``(x, y)`` pairs.
 
         Notes:
-            It should be noted that additional processing may be worthwile before
+            It should be noted that additional processing may be worthwhile before
             passing into a follower. This method returns a tuple of cells, traversing
             along an eight-connected graph. Any route at any angle other than a
-            multiple of 45 degrees is a staircase of straight and diagonal steps.
-            A follower that steers toward each waypoint in turn will drive it slowly and
-            unevenly; simplify the list (drop waypoints on a straight line
-            between their neighbors) before handing it to a follower.
+            multiple of 45 degrees is a staircase of straight and diagonal steps. A
+            follower that steers toward each waypoint in turn will drive it slowly and
+            unevenly; simplify the list (drop waypoints on a straight line between
+            their neighbors) before handing it to a follower.
         """
 
         return tuple(grid.cell_center_m(cell) for cell in self.cells)
@@ -64,7 +64,7 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
     :meth:`CostGraph.heuristic`.
 
     The resulting route is deterministic given ``CostGraph.successors`` of each
-    node in ``CostGraph`` remains the same. Equal-cost ties are resolved by cell
+    node in ``CostGraph`` remains the same. Ties in computed cost are resolved by cell
     coordinates, never by the order in which :meth:`CostGraph.successors` yields steps.
 
     Args:
@@ -89,14 +89,14 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
         return Route((goal,), 0.0, 0)
 
     # Initialize Frontier, add start
-    # Entry: (f, h, cell). heapq pops the smallest f; if there is a tie, it is broken
+    # Entry: (f, h, cell, g). heapq pops the smallest f; if there is a tie, it is broken
     # by the smaller h, then the smaller cell tuple, giving a deterministic
     # tie-breaking order.
-    frontier: list[tuple[float, float, Cell]] = []
+    frontier: list[tuple[float, float, Cell, float]] = []
     g = 0.0
     h = graph.heuristic(start, goal)
     f = g + h
-    heapq.heappush(frontier, (f, h, start))
+    heapq.heappush(frontier, (f, h, start, g))
 
     # Entry: cell -> (f, parent).
     # Loop Invariant: f is the cheapest cost found through settled cells
@@ -112,7 +112,7 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
     expansions = 0
 
     while goal not in settled and frontier:
-        f, h, node = heapq.heappop(frontier)
+        _, _, node, g_node = heapq.heappop(frontier)
 
         # Lazy deletion: heapq can't update an entry, so a cell is pushed again
         # whenever a cheaper f is found. Skip the leftover copies.
@@ -123,41 +123,52 @@ def a_star(graph: CostGraph, start: Cell, goal: Cell) -> Route | None:
         expansions += 1
 
         for neighbor, cost in graph.successors(node):
-            # Neighbor's f: g(node) + cost + h(neighbor), where g(node) = f - h(node).
-            dist = (
-                (f - graph.heuristic(node, goal))  # g(node)
-                + cost
-                + graph.heuristic(neighbor, goal)
-            )
+            # A settled cell's f is final (see `settled`).
+            if neighbor in settled:
+                continue
+
+            g_neigh = g_node + cost
+            h_neigh = graph.heuristic(neighbor, goal)
+
+            # Neighbor's f: g(neighbor) + h(neighbor).
+            dist = g_neigh + h_neigh
             not_discovered = neighbor not in discovered
             if not_discovered or dist < discovered[neighbor][0]:
                 # Update if newly discovered or we found a better cost.
                 discovered[neighbor] = (dist, node)
-                heapq.heappush(frontier, (dist, graph.heuristic(neighbor, goal), neighbor))
+                heapq.heappush(frontier, (dist, h_neigh, neighbor, g_neigh))
 
     if goal not in settled:
         return None
     else:
-        return _backtrack(goal, discovered, expansions)
+        # The goal was the last cell settled, so g_node is its cost from start.
+        return _backtrack(goal, discovered, expansions, g_node)
 
 
 def _backtrack(
     goal: Cell,
     discovered: dict[Cell, tuple[float, Cell | None]],
     expansions: int,
+    cost: float,
 ) -> Route:
-    """
-    Creates a route object by backtracking from ``end`` to ``start``.
+    """Creates a route object by backtracking from ``goal`` to the start.
 
     Args:
-        goal: The node to backtrack from, creating a s -> ``goal`` Route. [s being defined by djikstra iteration...]
-        discovered: [Dictionary w/ appropriate structure of data] (maybe precondition on
-        djikstra's settling?)
+        goal: The route's last cell. Must be settled.
+        discovered: The search's ``cell -> (f, parent)`` map (see :func:`a_star`),
+            where ``parent`` is ``None`` only for the start cell.
+        expansions: The number of cells the search expanded, stored on the route.
+        cost: The route's total cost, stored on the route. See Notes.
 
     Returns:
-        [Route, finish later]
+        The :class:`Route` from the start to ``goal`` inclusive.
 
+    Notes:
+        A\\* orders its search by f = g + h, where g is the true cost from the start
+        and h is a heuristic. The route's cost is g, not f, and ``discovered`` only
+        holds f, so the caller passes g in as ``cost``.
     """
+
     route: deque[Cell] = deque()
     route.appendleft(goal)
 
@@ -169,4 +180,4 @@ def _backtrack(
         # Update
         curr = discovered[curr][1]
 
-    return Route(tuple(route), discovered[goal][0], expansions)
+    return Route(tuple(route), cost, expansions)
