@@ -50,7 +50,11 @@ relative-friction consensus: elliptic μ, pyramidal μ and elliptic 0.9 μ of th
 cell's own coefficient. The evaluator without `--grid` keeps the historical
 consensus. `grid_summary.json` lists each probe's pass, fail or unresolved
 verdict per cell with its failed bounds. `--continue` finishes an interrupted
-sweep and renames incomplete cells to `<id>.attempt_<n>`.
+sweep. It reuses a finished cell only when its summary matches the request:
+checkpoint bytes, source and model hashes, grid declaration, cell, selected
+probes and seed. Any mismatch stops the sweep before it renames or runs a cell;
+use a new `--output` for another request. Incomplete cells and cells with an
+acquisition failure move to `<id>.attempt_<n>` and run again.
 
 The probe runner verifies each substep against the nominal motor law, so a
 cell with motor strength 0.8 or 1.2, and `evaluate --randomization table2_v1`,

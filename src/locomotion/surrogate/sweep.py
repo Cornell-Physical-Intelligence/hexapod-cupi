@@ -3,8 +3,10 @@
 Each cell runs ``locomotion.surrogate.evaluate --grid --cell`` in its own process under
 ``<output>/cells/<cell id>``, so any cell can be reproduced alone. ``grid_summary.json`` collects
 the verdict of each probe in each cell: the relative-friction consensus for quiet and stop probes,
-else the probe's own verdict. ``--continue`` finishes an interrupted sweep and keeps every
-incomplete attempt under a fresh name.
+else the probe's own verdict. ``--continue`` finishes an interrupted sweep: it keeps a finished
+cell only when its summary matches this request (checkpoint bytes, sources, grid, cell, probes and
+seed) and refuses the sweep on any mismatch. It sets every incomplete or acquisition-failed
+attempt aside under a fresh name and runs that cell again.
 """
 
 from __future__ import annotations
@@ -96,6 +98,36 @@ def set_aside(directory):
     return target.name
 
 
+def cell_identity(summary):
+    """The request a cell summary answers, as ``cell_state`` compares it."""
+    condition = summary.get("condition") or {}
+    return {
+        "checkpoint_sha256": summary.get("checkpoint_sha256"),
+        "identity": summary.get("identity"),
+        "grid_sha256": condition.get("grid_sha256"),
+        "cell": condition.get("cell"),
+        "selected_case_ids": summary.get("selected_case_ids"),
+        "seed": summary.get("seed"),
+    }
+
+
+def cell_state(path, expected):
+    """``"finished"``, ``"retry"`` or the sorted request keys on which the summary differs.
+
+    A missing or unreadable summary, or an acquisition failure, is ``"retry"``. A summary
+    for another request is never reused or relabelled, whatever its status.
+    """
+    try:
+        summary = json.loads(path.read_text())
+    except (FileNotFoundError, json.JSONDecodeError):
+        return "retry"
+    observed = cell_identity(summary)
+    differences = sorted(key for key, value in expected.items() if observed[key] != value)
+    if differences:
+        return differences
+    return "finished" if summary.get("acquisition_failure") is None else "retry"
+
+
 def probe_verdict(row):
     """The consensus verdict of a quiet or stop probe, else the probe's own pass or fail."""
     if "contact_consensus" in row:
@@ -136,8 +168,10 @@ def cell_row(cell, values, summary):
 
 
 def main(argv=None):
+    import locomotion.evaluation.runner as evaluation
     import locomotion.randomization as rnd
     from locomotion.surrogate.env import repository_state, sha
+    from locomotion.surrogate.evaluate import effective_seed, selected_cases, source_identity
 
     args = build_parser().parse_args(argv)
     cells = rnd.grid_cells(args.grid)
@@ -153,19 +187,43 @@ def main(argv=None):
         cells = [(cell, known[cell]) for cell in wanted]
     if args.jobs < 1:
         raise ValueError("--jobs needs at least one cell at a time")
-    record = args.checkpoint.with_suffix(".json")
-    if record.exists():
-        expected = json.loads(record.read_text()).get("checkpoint_sha256")
-        if expected is not None and sha(args.checkpoint) != expected:
-            raise ValueError("Checkpoint bytes differ from the paired record")
+    record_path = args.checkpoint.with_suffix(".json")
+    record = json.loads(record_path.read_text()) if record_path.exists() else {}
+    checkpoint_sha256 = sha(args.checkpoint)
+    if record.get("checkpoint_sha256") not in (None, checkpoint_sha256):
+        raise ValueError("Checkpoint bytes differ from the paired record")
     if args.output.exists() and not args.resume:
         raise ValueError("The output exists; pass --continue to finish that sweep")
+    request = {
+        "checkpoint_sha256": checkpoint_sha256,
+        "grid_sha256": rnd.grid_declaration(args.grid)["sha256"],
+        "selected_case_ids": selected_cases(
+            args.cases, [case["case_id"] for case in evaluation.learning_probe_cases()]
+        ),
+        "seed": effective_seed(args.seed, record.get("identity", {})),
+    }
+    if args.resume:
+        request["identity"] = source_identity()
+    # Check every finished cell before any rename or run, so a refused resume changes nothing.
+    finished, mismatched = set(), {}
+    for cell, _ in cells:
+        path = args.output / "cells" / cell / "surrogate_summary.json"
+        state = cell_state(path, {**request, "cell": cell}) if args.resume else "retry"
+        if isinstance(state, list):
+            mismatched[cell] = state
+        elif state == "finished":
+            finished.add(cell)
+    if mismatched:
+        raise ValueError(
+            "Finished cells answer another request; use a new --output: "
+            + json.dumps(mismatched, sort_keys=True)
+        )
     (args.output / "cells").mkdir(parents=True, exist_ok=args.resume)
     started = time.monotonic()
     set_aside_attempts, pending = {}, []
     for cell, _ in cells:
         directory = args.output / "cells" / cell
-        if (directory / "surrogate_summary.json").exists():
+        if cell in finished:
             continue
         if directory.exists():
             set_aside_attempts.setdefault(cell, []).append(set_aside(directory))

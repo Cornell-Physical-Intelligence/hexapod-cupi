@@ -441,6 +441,40 @@ def build_parser():
     return parser
 
 
+def effective_seed(seed_option, identity):
+    """The evaluation seed: ``--seed`` if given, else the checkpoint's training seed."""
+    return seed_option if seed_option is not None else int(identity.get("seed", 20260917))
+
+
+def selected_cases(cases_option, probes):
+    """The probe ids that ``--cases`` selects from ``probes``, in order."""
+    if cases_option == "focus":
+        return list(FOCUS)
+    return list(probes) if cases_option == "all" else cases_option.split(",")
+
+
+def source_identity():
+    """Hashes of the sources and model files an evaluation runs; a summary records them."""
+    from locomotion.surrogate.env import (
+        DEFAULT_GEOMETRY,
+        DEFAULT_MODEL,
+        DEFAULT_STANCE,
+        ROOT,
+        sha,
+    )
+
+    return {
+        "source_files": source_files(ROOT / "src/locomotion"),
+        "surrogate_files": {
+            p.name: sha(p) for p in sorted(Path(__file__).resolve().parent.glob("*.py"))
+        },
+        "model_sha256": sha(DEFAULT_MODEL),
+        "stance_sha256": sha(DEFAULT_STANCE),
+        "geometry_sha256": sha(DEFAULT_GEOMETRY),
+        "geometry_extrema_sha256": sha(DEFAULT_GEOMETRY.parent / "geometry_extrema.npz"),
+    }
+
+
 def task_and_wrapper(args, identity):
     """The task and wrapper to rebuild: the command line, then the record's own, then the experiment's.
 
@@ -482,7 +516,6 @@ def evaluate_checkpoint(args):
         DEFAULT_MODEL,
         DEFAULT_STANCE,
         LEGS,
-        ROOT,
         Renderer,
         SurrogateConfig,
         SurrogateEnv,
@@ -518,13 +551,11 @@ def evaluate_checkpoint(args):
     )
     if config is None:
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
-    seed = args.seed if args.seed is not None else int(identity.get("seed", 20260917))
+    seed = effective_seed(args.seed, identity)
     task_spec, wrapper_spec = task_and_wrapper(args, identity)
     profiles = {case["case_id"]: case["profile"] for case in evaluation.learning_probe_cases()}
     probes = list(profiles)
-    selected = (
-        FOCUS if args.cases == "focus" else probes if args.cases == "all" else args.cases.split(",")
-    )
+    selected = selected_cases(args.cases, probes)
     video = (
         []
         if args.video == "none"
@@ -741,16 +772,7 @@ def evaluate_checkpoint(args):
             "draw": condition.as_json(),
             "consensus": "relative_friction",
         },
-        "identity": {
-            "source_files": source_files(ROOT / "src/locomotion"),
-            "surrogate_files": {
-                p.name: sha(p) for p in sorted(Path(__file__).resolve().parent.glob("*.py"))
-            },
-            "model_sha256": sha(DEFAULT_MODEL),
-            "stance_sha256": sha(DEFAULT_STANCE),
-            "geometry_sha256": sha(DEFAULT_GEOMETRY),
-            "geometry_extrema_sha256": sha(DEFAULT_GEOMETRY.parent / "geometry_extrema.npz"),
-        },
+        "identity": source_identity(),
         "failed_probe_cases": summary["failed_probe_cases"],
         "unresolved_probe_cases": unresolved,
         "acquisition_failure": summary["acquisition_failure"],

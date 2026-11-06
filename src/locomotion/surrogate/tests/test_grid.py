@@ -1,6 +1,7 @@
 """Check the fixed-condition grid on the surrogate: the cell environment, the cell evaluation and the sweep."""
 
 import contextlib
+import functools
 import io
 import json
 import tempfile
@@ -11,6 +12,7 @@ from unittest import mock
 import numpy as np
 import torch
 
+import locomotion.evaluation.runner as runner
 from locomotion import randomization as rnd
 from locomotion.surrogate import evaluate, sweep
 from locomotion.surrogate.env import (
@@ -20,6 +22,7 @@ from locomotion.surrogate.env import (
     SurrogateConfig,
     SurrogateEnv,
     make_env,
+    sha,
 )
 
 GRID = "table2_v1_grid"
@@ -153,7 +156,13 @@ class CellEvaluationTests(unittest.TestCase):
         )
 
 
-def fake_summary(cell, verdict=True, failure=None):
+@functools.cache
+def source_identity():
+    return evaluate.source_identity()
+
+
+def fake_summary(cell, verdict=True, failure=None, command=None):
+    """A cell summary as the evaluator writes it, bound to the request in ``command``."""
     case = {
         "case_id": "learning:quiet_20s",
         "pass": verdict,
@@ -161,29 +170,45 @@ def fake_summary(cell, verdict=True, failure=None):
         "metrics": {"planar_error_mps": 0.0},
         "contact_consensus": {"verdict": "pass" if verdict else "unresolved", "failed_bounds": {}},
     }
-    return {
+    summary = {
         "seed": 20260917,
         "condition": {"draw": rnd.cell_draw(GRID, cell).as_json()},
         "acquisition_failure": failure,
         "cases": [case],
     }
+    if command is not None:
+
+        def option(name, default=None):
+            return command[command.index(name) + 1] if name in command else default
+
+        probes = [case["case_id"] for case in runner.learning_probe_cases()]
+        summary["checkpoint_sha256"] = sha(Path(option("--checkpoint")))
+        summary["seed"] = int(option("--seed", 20260917))
+        summary["selected_case_ids"] = evaluate.selected_cases(option("--cases"), probes)
+        summary["identity"] = source_identity()
+        summary["condition"].update(
+            grid=option("--grid"), grid_sha256=rnd.grid_declaration(GRID)["sha256"], cell=cell
+        )
+    return summary
 
 
 class SweepTests(unittest.TestCase):
-    def sweep(self, directory, *extra, fail=()):
+    def sweep(self, directory, *extra, fail=(), acquisition=(), weights=b"weights", calls=None):
         checkpoint = Path(directory) / "checkpoint.pt"
-        checkpoint.write_bytes(b"weights")
+        checkpoint.write_bytes(weights)
 
         def run_process(command, log):
             cell = command[command.index("--cell") + 1]
+            if calls is not None:
+                calls.append(cell)
             output = Path(command[command.index("--output") + 1])
             output.mkdir(parents=True)
             Path(log).write_text("log\n")
             if cell in fail:
                 return 1
-            (output / "surrogate_summary.json").write_text(
-                json.dumps(fake_summary(cell, cell != CORNER))
-            )
+            failure = "RuntimeError('recurrence')" if cell in acquisition else None
+            summary = fake_summary(cell, cell != CORNER, failure, command)
+            (output / "surrogate_summary.json").write_text(json.dumps(summary))
             return 0
 
         argv = ["--checkpoint", str(checkpoint), "--output", str(Path(directory) / "sweep"), *extra]
@@ -222,6 +247,68 @@ class SweepTests(unittest.TestCase):
             row = next(row for row in summary["cells"] if row["cell"] == CORNER)
             self.assertEqual(row["set_aside_attempts"], [f"{CORNER}.attempt_001"])
             self.assertNotIn("exit_code", next(r for r in summary["cells"] if r["cell"] == NOMINAL))
+
+    def test_continue_refuses_cells_of_another_request_and_changes_nothing(self):
+        with tempfile.TemporaryDirectory() as directory:
+            code, _ = self.sweep(directory, "--cells", NOMINAL, "--cases", "focus")
+            self.assertEqual(code, 0)
+            cells = Path(directory) / "sweep/cells"
+            before = (cells / NOMINAL / "surrogate_summary.json").read_bytes()
+            requests = {
+                "checkpoint_sha256": ((), b"other weights"),
+                "selected_case_ids": (("--cases", "all"), b"weights"),
+                "seed": (("--seed", "42"), b"weights"),
+            }
+            for key, (option, weights) in requests.items():
+                with self.subTest(key):
+                    calls = []
+                    extra = ("--cells", NOMINAL, "--cases", "focus", "--continue", *option)
+                    with self.assertRaisesRegex(ValueError, key):
+                        self.sweep(directory, *extra, weights=weights, calls=calls)
+                    self.assertEqual(calls, [])
+                    self.assertEqual(
+                        (cells / NOMINAL / "surrogate_summary.json").read_bytes(), before
+                    )
+                    self.assertEqual(
+                        sorted(p.name for p in cells.iterdir()), [NOMINAL, f"{NOMINAL}.log"]
+                    )
+            # The review's case: another checkpoint, every probe and another seed at once.
+            calls = []
+            extra = ("--cells", NOMINAL, "--continue", "--cases", "all", "--seed", "42")
+            with self.assertRaisesRegex(ValueError, "Finished cells answer another request"):
+                self.sweep(directory, *extra, weights=b"other weights", calls=calls)
+            self.assertEqual(calls, [])
+            # A source change also refuses the resume.
+            identity = {**source_identity(), "model_sha256": "0" * 64}
+            with mock.patch.object(evaluate, "source_identity", return_value=identity):
+                with self.assertRaisesRegex(ValueError, "identity"):
+                    self.sweep(directory, "--cells", NOMINAL, "--cases", "focus", "--continue")
+            # So does a changed grid declaration.
+            declaration = {**rnd.grid_declaration(GRID), "sha256": "0" * 64}
+            with mock.patch.object(rnd, "grid_declaration", return_value=declaration):
+                with self.assertRaisesRegex(ValueError, "grid_sha256"):
+                    self.sweep(directory, "--cells", NOMINAL, "--cases", "focus", "--continue")
+            self.assertEqual((cells / NOMINAL / "surrogate_summary.json").read_bytes(), before)
+
+    def test_continue_sets_an_acquisition_failure_aside_and_runs_the_cell_again(self):
+        with tempfile.TemporaryDirectory() as directory:
+            code, summary = self.sweep(
+                directory, "--cells", f"{NOMINAL},{CORNER}", acquisition=(CORNER,)
+            )
+            self.assertEqual((code, summary["cells_with_acquisition_failure"]), (1, [CORNER]))
+            calls = []
+            code, summary = self.sweep(
+                directory, "--cells", f"{NOMINAL},{CORNER}", "--continue", calls=calls
+            )
+            self.assertEqual(calls, [CORNER])
+            self.assertEqual((code, summary["cells_complete"]), (0, 2))
+            self.assertEqual(summary["cells_with_acquisition_failure"], [])
+            cells = Path(directory) / "sweep/cells"
+            kept = json.loads((cells / f"{CORNER}.attempt_001/surrogate_summary.json").read_text())
+            self.assertEqual(kept["acquisition_failure"], "RuntimeError('recurrence')")
+            self.assertTrue((cells / f"{CORNER}.attempt_001.log").exists())
+            row = next(row for row in summary["cells"] if row["cell"] == CORNER)
+            self.assertEqual(row["set_aside_attempts"], [f"{CORNER}.attempt_001"])
 
     def test_an_acquisition_failure_is_no_complete_cell(self):
         with tempfile.TemporaryDirectory() as directory:

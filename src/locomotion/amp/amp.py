@@ -203,7 +203,14 @@ class AMPVecEnv(OmniVecEnv):
         velocity = output["critic"][:, OBSERVATION_WIDTH : OBSERVATION_WIDTH + 3]
         # The critic observation carries navigation-frame velocity; the body frame is forward=-Y, left=+X.
         body_velocity = torch.stack((velocity[:, 1], -velocity[:, 0], velocity[:, 2]), dim=-1)
-        height = torch.full((n, 1), float(env.reset_height), device=self.device)
+        # A randomized surrogate lifts each replica's reset pose by its own draw; others keep one height.
+        reset_height = getattr(env, "reset_heights", None)
+        reset_height = (
+            torch.full((n, 1), float(env.reset_height), device=self.device)
+            if reset_height is None
+            else reset_height.reshape(n, 1).to(self.device, torch.float32)
+        )
+        height = reset_height.clone()
         forces = torch.zeros(n, 18, device=self.device)
         collision = torch.zeros(n, 13, device=self.device)
         # Read from the environment, not telemetry: telemetry still holds a reset row's old draw.
@@ -226,7 +233,7 @@ class AMPVecEnv(OmniVecEnv):
             if self.collision is not None:
                 collision = (self.collision.maximum > COLLISION_FORCE_N).float()
         fresh = self.reset_rows[:, None]
-        height = torch.where(fresh, torch.full_like(height, float(env.reset_height)), height)
+        height = torch.where(fresh, reset_height, height)
         forces = torch.where(fresh, torch.zeros_like(forces), forces)
         collision = torch.where(fresh, torch.zeros_like(collision), collision)
         wrench = torch.where(fresh, torch.zeros_like(wrench), wrench)

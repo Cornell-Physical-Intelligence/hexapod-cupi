@@ -244,6 +244,36 @@ class PrivilegedStateTests(unittest.TestCase):
         finally:
             env.close()
 
+    def test_the_height_slot_reads_each_replicas_randomized_reset_height(self):
+        env, adapter = self.adapter("table2_v1")
+        try:
+            # Full reset: each replica's own lifted root height, not the nominal scalar.
+            # The review reproduced these heights at seed 3; the nominal scalar is 0.1028 m.
+            privileged = adapter.get_observations()["privileged"]
+            torch.testing.assert_close(privileged[:, 3], env.current["root"][:, 2], rtol=0, atol=0)
+            torch.testing.assert_close(
+                privileged[:, 3], torch.tensor([0.106898308, 0.107334152, 0.111450374])
+            )
+            # Selected reset of replica 0: its new draw's height; the others keep their stepped height.
+            task, step = adapter.task, adapter.task.step
+
+            def terminate_first(action):
+                output = step(action)
+                output["terminated"] = output["terminated"].clone()
+                output["terminated"][0] = True
+                return output
+
+            task.step = terminate_first
+            before = float(env.reset_heights[0])
+            privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+            self.assertTrue(bool(adapter.reset_rows[0]) and not bool(adapter.reset_rows[1:].any()))
+            self.assertNotEqual(float(env.reset_heights[0]), before)
+            self.assertEqual(float(privileged[0, 3]), float(env.reset_heights[0]))
+            self.assertEqual(float(privileged[0, 3]), float(env.current["root"][0, 2]))
+            torch.testing.assert_close(privileged[1:, 3], env.telemetry["root_pose_xyzw"][1:, 2])
+        finally:
+            env.close()
+
 
 class CommandTests(unittest.TestCase):
     def test_both_commands_offer_the_declared_names_and_default_to_none(self):

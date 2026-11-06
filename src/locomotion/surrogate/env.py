@@ -1012,6 +1012,11 @@ class SurrogateEnv:
         return {"obs": obs, "critic": critic}
 
     # ----- OmniEnv interface ---------------------------------------------------------------
+    @property
+    def reset_heights(self):
+        """Each replica's root height at its reset: a randomized draw lifts the root to the nominal toe clearance."""
+        return torch.as_tensor(self._qpos0[:, 2], dtype=torch.float32)
+
     def reset(self, indices=None):
         if self.native_errors:
             raise RuntimeError("Cannot reset across a physics error")
