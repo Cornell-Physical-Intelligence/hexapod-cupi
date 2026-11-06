@@ -1,0 +1,32 @@
+{
+  "id": "20261026T232909_step7_fixed_condition_grid",
+  "date": "2026-10-26T23:29:09Z",
+  "title": "Add the Step 7 fixed-condition grid, keep the friction draw on the toes, and screen both retrained surrogate policies",
+  "summary": "randomization.py declares table2_v1_grid, SHA-256 7d631f12e8abefd8141f0dc515eaa446b90b5563315fe41ea608db0ab2822882: foot friction 0.1, 1.0 and 2.5, payload 0, 0.732 and 1.464 kg centred at the deck height, and one motor strength factor 0.8, 1.0 or 1.2, with no pushes and nominal values elsewhere. The surrogate takes a fixed condition that every reset reapplies, and its friction reaches the touchdown correction. evaluate --grid --cell screens one cell with the relative-friction consensus on quiet and stop probes; the historical consensus stays the default. locomotion.surrogate.sweep runs every cell in its own process, keeps incomplete attempts and writes per-cell verdicts. The nominal cell reproduces the nominal surrogate bit for bit in a unit test and in a full focus evaluation of the none update-2000 checkpoint. The probe runner checks each substep against the nominal motor law, so cells with motor strength 0.8 or 1.2 stop at that check and the sweep records them as acquisition failures. A review found that the surrogate's friction draw also reached tibia shafts and hulls whenever it exceeded 1.0, because MuJoCo takes the larger coefficient of a contact pair. A randomized replica now sets its floor coefficient to zero, so the six toe caps carry the draw and every other contact keeps 1.0, as PhysX gives with a floor material of 1.0. The foot-friction row states this, so table2_v1 takes the new SHA-256 730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c and earlier table2_v1 surrogate runs used the previous contact rule. The readback of a randomized run records the nominal ledger instead of a draw that the first task reset replaces. Both arms were retrained from this source under the toe-only rule: seed 20260917, 2000 updates, 128 replicas, one seed per arm, CPU surrogate design evidence with no native result. At nominal conditions the none update-2000 checkpoint (SHA-256 65a53a68afa335eb21a92efa1b6669c9bda61f1f95067167bc28e55258ea0c82) passes the translate, quiet and stop probes. The table2_v1 checkpoint (SHA-256 80b9d48ed36514567da9a36d4531ef82085d78cce9340d51f014278a86c17b5b) fails translate on planar error and quiet on joint position range, and its stop verdict is unresolved because the pyramidal-cone run fails joint position range. On the nine strength-1.0 grid cells, none passes translate in 5, quiet in 3 and stop in 6; table2_v1 passes translate in 1, quiet in 0 and stop in 2, with 4 stop cells unresolved. Under the previous contact rule, table2_v1 passed all three nominal probes, so the randomized policy does not yet show a robustness gain. A second sweep of both checkpoints reproduced all 54 probe results bit for bit.",
+  "areas": [
+    "training",
+    "verification"
+  ],
+  "changes": [
+    "configs/source_inventory.json",
+    "src/locomotion/README.md",
+    "src/locomotion/randomization.py",
+    "src/locomotion/surrogate/README.md",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/surrogate/sweep.py",
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "src/locomotion/tests/test_randomization.py",
+    "docs/TRAINING.md",
+    "src/locomotion/surrogate/tests/test_randomization.py",
+    "site/updates/20261026T232909_step7_fixed_condition_grid.json"
+  ],
+  "evidence": [
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "src/locomotion/randomization.py",
+    "src/locomotion/README.md"
+  ],
+  "next": "Open the milestone-1 PR and bring the failed comparison, candidate range or budget changes, the seed count and the open motor-strength check to the first #67 review.",
+  "no_project_impact": true,
+  "reason": "A CPU screening command and its tests: no native run, admission or accepted capability changes."
+}
