@@ -7,6 +7,13 @@ seen, so this follower emits bank entries only. It holds the body heading at a
 multiple of 45 degrees in the map frame and drives holonomically, so an
 eight-connected grid route maps onto bank bearings without turning.
 
+Training also held each command for 2 to 5 seconds before changing it, and the
+policy's destination restarts on every change. A translation command is
+therefore held for ``hold_min_s`` before the bearing or speed is chosen again;
+without the hold, a goal near a 22.5 degree boundary makes the follower
+alternate between two neighbouring entries every tick. Reaching a goal or
+tripping the heading gate ends a hold at once.
+
 Navigation must not import locomotion (ARCHITECTURE.md), so the bank values are
 restated here; ``tests/test_producer.py`` asserts they equal
 ``locomotion.omniwalk.mdp.commands.command_bank(TaskConfig())``.
@@ -27,6 +34,7 @@ from .producer import Pose2D, wrap_to_pi
 
 __all__ = [
     "BANK_ARC_SPEED_MPS",
+    "TRAINING_HOLD_MIN_S",
     "BANK_ARC_YAW_RATE_RAD_S",
     "BANK_ENVELOPE",
     "BANK_SPEED_LEVELS_MPS",
@@ -44,6 +52,9 @@ BANK_ARC_SPEED_MPS = 0.04
 BANK_ARC_YAW_RATE_RAD_S = 0.15
 BANK_BEARINGS = 8
 BEARING_STEP_RAD = math.pi / 4
+# Restated from TaskConfig.hold_min_seconds: the shortest command hold the
+# policy saw in training.
+TRAINING_HOLD_MIN_S = 2.0
 
 
 def command_bank() -> list[list[float]]:
@@ -90,6 +101,7 @@ class WaypointFollower:
         approach_gain_per_s: float = 0.60,
         heading_gate_rad: float = 0.05,
         stop_radius_m: float = 0.12,
+        hold_min_s: float = TRAINING_HOLD_MIN_S,
         envelope: CommandEnvelope = BANK_ENVELOPE,
     ) -> None:
         self.waypoints: list[tuple[float, float]] = []
@@ -107,6 +119,8 @@ class WaypointFollower:
         ):
             if not math.isfinite(float(value)) or float(value) <= 0.0:
                 raise ValueError(f"{name} must be finite and positive, got {value!r}")
+        if not math.isfinite(float(hold_min_s)) or float(hold_min_s) < 0.0:
+            raise ValueError(f"hold_min_s must be finite and non-negative, got {hold_min_s!r}")
         # The held heading is the nearest multiple of 45 degrees, so the error
         # never exceeds 22.5 degrees; a gate at or past that never trips.
         if float(heading_gate_rad) >= BEARING_STEP_RAD / 2.0:
@@ -117,8 +131,11 @@ class WaypointFollower:
         self.approach_gain_per_s = float(approach_gain_per_s)
         self.heading_gate_rad = float(heading_gate_rad)
         self.stop_radius_m = float(stop_radius_m)
+        self.hold_min_s = float(hold_min_s)
         self.envelope = envelope
         self._index = 0
+        self._held: VelocityCommand | None = None
+        self._hold_until_s = -math.inf
 
     @property
     def is_finished(self) -> bool:
@@ -141,11 +158,13 @@ class WaypointFollower:
         return wrap_to_pi(round(float(heading_rad) / BEARING_STEP_RAD) * BEARING_STEP_RAD)
 
     def update(self, pose: Pose2D, t: float) -> VelocityCommand:
-        """Return the bank command for this tick. ``t`` is unused; see the module docstring."""
+        """Return the bank command for the tick at ``t`` seconds; see the module docstring."""
 
-        del t  # memoryless: the follower's only state is the waypoint index
         if not isinstance(pose, Pose2D):
             raise TypeError(f"pose must be a Pose2D, got {type(pose).__name__}")
+        t = float(t)
+        if not math.isfinite(t):
+            raise ValueError(f"t must be finite, got {t!r}")
 
         # Retire every waypoint already satisfied, so a pose that lands inside
         # several small goals at once does not need several ticks to catch up.
@@ -153,6 +172,7 @@ class WaypointFollower:
             goal_x, goal_y = self.waypoints[self._index]
             if math.hypot(goal_x - pose.x_m, goal_y - pose.y_m) <= self.stop_radius_m:
                 self._index += 1
+                self._held = None
                 continue
             break
         if self.is_finished:
@@ -160,8 +180,13 @@ class WaypointFollower:
 
         heading_error = wrap_to_pi(self.held_heading(pose.heading_rad) - pose.heading_rad)
         if abs(heading_error) >= self.heading_gate_rad:
+            # The gate ends a hold: the correction is a few ticks long and
+            # holding it for hold_min_s would overshoot the held heading.
+            self._held = None
             yaw_rate = BANK_YAW_RATE_RAD_S if heading_error > 0.0 else -BANK_YAW_RATE_RAD_S
             command = VelocityCommand(0.0, 0.0, yaw_rate, frame=Frame.NAVIGATION)
+        elif self._held is not None and t < self._hold_until_s:
+            command = self._held
         else:
             goal_x, goal_y = self.waypoints[self._index]
             delta_x = goal_x - pose.x_m
@@ -177,6 +202,8 @@ class WaypointFollower:
                 wz_rad_s=0.0,
                 frame=Frame.NAVIGATION,
             )
+            self._held = command
+            self._hold_until_s = t + self.hold_min_s
 
         command = self.envelope.clamp(command)
         # Cheap and worth it: a producer that emits an inadmissible command

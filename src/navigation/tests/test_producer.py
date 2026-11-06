@@ -26,6 +26,7 @@ from navigation.waypoint import (
     BANK_ENVELOPE,
     BANK_SPEED_LEVELS_MPS,
     BANK_YAW_RATE_RAD_S,
+    TRAINING_HOLD_MIN_S,
     WaypointFollower,
     command_bank,
 )
@@ -168,6 +169,49 @@ class WaypointFollowerTests(unittest.TestCase):
         }
         self.assertEqual(bearings, set(range(8)))
 
+    def test_translation_commands_hold_for_the_training_minimum(self) -> None:
+        # Training held each command for at least TRAINING_HOLD_MIN_S, so a
+        # translation entry may change only after that long, unless the goal
+        # is reached. Without the hold, a goal near a 22.5 degree boundary
+        # flips between two neighbouring entries every tick.
+        boundary_goal = [(0.5 * math.cos(math.radians(22.4)), 0.5 * math.sin(math.radians(22.4)))]
+        routes = [
+            (STAIRCASE, Pose2D(0.0, 0.0, 0.0)),
+            (boundary_goal, Pose2D(0.0, 0.0, 0.0)),
+            ([(1.0, -0.7), (-0.5, -1.0), (0.2, 0.4)], Pose2D(0.0, 0.0, math.pi)),
+        ]
+        min_ticks = int(round(TRAINING_HOLD_MIN_S / POLICY_STEP_DT_S))
+        for route, start in routes:
+            with self.subTest(route=route):
+                follower = WaypointFollower(route, stop_radius_m=0.12)
+                pose = start
+                segments: list[list] = []  # [command tuple, ticks, ended by a retired goal]
+                for step in range(6000):
+                    goal = follower.current_waypoint
+                    command = follower.update(pose, step * POLICY_STEP_DT_S)
+                    retired = follower.current_waypoint != goal
+                    key = command.as_tuple()
+                    if segments and segments[-1][0] == key and not retired:
+                        segments[-1][1] += 1
+                    else:
+                        if segments:
+                            segments[-1][2] = retired
+                        segments.append([key, 1, False])
+                    if follower.is_finished:
+                        break
+                    pose = _integrate(pose, command, POLICY_STEP_DT_S)
+                self.assertTrue(follower.is_finished)
+                translations = [s for s in segments if s[0][0] or s[0][1]]
+                for key, ticks, ended_by_goal in translations:
+                    if not ended_by_goal:
+                        self.assertGreaterEqual(ticks, min_ticks, f"{key} held {ticks} ticks")
+                self.assertLessEqual(len(translations), 40)
+        # The same boundary goal without a hold reproduces the defect.
+        follower = WaypointFollower(boundary_goal, stop_radius_m=0.12, hold_min_s=0.0)
+        _, emitted, _ = _rollout(follower, Pose2D(0.0, 0.0, 0.0))
+        changes = sum(1 for a, b in zip(emitted, emitted[1:]) if a.as_tuple() != b.as_tuple())
+        self.assertGreater(changes, len(emitted) // 2)
+
     def test_staircase_route_from_a_diagonal_held_heading(self) -> None:
         follower = WaypointFollower(STAIRCASE, stop_radius_m=0.12)
         start = Pose2D(0.0, 0.0, math.pi / 4)
@@ -245,7 +289,7 @@ class WaypointFollowerTests(unittest.TestCase):
         follower = WaypointFollower([(3.0, 0.0)], approach_gain_per_s=0.60, stop_radius_m=0.02)
         far = follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
         self.assertAlmostEqual(far.vx_mps, high, places=12, msg="0.60 * 3.0 rounds to the top")
-        near = follower.update(Pose2D(2.95, 0.0, 0.0), 0.0)
+        near = follower.update(Pose2D(2.95, 0.0, 0.0), TRAINING_HOLD_MIN_S)
         self.assertAlmostEqual(near.vx_mps, low, places=12, msg="0.60 * 0.05 rounds to the low")
         self.assertTrue(_is_bank_or_stand(near))
 
@@ -300,6 +344,10 @@ class WaypointFollowerTests(unittest.TestCase):
             WaypointFollower([(1.0, 0.0)], stop_radius_m=-0.1)
         with self.assertRaises(ValueError):
             WaypointFollower([(1.0, 0.0)], heading_gate_rad=math.pi / 8)
+        with self.assertRaises(ValueError):
+            WaypointFollower([(1.0, 0.0)], hold_min_s=-1.0)
+        with self.assertRaises(ValueError):
+            WaypointFollower([(1.0, 0.0)]).update(Pose2D(0.0, 0.0, 0.0), float("nan"))
         with self.assertRaises(TypeError):
             WaypointFollower([(1.0, 0.0)]).update((0.0, 0.0, 0.0), 0.0)  # type: ignore[arg-type]
 
