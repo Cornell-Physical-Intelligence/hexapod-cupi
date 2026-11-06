@@ -1,0 +1,85 @@
+{
+ "schema": "hexapod_destination_curriculum_provenance_v1",
+ "scope": "The steps from the destination_v9 checkpoint (PR 88) to the destination_v29 update-600 checkpoint: a derived starting checkpoint with the ghost_v11 inputs and two native Spark trainings, each started from the previous checkpoint. Checkpoints and raw runs stay on Spark under /srv/cupi/hexapod/runs/julian.",
+ "seed": 20260917,
+ "robots_per_training": 128,
+ "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+ "motion_prior": false,
+ "final_model": {
+  "experiment": "destination_v29",
+  "checkpoint_sha256": "ed73eb07c1f9c364e33fd6673c53d2a1c4a54d4086bda1e05ca72b680f36ccf8",
+  "path": "/srv/cupi/hexapod/runs/julian/dest_v29_from_v25u1350_ghost_v11_c36_u600_seed20260917_20261026_002/run/standing/checkpoint_update000600.pt"
+ },
+ "chain": [
+  {
+   "step": 0,
+   "description": "The destination_v9 model (PR 88)",
+   "checkpoint_sha256": "16048b8f7b31c61ba6630742475f796e24c4bc43bd17bc61f9b40bb0d37b6d33",
+   "path": "/srv/cupi/hexapod/runs/julian/dest_v9_from_dest_v8_c36_u600_finetune_seed20260917_20261020_001/run/standing/checkpoint_update000600.pt"
+  },
+  {
+   "step": 1,
+   "description": "Give the policy the ghost's sideways gap, along-track gap and relative velocity (ghost_v11)",
+   "change": "make_ghost_v11_start.py widens the first actor and critic layers from v9's 5 ghost inputs to 9: the sideways and along-track gaps both take the gap's weights (they sum to the gap) and the two relative-velocity inputs start at zero, so the derived checkpoint acts as v9 does (to 1e-6 on the surrogate). Its declaration keeps v9's identity and records the derivation.",
+   "checkpoint_sha256": "41e0e7c502ef25a3e477022e450e4445a7c2d6582c2c02b317c1ac519b84da4e",
+   "declaration_sha256": "83c43acb20b64f36e50f930668964bee7abff3dc7efaa5e09f470997db140c24",
+   "path": "/srv/cupi/hexapod/runs/julian/starts_v9_ghost_v11_20261025/v9_ghost_v11.pt"
+  },
+  {
+   "step": 2,
+   "description": "Learn to walk up to 0.15 m/s with a speed curriculum",
+   "change": "destination_v25: every command a walk in a uniform direction, a fifth stopping after 4-12 s; the top speed starts at 0.075 m/s and rises by 0.025 m/s to 0.15 m/s once, over the last 30 updates, no robot fell, every finished walk passed the evaluator's moving checks and the gap to the ghost moved less than about 5 mm from each walk's halfway to its end; the gait cycle shortens with speed (speed_v1: 60 controls at 0.075 m/s to 40 at 0.15 m/s); the ghost pay turns linear past 20 mm and becomes a charge of up to -1; a charge of -0.5 min(planar error / evaluator bound, 2) per walking control; learning-rate floor 2e-5.",
+   "training": {
+    "attempt": "dest_v25_from_v9_ghost_v11_c36_u5000_seed20260917_20261025_001",
+    "binding_sha256": "475cabb93c430de588d750fe46286456bf8ea9a731cae9b84c2c9a06dab74cd3",
+    "source_commit": "5c193b4ec91488145d1b2630883ab37ee8248ac0",
+    "source_freeze_sha256": "37d94892c68a99de9f4f70a8d90eb5450ab97c2a831504062c564c8e490572a7",
+    "experiment": "destination_v25",
+    "updates_completed": 4381,
+    "status": "failed",
+    "exit_code": 1,
+    "wall_hours": 6.0,
+    "started_from_checkpoint_sha256": "41e0e7c502ef25a3e477022e450e4445a7c2d6582c2c02b317c1ac519b84da4e",
+    "starting_learning_rate": {
+     "value": 0.0001,
+     "source": "configured"
+    },
+    "learner_arguments": "--updates 5000 --seed 20260917 --extended-updates --recipe none --action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0001 --learning-rate-min 2e-05 --action-std 0.05 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --steps-per-env 36 --experiment destination_v25 --initialize-from /checkpoint/v9_ghost_v11.pt --initialize-from-sha256 41e0e7c502ef25a3e477022e450e4445a7c2d6582c2c02b317c1ac519b84da4e --initialize-from-declaration-sha256 83c43acb20b64f36e50f930668964bee7abff3dc7efaa5e09f470997db140c24"
+   },
+   "kept_checkpoint": {
+    "update": 1350,
+    "sha256": "b0a2ccf3d82ccaa1c38f66b36340ceec7b6ced969af281aca9f99263c9c3d529",
+    "path": "/srv/cupi/hexapod/runs/julian/dest_v25_from_v9_ghost_v11_c36_u5000_seed20260917_20261025_001/run/standing/checkpoint_update001350.pt"
+   },
+   "note": "Mastered 0.15 m/s at update 1341; update 1350 is the first checkpoint after. The run continued to its 6 h wall limit at update 4381 (recorded as failed, exit 1); the curriculum's drift score fell from 0.87 to 0.49 after update 2600."
+  },
+  {
+   "step": 3,
+   "description": "Fine-tune stopping, standing and turning in place, and pay the ghost gap at each run's end",
+   "change": "destination_v29: runs drawn as 10% turns in place at 0.2 rad/s for 20 s, 10% stands of 20 s or 32 s, 50% walks of 4-12 s then a stop for the rest of 20 s, and 30% 20 s walks, in uniform directions at 0.05-0.15 m/s; episodes up to 32 s; an added run-end pay share_done * max(1 - gap / 25 mm, -1); termination 52; learning rate 2e-5 from the checkpoint, action deviation 0.05.",
+   "training": {
+    "attempt": "dest_v29_from_v25u1350_ghost_v11_c36_u600_seed20260917_20261026_002",
+    "binding_sha256": "24fbdcb319c03e60b19c310b7ec784fe5b6f9d567455a4fa924aa5a00d652de4",
+    "source_commit": "f3978d75f08ec5367e21c6f57676124c7715266e",
+    "source_freeze_sha256": "df9f8801737648f0cefad3112550873f85b16f51d92bb4200f0f1ced9fb72fbb",
+    "experiment": "destination_v29",
+    "updates_completed": 600,
+    "status": "completed",
+    "exit_code": 0,
+    "wall_hours": 0.89,
+    "started_from_checkpoint_sha256": "b0a2ccf3d82ccaa1c38f66b36340ceec7b6ced969af281aca9f99263c9c3d529",
+    "starting_learning_rate": {
+     "value": 2e-05,
+     "source": "checkpoint"
+    },
+    "learner_arguments": "--updates 600 --seed 20260917 --recipe none --action-mean tanh --observation-normalization none --observation-scaling fixed --command-segments bootstrap --learning-rate-max 0.0001 --learning-rate-min 2e-05 --action-std 0.05 --action-std-final 0.05 --gait-clock 60 --action-smoothing mean2 --velocity-noise 0.5 --steps-per-env 36 --episode-seconds 32.0 --experiment destination_v29 --initialize-from /checkpoint/checkpoint_update001350.pt --initialize-from-sha256 b0a2ccf3d82ccaa1c38f66b36340ceec7b6ced969af281aca9f99263c9c3d529 --initialize-from-declaration-sha256 b6e2efa7852bc8b9fc0eb842ce15cd6d263d8e98577b0b2f73de9aebb8d3622d --initialize-rate checkpoint"
+   },
+   "kept_checkpoint": {
+    "update": 600,
+    "sha256": "ed73eb07c1f9c364e33fd6673c53d2a1c4a54d4086bda1e05ca72b680f36ccf8",
+    "path": "/srv/cupi/hexapod/runs/julian/dest_v29_from_v25u1350_ghost_v11_c36_u600_seed20260917_20261026_002/run/standing/checkpoint_update000600.pt"
+   },
+   "note": "The first launch (_001) stopped before training: scripts/cli.py still capped training episodes at 20 s. It is preserved on Spark."
+  }
+ ]
+}

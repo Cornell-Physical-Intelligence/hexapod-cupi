@@ -1,0 +1,25 @@
+{
+  "id": "20261025T034156_destination_v21_ghost_v11",
+  "date": "2026-10-25T03:41:56.000000Z",
+  "title": "Add destination_v21 and the ghost_v11 inputs: the along-track gap returns beside the sideways gap and relative velocity",
+  "summary": "destination_v21 is destination_v20 with nine ghost_v11 inputs: the seven ghost_v10 values (sideways gap, heading gap sine and cosine, controls since the command began, velocity relative to the ghost) and the gap's part along the ghost's path in the body's navigation axes over 0.1 m. Sideways plus along-track is the ghost gap, so a start that gives both the v9 gap's weights computes what v9 did. At update 600 of destination_v20 the v10 model, which saw no along-track gap, held 0.075 m/s 4-10% off the command in most directions and ended 7-126 mm from the ghost; its window pay sat near 0.47.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v21 on the surrogate from a v9 start with the gap weights in both gap inputs and test it against v9.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/omniwalk/mdp/destination.py",
+    "src/locomotion/rl/destination_wrapper.py",
+    "src/locomotion/scripts/play.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T034156_destination_v21_ghost_v11.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment and input option that no gate or registry entry uses yet; the canonical task, inputs and evaluator are unchanged."
+}

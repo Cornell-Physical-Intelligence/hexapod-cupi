@@ -1,0 +1,41 @@
+{
+  "id": "20261026T064002_destination_curriculum",
+  "date": "2026-10-26T06:40:02.000000Z",
+  "title": "Walk to the ghost at up to 0.15 m/s: the destination_v29 locomotion model",
+  "summary": "Starting from destination_v9 (PR 88), a speed curriculum on Spark taught the policy to walk at up to 0.15 m/s in every direction (destination_v25), and a 600-update Spark fine-tune taught it to stop, stand still and turn in place again while paying the ghost gap at each run's end (destination_v29). On the surrogate suite the destination_v29 update-600 checkpoint passes all 13 learning probes and every walk and walk-then-stop case in 8 directions at 0.05 to 0.15 m/s with no fall; v9 passes 3, 0 and 0 of 8 walks at 0.1, 0.125 and 0.15 m/s. Its 0.05 m/s walks end 2.47 mm (median) from the ghost, against 0.82 mm for v9, and it holds about 18 mm of lag at 0.15 m/s. Of the 96 required cases it passes 53 on the surrogate, against v9's 16 natively: it misses every case at 0.20 m/s or faster, the tight 0.4 rad/s arcs, the -0.4 rad/s turn in place, three of the eight walk-and-turn cases, one gentle arc, one segment of the transition program and the formal cases at 0 and 0.16 m/s on body tilt. The native evaluator cannot yet run its ghost_v11 inputs or speed-scaled gait clock, so all evaluation so far is on the surrogate.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Teach the native evaluator the ghost_v11 inputs and the speed-scaled gait clock and run the 96 required cases natively on the destination_v29 update-600 checkpoint with unchanged thresholds; then train turning while walking and faster turns (tight 0.4 rad/s arcs, combined walk-and-turn cases).",
+  "changes": [
+    "configs/source_inventory.json",
+    "site/assets/destination_curriculum_20261026_001/*",
+    "src/locomotion/evaluation/task_metrics.py",
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/omniwalk/mdp/commands.py",
+    "src/locomotion/omniwalk/mdp/destination.py",
+    "src/locomotion/omniwalk/mdp/gait.py",
+    "src/locomotion/omniwalk/mdp/rewards.py",
+    "src/locomotion/rl/destination_wrapper.py",
+    "src/locomotion/rl/ppo.py",
+    "src/locomotion/rl/wrapper.py",
+    "src/locomotion/scripts/cli.py",
+    "src/locomotion/scripts/play.py",
+    "src/locomotion/scripts/train.py",
+    "src/locomotion/spark/prepare.py",
+    "src/locomotion/spark/validation.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/tests/test_destination.py",
+    "src/locomotion/tests/test_learner_options.py"
+  ],
+  "evidence": [
+    "site/assets/destination_curriculum_20261026_001/provenance.json",
+    "site/assets/destination_curriculum_20261026_001/results.json",
+    "site/assets/destination_curriculum_20261026_001/build_results.py",
+    "site/assets/destination_curriculum_20261026_001/make_ghost_v11_start.py",
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": false
+}

@@ -1,0 +1,21 @@
+{
+  "id": "20261025T055017_destination_v24_to_0_175",
+  "date": "2026-10-25T05:50:17.000000Z",
+  "title": "Add destination_v24: continue the speed curriculum to 0.175 m/s",
+  "summary": "destination_v24 is destination_v23 whose speed curriculum continues one step past 0.15 m/s to 0.175 m/s. Attempt 15 of destination_v23 mastered 0.15 m/s at update 747. The speed_v1 gait clock holds its 40-control cycle above 0.15 m/s, so 0.175 m/s needs 70 mm strides, beyond the 66 mm sideways reach that the +-0.35 rad action range allows.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v24 on the surrogate from attempt 15's update-700 checkpoint and test it at 0.05 to 0.175 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T055017_destination_v24_to_0_175.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and evaluator are unchanged."
+}

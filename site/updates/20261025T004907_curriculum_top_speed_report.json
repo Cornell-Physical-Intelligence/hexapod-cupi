@@ -1,0 +1,20 @@
+{
+  "id": "20261025T004907_curriculum_top_speed_report",
+  "date": "2026-10-25T00:49:07.000000Z",
+  "title": "Report the walking speed of the curriculum's top-speed walks",
+  "summary": "The speed curriculum's status now reports, since the current level began, how many controls robots spent walking at the top speed and the sum of their speed along the command, so a monitor can follow the top speed alone rather than the mix with slower walks. The report changes no reward, command or level decision.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Plot the top-speed walking speed on the curriculum progress page for the next surrogate attempt.",
+  "changes": [
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T004907_curriculum_top_speed_report.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A reporting field of named experiments; rewards, commands and curriculum decisions are unchanged."
+}

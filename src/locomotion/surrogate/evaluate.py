@@ -43,6 +43,12 @@ class DeterministicPolicy:
         self.actor, self.env, self.adapter = actor, env, adapter
         self.scaling = options.get("observation_scaling", "none")
         self.period = options.get("gait_clock", 0)
+        # A speed-scaled clock follows each probe's commands, as the training task does.
+        self.gait = None
+        if options.get("gait_clock_scaling") is not None:
+            from locomotion.omniwalk.mdp.gait import GaitPhase
+
+            self.gait = GaitPhase(env.num_envs, options["gait_clock_scaling"], "cpu")
         self.gain = float(velocity_input_gain)
         if adapter is not None and (self.gain != 1.0 or action_mean2):
             raise ValueError(
@@ -56,10 +62,19 @@ class DeterministicPolicy:
         self.previous = None
         # The destination inputs follow each probe's command from the root pose, as play.py does.
         self.tracker = None
-        if options.get("destination_input", "none") == "ghost":
-            from locomotion.omniwalk.mdp.destination import DestinationTracker
+        if options.get("destination_input", "none") in ("ghost", "ghost_v10", "ghost_v11"):
+            from locomotion.omniwalk.mdp.destination import (
+                DestinationTracker,
+                GhostV10Tracker,
+                GhostV11Tracker,
+            )
 
-            self.tracker = DestinationTracker(env.num_envs, "cpu")
+            tracker = {
+                "ghost": DestinationTracker,
+                "ghost_v10": GhostV10Tracker,
+                "ghost_v11": GhostV11Tracker,
+            }[options["destination_input"]]
+            self.tracker = tracker(env.num_envs, "cpu")
 
     def record(self, options):
         """The ``policy_path`` entry of the summary: the path that ran and the options that acted on it."""
@@ -92,8 +107,11 @@ class DeterministicPolicy:
             for frame in range(5):
                 scaled[:, 42 * frame + 24 : 42 * frame + 42] *= self.gain
         if self.period:
+            cycles = None
+            if self.gait is not None:
+                cycles = self.gait.follow(observation[:, 210:213], self.env.episode_steps)
             clock = omni_wrapper.clock_features(
-                self.env.episode_steps, self.period, observation[:, 210:213]
+                self.env.episode_steps, self.period, observation[:, 210:213], cycles
             ).to(scaled)
             scaled = torch.cat((scaled, clock), -1)
         if self.tracker is not None:
