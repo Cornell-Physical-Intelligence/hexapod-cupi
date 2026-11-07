@@ -322,7 +322,47 @@ def validate_progress(project):
     )
 
 
-def status_text(project, link=lambda value: value):
+def native_approval():
+    """Whether the tree still matches the runtime the approved code version's receipt binds.
+
+    A status, not a gate: a changed runtime file lapses native approval until a new
+    campaign writes a new receipt. The loader enforces the receipt at native run time.
+    """
+    declared = ROOT / "configs/approved_code_version.json"
+    if not declared.exists():
+        return None
+    approved = read(declared)
+    receipt_path = ROOT / approved["receipt"]["path"]
+    require(sha(receipt_path) == approved["receipt"]["sha256"], "Approved receipt bytes differ")
+    bound = read(receipt_path)["candidate_runtime_sources"]["files"]
+    changed = sorted(
+        path
+        for path, digest in bound.items()
+        if not (ROOT / "src" / path).exists() or sha(ROOT / "src" / path) != digest
+    )
+    return {
+        "status": "lapsed" if changed else "current",
+        "certified_commit": approved["certified_commit"],
+        "receipt_sha256": approved["receipt"]["sha256"],
+        "bound": len(bound),
+        "changed": changed,
+    }
+
+
+def approval_line(approval):
+    if approval is None:
+        return "Native evaluation runtime: no approved code version declared."
+    short = approval["certified_commit"][:8]
+    if approval["status"] == "current":
+        return f"Native evaluation runtime: approved at {short}, all {approval['bound']} bound files match."
+    return (
+        f"Native evaluation runtime: approval lapsed, {len(approval['changed'])} of "
+        f"{approval['bound']} bound files changed since {short}; renewal due "
+        f"(first: {approval['changed'][0]})."
+    )
+
+
+def status_text(project, link=lambda value: value, approval=None):
     """Deterministic text projection; STATUS is never an input to this renderer."""
     latest = project["latest"]
     metric = latest["metric"]
@@ -345,6 +385,8 @@ def status_text(project, link=lambda value: value):
         "",
     ]
     lines.extend(f"- {step['title']}: {STEP_LABELS[step['state']]}" for step in project["roadmap"])
+    if approval is not None:
+        lines.extend(["", approval_line(approval)])
     lines.extend(["", "## Accomplishments", ""])
     lines.extend(
         f"- {a['date']}: {a['text']} [Evidence]({link(a['source'])})"
@@ -359,7 +401,7 @@ def status_text(project, link=lambda value: value):
 def write_status(output=None):
     project = registry()
     path = ROOT / project["status_source"] if output is None else Path(output)
-    path.write_text(status_text(project))
+    path.write_text(status_text(project, approval=native_approval()))
     print("Generated", path, "from site/project.json (untracked)")
 
 
@@ -541,6 +583,7 @@ def check(base=None):
             not uncovered,
             "Repository changes lack a new central update record:\n" + "\n".join(uncovered),
         )
+    print(approval_line(native_approval()))
     return project, updates
 
 

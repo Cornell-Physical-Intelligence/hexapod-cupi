@@ -207,7 +207,10 @@ class ProgressTests(unittest.TestCase):
         ):
             project = site.registry()
             site.write_status(Path(temp) / "STATUS.md")
-            self.assertEqual((Path(temp) / "STATUS.md").read_text(), site.status_text(project))
+            self.assertEqual(
+                (Path(temp) / "STATUS.md").read_text(),
+                site.status_text(project, approval=site.native_approval()),
+            )
 
     def test_current_registry_validates_against_its_actual_evidence(self):
         with patch.object(site, "ROOT", ROOT), patch.object(site, "SITE", ROOT / "site"):
