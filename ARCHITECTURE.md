@@ -50,10 +50,13 @@ exchange with the payload team before integrating survey execution.
 ## Navigation and commands
 
 The baseline uses onboard GPS without RTK corrections. Define one local
-east-north frame for the map, route and pose. Account for position and heading
-uncertainty when setting boundaries and stopping margins. Use a reviewed,
-obstacle-free course for the first survey; an open map cannot establish that
-the walking path is clear. The baseline has no ground map or obstacle detector.
+east-north frame, the map frame, for the map, route and pose. In the map frame,
+`Pose2D` +x is east and +y is north; a GPS adapter must convert its heading to
+this convention (e.g. a compass bearing, which runs clockwise from north).
+Account for position and heading uncertainty when setting boundaries and
+stopping margins. Use a reviewed, obstacle-free course for the first survey; an
+open map cannot establish that the walking path is clear. The baseline has no
+ground map or obstacle detector.
 
 `VelocityCommand` carries forward and lateral speed in m/s and yaw rate in
 rad/s. Anatomical forward is body -Y, left is body +X, and up is body +Z.
