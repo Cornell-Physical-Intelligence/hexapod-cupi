@@ -156,6 +156,54 @@ class CellEvaluationTests(unittest.TestCase):
         )
 
 
+class SubstepMotorHook:
+    """Record each substep's torques with the draw the environment applied at that substep."""
+
+    uses_state = False
+
+    def __init__(self):
+        self.rows = []
+
+    def __call__(self, env, state, q, dq, requested, applied, ceiling, target, *rest):
+        values = (q, dq, target, requested, applied, ceiling)
+        self.rows.append(([np.array(x, np.float32, copy=True) for x in values], env.motor_law))
+
+
+class ProbeMotorLawTests(unittest.TestCase):
+    """The probe runner's exact check accepts the declared law and still rejects the nominal one."""
+
+    def check(self, env):
+        hook, generator = SubstepMotorHook(), torch.Generator().manual_seed(7)
+        env.capture = hook
+        try:
+            for control in range(24):
+                env.step(1.5 * torch.randn(env.num_envs, 18, generator=generator))
+                if control == 10:
+                    env.reset([1])
+        finally:
+            env.capture = None
+            env.close()
+        drawn = nominal = True
+        for (q, dq, target, *torques), law in hook.rows:
+            expected = runner.expected_motor_law(q, dq, target, law)
+            drawn &= all(map(np.array_equal, torques, expected))
+            nominal &= all(map(np.array_equal, torques, runner.expected_motor_law(q, dq, target)))
+        return drawn, nominal
+
+    def test_a_strength_cell_passes_under_its_law_and_fails_under_the_nominal_one(self):
+        self.assertEqual(self.check(cell_env(CORNER)), (True, False))
+
+    def test_table2_draws_pass_across_a_selected_reset(self):
+        env = make_env(3, threads=0, randomization="table2_v1")
+        self.assertEqual(self.check(env), (True, False))
+
+    def test_the_nominal_cell_declares_its_law_and_matches_the_nominal_check(self):
+        env = cell_env(NOMINAL)
+        self.assertIsNotNone(env.motor_law)
+        self.assertEqual(self.check(env), (True, True))
+        self.assertIsNone(make_env(1, threads=0).motor_law)
+
+
 @functools.cache
 def source_identity():
     return evaluate.source_identity()

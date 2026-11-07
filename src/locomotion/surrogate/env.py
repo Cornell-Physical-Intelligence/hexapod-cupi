@@ -999,6 +999,20 @@ class SurrogateEnv:
         """Each replica's root height at its reset: a randomized draw lifts the root to the nominal toe clearance."""
         return torch.as_tensor(self._qpos0[:, 2], dtype=torch.float32)
 
+    @property
+    def motor_law(self):
+        """The applied draw's servo gain, damping and strength as float32 (replicas, 18) arrays.
+
+        None under the nominal law. The probe runner checks each substep against these values.
+        """
+        if not self.randomized:
+            return None
+        n = self.num_envs
+        return {
+            name: np.array(value.expand(n, 18), dtype=np.float32)
+            for name, value in (("kp", self._kp), ("kd", self._kd), ("strength", self._strength))
+        }
+
     def reset(self, indices=None):
         if self.native_errors:
             raise RuntimeError("Cannot reset across a physics error")

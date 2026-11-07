@@ -268,5 +268,63 @@ class GridTests(unittest.TestCase):
         self.assertIn(grid["sha256"], guide)
 
 
+class ProbeMotorLawTests(unittest.TestCase):
+    """The probe runner's exact torque check follows the applied draw, not only the nominal law."""
+
+    def batch(self, strength):
+        generator = torch.Generator().manual_seed(5)
+        q = 0.4 * torch.randn(64, 18, generator=generator)
+        # Joint speeds from rest through the 450-480 rpm tail, where strength 1.2 lifts the ceiling.
+        dq = torch.linspace(0.0, 500.0, 64 * 18).reshape(64, 18) * (2 * math.pi / 60)
+        dq = dq * torch.where(torch.rand(64, 18, generator=generator) < 0.5, -1.0, 1.0)
+        target = q + 0.3 * torch.randn(64, 18, generator=generator)
+        kp = rnd.KP * (0.8 + 0.4 * torch.rand(64, 1, generator=generator))
+        kd = torch.tensor(KD) * (0.8 + 0.4 * torch.rand(64, 1, generator=generator))
+        return q, dq, target, kp, kd, torch.full((64, 18), strength)
+
+    def test_the_expected_law_reproduces_the_randomized_motor_bit_for_bit(self):
+        from locomotion.evaluation.runner import expected_motor_law
+
+        for strength in (0.8, 1.0, 1.2):
+            q, dq, target, kp, kd, factor = self.batch(strength)
+            torques = rnd.motor_force(q, dq, target, kd, kp, factor)
+            law = {
+                "kp": kp.expand(64, 18).numpy(),
+                "kd": kd.numpy(),
+                "strength": factor.numpy(),
+            }
+            wanted = expected_motor_law(q.numpy(), dq.numpy(), target.numpy(), law)
+            for name, actual, expected in zip(("requested", "applied", "ceiling"), torques, wanted):
+                with self.subTest(strength=strength, name=name):
+                    self.assertTrue(np.array_equal(actual.numpy(), expected))
+                    self.assertEqual(expected.dtype, np.float32)
+            self.assertLessEqual(float(wanted[2].max()), np.float32(rnd.TORQUE_CAP_NM))
+
+    def test_the_nominal_law_still_rejects_a_scaled_ceiling(self):
+        from locomotion.evaluation.runner import expected_motor_law
+
+        for strength in (0.8, 1.2):
+            q, dq, target, _, _, factor = self.batch(strength)
+            kp = torch.full((64, 18), rnd.KP)
+            kd = torch.tensor(KD).expand(64, 18)
+            _, _, ceiling = rnd.motor_force(q, dq, target, kd, kp, factor)
+            nominal = expected_motor_law(q.numpy(), dq.numpy(), target.numpy())
+            with self.subTest(strength=strength):
+                self.assertFalse(np.array_equal(ceiling.numpy(), nominal[2]))
+
+    def test_a_nominal_draw_gives_the_nominal_check(self):
+        from locomotion.evaluation.runner import expected_motor_law
+
+        q, dq, target, _, _, factor = self.batch(1.0)
+        law = {
+            "kp": np.full((64, 18), rnd.KP, np.float32),
+            "kd": np.tile(np.asarray(KD, np.float32), (64, 1)),
+            "strength": factor.numpy(),
+        }
+        args = (q.numpy(), dq.numpy(), target.numpy())
+        for drawn, nominal in zip(expected_motor_law(*args, law), expected_motor_law(*args)):
+            self.assertTrue(np.array_equal(drawn, nominal))
+
+
 if __name__ == "__main__":
     unittest.main()

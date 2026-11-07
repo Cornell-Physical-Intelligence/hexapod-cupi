@@ -27,6 +27,7 @@ from locomotion.evaluation.capture import (
 from locomotion.evaluation.force_metrics import write_summary
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.robots.hexapod import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
+from locomotion.robots.randomization import strength_ceiling
 from locomotion.robots.rs05 import STIFFNESS_NM_PER_RAD
 
 
@@ -205,6 +206,22 @@ def _deadline(seconds):
     return time.monotonic() + seconds
 
 
+def expected_motor_law(q, dq, target, law=None):
+    """The exact float32 torque recurrence each substep must reproduce.
+
+    ``law`` is None for the nominal RS05 law. A Step 7 draw gives float32 ``kp``, ``kd`` and
+    ``strength`` arrays; the ceiling then follows ``randomization.strength_ceiling``, so the
+    1.6 N·m cap still holds and the comparison stays bit-exact.
+    """
+    if law is None:
+        return diagnostic_servo(
+            q, dq, target, np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32)
+        )
+    requested, _, ceiling = diagnostic_servo(q, dq, target, law["kp"], law["kd"])
+    ceiling = np.asarray(strength_ceiling(ceiling, law["strength"]), np.float32)
+    return requested, np.clip(requested, -ceiling, ceiling).astype(np.float32), ceiling
+
+
 class ExactEvaluationCapture:
     """Capture all eight native samples, including full unedited patch packets."""
 
@@ -305,12 +322,11 @@ class ExactEvaluationCapture:
                 raise FloatingPointError("Nonfinite native evaluation evidence")
             if not np.array_equal(row["native_input_pre_nm"], row["applied_torque_nm"]):
                 raise RuntimeError("Actual native motor input differs")
-            wanted = diagnostic_servo(
+            wanted = expected_motor_law(
                 row["pre_joint_position_rad"],
                 row["pre_joint_velocity_rad_s"],
                 row["joint_target_rad"],
-                np.full(18, STIFFNESS_NM_PER_RAD, np.float32),
-                np.asarray(KD, np.float32),
+                getattr(self.env, "motor_law", None),
             )
             for name, expected in zip(
                 ("computed_torque_nm", "applied_torque_nm", "effort_ceiling_nm"), wanted

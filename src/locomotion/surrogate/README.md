@@ -56,10 +56,12 @@ probes and seed. Any mismatch stops the sweep before it renames or runs a cell;
 use a new `--output` for another request. Incomplete cells and cells with an
 acquisition failure move to `<id>.attempt_<n>` and run again.
 
-The probe runner verifies each substep against the nominal motor law, so a
-cell with motor strength 0.8 or 1.2, and `evaluate --randomization table2_v1`,
-stop at that check with an acquisition failure. The sweep records those cells as
-`acquisition_failure`, not as evaluated.
+The probe runner verifies each substep's requested torque, applied torque and
+effort ceiling bit for bit. Under a cell or a `table2_v1` draw it reads the
+environment's `motor_law` (the applied gain, damping and strength per replica)
+and recomputes the ceiling with `randomization.strength_ceiling`, so the 1.6 N·m
+cap still holds; otherwise it uses the nominal law. The sweep records a cell that
+stops at any check as `acquisition_failure`, not as evaluated.
 
 The evaluator reconstructs the recorded actor inputs with no observation noise.
 You can test joint-velocity input gains or force a two-control action mean. Static

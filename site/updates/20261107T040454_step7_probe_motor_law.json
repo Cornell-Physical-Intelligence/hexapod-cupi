@@ -1,0 +1,26 @@
+{
+  "id": "20261107T040454_step7_probe_motor_law",
+  "date": "2026-11-07T04:04:54Z",
+  "title": "Check probe torques against the applied Step 7 motor draw",
+  "summary": "The probe runner recomputed each substep's torques from the nominal motor law alone, so the strength 0.8 and 1.2 grid cells and table2_v1 evaluations stopped as acquisition failures. The surrogate now exposes motor_law, the applied gain, damping and strength per replica, and the runner checks against it with randomization.strength_ceiling. The check stays bit-exact and the 1.6 N m cap still holds. Without motor_law, as in the native environment, the runner uses the nominal law unchanged. capture.py and the other native physics sources are unchanged, so native physics source identity is unchanged. Tests show the new law matches the randomized motor bit for bit from rest through 500 rpm at strengths 0.8, 1.0 and 1.2, and that the nominal law still rejects a scaled ceiling. A strength-0.8 cell that used to stop now runs: one diagnostic trial, not a result.",
+  "areas": [
+    "training",
+    "verification"
+  ],
+  "changes": [
+    "src/locomotion/evaluation/runner.py",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/README.md",
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "src/locomotion/tests/test_randomization.py",
+    "site/updates/20261107T040454_step7_probe_motor_law.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_randomization.py",
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Train none and table2_v1 for 4000 updates on five seeds each and sweep all 27 grid cells at updates 2000 and 4000.",
+  "no_project_impact": true,
+  "reason": "An evaluator bookkeeping check for surrogate draws: no native run, admission, gate threshold or accepted capability changes."
+}
