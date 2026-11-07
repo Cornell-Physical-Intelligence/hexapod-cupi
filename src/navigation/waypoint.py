@@ -14,6 +14,14 @@ without the hold, a goal near a 22.5 degree boundary makes the follower
 alternate between two neighbouring entries every tick. Reaching a goal or
 tripping the heading gate ends a hold at once.
 
+The heading gate has hysteresis: a turn starts once the heading error reaches
+``heading_gate_rad`` and ends once it falls inside ``heading_release_rad``.
+Without it, a policy whose heading creeps while walking trips the gate every
+few ticks and the follower alternates one-tick turns with walks. A goal is
+retired at ``stop_radius_m``, which sits inside the mission's stop tolerance by
+the body's stopping distance, so the stand command arrives before the goal
+and the body rolls to rest inside the tolerance.
+
 Navigation must not import locomotion (ARCHITECTURE.md), so the bank values are
 restated here; ``tests/test_producer.py`` asserts they equal
 ``locomotion.omniwalk.mdp.commands.command_bank(TaskConfig())``.
@@ -55,6 +63,10 @@ BEARING_STEP_RAD = math.pi / 4
 # Restated from TaskConfig.hold_min_seconds: the shortest command hold the
 # policy saw in training.
 TRAINING_HOLD_MIN_S = 2.0
+# Retire a goal well inside the 0.12 m stop tolerance of configs/walking_requirements.json:
+# the body rolls up to the 0.05 m stopping distance after the stand command, and the
+# surrogate closed loop of 7 November 2026 ended 117 to 122 mm from goals retired at 0.12 m.
+RETIRE_RADIUS_M = 0.06
 
 
 def command_bank() -> list[list[float]]:
@@ -100,7 +112,8 @@ class WaypointFollower:
         *,
         approach_gain_per_s: float = 0.60,
         heading_gate_rad: float = 0.05,
-        stop_radius_m: float = 0.12,
+        heading_release_rad: float = 0.01,
+        stop_radius_m: float = RETIRE_RADIUS_M,
         hold_min_s: float = TRAINING_HOLD_MIN_S,
         envelope: CommandEnvelope = BANK_ENVELOPE,
     ) -> None:
@@ -121,6 +134,12 @@ class WaypointFollower:
                 raise ValueError(f"{name} must be finite and positive, got {value!r}")
         if not math.isfinite(float(hold_min_s)) or float(hold_min_s) < 0.0:
             raise ValueError(f"hold_min_s must be finite and non-negative, got {hold_min_s!r}")
+        release = float(heading_release_rad)
+        if not math.isfinite(release) or not 0.0 <= release < float(heading_gate_rad):
+            raise ValueError(
+                "heading_release_rad must lie in [0, heading_gate_rad), "
+                f"got {heading_release_rad!r}"
+            )
         # The held heading is the nearest multiple of 45 degrees, so the error
         # never exceeds 22.5 degrees; a gate at or past that never trips.
         if float(heading_gate_rad) >= BEARING_STEP_RAD / 2.0:
@@ -130,6 +149,8 @@ class WaypointFollower:
             )
         self.approach_gain_per_s = float(approach_gain_per_s)
         self.heading_gate_rad = float(heading_gate_rad)
+        self.heading_release_rad = release
+        self._turning = False
         self.stop_radius_m = float(stop_radius_m)
         self.hold_min_s = float(hold_min_s)
         self.envelope = envelope
@@ -173,13 +194,19 @@ class WaypointFollower:
             if math.hypot(goal_x - pose.x_m, goal_y - pose.y_m) <= self.stop_radius_m:
                 self._index += 1
                 self._held = None
+                self._turning = False
                 continue
             break
         if self.is_finished:
             return STAND
 
         heading_error = wrap_to_pi(self.held_heading(pose.heading_rad) - pose.heading_rad)
-        if abs(heading_error) >= self.heading_gate_rad:
+        # A turn starts past the gate and ends inside the release, so a heading that
+        # creeps across the gate does not alternate one-tick turns with walks.
+        self._turning = abs(heading_error) >= self.heading_gate_rad or (
+            self._turning and abs(heading_error) > self.heading_release_rad
+        )
+        if self._turning:
             # The gate ends a hold: the correction is a few ticks long and
             # holding it for hold_min_s would overshoot the held heading.
             self._held = None

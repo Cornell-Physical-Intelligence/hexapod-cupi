@@ -42,9 +42,10 @@ class RequirementsBindingTests(unittest.TestCase):
     def test_follower_defaults_equal_the_requirements(self):
         self.assertEqual(TRAINING_HOLD_MIN_S, self.stage2["hold_min_s"])
         defaults = inspect.signature(WaypointFollower).parameters
-        self.assertEqual(
-            defaults["stop_radius_m"].default, self.stage2["stop"]["position_tolerance_m"]
-        )
+        tolerance = self.stage2["stop"]["position_tolerance_m"]
+        stopping = self.stage2["controller"]["stopping_distance_max_m"]
+        self.assertGreater(defaults["stop_radius_m"].default, 0.0)
+        self.assertLessEqual(defaults["stop_radius_m"].default, tolerance - stopping)
         self.assertEqual(defaults["hold_min_s"].default, self.stage2["hold_min_s"])
 
     def test_requirements_name_the_payload(self):

@@ -1,0 +1,23 @@
+{
+  "id": "20261107T233000_follower_closed_loop_stop_tolerance",
+  "date": "2026-11-07T23:30:00Z",
+  "title": "Measure the stop tolerance with the follower driving c48_long in the surrogate, and fix two follower defects it exposed",
+  "summary": "A surrogate closed loop lets the waypoint follower read the true pose each control and drive the unchanged c48_long checkpoint over five 1 m routes. With the follower as merged, the body ended 117 to 122 mm from every goal, three of five outside the 0.12 m stop tolerance by up to 2 mm, because the follower retired goals at 0.12 m and the tolerance was the same number; and the command changed 44 to 245 times per route, because the heading gate had no hysteresis and alternated one-tick turns with walks on the policy's 0.014 rad/s heading creep. The follower now retires a goal at 0.06 m, inside the tolerance by the 0.05 m stopping distance, and turns from a 0.05 rad error until it falls inside 0.01 rad. With those two changes the body ends 57 to 66 mm from every goal, the shortest turn is 9 controls and commands change 6 to 33 times per route. No falls on any route. The open-loop drift of up to 298 mm per 20 s walk is corrected in closed loop.",
+  "areas": ["navigation", "evaluation"],
+  "next": "Repeat with a simulated Mid-360 odometry pose instead of the true pose, then natively on Spark once the evaluator accepts a command producer.",
+  "changes": [
+    "src/navigation/waypoint.py",
+    "src/navigation/README.md",
+    "src/navigation/tests/test_producer.py",
+    "src/navigation/tests/test_requirements.py",
+    "site/assets/c48_closed_loop_20261107_001/*",
+    "site/updates/20261107T233000_follower_closed_loop_stop_tolerance.json"
+  ],
+  "evidence": [
+    "site/assets/c48_closed_loop_20261107_001/after_follower_fix/closed_loop.json",
+    "site/assets/c48_closed_loop_20261107_001/before_follower_fix/closed_loop.json",
+    "src/navigation/tests/test_producer.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The navigation example, its CPU tests and one surrogate evidence directory change. Runtime locomotion sources, checkpoints, the approved robot, acceptance gates and roadmap markers remain unchanged."
+}
