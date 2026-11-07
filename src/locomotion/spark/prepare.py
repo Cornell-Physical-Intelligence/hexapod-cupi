@@ -299,10 +299,15 @@ def prepare(
     if learner == "amp":
         bank = Path("locomotion/priors/datasets/amp_demonstrations_001")
         shutil.copytree(tree / bank, source / bank)
-    contracts = source / "contracts"
-    contracts.mkdir()
-    for name in ("__init__.py", "release.py"):
-        shutil.copy2(tree / "contracts" / name, contracts / name)
+    # The evaluation runs the waypoint follower in closed loop; it and its contracts travel too.
+    for package_name, names in (
+        ("contracts", ("__init__.py", "release.py", "command.py", "pose.py")),
+        ("navigation", ("__init__.py", "producer.py", "waypoint.py")),
+    ):
+        directory = source / package_name
+        directory.mkdir()
+        for name in names:
+            shutil.copy2(tree / package_name / name, directory / name)
     write_runtime(source)
     save(
         source / "FREEZE_SHA256.json",

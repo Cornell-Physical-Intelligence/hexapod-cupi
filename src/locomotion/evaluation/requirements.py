@@ -6,13 +6,16 @@ evaluation. Nothing else in the package decides pass or fail.
 
 Cases: the stand, each translation speed on each bearing, both turns and both arcs. Every case
 holds its command for ``hold_max_s`` and then commands zero for twice ``stop.settle_s``, so every
-moving case also measures its stop.
+moving case also measures its stop. A set may also name routes under ``stop.routes_m``: goals in
+metres relative to the start pose. A route case runs the waypoint follower in closed loop from the
+simulator's true pose, so the command at each control depends on where the body is.
 
 Checks per case: drift per hold (the gap between the body and the path its command traces),
 stopping distance (travel after the command becomes zero, read after the settle), tilt (the
 largest body tilt) and applied motor torque (the largest absolute value). The drift limit is set
-at ``drift_speed_mps`` and applied to every command of the set at or below that speed. An
-incomplete trace fails.
+at ``drift_speed_mps`` and applied to every command of the set at or below that speed. A route
+case adds the stop position: the body must finish within ``stop.position_tolerance_m`` of the last
+goal and stay there, under a zero command, for ``stop.stay_stopped_s``. An incomplete trace fails.
 
 Run: ``python -m locomotion.evaluation.requirements <evaluation dir> [--set stage2_flat]``.
 """
@@ -26,6 +29,8 @@ import math
 from pathlib import Path
 
 import numpy as np
+
+from contracts.pose import Pose2D
 
 ROOT = Path(__file__).resolve().parents[3]
 REQUIREMENTS = ROOT / "configs/walking_requirements.json"
@@ -65,10 +70,61 @@ def cases(rules):
         )
         for sign in (-1, 1)
     ]
-    return [
+    fixed = [
         {"case_id": case_id, "command": command, "controls": hold + stop, "stop_control": hold}
         for case_id, command in rows
     ]
+    slowest = min(commands["translate_speeds_mps"])
+    routes = []
+    for name, goals in rules["stop"].get("routes_m", {}).items():
+        points = [(0.0, 0.0)] + [tuple(goal) for goal in goals]
+        length = sum(math.dist(a, b) for a, b in zip(points, points[1:]))
+        seconds = length / slowest + rules["stop"]["stay_stopped_s"] + 2 * rules["stop"]["settle_s"]
+        routes.append(
+            {
+                "case_id": "route_" + name,
+                "route_m": goals,
+                "controls": round(seconds / CONTROL_DT_S),
+            }
+        )
+    return fixed + routes
+
+
+def follower_pose(root_pose_xyzw):
+    """World x, y and forward heading of one root pose row; body forward is -y, so yaw - pi/2."""
+    x, y, yaw = planar_pose(np.asarray(root_pose_xyzw)[None, :])[0]
+    return float(x), float(y), float(yaw - math.pi / 2)
+
+
+def route_goals(case, start):
+    """The route's goals in the world, given relative to the start pose in its forward frame."""
+    x0, y0, heading = start
+    c, s = math.cos(heading), math.sin(heading)
+    return [(x0 + c * gx - s * gy, y0 + s * gx + c * gy) for gx, gy in case["route_m"]]
+
+
+def producer(case):
+    """The command of ``case`` at each control: ``produce(control, root_pose_row)``.
+
+    A fixed case ignores the pose. A route case builds the waypoint follower on its first call,
+    at the body's start pose, and then asks it for the bank command from the current pose.
+    """
+    if "route_m" not in case:
+        return lambda control, root: command_at(case, control)
+    from navigation.waypoint import WaypointFollower
+
+    follower = []
+
+    def produce(control, root):
+        x, y, heading = follower_pose(root)
+        if not follower:
+            follower.append(WaypointFollower(route_goals(case, (x, y, heading))))
+        command = follower[0].update(
+            Pose2D(x_m=x, y_m=y, heading_rad=heading), control * CONTROL_DT_S
+        )
+        return [command.vx_mps, command.vy_mps, command.wz_rad_s]
+
+    return produce
 
 
 def command_at(case, control):
@@ -166,8 +222,27 @@ def _check(value, bound):
     return {"value": float(value), "bound": float(bound), "pass": bool(value <= bound)}
 
 
-def judge_case(trace, rules, controls=None):
-    """One recorded trace against the controller, tilt and torque rows of a requirement set."""
+def stop_position(trace, case, stay_stopped_s):
+    """Distance to the route's last goal over the final stay window, and whether the body stayed stopped."""
+    poses = planar_pose(trace["root_pose_xyzw"][:, 0, :])
+    goal = route_goals(case, follower_pose(trace["root_pose_xyzw"][0, 0, :]))[-1]
+    distance = np.hypot(poses[:, 0] - goal[0], poses[:, 1] - goal[1])
+    moving = np.any(np.asarray(trace["command"][:, 0, :]) != 0, axis=1)
+    stopped = len(moving) - (int(np.nonzero(moving)[0][-1]) + 1 if moving.any() else 0)
+    window = int(round(stay_stopped_s / CONTROL_DT_S))
+    arrived = stopped >= window
+    return {
+        "goal_world_m": [float(goal[0]), float(goal[1])],
+        "stopped_controls": int(stopped),
+        "stay_window_controls": window,
+        "arrived": bool(arrived),
+        "final_distance_m": float(distance[-1]),
+        "stay_distance_max_m": float(distance[-window:].max()) if arrived else None,
+    }
+
+
+def judge_case(trace, rules, controls=None, case=None):
+    """One recorded trace against the controller, tilt, torque and, for a route, stop rows of a set."""
     n = len(trace["command"]) if "command" in trace else 0
     if n == 0 or (controls is not None and n != controls):
         check = {"value": float(n), "bound": float(controls or 0), "pass": False}
@@ -202,10 +277,17 @@ def judge_case(trace, rules, controls=None):
     checks["applied_torque_nm"] = _check(
         np.abs(trace["applied_torque_abs_max_400hz"]).max(), rules["motor_torque_max_nm"]
     )
+    route = None
+    if case is not None and "route_m" in case:
+        route = stop_position(trace, case, rules["stop"]["stay_stopped_s"])
+        value = route["stay_distance_max_m"] if route["arrived"] else route["final_distance_m"]
+        checks["stop_position_m"] = _check(value, rules["stop"]["position_tolerance_m"])
+        checks["stop_position_m"]["pass"] &= route["arrived"]
     failed = [name for name, check in checks.items() if not check["pass"]]
     return {
         "holds": holds,
         "stop": stop,
+        "route": route,
         "checks": checks,
         "failed_checks": failed,
         "pass": not failed,
@@ -225,8 +307,9 @@ def judge(evaluation_dir, requirements=None, name="stage2_flat"):
         rows.append(
             {
                 "case_id": case["case_id"],
-                "command": case["command"],
-                **judge_case(trace, rules, case.get("controls")),
+                "command": case.get("command"),
+                "route_m": case.get("route_m"),
+                **judge_case(trace, rules, case.get("controls"), case),
             }
         )
     return {

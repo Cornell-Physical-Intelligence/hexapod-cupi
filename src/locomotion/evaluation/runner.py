@@ -304,13 +304,17 @@ def run_batch(
     """One initial reset, full fixed-duration trials; a failure preserves prefixes.
 
     Each case holds its command until its ``stop_control`` and commands zero after it; a case
-    without a stop control holds its command throughout. ``motion_features`` maps the environment
+    without a stop control holds its command throughout, and a route case asks the waypoint
+    follower for its command from the body's true pose. ``motion_features`` maps the environment
     state to the motion features that the trace records before and after each control. The report
     holds recording facts only; the judge decides pass or fail from the trace.
     """
     if not cases or len(cases) > env.num_envs or len({x["controls"] for x in cases}) != 1:
         raise ValueError("Batch cases must fit the environment and have one fixed duration")
     cases = [{"stop_control": case["controls"], **case} for case in cases]
+    producers = [
+        requirements.producer(case) for case in cases + [cases[-1]] * (env.num_envs - len(cases))
+    ]
     duration = cases[0]["controls"] * 0.02
     if env.cfg.episode_seconds <= duration:
         raise ValueError("Declared episode timeout would truncate the requested evaluation")
@@ -367,7 +371,8 @@ def run_batch(
             if control % 100 == 0 and time.monotonic() >= deadline:
                 allocation_limit_reached = True
                 raise RuntimeError("Evaluation wall-clock allocation exhausted; preserved prefix")
-            requested = [requirements.command_at(c, control) for c in assignments]
+            root = _cpu(env.current["root"])
+            requested = [produce(control, root[i]) for i, produce in enumerate(producers)]
             observation = _set_command(env, requested)
             before = None if motion_features is None else motion_features(env.current)
             action = (

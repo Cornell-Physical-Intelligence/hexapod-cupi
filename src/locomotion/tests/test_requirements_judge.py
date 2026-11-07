@@ -195,5 +195,64 @@ class JudgeTests(unittest.TestCase):
             self.assertEqual(result["failed_cases"], ["turn_+0.20"])
 
 
+class RouteTests(unittest.TestCase):
+    def setUp(self):
+        rules, _ = judge.load_requirements()
+        routes = {"forward_0.5m": [[0.5, 0.0]], "L": [[0.5, 0.0], [0.5, 0.5]]}
+        self.rules = {**rules, "stop": {**rules["stop"], "routes_m": routes}}
+        self.case = next(c for c in judge.cases(self.rules) if c["case_id"] == "route_forward_0.5m")
+
+    def test_route_cases_come_from_the_file_and_size_their_trials_from_its_numbers(self):
+        routes = [case for case in judge.cases(self.rules) if "route_m" in case]
+        self.assertEqual([case["case_id"] for case in routes], ["route_forward_0.5m", "route_L"])
+        # Path length at the slowest speed, the stay window and two settles.
+        self.assertEqual(routes[0]["controls"], round((0.5 / 0.025 + 20.0 + 4.0) / 0.02))
+        self.assertEqual(routes[1]["controls"], round((1.0 / 0.025 + 20.0 + 4.0) / 0.02))
+        self.assertNotIn("route_m", judge.cases(judge.load_requirements()[0])[-1])
+
+    def test_the_producer_drives_the_follower_from_the_true_pose(self):
+        # Body yaw pi/2 points anatomical forward (-y of the body) along world +x.
+        facing_x = [0.0, 0.0, 0.1, 0.0, 0.0, math.sin(math.pi / 4), math.cos(math.pi / 4)]
+        self.assertAlmostEqual(judge.follower_pose(facing_x)[2], 0.0, places=9)
+        self.assertEqual(judge.route_goals(self.case, (0.0, 0.0, 0.0)), [(0.5, 0.0)])
+        goal = judge.route_goals(self.case, (1.0, 2.0, math.pi / 2))[0]
+        self.assertAlmostEqual(goal[0], 1.0, places=9)
+        self.assertAlmostEqual(goal[1], 2.5, places=9)
+        produce = judge.producer(self.case)
+        self.assertEqual(produce(0, facing_x), [0.05, 0.0, 0.0])
+        arrived = [0.5, 0.0, 0.1, *facing_x[3:]]
+        self.assertEqual(produce(1, arrived), [0.0, 0.0, 0.0])
+        fixed = judge.producer(
+            {"case_id": "f", "command": [0.0, 0.0, 0.2], "controls": 2, "stop_control": 1}
+        )
+        self.assertEqual(
+            (fixed(0, facing_x), fixed(1, facing_x)), ([0.0, 0.0, 0.2], [0.0, 0.0, 0.0])
+        )
+
+    def route_trace(self, rest, zero_controls):
+        n = self.case["controls"]
+        commands = [[0.05, 0.0, 0.0]] * (n - zero_controls) + [[0.0, 0.0, 0.0]] * zero_controls
+        path = np.zeros((n, 3))
+        path[:, 2] = math.pi / 2
+        path[n - zero_controls :, :2] = rest
+        return trace_from_path(path, commands)
+
+    def test_stop_position_requires_arriving_and_staying_within_the_tolerance(self):
+        # 900 controls of walking stay under the 20 s drift hold, so only the stop is judged.
+        stayed = judge.judge_case(self.route_trace((0.45, 0.02), 1300), self.rules, None, self.case)
+        self.assertTrue(stayed["route"]["arrived"])
+        check = stayed["checks"]["stop_position_m"]
+        self.assertAlmostEqual(check["value"], math.hypot(0.05, 0.02), places=6)
+        self.assertEqual(check["bound"], 0.12)
+        self.assertTrue(check["pass"])
+        self.assertTrue(stayed["pass"])
+        short = judge.judge_case(self.route_trace((0.3, 0.0), 1300), self.rules, None, self.case)
+        self.assertEqual(short["failed_checks"], ["stop_position_m"])
+        self.assertAlmostEqual(short["checks"]["stop_position_m"]["value"], 0.2, places=6)
+        restless = judge.judge_case(self.route_trace((0.5, 0.0), 500), self.rules, None, self.case)
+        self.assertFalse(restless["route"]["arrived"])
+        self.assertIn("stop_position_m", restless["failed_checks"])
+
+
 if __name__ == "__main__":
     unittest.main()

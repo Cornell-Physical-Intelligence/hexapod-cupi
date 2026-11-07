@@ -29,6 +29,28 @@ class PackBindingTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "manifest differs"):
                 verify_runtime(root / "pack/source")
 
+    def test_evaluation_pack_ships_the_waypoint_follower_without_shapely_modules(self):
+        with tempfile.TemporaryDirectory() as directory:
+            from locomotion.evaluation.checkpoint import CHECKPOINT_SHA, DECLARATION_SHA
+
+            root = Path(directory)
+            prepare(
+                root / "pack",
+                REMOTE,
+                mode="evaluate",
+                num_envs=1,
+                checkpoint="/srv/cupi/hexapod/runs/james/checkpoint.pt",
+                checkpoint_sha=CHECKPOINT_SHA,
+                checkpoint_declaration_sha=DECLARATION_SHA,
+            )
+            files = set(verify_runtime(root / "pack/source")["files"])
+            self.assertLessEqual(
+                {"navigation/waypoint.py", "navigation/producer.py", "contracts/pose.py"}, files
+            )
+            self.assertFalse({"navigation/grid.py", "navigation/region.py"} & files)
+            init = (root / "pack/source/navigation/__init__.py").read_text()
+            self.assertNotIn("from . import", init)
+
     def test_retired_modes_fail_before_creating_pack(self):
         with tempfile.TemporaryDirectory() as directory:
             for mode in ("tripod", "throughput"):

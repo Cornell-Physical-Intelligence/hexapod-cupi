@@ -22,7 +22,10 @@ class FakeNative:
         self.device = "cpu"
         self.cfg = EnvConfig(num_envs=1, episode_seconds=60.0)
         self.commands = torch.zeros(1, 3)
-        self.current = {"toe_world": torch.zeros(1, 6, 3)}
+        self.current = {
+            "toe_world": torch.zeros(1, 6, 3),
+            "root": torch.tensor([[0.0, 0.0, 0.1, 0.0, 0.0, 0.0, 1.0]]),
+        }
         self.counter = 0
         self.reset_count = 0
         self.capture = None
@@ -408,6 +411,32 @@ class CaseRunTests(unittest.TestCase):
             self.assertFalse(judgement["pass"])
             with np.load(Path(temporary) / "run/batch_000/control_trace.npz") as saved:
                 self.assertEqual(len(saved["time_s"]), 100)
+
+    def test_a_route_case_takes_its_commands_from_the_follower_and_judges_the_stop_position(self):
+        native = FakeNative()
+        with TemporaryDirectory() as temporary:
+            rules = json.loads(requirements.REQUIREMENTS.read_text())
+            rules["sets"]["stage2_flat"]["stop"]["routes_m"] = {"forward_0.5m": [[0.5, 0.0]]}
+            path = Path(temporary) / "requirements.json"
+            path.write_text(json.dumps(rules))
+            judgement = self.run_cases(
+                native, temporary, requirements_path=path, case_ids=["route_forward_0.5m"]
+            )
+            case = judgement["allocation"]["cases"][0]
+            self.assertEqual(case["route_m"], [[0.5, 0.0]])
+            self.assertEqual(case["controls"], round((0.5 / 0.025 + 20.0 + 4.0) / 0.02))
+            self.assertEqual(native.steps, case["controls"])
+            with np.load(Path(temporary) / "run/batch_000/control_trace.npz") as saved:
+                # The fixture body never moves, so the follower keeps asking for the forward walk.
+                np.testing.assert_allclose(
+                    saved["command"][:, 0], [[0.05, 0.0, 0.0]] * case["controls"]
+                )
+            route = judgement["cases"][0]
+            self.assertFalse(route["route"]["arrived"])
+            self.assertAlmostEqual(route["route"]["final_distance_m"], 0.5, places=9)
+            # A 44 s forward hold is also a drift case, and the static body drifts from its ghost.
+            self.assertEqual(route["failed_checks"], ["drift_per_hold_m", "stop_position_m"])
+            self.assertEqual(route["checks"]["stop_position_m"]["bound"], 0.12)
 
     def test_a_fall_ends_its_case_and_the_next_case_still_runs(self):
         native = FakeNative(terminate_at=2)
