@@ -188,8 +188,8 @@ cover motors, transitions, packs and hexapod sources.
 ## Native admission
 
 The physics identity hashes the import closure of `adapter.py`, `env_cfg.py`
-and `env.py` in `omniwalk/`, with `admission.py`, `capture.py` and `scoring.py`
-in `evaluation/`, and it names the floor. `EnvConfig.floor` selects a stock
+and `env.py` in `omniwalk/`, with `admission.py` and `capture.py` in
+`evaluation/`, and it names the floor. `EnvConfig.floor` selects a stock
 Isaac Lab floor: the recorded two-triangle mesh built by the terrain utility
 (the default), the grid ground plane or a cuboid. The recorded physics depends
 on the simulator's default collider offsets on that mesh, so the default keeps
@@ -226,4 +226,5 @@ harness, and a CPU production-loader check; its 56 bound runtime files match
 main since PR 91 merged.
 `tests/native_parity_pack.py` writes a candidate replay pack with the harness
 and its pinned ranges, and `spark/pack.py` records the root review of any pack
-before launch. Stage 2 adds the 96-case suite and visual acceptance.
+before launch. Stage 2 is judged on the walking requirements, with visual
+acceptance; the 13 probes and the 96-case scorer above are history.

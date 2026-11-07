@@ -1,4 +1,4 @@
-"""Keep native comparison ranges fixed before candidate scoring."""
+"""Keep native comparison ranges fixed before a candidate judgement."""
 
 import json
 import tempfile
@@ -8,22 +8,25 @@ from pathlib import Path
 
 
 class NativeRangeTests(unittest.TestCase):
-    def suite(self, value):
+    def suite(self, value, count=3):
         return {
-            "diagnostic_screens_passed": True,
-            "missing_probe_cases": [],
-            "failed_probe_cases": [],
-            "allocation": {"checkpoint_sha256": "weights", "evaluator_sha256": "scorer"},
-            "results": [
+            "failure": None,
+            "allocation": {
+                "checkpoint_sha256": "weights",
+                "judge_sha256": "judge",
+                "requirements_sha256": "requirements",
+                "cases": [{"case_id": str(i)} for i in range(count)],
+            },
+            "cases": [
                 {
                     "case_id": str(i),
                     "pass": True,
-                    "metrics": {"drift": value},
-                    "checks": {
-                        "drift": {"value": value, "bound": 9, "operator": "<=", "status": "pass"}
-                    },
+                    "holds": [{"max_gap_m": value, "end_gap_m": value}],
+                    "stop": {"final_distance_m": value},
+                    "checks": {"drift_per_hold_m": {"value": value, "bound": 9, "pass": True}},
+                    "failed_checks": [],
                 }
-                for i in range(13)
+                for i in range(count)
             ],
         }
 
@@ -78,10 +81,16 @@ class NativeRangeTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             freeze(baseline[:2])
         candidate = self.suite(1.0)
-        candidate["results"][0]["checks"]["drift"]["bound"] = 10
+        candidate["cases"][0]["checks"]["drift_per_hold_m"]["bound"] = 10
         self.assertFalse(compare(limits, candidate)["pass"])
         candidate = self.suite(1.0)
-        candidate["diagnostic_screens_passed"] = False
+        candidate["failure"] = "Native physics errors prevent another case"
+        self.assertFalse(compare(limits, candidate)["pass"])
+        candidate = self.suite(1.0)
+        candidate["cases"].pop()
+        self.assertFalse(compare(limits, candidate)["pass"])
+        candidate = self.suite(1.0)
+        candidate["cases"][1]["checks"]["complete_trace"] = {"value": 5, "bound": 9, "pass": False}
         self.assertFalse(compare(limits, candidate)["pass"])
 
     def test_host_receipts_survive_native_process_exit_and_reject_tampering(self):
@@ -140,15 +149,15 @@ class NativeRangeTests(unittest.TestCase):
             save(pack / "run/cleanup.json", cleanup)
             summary = self.suite(1.0)
             summary["allocation"]["checkpoint_sha256"] = CHECKPOINT_SHA
-            save(root / "evaluation/summary.json", summary)
-            for index in range(13):
+            save(root / "evaluation/judgement.json", summary)
+            for index in range(3):
                 save(
                     root / f"evaluation/batch_{index:03d}/force_metrics.json",
                     {"status": "available"},
                 )
             # Kit can terminate Python during app.close(); the host still verifies the completed run.
             self.assertFalse((root / "parity_receipt.json").exists())
-            self.assertEqual(len(read_run(root, "baseline")["results"]), 13)
+            self.assertEqual(len(read_run(root, "baseline")["cases"]), 3)
             with self.assertRaises(ValueError):
                 read_run(root, "candidate")
             cleanup["cleanup_checked"] = False

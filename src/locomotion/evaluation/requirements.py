@@ -1,13 +1,18 @@
-"""Judge recorded evaluation traces against the controller rows of the walking requirements.
+"""Judge recorded evaluation traces against ``configs/walking_requirements.json``.
 
-``configs/walking_requirements.json`` owns two limits a fixed-command trace can measure:
+The requirements file owns every number. This module turns one requirement set into the cases to
+run, measures each recorded trace against the set's limits and writes one judgement per
+evaluation. Nothing else in the package decides pass or fail.
 
-- stopping distance: how far the body travels after the command becomes zero;
-- drift per hold: how far the body strays from the path its command would trace over one hold.
+Cases: the stand, each translation speed on each bearing, both turns and both arcs. Every case
+holds its command for ``hold_max_s`` and then commands zero for twice ``stop.settle_s``, so every
+moving case also measures its stop.
 
-The frozen scorer (``scoring.py``) keeps its gates and bytes; this module reads the same
-``control_trace.npz`` files and reports against the requirements file and its hash. Each result
-names the requirement set, the file's SHA-256 and the checkpoint the traces came from.
+Checks per case: drift per hold (the gap between the body and the path its command traces),
+stopping distance (travel after the command becomes zero, read after the settle), tilt (the
+largest body tilt) and applied motor torque (the largest absolute value). The drift limit is set
+at ``drift_speed_mps`` and applied to every command of the set at or below that speed. An
+incomplete trace fails.
 
 Run: ``python -m locomotion.evaluation.requirements <evaluation dir> [--set stage2_flat]``.
 """
@@ -25,6 +30,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[3]
 REQUIREMENTS = ROOT / "configs/walking_requirements.json"
 CONTROL_DT_S = 0.02
+SCHEMA = "hexapod_walking_requirements_judgement_v2"
 
 
 def load_requirements(path=REQUIREMENTS, name="stage2_flat"):
@@ -33,12 +39,58 @@ def load_requirements(path=REQUIREMENTS, name="stage2_flat"):
     return data["sets"][name], hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
+def cases(rules):
+    """The cases of one requirement set: id, navigation command, controls and the stop control."""
+    hold = round(rules["hold_max_s"] / CONTROL_DT_S)
+    stop = round(2 * rules["stop"]["settle_s"] / CONTROL_DT_S)
+    commands = rules["commands"]
+    rows = [("stand", [0.0, 0.0, 0.0])] if commands["stand"] else []
+    step = 2 * math.pi / commands["translate_bearings"]
+    for speed in commands["translate_speeds_mps"]:
+        for bearing in range(commands["translate_bearings"]):
+            angle = bearing * step
+            rows.append(
+                (
+                    f"walk_{speed:.3f}_{round(math.degrees(angle))}deg",
+                    [speed * math.cos(angle), speed * math.sin(angle), 0.0],
+                )
+            )
+    rate = commands["turn_rate_rad_s"]
+    rows += [(f"turn_{sign * rate:+.2f}", [0.0, 0.0, sign * rate]) for sign in (-1, 1)]
+    arc = commands["arc"]
+    rows += [
+        (
+            f"arc_{sign * arc['turn_rate_rad_s']:+.2f}",
+            [arc["speed_mps"], 0.0, sign * arc["turn_rate_rad_s"]],
+        )
+        for sign in (-1, 1)
+    ]
+    return [
+        {"case_id": case_id, "command": command, "controls": hold + stop, "stop_control": hold}
+        for case_id, command in rows
+    ]
+
+
+def command_at(case, control):
+    """The navigation command of ``case`` at ``control``: its command, then zero from the stop control."""
+    if not 0 <= control < case["controls"]:
+        raise ValueError("Control lies outside the declared case")
+    return list(case["command"]) if control < case["stop_control"] else [0.0, 0.0, 0.0]
+
+
 def planar_pose(root_pose_xyzw):
     """World x, y and yaw of root pose rows ``(x, y, z, qx, qy, qz, qw)``."""
     p = np.asarray(root_pose_xyzw, dtype=np.float64)
     x, y, z, w = p[:, 3], p[:, 4], p[:, 5], p[:, 6]
     yaw = np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z))
     return np.stack((p[:, 0], p[:, 1], yaw), -1)
+
+
+def tilt_degrees(root_pose_xyzw):
+    """The angle between the body's up axis and world up, per row, in degrees."""
+    p = np.asarray(root_pose_xyzw, dtype=np.float64)
+    up = 1 - 2 * (p[:, 3] ** 2 + p[:, 4] ** 2)
+    return np.degrees(np.arccos(np.clip(up, -1.0, 1.0)))
 
 
 def ghost_path(start, commands, dt=CONTROL_DT_S):
@@ -110,59 +162,82 @@ def stopping_distance(trace, settle_s):
     }
 
 
-def judge(evaluation_dir, requirements=None, name="stage2_flat"):
-    """Every trace under ``evaluation_dir`` against the controller rows of one requirement set."""
-    rules, requirements_sha = load_requirements(requirements or REQUIREMENTS, name)
+def _check(value, bound):
+    return {"value": float(value), "bound": float(bound), "pass": bool(value <= bound)}
+
+
+def judge_case(trace, rules, controls=None):
+    """One recorded trace against the controller, tilt and torque rows of a requirement set."""
+    n = len(trace["command"]) if "command" in trace else 0
+    if n == 0 or (controls is not None and n != controls):
+        check = {"value": float(n), "bound": float(controls or 0), "pass": False}
+        return {
+            "holds": [],
+            "stop": None,
+            "checks": {"complete_trace": check},
+            "failed_checks": ["complete_trace"],
+            "pass": False,
+        }
     limits = rules["controller"]
-    settle_s = rules["stop"]["settle_s"]
-    cases, checkpoints = [], set()
+    holds = drift_per_hold(trace)
+    stop = stopping_distance(trace, rules["stop"]["settle_s"])
+    checks = {}
+    walks = [
+        h
+        for h in holds
+        if math.hypot(*h["command"][:2]) <= limits["drift_speed_mps"] + 1e-9
+        and h["controls"] * CONTROL_DT_S >= limits["drift_hold_s"] - 1e-9
+    ]
+    if walks:
+        checks["drift_per_hold_m"] = _check(
+            max(h["max_gap_m"] for h in walks), limits["drift_per_hold_max_m"]
+        )
+    if stop is not None:
+        checks["stopping_distance_m"] = _check(
+            stop["final_distance_m"], limits["stopping_distance_max_m"]
+        )
+    checks["tilt_deg"] = _check(
+        tilt_degrees(trace["root_pose_xyzw"][:, 0, :]).max(), rules["tilt_max_deg"]
+    )
+    checks["applied_torque_nm"] = _check(
+        np.abs(trace["applied_torque_abs_max_400hz"]).max(), rules["motor_torque_max_nm"]
+    )
+    failed = [name for name, check in checks.items() if not check["pass"]]
+    return {
+        "holds": holds,
+        "stop": stop,
+        "checks": checks,
+        "failed_checks": failed,
+        "pass": not failed,
+    }
+
+
+def judge(evaluation_dir, requirements=None, name="stage2_flat"):
+    """Every recorded batch under ``evaluation_dir`` against one requirement set."""
+    rules, requirements_sha = load_requirements(requirements or REQUIREMENTS, name)
+    rows, checkpoints = [], set()
     for report_path in sorted(Path(evaluation_dir).glob("batch_*/report.json")):
         report = json.loads(report_path.read_text())
         checkpoints.add(report.get("checkpoint_sha256"))
-        trace = np.load(report_path.with_name("control_trace.npz"))
         case = report["cases"][0]
-        holds = drift_per_hold(trace)
-        stop = stopping_distance(trace, settle_s)
-        checks = {}
-        walks = [
-            h
-            for h in holds
-            if h["command"][2] == 0
-            and abs(math.hypot(*h["command"][:2]) - limits["drift_speed_mps"]) < 1e-6
-            and h["controls"] * CONTROL_DT_S >= limits["drift_hold_s"] - 1e-9
-        ]
-        if walks:
-            worst = max(h["max_gap_m"] for h in walks)
-            checks["drift_per_hold_m"] = {
-                "value": worst,
-                "bound": limits["drift_per_hold_max_m"],
-                "pass": worst <= limits["drift_per_hold_max_m"],
-            }
-        if stop is not None:
-            checks["stopping_distance_m"] = {
-                "value": stop["final_distance_m"],
-                "bound": limits["stopping_distance_max_m"],
-                "pass": stop["final_distance_m"] <= limits["stopping_distance_max_m"],
-            }
-        cases.append(
+        trace_path = report_path.with_name("control_trace.npz")
+        trace = dict(np.load(trace_path)) if trace_path.exists() else {}
+        rows.append(
             {
                 "case_id": case["case_id"],
                 "command": case["command"],
-                "holds": holds,
-                "stop": stop,
-                "checks": checks,
-                "pass": all(c["pass"] for c in checks.values()) if checks else None,
+                **judge_case(trace, rules, case.get("controls")),
             }
         )
-    judged = [c for c in cases if c["checks"]]
     return {
-        "schema": "hexapod_walking_requirements_judgement_v1",
+        "schema": SCHEMA,
         "requirements_set": name,
         "requirements_sha256": requirements_sha,
         "checkpoint_sha256": sorted(c for c in checkpoints if c),
-        "cases": cases,
-        "judged_cases": len(judged),
-        "pass": all(c["pass"] for c in judged) if judged else None,
+        "cases": rows,
+        "judged_cases": len(rows),
+        "failed_cases": [row["case_id"] for row in rows if not row["pass"]],
+        "pass": all(row["pass"] for row in rows) if rows else None,
     }
 
 
