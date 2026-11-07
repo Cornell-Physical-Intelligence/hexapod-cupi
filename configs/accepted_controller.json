@@ -1,0 +1,58 @@
+{
+  "schema_version": 1,
+  "purpose": "The one checkpoint the project calls its walking controller, the requirement set it is judged against, and the evidence. A candidate becomes the controller only by replacing this file.",
+  "accepted_by": "program lead",
+  "accepted_on": "2026-11-07",
+  "acceptance": "c48_long meets the stage 2 commands, the stop and the stop tolerance under the follower in the surrogate. It exceeds the drift limit open loop; the closed loop corrects that drift. It is accepted because every input has a sensor on the robot and nothing better exists with that property.",
+  "controller": {
+    "name": "c48_long",
+    "checkpoint_sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+    "declaration_sha256": "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3",
+    "bytes": "/srv/cupi/hexapod/runs/julian/ppo_v4_stride_c48_u2500_seed20260917_20261011_001/run/standing/checkpoint_update002500.pt",
+    "inputs": "231 proprioception, command and last-target values plus a 60-control gait clock; every input has a sensor on the robot",
+    "robot_model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "trained_at_commit": "b2a6168c35156dfe0a8202201aa574b8d9e43fb1"
+  },
+  "requirements_set": "stage2_flat",
+  "requirements_sha256": "4bf8b0a9c12038e47b7dd0cbe6d57c8a50931b39df899158d950a8ac082557e8",
+  "judged": {
+    "commands": {
+      "value": "13 of 13 native learning probes",
+      "pass": true,
+      "evidence": "site/assets/floor_contact_20261016_002/verification.json"
+    },
+    "stopping_distance_m": {
+      "value": 0.0097,
+      "limit": 0.05,
+      "pass": true,
+      "evidence": "site/assets/c48_requirements_20261107_001/judgement.json"
+    },
+    "drift_per_hold_m": {
+      "value": 0.298,
+      "limit": 0.1,
+      "pass": false,
+      "note": "7 of 8 walks over the limit, median 0.152; corrected by the follower in closed loop",
+      "evidence": "site/assets/c48_requirements_20261107_001/judgement.json"
+    },
+    "stop_position_tolerance_m": {
+      "value": 0.066,
+      "limit": 0.12,
+      "pass": true,
+      "note": "worst of five 1 m routes, surrogate, true pose, one trial each",
+      "evidence": "site/assets/c48_closed_loop_20261107_001/after_follower_fix/closed_loop.json"
+    }
+  },
+  "not_judged": [
+    "closed loop with a simulated Mid-360 odometry pose",
+    "closed loop natively on Spark",
+    "payload on the deck",
+    "disturbance: no noise, delay or randomization in training",
+    "full 96-case manifest, 512-robot admission, terrain, hardware"
+  ],
+  "compatibility_receipt": {
+    "path": "site/assets/floor_contact_20261016_002/compatibility/receipt.json",
+    "sha256": "4ee8c70ae3abecd970e7d2b9d1ec80fdad0b4e1a38b8819674c305a8dad30cf2",
+    "binds_commit": "717548d5e897fb2e59aaa8a83268cae0e6ccb160",
+    "note": "Earlier than main after the Ruff reformat; renewal pending"
+  }
+}
