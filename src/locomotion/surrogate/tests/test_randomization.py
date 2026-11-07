@@ -11,10 +11,10 @@ import mujoco
 import numpy as np
 import torch
 
-from locomotion import randomization as rnd
 from locomotion.amp.amp import AMPVecEnv
 from locomotion.omniwalk.mdp.commands import TaskConfig
 from locomotion.omniwalk.task import TrainingTask
+from locomotion.robots import randomization as rnd
 from locomotion.robots.hexapod import BODY_NAMES, KD, MASS_KG
 from locomotion.robots.rs05 import motor_force
 from locomotion.surrogate import evaluate, train

@@ -1,5 +1,5 @@
 """Run the interface of ``locomotion.omniwalk.adapter.OmniEnv`` on CPU MuJoCo physics.
-Under a Step 7 randomization (``locomotion.randomization``) each replica owns a model copy that its
+Under a Step 7 randomization (``locomotion.robots.randomization``) each replica owns a model copy that its
 reset redraws; under ``none`` every replica shares the compiled model and steps as before.
 """
 
@@ -19,7 +19,6 @@ import torch
 from mujoco import rollout as mj_rollout
 from scipy.spatial import ConvexHull
 
-from locomotion import randomization as rnd
 from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
 from locomotion.omniwalk.mdp.frames import inverse_rotate, rotate
 from locomotion.omniwalk.mdp.loads import SubstepLoads, control_telemetry
@@ -27,6 +26,7 @@ from locomotion.omniwalk.mdp.observations import observations as assemble_observ
 from locomotion.omniwalk.mdp.observations import proprio
 from locomotion.omniwalk.mdp.state import toe_points
 from locomotion.omniwalk.mdp.terminations import episode_timeout, physical_termination
+from locomotion.robots import randomization as rnd
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
 from locomotion.robots.rs05 import motor_force
 
@@ -413,7 +413,7 @@ class SurrogateEnv:
     ):
         """The constructor ignores ``asset`` (the native USD). ``reference_metadata``
         defaults to the repository stance.json, which native training passes.
-        ``randomization`` names a ``locomotion.randomization`` declaration. ``condition`` is a
+        ``randomization`` names a ``locomotion.robots.randomization`` declaration. ``condition`` is a
         fixed ``randomization.ReplicaDraw`` that every reset applies to every replica, with no
         push; a fixed-grid cell uses it under ``randomization="none"``."""
         if randomization not in rnd.NAMES:

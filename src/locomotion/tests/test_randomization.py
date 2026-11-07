@@ -7,7 +7,7 @@ import unittest
 import numpy as np
 import torch
 
-from locomotion import randomization as rnd
+from locomotion.robots import randomization as rnd
 from locomotion.robots.hexapod import JOINT_NAMES, KD, MASS_KG
 from locomotion.robots.rs05 import motor_force
 

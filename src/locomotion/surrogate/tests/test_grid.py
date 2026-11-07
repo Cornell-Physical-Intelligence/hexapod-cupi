@@ -13,7 +13,7 @@ import numpy as np
 import torch
 
 import locomotion.evaluation.runner as runner
-from locomotion import randomization as rnd
+from locomotion.robots import randomization as rnd
 from locomotion.surrogate import evaluate, sweep
 from locomotion.surrogate.env import (
     DEFAULT_GEOMETRY,

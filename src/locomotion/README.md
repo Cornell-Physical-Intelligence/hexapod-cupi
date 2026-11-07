@@ -8,7 +8,7 @@ shows definitions and imports.
 
 | Package | Purpose | Start here |
 | --- | --- | --- |
-| `robots/` | Robot identity, RS05 motor model and Isaac actuator. | `hexapod.py` |
+| `robots/` | Robot identity, RS05 motor model, Isaac actuator and the Step 7 randomization declaration. | `hexapod.py` |
 | `omniwalk/` | Omnidirectional walking task, Direct environment and learner recipe. | `env.py`, `task.py` |
 | `rl/` | RSL-RL wrapper, PPO subclasses and action distributions. | `wrapper.py` |
 | `scripts/` | Container entry points: train, play and diagnose. | `train.py` |
@@ -18,7 +18,6 @@ shows definitions and imports.
 | `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
 | `hexapod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
 | `tests/` | CPU, parity and native replay tests. | [Verification](#verification) |
-| `randomization.py` | Step 7 Table II declaration and per-replica draws; the surrogate applies them. | [TRAINING](../../docs/TRAINING.md) |
 
 ## Omniwalk files
 
@@ -101,7 +100,7 @@ overrides. Use the common evaluator for acceptance.
 
 ## Step 7: domain randomization declaration
 
-[`randomization.py`](randomization.py) declares `table2_v1` for
+[`robots/randomization.py`](robots/randomization.py) declares `table2_v1` for
 [issue #67](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67):
 one field per Table II row with its status, this project's range, the draw
 granularity and the reason. `declaration("table2_v1")` returns the canonical

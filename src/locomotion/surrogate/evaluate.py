@@ -419,7 +419,7 @@ def build_parser():
     parser.add_argument(
         "--grid",
         choices=["table2_v1_grid"],
-        help="Fixed-condition grid in locomotion/randomization.py; needs --cell. The cell holds across "
+        help="Fixed-condition grid in locomotion/robots/randomization.py; needs --cell. The cell holds across "
         "resets, and the quiet/stop consensus becomes the relative-friction consensus.",
     )
     parser.add_argument(
@@ -510,7 +510,7 @@ def evaluate_checkpoint(args):
 
     import locomotion.evaluation.runner as evaluation
     import locomotion.omniwalk.task as task_module
-    import locomotion.randomization as rnd
+    import locomotion.robots.randomization as rnd
     from locomotion.surrogate.env import (
         DEFAULT_GEOMETRY,
         DEFAULT_MODEL,

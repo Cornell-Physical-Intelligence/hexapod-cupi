@@ -169,7 +169,7 @@ def cell_row(cell, values, summary):
 
 def main(argv=None):
     import locomotion.evaluation.runner as evaluation
-    import locomotion.randomization as rnd
+    import locomotion.robots.randomization as rnd
     from locomotion.surrogate.env import repository_state, sha
     from locomotion.surrogate.evaluate import effective_seed, selected_cases, source_identity
 
