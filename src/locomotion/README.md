@@ -218,8 +218,12 @@ is the one the production loader ran natively, passing the 13 probes again
 ([verification](../../site/assets/floor_contact_20261016_002/verification.json)).
 Both bind the runtime bytes of source `717548d5`. `scripts/play.py
 --checkpoint-compatibility` accepts a receipt only when the running runtime
-files match the ones it binds, so the 23 October 2026 Ruff reformat of the
-runtime (PR 86) needs its own receipt; that certification is pending.
+files match the ones it binds. The 2 November 2026 campaign on the reformatted
+runtime renewed the receipt
+([c48_receipt_renewal_20261102_001](../../site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json)):
+standing admission at 1 and 128 robots, 13 of 13 probes through the parity
+harness, and a CPU production-loader check; its 56 bound runtime files match
+main since PR 91 merged.
 `tests/native_parity_pack.py` writes a candidate replay pack with the harness
 and its pinned ranges, and `spark/pack.py` records the root review of any pack
 before launch. Stage 2 adds the 96-case suite and visual acceptance.
