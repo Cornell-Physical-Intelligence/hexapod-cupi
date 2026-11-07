@@ -224,6 +224,11 @@ def merge(base, override):
     return base
 
 
+def randomization_identity(rnd, name):
+    """The declaration a run trains under: its name and hash, and the canonical declaration with its ranges."""
+    return {**rnd.identity(name), "declaration": json.loads(rnd.declaration(name)["json"])}
+
+
 def resume_record(path, identity):
     """Check the checkpoint bytes and training contract before loading learner state."""
     import torch
@@ -373,6 +378,12 @@ def build_parser():
     parser.add_argument("--checkpoint-interval", type=int, default=50)
     parser.add_argument("--max-wall-seconds", type=float, default=86400.0)
     parser.add_argument(
+        "--randomization",
+        choices=["none", "table2_v1"],
+        default="none",
+        help="Step 7 declaration in locomotion/randomization.py; each reset redraws that replica.",
+    )
+    parser.add_argument(
         "--contact",
         action="append",
         default=[],
@@ -425,6 +436,7 @@ def run(args, argv=None):
     import locomotion.evaluation.ppo_diagnostics as diagnostics_module
     import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
     import locomotion.omniwalk.task as task_module
+    import locomotion.randomization as rnd
     import locomotion.rl.ppo as algorithms
     from locomotion.evaluation.task_metrics import TaskMetrics, scalars
     from locomotion.surrogate.env import (
@@ -486,6 +498,7 @@ def run(args, argv=None):
         "config": cfg.declaration(),
         "contact_model": asdict(contact),
         "seed": args.seed,
+        "randomization": randomization_identity(rnd, args.randomization),
         "task": args.task,
         "wrapper": args.wrapper,
         "action_mean": args.action_mean,
@@ -537,6 +550,7 @@ def run(args, argv=None):
             threads=args.threads,
             contact=contact,
             substep_state=False,
+            randomization=args.randomization,
         )
         task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output / "task")
         # A task class outside TrainingTask may report its own status.

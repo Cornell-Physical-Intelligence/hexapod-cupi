@@ -1,0 +1,42 @@
+{
+  "id": "20261017T180331_step7_surrogate_randomization",
+  "date": "2026-10-17T18:03:31Z",
+  "title": "Apply the Table II randomization in the CPU surrogate and test it against the pre-change trajectory",
+  "summary": "The CPU surrogate takes --randomization none|table2_v1 in training and evaluation. Under table2_v1 each replica owns a MuJoCo model copy and redraws its link masses, payload, foot friction, gains, motor strength, reset pose and push schedule from the Step 7 declaration at every reset; run identities bind the declaration hash and resume refuses a different one. The AMP adapter fills the critic's friction and push slots from the environment. A committed extract of the pre-change trajectory step7_baseline_20261013_001 (main 7478fca8) shows that none reproduces every state row bit for bit, including a selected reset. Tests cover draw bounds, determinism, replica isolation, the 1.6 N m motor cap, resume mismatch, the privileged layout and actor isolation, and pin the bytes of the historical records and the approved model. A fresh self check at revision 232e19f0 passes without native references.",
+  "areas": [
+    "training",
+    "verification"
+  ],
+  "changes": [
+    "configs/source_inventory.json",
+    "docs/TRAINING.md",
+    "locomotion/README.md",
+    "locomotion/core/motor.py",
+    "locomotion/learning/amp_ppo.py",
+    "locomotion/randomization.py",
+    "locomotion/surrogate/README.md",
+    "locomotion/surrogate/env.py",
+    "locomotion/surrogate/evaluate.py",
+    "locomotion/surrogate/train.py",
+    "locomotion/surrogate/provenance.json",
+    "locomotion/surrogate/records/self_check_step7_20261017_001.json",
+    "locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.json",
+    "locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.npz",
+    "locomotion/surrogate/tests/test_randomization.py",
+    "locomotion/surrogate/tests/test_resume.py",
+    "locomotion/surrogate/tests/test_step7_oracle.py",
+    "locomotion/tests/test_amp_ppo.py",
+    "locomotion/tests/test_paper_networks.py",
+    "locomotion/tests/test_randomization.py",
+    "site/updates/20261017T180331_step7_surrogate_randomization.json"
+  ],
+  "evidence": [
+    "locomotion/surrogate/records/self_check_step7_20261017_001.json",
+    "locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.json",
+    "locomotion/randomization.py",
+    "docs/TRAINING.md"
+  ],
+  "next": "Train two surrogate runs from seed 20260917, none against table2_v1 for 2000 updates, add the 27-cell fixed-condition sweep and bring both to the first #67 review, which freezes the ranges and push schedule before any native code.",
+  "no_project_impact": true,
+  "reason": "CPU design evidence only: no native run, admission or accepted capability changes."
+}

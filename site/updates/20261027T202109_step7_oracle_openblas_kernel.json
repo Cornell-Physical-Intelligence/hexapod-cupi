@@ -1,0 +1,25 @@
+{
+  "id": "20261027T202109_step7_oracle_openblas_kernel",
+  "date": "2026-10-27T20:21:09Z",
+  "title": "Pin the Step 7 oracle replay to an OpenBLAS kernel so CI can check it",
+  "summary": "The Step 7 oracle test failed on the GitHub runners while passing on the capture machine: 13747 of 15300 state values differed, from 7e-14 at control 1 growing to 8e-4. NumPy's bundled OpenBLAS picks its kernel by CPU, and the kernels round differently; forcing OPENBLAS_CORETYPE=Haswell on the capture machine reproduces the runner failure exactly. step7_baseline_20261013_001 had used the AVX-512 SkylakeX kernel: a recapture at main 7478fca8 with that kernel reproduces its trajectory.npz byte for byte. A second capture at the same commit with the AVX2 Haswell kernel, step7_baseline_haswell_20261027_001 (state SHA-256 bbcef80123d1d064ce07c1aabae61ea1dd35f2c907d7e1f2a8603b5dcef16d1a), has the same source files, protocol, resets and counters. The test now replays each oracle in a subprocess pinned to its kernel on one OpenBLAS thread and still requires exact equality: the Haswell oracle runs on any x86-64 host, and the original runs where the CPU has AVX-512. A replay of the Haswell oracle on the SkylakeX kernel fails, so the pin takes effect. The original fixture stays unchanged. Surrogate runs are bit-reproducible per OpenBLAS kernel, not across machines.",
+  "areas": [
+    "training",
+    "verification"
+  ],
+  "changes": [
+    "src/locomotion/surrogate/tests/test_step7_oracle.py",
+    "src/locomotion/surrogate/tests/fixtures/step7_baseline_haswell_20261027_001.json",
+    "src/locomotion/surrogate/tests/fixtures/step7_baseline_haswell_20261027_001.npz",
+    "src/locomotion/surrogate/README.md",
+    "site/updates/20261027T202109_step7_oracle_openblas_kernel.json"
+  ],
+  "evidence": [
+    "src/locomotion/surrogate/tests/test_step7_oracle.py",
+    "src/locomotion/surrogate/tests/fixtures/step7_baseline_haswell_20261027_001.json",
+    "src/locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.json"
+  ],
+  "next": "Bring the Step 7 CPU comparison and its open questions to the first #67 review on PR #94.",
+  "no_project_impact": true,
+  "reason": "A test fixture and replay harness for the CPU surrogate: no physics, native run, admission or accepted capability changes."
+}
