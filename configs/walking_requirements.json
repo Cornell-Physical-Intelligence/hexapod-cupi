@@ -1,0 +1,57 @@
+{
+  "schema_version": 1,
+  "purpose": "Everything the survey asks of the walking controller, with numbers. Navigation sends only these commands. The accepted controller is judged only on the set it claims. No guide restates these values.",
+  "decided_by": "program lead",
+  "sets": {
+    "stage2_flat": {
+      "decided_on": "2026-11-07",
+      "ground": "flat, level, obstacle-free; drawn exclusions are avoided by the route planner, not by the controller",
+      "commands": {
+        "translate_speeds_mps": [
+          0.025,
+          0.05
+        ],
+        "translate_bearings": 8,
+        "turn_rate_rad_s": 0.2,
+        "arc": {
+          "speed_mps": 0.04,
+          "turn_rate_rad_s": 0.15
+        },
+        "stand": true
+      },
+      "hold_min_s": 2.0,
+      "hold_max_s": 20.0,
+      "stop": {
+        "settle_s": 2.0,
+        "position_tolerance_m": 0.12,
+        "stay_stopped_s": 20.0
+      },
+      "tilt_max_deg": 1.7,
+      "motor_torque_max_nm": 1.6,
+      "pose_source": "GPS without RTK, 3 m error bound; heading sensor not decided",
+      "payload": {
+        "device": "Livox Mid-360 lidar",
+        "mass_kg": 0.265,
+        "size_m": [
+          0.065,
+          0.065,
+          0.06
+        ],
+        "power_w": 6.5,
+        "supply_v": [
+          9,
+          27
+        ],
+        "note": "Sensor only. Mount, cable and any compute or battery on the deck add to this mass and are not decided."
+      }
+    }
+  },
+  "sources": {
+    "commands, hold_min_s, stop.position_tolerance_m": "src/navigation/waypoint.py command bank and follower defaults, bound by src/navigation/tests/test_requirements.py",
+    "tilt_max_deg": "src/locomotion/evaluation/scoring.py TAIL maximum_tilt_degrees; the 5 degree static-scenario bound there is a diagnostic",
+    "motor_torque_max_nm": "docs/RS05_SPEC_REVIEW.md rated rotating torque",
+    "ground, pose_source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20",
+    "hold_max_s, stop.settle_s, stop.stay_stopped_s": "program lead, 2026-11-07",
+    "payload": "https://www.livoxtech.com/mid-360/specs, program lead decision 2026-11-07"
+  }
+}
