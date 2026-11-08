@@ -15,6 +15,7 @@ import torch
 import locomotion.rl.ppo as algorithms
 import locomotion.rl.wrapper as omni_wrapper
 from locomotion.amp.features import extract_features
+from locomotion.evaluation.checkpoint import configuration
 from locomotion.spark.sources import source_files
 from locomotion.surrogate.train import (
     build_wrapper,
@@ -516,6 +517,8 @@ def evaluate_checkpoint(args):
     )
     if config is None:
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
+    # A record written before the package migration names the old class paths.
+    config = configuration(config)
     seed = effective_seed(args.seed, identity)
     task_spec, wrapper_spec = task_and_wrapper(args, identity)
     probes = [case["case_id"] for case in requirements.cases(requirements.load_requirements()[0])]
@@ -760,7 +763,7 @@ def evaluate_checkpoint(args):
                 {
                     "case": row["case_id"],
                     "pass": row["pass"],
-                    "failed": row["failed_bounds"],
+                    "failed": row["failed_checks"],
                     "consensus": row.get("contact_consensus", {}).get("verdict"),
                     "planar_error": row["metrics"].get("planar_error_mps"),
                     "mean_velocity": gait.get("mean_velocity_nav_mps"),

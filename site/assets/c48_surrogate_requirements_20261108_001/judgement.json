@@ -1,0 +1,1847 @@
+{
+  "schema": "hexapod_walking_requirements_judgement_v2",
+  "requirements_set": "stage2_flat",
+  "requirements_sha256": "cdaaea46dd7dc50c34c46f80ca524036c0a1e431bf1fee46e363e4cd535f190a",
+  "checkpoint_sha256": [
+    "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9"
+  ],
+  "cases": [
+    {
+      "case_id": "stand",
+      "command": [
+        0.0,
+        0.0,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [],
+      "stop": null,
+      "route": null,
+      "checks": {
+        "tilt_deg": {
+          "value": 1.3461713915594504,
+          "bound": 1.7,
+          "pass": true
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [],
+      "pass": true
+    },
+    {
+      "case_id": "walk_0.025_0deg",
+      "command": [
+        0.025,
+        0.0,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.02500000037252903,
+            0.0,
+            0.0
+          ],
+          "max_gap_m": 0.1681123193366758,
+          "end_gap_m": 0.1681123193366758
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.005654270485791907,
+        "final_distance_m": 0.005774358144639249,
+        "max_distance_m": 0.005774443628953474
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.1681123193366758,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.005774358144639249,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.090660346106568,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.025_45deg",
+      "command": [
+        0.01767766952966369,
+        0.017677669529663688,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.01767767034471035,
+            0.01767767034471035,
+            0.0
+          ],
+          "max_gap_m": 0.08305402511163125,
+          "end_gap_m": 0.08305402511163125
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.006543596896275672,
+        "final_distance_m": 0.006733102452113648,
+        "max_distance_m": 0.006733102452113648
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.08305402511163125,
+          "bound": 0.1,
+          "pass": true
+        },
+        "stopping_distance_m": {
+          "value": 0.006733102452113648,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.0800778814694256,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.025_90deg",
+      "command": [
+        1.5308084989341916e-18,
+        0.025,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            1.5308084623338832e-18,
+            0.02500000037252903,
+            0.0
+          ],
+          "max_gap_m": 0.11913578487185666,
+          "end_gap_m": 0.11913578487185666
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.0053762415761996595,
+        "final_distance_m": 0.005453187330196021,
+        "max_distance_m": 0.005453187330196021
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.11913578487185666,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.005453187330196021,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.104514912381229,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.025_135deg",
+      "command": [
+        -0.017677669529663688,
+        0.01767766952966369,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -0.01767767034471035,
+            0.01767767034471035,
+            0.0
+          ],
+          "max_gap_m": 0.23186014193618315,
+          "end_gap_m": 0.23186014193618315
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.006048497127375188,
+        "final_distance_m": 0.006048050411400331,
+        "max_distance_m": 0.006048503893007834
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.23186014193618315,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.006048050411400331,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.0202772711111625,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.025_180deg",
+      "command": [
+        -0.025,
+        3.061616997868383e-18,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -0.02500000037252903,
+            3.0616169246677665e-18,
+            0.0
+          ],
+          "max_gap_m": 0.10186258685167872,
+          "end_gap_m": 0.10186258685167872
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.004081665580228496,
+        "final_distance_m": 0.004944752009662899,
+        "max_distance_m": 0.004944752009662899
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.10186258685167872,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.004944752009662899,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 1.6262611992862372,
+          "bound": 1.7,
+          "pass": true
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.025_225deg",
+      "command": [
+        -0.01767766952966369,
+        -0.017677669529663688,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -0.01767767034471035,
+            -0.01767767034471035,
+            0.0
+          ],
+          "max_gap_m": 0.11299114538084874,
+          "end_gap_m": 0.11299114538084874
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.0009361647275209564,
+        "final_distance_m": 0.0009353604848472367,
+        "max_distance_m": 0.0032206186151698883
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.11299114538084874,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.0009353604848472367,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 1.708081976857699,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.025_270deg",
+      "command": [
+        -4.592425496802574e-18,
+        -0.025,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -4.5924256971943795e-18,
+            -0.02500000037252903,
+            0.0
+          ],
+          "max_gap_m": 0.08863449219051535,
+          "end_gap_m": 0.08863449219051535
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.0017659138786420819,
+        "final_distance_m": 0.001838842205506776,
+        "max_distance_m": 0.0024963110683748537
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.08863449219051535,
+          "bound": 0.1,
+          "pass": true
+        },
+        "stopping_distance_m": {
+          "value": 0.001838842205506776,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.0014181210190722,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.025_315deg",
+      "command": [
+        0.017677669529663684,
+        -0.01767766952966369,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.01767767034471035,
+            -0.01767767034471035,
+            0.0
+          ],
+          "max_gap_m": 0.10008091693784125,
+          "end_gap_m": 0.10008091693784125
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.0012807461828864776,
+        "final_distance_m": 0.00128427758392009,
+        "max_distance_m": 0.00151472867715544
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.10008091693784125,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.00128427758392009,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.0865403062566084,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.050_0deg",
+      "command": [
+        0.05,
+        0.0,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.05000000074505806,
+            0.0,
+            0.0
+          ],
+          "max_gap_m": 0.12892467144082823,
+          "end_gap_m": 0.12892467144082823
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.008856469408427221,
+        "final_distance_m": 0.008611863815044021,
+        "max_distance_m": 0.008856837665320662
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.12892467144082823,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.008611863815044021,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.3005685701595024,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.050_45deg",
+      "command": [
+        0.03535533905932738,
+        0.035355339059327376,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.0353553406894207,
+            0.0353553406894207,
+            0.0
+          ],
+          "max_gap_m": 0.22751334752148444,
+          "end_gap_m": 0.22751334752148444
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.01252465720859628,
+        "final_distance_m": 0.013655324386957218,
+        "max_distance_m": 0.013655324386957218
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.22751334752148444,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.013655324386957218,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.189503235583911,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.050_90deg",
+      "command": [
+        3.061616997868383e-18,
+        0.05,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.27383386160884005,
+          "end_gap_m": 0.27383386160884005
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.008006698052449005,
+        "final_distance_m": 0.00835746982637329,
+        "max_distance_m": 0.00835746982637329
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.27383386160884005,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.00835746982637329,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.2598280619101594,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.050_135deg",
+      "command": [
+        -0.035355339059327376,
+        0.03535533905932738,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -0.0353553406894207,
+            0.0353553406894207,
+            0.0
+          ],
+          "max_gap_m": 0.2985590285552668,
+          "end_gap_m": 0.2985590285552668
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.004248994477358115,
+        "final_distance_m": 0.0042774950107937896,
+        "max_distance_m": 0.0042774950107937896
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.2985590285552668,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.0042774950107937896,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.0020835494638702,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.050_180deg",
+      "command": [
+        -0.05,
+        6.123233995736766e-18,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -0.05000000074505806,
+            6.123233849335533e-18,
+            0.0
+          ],
+          "max_gap_m": 0.036689671010645575,
+          "end_gap_m": 0.03381454377934973
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.006137923622632284,
+        "final_distance_m": 0.007451522684634689,
+        "max_distance_m": 0.007451522684634689
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.036689671010645575,
+          "bound": 0.1,
+          "pass": true
+        },
+        "stopping_distance_m": {
+          "value": 0.007451522684634689,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 1.6014006359955992,
+          "bound": 1.7,
+          "pass": true
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [],
+      "pass": true
+    },
+    {
+      "case_id": "walk_0.050_225deg",
+      "command": [
+        -0.03535533905932738,
+        -0.035355339059327376,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -0.0353553406894207,
+            -0.0353553406894207,
+            0.0
+          ],
+          "max_gap_m": 0.154672493815248,
+          "end_gap_m": 0.154672493815248
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.001463917171762585,
+        "final_distance_m": 0.001519416693540545,
+        "max_distance_m": 0.003768694207422604
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.154672493815248,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.001519416693540545,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 1.7478595758118196,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.050_270deg",
+      "command": [
+        -9.184850993605149e-18,
+        -0.05,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            -9.184851394388759e-18,
+            -0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.10405319529402697,
+          "end_gap_m": 0.10405319529402697
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.0009991047907262195,
+        "final_distance_m": 0.0010048239611647543,
+        "max_distance_m": 0.001920412938315854
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.10405319529402697,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.0010048239611647543,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.244101668447445,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "walk_0.050_315deg",
+      "command": [
+        0.03535533905932737,
+        -0.03535533905932738,
+        0.0
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.0353553406894207,
+            -0.0353553406894207,
+            0.0
+          ],
+          "max_gap_m": 0.1818319508751064,
+          "end_gap_m": 0.1818319508751064
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.002299692643626039,
+        "final_distance_m": 0.002307043937022444,
+        "max_distance_m": 0.0023338821415854727
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.1818319508751064,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.002307043937022444,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.407803060571733,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "turn_-0.20",
+      "command": [
+        0.0,
+        0.0,
+        -0.2
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.0,
+            0.0,
+            -0.20000000298023224
+          ],
+          "max_gap_m": 0.03188617059797113,
+          "end_gap_m": 0.025457283951394474
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.005322936226075576,
+        "final_distance_m": 0.005279428178724026,
+        "max_distance_m": 0.005375429350430951
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.03188617059797113,
+          "bound": 0.1,
+          "pass": true
+        },
+        "stopping_distance_m": {
+          "value": 0.005279428178724026,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.170572478090596,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "turn_+0.20",
+      "command": [
+        0.0,
+        0.0,
+        0.2
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.014389199659498263,
+          "end_gap_m": 0.010411073573863318
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.0021505193177260677,
+        "final_distance_m": 0.00242935047128066,
+        "max_distance_m": 0.002433441432214278
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.014389199659498263,
+          "bound": 0.1,
+          "pass": true
+        },
+        "stopping_distance_m": {
+          "value": 0.00242935047128066,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 1.955704449249989,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "arc_-0.15",
+      "command": [
+        0.04,
+        0.0,
+        -0.15
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.03999999910593033,
+            0.0,
+            -0.15000000596046448
+          ],
+          "max_gap_m": 0.2641764603014663,
+          "end_gap_m": 0.2641764603014663
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.008626644325967155,
+        "final_distance_m": 0.008700461846649033,
+        "max_distance_m": 0.008705174498511522
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.2641764603014663,
+          "bound": 0.1,
+          "pass": false
+        },
+        "stopping_distance_m": {
+          "value": 0.008700461846649033,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.2687889482406853,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "drift_per_hold_m",
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "arc_+0.15",
+      "command": [
+        0.04,
+        0.0,
+        0.15
+      ],
+      "route_m": null,
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 1000,
+          "command": [
+            0.03999999910593033,
+            0.0,
+            0.15000000596046448
+          ],
+          "max_gap_m": 0.09587892821811027,
+          "end_gap_m": 0.0945668334075064
+        }
+      ],
+      "stop": {
+        "stop_control": 1000,
+        "settle_distance_m": 0.002350956119760825,
+        "final_distance_m": 0.002278923550279127,
+        "max_distance_m": 0.0023536484701277343
+      },
+      "route": null,
+      "checks": {
+        "drift_per_hold_m": {
+          "value": 0.09587892821811027,
+          "bound": 0.1,
+          "pass": true
+        },
+        "stopping_distance_m": {
+          "value": 0.002278923550279127,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.0396452414161947,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "route_forward_0.5m",
+      "command": null,
+      "route_m": [
+        [
+          0.5,
+          0.0
+        ]
+      ],
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 179,
+          "command": [
+            0.05000000074505806,
+            0.0,
+            0.0
+          ],
+          "max_gap_m": 0.014909500059239552,
+          "end_gap_m": 0.014909500059239552
+        },
+        {
+          "first_control": 179,
+          "controls": 10,
+          "command": [
+            0.0,
+            0.0,
+            -0.20000000298023224
+          ],
+          "max_gap_m": 0.001363493153259811,
+          "end_gap_m": 0.001363493153259811
+        },
+        {
+          "first_control": 189,
+          "controls": 170,
+          "command": [
+            0.05000000074505806,
+            0.0,
+            0.0
+          ],
+          "max_gap_m": 0.012225052819036809,
+          "end_gap_m": 0.012225052819036809
+        },
+        {
+          "first_control": 359,
+          "controls": 11,
+          "command": [
+            0.0,
+            0.0,
+            -0.20000000298023224
+          ],
+          "max_gap_m": 0.0015727082733530853,
+          "end_gap_m": 0.0015727082733530853
+        },
+        {
+          "first_control": 370,
+          "controls": 89,
+          "command": [
+            0.05000000074505806,
+            0.0,
+            0.0
+          ],
+          "max_gap_m": 0.00793275049242521,
+          "end_gap_m": 0.007028435100800952
+        }
+      ],
+      "stop": {
+        "stop_control": 459,
+        "settle_distance_m": 0.01025309452827681,
+        "final_distance_m": 0.010348586411814489,
+        "max_distance_m": 0.010452975088830493
+      },
+      "route": {
+        "goal_world_m": [
+          0.0003982710685521581,
+          -0.500295076726653
+        ],
+        "stopped_controls": 1741,
+        "stay_window_controls": 1000,
+        "arrived": true,
+        "final_distance_m": 0.06438455471666418,
+        "stay_distance_max_m": 0.06438508255115512
+      },
+      "checks": {
+        "stopping_distance_m": {
+          "value": 0.010348586411814489,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.1938032961294027,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        },
+        "stop_position_m": {
+          "value": 0.06438508255115512,
+          "bound": 0.12,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "route_diagonal_0.5m",
+      "command": null,
+      "route_m": [
+        [
+          0.3536,
+          0.3536
+        ]
+      ],
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 324,
+          "command": [
+            0.0353553406894207,
+            0.0353553406894207,
+            0.0
+          ],
+          "max_gap_m": 0.051550912817519466,
+          "end_gap_m": 0.051550912817519466
+        },
+        {
+          "first_control": 324,
+          "controls": 13,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.006433049548327727,
+          "end_gap_m": 0.006433049548327727
+        },
+        {
+          "first_control": 337,
+          "controls": 100,
+          "command": [
+            0.0353553406894207,
+            0.0353553406894207,
+            0.0
+          ],
+          "max_gap_m": 0.01944514940373105,
+          "end_gap_m": 0.01944514940373105
+        },
+        {
+          "first_control": 437,
+          "controls": 17,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.007183461581228435,
+          "end_gap_m": 0.007183461581228435
+        },
+        {
+          "first_control": 454,
+          "controls": 46,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.008420406066752555,
+          "end_gap_m": 0.007009852061377601
+        },
+        {
+          "first_control": 500,
+          "controls": 13,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.007156533475047134,
+          "end_gap_m": 0.007156533475047134
+        },
+        {
+          "first_control": 513,
+          "controls": 14,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.005687456017385065,
+          "end_gap_m": 0.005687456017385065
+        }
+      ],
+      "stop": {
+        "stop_control": 527,
+        "settle_distance_m": 0.0029799765539757334,
+        "final_distance_m": 0.003327763912197054,
+        "max_distance_m": 0.003327763912197054
+      },
+      "route": {
+        "goal_world_m": [
+          0.3539470033288982,
+          -0.3537387840651917
+        ],
+        "stopped_controls": 1673,
+        "stay_window_controls": 1000,
+        "arrived": true,
+        "final_distance_m": 0.05772888475325416,
+        "stay_distance_max_m": 0.05773210882049876
+      },
+      "checks": {
+        "stopping_distance_m": {
+          "value": 0.003327763912197054,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.189503235583911,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        },
+        "stop_position_m": {
+          "value": 0.05773210882049876,
+          "bound": 0.12,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "route_left_0.5m",
+      "command": null,
+      "route_m": [
+        [
+          0.0,
+          0.5
+        ]
+      ],
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 119,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.015692992514975485,
+          "end_gap_m": 0.015692992514975485
+        },
+        {
+          "first_control": 119,
+          "controls": 10,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.0038778849858293082,
+          "end_gap_m": 0.0038778849858293082
+        },
+        {
+          "first_control": 129,
+          "controls": 111,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.0192125005990574,
+          "end_gap_m": 0.018758131409648673
+        },
+        {
+          "first_control": 240,
+          "controls": 10,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.0038270915216024265,
+          "end_gap_m": 0.0038270915216024265
+        },
+        {
+          "first_control": 250,
+          "controls": 128,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.02129527019640193,
+          "end_gap_m": 0.017730633894011662
+        },
+        {
+          "first_control": 378,
+          "controls": 13,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.003267229068877883,
+          "end_gap_m": 0.003267229068877883
+        },
+        {
+          "first_control": 391,
+          "controls": 46,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.003616450574673117,
+          "end_gap_m": 0.0031754757559043514
+        },
+        {
+          "first_control": 437,
+          "controls": 13,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.0034901277512392804,
+          "end_gap_m": 0.0034901277512392804
+        },
+        {
+          "first_control": 450,
+          "controls": 47,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.004544760831065116,
+          "end_gap_m": 0.00435288589696344
+        },
+        {
+          "first_control": 497,
+          "controls": 13,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.003197375802033899,
+          "end_gap_m": 0.003197375802033899
+        },
+        {
+          "first_control": 510,
+          "controls": 34,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.0038212656664333997,
+          "end_gap_m": 0.003685984923174111
+        }
+      ],
+      "stop": {
+        "stop_control": 544,
+        "settle_distance_m": 0.004995608262079712,
+        "final_distance_m": 0.005227755043047246,
+        "max_distance_m": 0.005227755043047246
+      },
+      "route": {
+        "goal_world_m": [
+          0.5002803830138881,
+          -0.00033641226936359877
+        ],
+        "stopped_controls": 1656,
+        "stay_window_controls": 1000,
+        "arrived": true,
+        "final_distance_m": 0.0582741180436924,
+        "stay_distance_max_m": 0.0582741180436924
+      },
+      "checks": {
+        "stopping_distance_m": {
+          "value": 0.005227755043047246,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.2598280619101594,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        },
+        "stop_position_m": {
+          "value": 0.0582741180436924,
+          "bound": 0.12,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    },
+    {
+      "case_id": "route_back_0.5m",
+      "command": null,
+      "route_m": [
+        [
+          -0.5,
+          0.0
+        ]
+      ],
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 295,
+          "command": [
+            -0.05000000074505806,
+            6.123233849335533e-18,
+            0.0
+          ],
+          "max_gap_m": 0.00997660627122469,
+          "end_gap_m": 0.00997660627122469
+        },
+        {
+          "first_control": 295,
+          "controls": 12,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.003777040631599119,
+          "end_gap_m": 0.003777040631599119
+        },
+        {
+          "first_control": 307,
+          "controls": 157,
+          "command": [
+            -0.05000000074505806,
+            6.123233849335533e-18,
+            0.0
+          ],
+          "max_gap_m": 0.008377635352647303,
+          "end_gap_m": 0.00409771683447257
+        }
+      ],
+      "stop": {
+        "stop_control": 464,
+        "settle_distance_m": 0.006502560677374314,
+        "final_distance_m": 0.009888340971619137,
+        "max_distance_m": 0.009903459576111929
+      },
+      "route": {
+        "goal_world_m": [
+          0.00016337516879875443,
+          0.5003337712573082
+        ],
+        "stopped_controls": 1736,
+        "stay_window_controls": 1000,
+        "arrived": true,
+        "final_distance_m": 0.059383432896568125,
+        "stay_distance_max_m": 0.059383633416395035
+      },
+      "checks": {
+        "stopping_distance_m": {
+          "value": 0.009888340971619137,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 1.570306376660512,
+          "bound": 1.7,
+          "pass": true
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        },
+        "stop_position_m": {
+          "value": 0.059383633416395035,
+          "bound": 0.12,
+          "pass": true
+        }
+      },
+      "failed_checks": [],
+      "pass": true
+    },
+    {
+      "case_id": "route_L_0.8m",
+      "command": null,
+      "route_m": [
+        [
+          0.4,
+          0.0
+        ],
+        [
+          0.4,
+          0.4
+        ]
+      ],
+      "holds": [
+        {
+          "first_control": 0,
+          "controls": 179,
+          "command": [
+            0.05000000074505806,
+            0.0,
+            0.0
+          ],
+          "max_gap_m": 0.014909500059239552,
+          "end_gap_m": 0.014909500059239552
+        },
+        {
+          "first_control": 179,
+          "controls": 10,
+          "command": [
+            0.0,
+            0.0,
+            -0.20000000298023224
+          ],
+          "max_gap_m": 0.001363493153259811,
+          "end_gap_m": 0.001363493153259811
+        },
+        {
+          "first_control": 189,
+          "controls": 156,
+          "command": [
+            0.05000000074505806,
+            0.0,
+            0.0
+          ],
+          "max_gap_m": 0.011441285817395409,
+          "end_gap_m": 0.010587815806105091
+        },
+        {
+          "first_control": 345,
+          "controls": 217,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.035702689841344386,
+          "end_gap_m": 0.03364821816206285
+        },
+        {
+          "first_control": 562,
+          "controls": 14,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.006804483257537199,
+          "end_gap_m": 0.006804483257537199
+        },
+        {
+          "first_control": 576,
+          "controls": 27,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.008093763674200678,
+          "end_gap_m": 0.008093763674200678
+        },
+        {
+          "first_control": 603,
+          "controls": 9,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.0020387471471515002,
+          "end_gap_m": 0.001994226954308225
+        },
+        {
+          "first_control": 612,
+          "controls": 104,
+          "command": [
+            3.0616169246677665e-18,
+            0.05000000074505806,
+            0.0
+          ],
+          "max_gap_m": 0.013874262265753627,
+          "end_gap_m": 0.013874262265753627
+        },
+        {
+          "first_control": 716,
+          "controls": 12,
+          "command": [
+            0.0,
+            0.0,
+            0.20000000298023224
+          ],
+          "max_gap_m": 0.0024048912359983855,
+          "end_gap_m": 0.0024048912359983855
+        },
+        {
+          "first_control": 728,
+          "controls": 8,
+          "command": [
+            0.0353553406894207,
+            0.0353553406894207,
+            0.0
+          ],
+          "max_gap_m": 0.0011325230205357741,
+          "end_gap_m": 0.0011325230205357741
+        }
+      ],
+      "stop": {
+        "stop_control": 736,
+        "settle_distance_m": 0.0059220398125491005,
+        "final_distance_m": 0.005904858261929883,
+        "max_distance_m": 0.005940894676379799
+      },
+      "route": {
+        "goal_world_m": [
+          0.4003428677874915,
+          -0.40007372393531926
+        ],
+        "stopped_controls": 2064,
+        "stay_window_controls": 1000,
+        "arrived": true,
+        "final_distance_m": 0.060086457977826295,
+        "stay_distance_max_m": 0.06008808158697217
+      },
+      "checks": {
+        "stopping_distance_m": {
+          "value": 0.005904858261929883,
+          "bound": 0.05,
+          "pass": true
+        },
+        "tilt_deg": {
+          "value": 2.1938032961294027,
+          "bound": 1.7,
+          "pass": false
+        },
+        "applied_torque_nm": {
+          "value": 1.600000023841858,
+          "bound": 1.6,
+          "pass": true
+        },
+        "stop_position_m": {
+          "value": 0.06008808158697217,
+          "bound": 0.12,
+          "pass": true
+        }
+      },
+      "failed_checks": [
+        "tilt_deg"
+      ],
+      "pass": false
+    }
+  ],
+  "judged_cases": 26,
+  "failed_cases": [
+    "walk_0.025_0deg",
+    "walk_0.025_45deg",
+    "walk_0.025_90deg",
+    "walk_0.025_135deg",
+    "walk_0.025_180deg",
+    "walk_0.025_225deg",
+    "walk_0.025_270deg",
+    "walk_0.025_315deg",
+    "walk_0.050_0deg",
+    "walk_0.050_45deg",
+    "walk_0.050_90deg",
+    "walk_0.050_135deg",
+    "walk_0.050_225deg",
+    "walk_0.050_270deg",
+    "walk_0.050_315deg",
+    "turn_-0.20",
+    "turn_+0.20",
+    "arc_-0.15",
+    "arc_+0.15",
+    "route_forward_0.5m",
+    "route_diagonal_0.5m",
+    "route_left_0.5m",
+    "route_L_0.8m"
+  ],
+  "pass": false
+}

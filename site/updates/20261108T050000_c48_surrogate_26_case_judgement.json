@@ -1,0 +1,28 @@
+{
+  "id": "20261108T050000_c48_surrogate_26_case_judgement",
+  "date": "2026-11-08T05:00:00Z",
+  "title": "Judge c48_long on all 26 stage 2 cases in the surrogate, routes included",
+  "summary": "The surrogate evaluator ran the unchanged c48_long checkpoint through the 26 stage2_flat cases with the new runner and judge: 21 fixed commands and the five routes with the waypoint follower driving from the true pose. Every route arrives: the body ends 58 to 64 mm from its last goal and stays there for 20 s, inside the 0.12 m tolerance, so the stop row's measurement is now taken in the surrogate. Three cases pass everything: stand, the 0.05 m/s backward walk and the backward route. Drift exceeds 0.1 m on 7 of 8 walks at 0.05 m/s and 6 of 8 at 0.025 m/s; the native open-loop numbers agree. Tilt exceeds 1.7 degrees on 22 of 26 cases at 2.0 to 2.4 degrees while moving, and the 2 November native campaign shows the same 1.7 to 2.4 on 7 of 13 probes; the limit came from the scorer's stop-tail bound and was never applied to walking before. The surrogate clamps motor torque at the rating, so its torque reading is the clamp, not a measurement. The run exposed two defects: float32 commands at 0.05 m/s on a diagonal read as 0.0500000023 and escaped the drift speed test, so four walks were never judged for drift, fixed with a relative tolerance and a test; and the surrogate evaluator read a pre-migration checkpoint record without translating its class names, fixed by applying the native loader's translation. The accepted controller's judged rows carry the new numbers; its acceptance text is unchanged and awaits the tilt decision. Raw traces, 928 MB, stay on the lead's machine with their hashes in the asset.",
+  "areas": [
+    "locomotion",
+    "evaluation"
+  ],
+  "next": "Decide the tilt requirement: its scope (stand and stop only, or every case) and its value, given 2.0 to 2.4 degrees while walking on both simulators; then the Spark renewal campaign on the 26 cases.",
+  "changes": [
+    "configs/accepted_controller.json",
+    "site/assets/c48_surrogate_requirements_20261108_001/*",
+    "src/locomotion/evaluation/requirements.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/tests/test_requirements_judge.py",
+    "src/locomotion/tests/test_yaw_sign.py",
+    "tests/test_accepted_controller.py",
+    "site/updates/20261108T050000_c48_surrogate_26_case_judgement.json"
+  ],
+  "evidence": [
+    "site/assets/c48_surrogate_requirements_20261108_001/judgement.json",
+    "site/assets/c48_surrogate_requirements_20261108_001/files.json",
+    "configs/accepted_controller.json"
+  ],
+  "no_project_impact": false,
+  "reason": "The accepted controller's judged rows change: the stop tolerance is now measured on the file's routes, tilt is recorded as failing on both simulators, and drift at 0.025 m/s is recorded. The judge gains a float32 tolerance, which changes its hash. The checkpoint, the approved robot and roadmap markers remain unchanged."
+}

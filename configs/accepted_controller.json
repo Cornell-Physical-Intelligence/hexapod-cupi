@@ -31,23 +31,43 @@
       "value": 0.298,
       "limit": 0.1,
       "pass": false,
-      "note": "7 of 8 walks over the limit, median 0.152; corrected by the follower in closed loop",
-      "evidence": "site/assets/c48_requirements_20261107_001/judgement.json"
+      "note": "native: 7 of 8 walks at 0.05 m/s over the limit, median 0.152; surrogate, 26 cases: 7 of 8 at 0.05 (median 0.168, max 0.299) and 6 of 8 at 0.025 (median 0.107, max 0.232) over the limit; the follower corrects the drift in closed loop",
+      "evidence": [
+        "site/assets/c48_requirements_20261107_001/judgement.json",
+        "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+      ]
     },
     "stop_position_tolerance_m": {
-      "value": 0.066,
+      "value": 0.064,
       "limit": 0.12,
       "pass": true,
-      "note": "worst of five 1 m routes in the surrogate, true pose, one trial each, before the file named its five routes; the file's routes are not yet judged on surrogate or native",
-      "evidence": "site/assets/c48_closed_loop_20261107_001/after_follower_fix/closed_loop.json"
+      "note": "worst of the file's five routes in the surrogate, true pose, one trial each; 0.058 to 0.064 m; not yet judged natively",
+      "evidence": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+    },
+    "tilt_deg": {
+      "value": 2.408,
+      "limit": 1.7,
+      "pass": false,
+      "note": "surrogate: 22 of 26 cases over the limit, 2.0 to 2.4 degrees while moving, 1.35 standing; native 2 November campaign: 7 of 13 probes over, max 2.40. The 1.7 limit was taken from the scorer's stop-tail bound, which never applied to walking.",
+      "evidence": [
+        "site/assets/c48_surrogate_requirements_20261108_001/judgement.json",
+        "site/assets/c48_receipt_renewal_20261102_001/compatibility/summary.json"
+      ]
+    },
+    "motor_torque_nm": {
+      "value": 1.171,
+      "limit": 1.6,
+      "pass": true,
+      "note": "native applied torque, 2 November campaign; the surrogate clamps at the rating and cannot judge it",
+      "evidence": "site/assets/c48_receipt_renewal_20261102_001/compatibility/summary.json"
     }
   },
   "not_judged": [
     "closed loop with a simulated Mid-360 odometry pose",
-    "closed loop natively on Spark",
     "payload on the deck",
     "disturbance: no noise, delay or randomization in training",
-    "full 96-case manifest, 512-robot admission, terrain, hardware"
+    "full 96-case manifest, 512-robot admission, terrain, hardware",
+    "closed loop natively on Spark (the five routes)"
   ],
   "compatibility_receipt": {
     "path": "site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json",

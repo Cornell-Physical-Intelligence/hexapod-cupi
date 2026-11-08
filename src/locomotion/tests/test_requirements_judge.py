@@ -200,6 +200,17 @@ class JudgeTests(unittest.TestCase):
             self.assertEqual(result["cases"][3]["failed_checks"], ["complete_trace"])
             self.assertEqual(result["failed_cases"], ["turn_+0.20"])
 
+    def test_a_float32_diagonal_walk_at_the_drift_speed_is_a_drift_case(self):
+        case = next(c for c in judge.cases(self.rules) if c["case_id"] == "walk_0.050_45deg")
+        commands = np.asarray(
+            [judge.command_at(case, c) for c in range(case["controls"])], dtype=np.float32
+        )
+        self.assertGreater(math.hypot(*commands[0, :2]), 0.05)
+        trace = trace_from_path(judge.ghost_path((0.0, 0.0, 0.0), commands), commands)
+        self.assertIn(
+            "drift_per_hold_m", judge.judge_case(trace, self.rules, case["controls"])["checks"]
+        )
+
 
 class RouteTests(unittest.TestCase):
     def setUp(self):

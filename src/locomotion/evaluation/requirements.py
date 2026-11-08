@@ -260,7 +260,8 @@ def judge_case(trace, rules, controls=None, case=None):
     walks = [
         h
         for h in holds
-        if math.hypot(*h["command"][:2]) <= limits["drift_speed_mps"] + 1e-9
+        # Recorded commands are float32: 0.05 m/s on a diagonal reads back as 0.0500000023.
+        if math.hypot(*h["command"][:2]) <= limits["drift_speed_mps"] * (1 + 1e-6)
         and h["controls"] * CONTROL_DT_S >= limits["drift_hold_s"] - 1e-9
     ]
     if walks:

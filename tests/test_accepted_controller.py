@@ -66,10 +66,17 @@ class AcceptedControllerTests(unittest.TestCase):
             if "drift_per_hold_m" in c["checks"]
         )
         self.assertAlmostEqual(judged["drift_per_hold_m"]["value"], worst, places=3)
-        closed = json.loads((ROOT / judged["stop_position_tolerance_m"]["evidence"]).read_text())
-        worst_stop = max(r["final_distance_to_last_goal_m"] for r in closed.values())
+        routes = json.loads((ROOT / judged["stop_position_tolerance_m"]["evidence"]).read_text())
+        self.assertEqual(routes["requirements_sha256"], self.accepted["requirements_sha256"])
+        stops = [
+            c["checks"]["stop_position_m"]
+            for c in routes["cases"]
+            if "route_m" in c and c["route_m"]
+        ]
+        self.assertEqual(len(stops), 5)
+        worst_stop = max(s["value"] for s in stops)
         self.assertAlmostEqual(judged["stop_position_tolerance_m"]["value"], worst_stop, places=3)
-        self.assertFalse(any(r["fell"] for r in closed.values()))
+        self.assertTrue(all(s["pass"] for s in stops))
 
     def test_pass_flags_follow_from_values_and_limits(self):
         for name, row in self.accepted["judged"].items():
