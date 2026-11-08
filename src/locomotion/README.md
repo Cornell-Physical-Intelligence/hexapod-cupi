@@ -106,8 +106,11 @@ one field per Table II row with its status, this project's range, the draw
 granularity and the reason. `declaration("table2_v1")` returns the canonical
 JSON and its SHA-256, `730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c`.
 Run identities, packs and admission bind that hash; `none` declares the nominal
-properties and draws nothing. The first milestone-1 review freezes these ranges
-with the push schedule. No row is excluded.
+properties and draws nothing. No row is excluded. The ranges, the push schedule
+and the declaration text are frozen as of 2026-11-08, after the five-seed
+surrogate comparison under #67; `test_randomization.py` pins this hash and the
+grid hash below. A range change takes a new declaration name. Where an engine
+departs from the declaration text, the notes below record it.
 
 | Table II row | Paper | Project range | Draw | Status |
 | --- | --- | --- | --- | --- |

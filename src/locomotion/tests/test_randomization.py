@@ -40,6 +40,17 @@ class DeclarationTests(unittest.TestCase):
         with self.assertRaises(ValueError):
             rnd.declaration("table2_v2")
 
+    def test_table2_v1_and_its_grid_are_frozen(self):
+        # Frozen 2026-11-08 under #67. A range or text change takes a new declaration name.
+        self.assertEqual(
+            rnd.declaration("table2_v1")["sha256"],
+            "730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c",
+        )
+        self.assertEqual(
+            rnd.grid_declaration("table2_v1_grid")["sha256"],
+            "7d631f12e8abefd8141f0dc515eaa446b90b5563315fe41ea608db0ab2822882",
+        )
+
     def test_every_row_records_a_status_range_granularity_and_reason(self):
         table = json.loads(rnd.declaration("table2_v1")["json"])["table"]
         rows = (
