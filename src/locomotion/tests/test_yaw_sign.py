@@ -57,7 +57,7 @@ class YawSignTests(unittest.TestCase):
         bank = command_bank(TaskConfig())
         for sign in SIGNS:
             self.assertIn([0.0, 0.0, sign * TaskConfig().yaw_rate_rad_s], bank)
-        probes = {case["case_id"]: case["command"] for case in cases(load_requirements()[0])}
+        probes = {c["case_id"]: c["command"] for c in cases(load_requirements()[0]) if "command" in c}
         self.assertEqual(probes["turn_-0.20"], [0.0, 0.0, -RATE])
         self.assertEqual(probes["turn_+0.20"], [0.0, 0.0, RATE])
         # Navigation forward is native -Y and left is native +X; both frames share +Z, so yaw keeps its sign.

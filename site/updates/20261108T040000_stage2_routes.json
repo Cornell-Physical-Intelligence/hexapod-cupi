@@ -1,0 +1,26 @@
+{
+  "id": "20261108T040000_stage2_routes",
+  "date": "2026-11-08T04:00:00Z",
+  "title": "Name five routes in the stage 2 walking requirements",
+  "summary": "configs/walking_requirements.json now names five routes under stop.routes_m: 0.5 m forward, diagonal, left and back, and an L of two 0.4 m legs. Each is a list of goals in metres relative to the start pose. The judge enumerates them as route cases beside the 21 fixed cases, the runner lets the waypoint follower drive each one from the simulator's true pose, and the stop check requires the body to end within 0.12 m of the last goal and stay there under a zero command for 20 s. The routes take the measurement the stop row called not yet taken; the row now names what measures it. Every route is at most 0.9 m so one trial fits the 60 s native episode at the slowest speed plus the stay window and two settles. The file's hash changes, so configs/accepted_controller.json is rebound to it; its surrogate closed-loop evidence predates these routes and the note says so. The tilt source line no longer points at the deleted scorer file.",
+  "areas": [
+    "locomotion",
+    "evaluation"
+  ],
+  "next": "Judge c48_long on the five routes in the surrogate, then re-freeze the parity ranges and run the renewal campaign on Spark with the 26 cases.",
+  "changes": [
+    "configs/walking_requirements.json",
+    "configs/accepted_controller.json",
+    "site/project.json",
+    "src/locomotion/tests/test_requirements_judge.py",
+    "src/locomotion/tests/test_yaw_sign.py",
+    "site/updates/20261108T040000_stage2_routes.json"
+  ],
+  "evidence": [
+    "configs/walking_requirements.json",
+    "configs/accepted_controller.json",
+    "src/locomotion/tests/test_requirements_judge.py"
+  ],
+  "no_project_impact": false,
+  "reason": "The approved walking requirements gain five routes and the accepted controller is rebound to the new file hash; the controller's evidence on those routes is not yet taken. The checkpoint, runtime sources, the approved robot and roadmap markers remain unchanged."
+}

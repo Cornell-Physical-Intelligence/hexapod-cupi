@@ -48,25 +48,31 @@ class CaseTests(unittest.TestCase):
     def setUp(self):
         self.rules, _ = judge.load_requirements()
         self.cases = judge.cases(self.rules)
+        self.fixed = [case for case in self.cases if "command" in case]
 
-    def test_the_set_enumerates_the_stand_every_walk_both_turns_and_both_arcs(self):
+    def test_the_set_enumerates_the_stand_every_walk_both_turns_both_arcs_and_the_routes(self):
         ids = [case["case_id"] for case in self.cases]
-        self.assertEqual(len(ids), 1 + 2 * 8 + 2 + 2)
+        routes = self.rules["stop"]["routes_m"]
+        self.assertEqual(len(ids), 1 + 2 * 8 + 2 + 2 + len(routes))
         self.assertEqual(len(set(ids)), len(ids))
         self.assertEqual(ids[0], "stand")
         self.assertIn("walk_0.025_135deg", ids)
         self.assertIn("walk_0.050_0deg", ids)
-        self.assertEqual(ids[-4:], ["turn_-0.20", "turn_+0.20", "arc_-0.15", "arc_+0.15"])
-        for case in self.cases:
+        self.assertEqual(ids[20:21], ["arc_+0.15"])
+        self.assertEqual(ids[21:], ["route_" + name for name in routes])
+        for case in self.fixed:
             self.assertEqual(case["controls"], 1200)
             self.assertEqual(case["stop_control"], 1000)
+        # Every route fits the 60 s native episode at the slowest speed plus the stay and two settles.
+        for case in self.cases[21:]:
+            self.assertLessEqual(case["controls"], 3000)
 
     def test_the_moving_cases_are_the_training_command_bank(self):
-        moving = [case["command"] for case in self.cases if any(case["command"])]
+        moving = [case["command"] for case in self.fixed if any(case["command"])]
         self.assertEqual(moving, command_bank(TaskConfig()))
 
     def test_every_case_is_reachable_from_the_declared_stance(self):
-        for case in self.cases:
+        for case in self.fixed:
             speed = math.hypot(*case["command"][:2])
             with self.subTest(case=case["case_id"]):
                 self.assertLessEqual(speed * GAIT_PERIOD_S / 2, REACH_M)
@@ -208,7 +214,8 @@ class RouteTests(unittest.TestCase):
         # Path length at the slowest speed, the stay window and two settles.
         self.assertEqual(routes[0]["controls"], round((0.5 / 0.025 + 20.0 + 4.0) / 0.02))
         self.assertEqual(routes[1]["controls"], round((1.0 / 0.025 + 20.0 + 4.0) / 0.02))
-        self.assertNotIn("route_m", judge.cases(judge.load_requirements()[0])[-1])
+        shipped = [c for c in judge.cases(judge.load_requirements()[0]) if "route_m" in c]
+        self.assertEqual(len(shipped), 5)
 
     def test_the_producer_drives_the_follower_from_the_true_pose(self):
         # Body yaw pi/2 points anatomical forward (-y of the body) along world +x.
