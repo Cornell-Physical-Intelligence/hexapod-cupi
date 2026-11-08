@@ -1,10 +1,10 @@
 {
   "schema": "hexapod_evidence_files_v1",
-  "scope": "Surrogate (CPU MuJoCo) judgement of the unchanged c48_long checkpoint on all 26 stage2_flat cases: 21 fixed commands held 20 s then stopped, and the five routes with the waypoint follower driving from the surrogate's true pose. Seed 20260917, one trial per case, actor mean, no payload, no odometry error. The surrogate actuator clamps torque at the 1.6 Nm rating, so applied_torque_nm reads the clamp and passes by equality; it is not a torque measurement. Raw 400 Hz traces and the two contact-model consensus runs stay on the lead's machine at the path below; this directory keeps the judgement, the allocation, the surrogate summary and the hashes.",
+  "scope": "Surrogate (CPU MuJoCo) judgement, tilt read standing and after each stop, of the unchanged c48_long checkpoint on all 26 stage2_flat cases: 21 fixed commands held 20 s then stopped, and the five routes with the waypoint follower driving from the surrogate's true pose. Seed 20260917, one trial per case, actor mean, no payload, no odometry error. The surrogate actuator clamps torque at the 1.6 Nm rating, so applied_torque_nm reads the clamp and passes by equality; it is not a torque measurement. Raw 400 Hz traces and the two contact-model consensus runs stay on the lead's machine at the path below; this directory keeps the judgement, the allocation, the surrogate summary and the hashes.",
   "raw_traces": "/Users/palerider/hexapod-evidence/surrogate-runs/c48_requirements_26cases_20261108",
   "checkpoint_sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
-  "judge_sha256": "595f317e86188cc5e3312a2ebd85864742cb459fd4a89eb57d33e2d06e4f205d",
-  "requirements_sha256": "cdaaea46dd7dc50c34c46f80ca524036c0a1e431bf1fee46e363e4cd535f190a",
+  "judge_sha256": "9b00891ab917811e5312ad6c8c645615aa440fc3a19d61090b8cc2d089d9e738",
+  "requirements_sha256": "eb6622e701d222f14128a941ba9143e17d00db957f755162b4ff796b0ed2f87a",
   "judge": "src/locomotion/evaluation/requirements.py",
   "note": "surrogate_summary.json was written by the run before the judge's float32 drift tolerance fix and lacks drift_per_hold_m on the four 0.05 m/s diagonal walks; judgement.json is the same traces judged after the fix.",
   "files": {
@@ -13,8 +13,8 @@
       "bytes": 5266
     },
     "judgement.json": {
-      "sha256": "210b6c63c395df3035631641467706a55e9d06e1e8f7903fa6d10e176b7d53ab",
-      "bytes": 44254
+      "sha256": "cf3d18e9d6ff8097139880b2892572f0fda8b5f6a655b5b14f2153664c610a73",
+      "bytes": 43580
     },
     "surrogate_summary.json": {
       "sha256": "e1c96add4f3e82c719ba0a63075cf84eeed057e367e3577842914d9ec6630758",

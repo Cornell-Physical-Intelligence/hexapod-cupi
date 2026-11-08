@@ -64,6 +64,7 @@
         "measured_against": "the simulator's true root pose with the waypoint follower driving each route from the start pose; the body must end within position_tolerance_m of the last goal and stay there under a zero command for stay_stopped_s; src/locomotion/evaluation/requirements.py stop_position_m"
       },
       "tilt_max_deg": 1.7,
+      "tilt_measured_against": "the body's up axis against world up while standing and after each stop, from stop.settle_s after the zero command to the end of the trial; the body may tilt while it moves",
       "motor_torque_max_nm": 1.6,
       "pose_source": "Livox Mid-360 lidar-inertial odometry for local position and heading; GPS without RTK (3 m error bound) for the global frame",
       "payload": {
@@ -92,7 +93,7 @@
   },
   "sources": {
     "commands, hold_min_s, stop.position_tolerance_m": "src/navigation/waypoint.py command bank and follower defaults, bound by src/navigation/tests/test_requirements.py",
-    "tilt_max_deg": "the retired scorer's TAIL maximum_tilt_degrees (src/locomotion/evaluation/scoring.py until a8d1a825, archive bound in configs/source_inventory.json); its 5 degree static-scenario bound was a diagnostic",
+    "tilt_max_deg": "the retired scorer's TAIL maximum_tilt_degrees, a stop-tail bound (src/locomotion/evaluation/scoring.py until a8d1a825, archive bound in configs/source_inventory.json); program lead decision 2026-11-08 that it applies standing and after each stop only, since c48_long tilts 2.0 to 2.4 degrees while moving on both simulators",
     "motor_torque_max_nm": "docs/RS05_SPEC_REVIEW.md rated rotating torque",
     "ground, pose_source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20 (ground); program lead decision 2026-11-07 that the Mid-360 is the localization sensor (pose_source)",
     "hold_max_s, stop.settle_s, stop.stay_stopped_s": "program lead, 2026-11-07",

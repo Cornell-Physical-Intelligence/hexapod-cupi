@@ -26,6 +26,7 @@ def trace_from_path(path, commands, torque=0.0, tilt_rad=0.0):
     pose[:, 0, 0] = path[:n, 0]
     pose[:, 0, 1] = path[:n, 1]
     # Yaw about z, then tilt about the body x axis.
+    tilt_rad = np.broadcast_to(np.asarray(tilt_rad, dtype=np.float64), (len(path),))[:n]
     pose[:, 0, 3] = np.sin(tilt_rad / 2) * np.cos(path[:n, 2] / 2)
     pose[:, 0, 4] = np.sin(tilt_rad / 2) * np.sin(path[:n, 2] / 2)
     pose[:, 0, 5] = np.cos(tilt_rad / 2) * np.sin(path[:n, 2] / 2)
@@ -151,6 +152,23 @@ class JudgeTests(unittest.TestCase):
         self.assertAlmostEqual(tilted["checks"]["tilt_deg"]["value"], 3.0, places=5)
         self.assertEqual(tilted["checks"]["tilt_deg"]["bound"], self.rules["tilt_max_deg"])
         self.assertEqual(tilted["failed_checks"], ["tilt_deg"])
+        # Tilt is a stand-and-stop limit: a body that tilts only while it walks passes.
+        walking = [[0.05, 0.0, 0.0]] * 1000 + [[0.0, 0.0, 0.0]] * 200
+        tilt = np.zeros(1201)
+        tilt[:1100] = math.radians(3.0)
+        leaning = trace_from_path(
+            judge.ghost_path((0.0, 0.0, 0.0), walking), walking, tilt_rad=tilt
+        )
+        self.assertAlmostEqual(
+            judge.judge_case(leaning, self.rules, 1200)["checks"]["tilt_deg"]["value"],
+            0.0,
+            places=5,
+        )
+        tilt[:] = math.radians(3.0)
+        leaning = trace_from_path(
+            judge.ghost_path((0.0, 0.0, 0.0), walking), walking, tilt_rad=tilt
+        )
+        self.assertIn("tilt_deg", judge.judge_case(leaning, self.rules, 1200)["failed_checks"])
         strained = judge.judge_case(trace_from_path(path, commands, torque=1.7), self.rules, 50)
         self.assertEqual(strained["checks"]["applied_torque_nm"]["bound"], 1.6)
         self.assertEqual(strained["failed_checks"], ["applied_torque_nm"])

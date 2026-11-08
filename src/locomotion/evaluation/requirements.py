@@ -12,7 +12,8 @@ simulator's true pose, so the command at each control depends on where the body 
 
 Checks per case: drift per hold (the gap between the body and the path its command traces),
 stopping distance (travel after the command becomes zero, read after the settle), tilt (the
-largest body tilt) and applied motor torque (the largest absolute value). The drift limit is set
+largest body tilt while standing and after each stop, past the settle; the body may tilt while it
+moves) and applied motor torque (the largest absolute value). The drift limit is set
 at ``drift_speed_mps`` and applied to every command of the set at or below that speed. A route
 case adds the stop position: the body must finish within ``stop.position_tolerance_m`` of the last
 goal and stay there, under a zero command, for ``stop.stay_stopped_s``. An incomplete trace fails.
@@ -218,6 +219,17 @@ def stopping_distance(trace, settle_s):
     }
 
 
+def stand_and_stop_rows(trace, settle_s):
+    """Rows under a zero command, excluding the first ``settle_s`` after each stop; tilt is read there."""
+    commands = np.asarray(trace["command"][:, 0, :], dtype=np.float64)
+    moving = np.any(commands != 0, axis=1)
+    still = ~moving
+    settle = int(round(settle_s / CONTROL_DT_S))
+    for k in np.nonzero(moving[:-1] & ~moving[1:])[0] + 1:
+        still[k : k + settle] = False
+    return still
+
+
 def _check(value, bound):
     return {"value": float(value), "bound": float(bound), "pass": bool(value <= bound)}
 
@@ -272,9 +284,11 @@ def judge_case(trace, rules, controls=None, case=None):
         checks["stopping_distance_m"] = _check(
             stop["final_distance_m"], limits["stopping_distance_max_m"]
         )
-    checks["tilt_deg"] = _check(
-        tilt_degrees(trace["root_pose_xyzw"][:, 0, :]).max(), rules["tilt_max_deg"]
-    )
+    still = stand_and_stop_rows(trace, rules["stop"]["settle_s"])
+    if still.any():
+        checks["tilt_deg"] = _check(
+            tilt_degrees(trace["root_pose_xyzw"][still, 0, :]).max(), rules["tilt_max_deg"]
+        )
     checks["applied_torque_nm"] = _check(
         np.abs(trace["applied_torque_abs_max_400hz"]).max(), rules["motor_torque_max_nm"]
     )
