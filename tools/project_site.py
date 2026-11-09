@@ -324,18 +324,24 @@ def validate_progress(project):
 
 
 ACCEPTED_CONTROLLER = "configs/accepted_controller.json"
+WALK_AND_STOP = "stage2"
 
 
 def validate_done_means(steps):
     """Each roadmap step says what done means and names the owner file that decides it.
 
     The owner file must exist in the repository. The accepted controller file must own
-    a step and decides it: the step cannot be done while a judged row fails or while
-    nobody is named as having accepted the videos.
+    the walk and stop step and decides it: the step cannot be done while a judged row
+    fails, while the file judges nothing, or while nobody is named as having accepted
+    the videos.
     """
     require(
         any(step.get("owner") == ACCEPTED_CONTROLLER for step in steps),
         "No roadmap step names its owner as " + ACCEPTED_CONTROLLER,
+    )
+    require(
+        all(s.get("owner") == ACCEPTED_CONTROLLER for s in steps if s["id"] == WALK_AND_STOP),
+        "The walk and stop step must name its owner as " + ACCEPTED_CONTROLLER,
     )
     for step in steps:
         owner = step.get("owner")
@@ -347,8 +353,15 @@ def validate_done_means(steps):
         require(path is not None and path.is_file(), "Roadmap owner file is missing: " + owner)
         if owner == ACCEPTED_CONTROLLER and step["state"] == "done":
             accepted = read(ROOT / owner)
+            judged = accepted.get("judged")
+            require(
+                isinstance(judged, dict) and judged,
+                f"{step['title']} is not done: {owner} has no judged rows",
+            )
             failing = sorted(
-                name for name, row in accepted["judged"].items() if row.get("pass") is not True
+                name
+                for name, row in judged.items()
+                if not isinstance(row, dict) or row.get("pass") is not True
             )
             require(
                 not failing,

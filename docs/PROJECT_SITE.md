@@ -55,7 +55,8 @@ Change `site/project.json` when a result changes:
    a `source` path. Each step names its `owner` file, which must exist, and
    states in `done_means` what that file must show. The check refuses `done` on
    the step that `configs/accepted_controller.json` owns while a judged row
-   fails or the file names no `video_accepted_by`.
+   fails or the file names no `video_accepted_by`. Walk and stop keeps that file
+   as its owner.
 4. `nodes`: a part's one sentence and its state (`working`, `in_progress`,
    `not_started`).
 

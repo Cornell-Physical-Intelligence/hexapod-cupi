@@ -298,6 +298,39 @@ class ProgressTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "No roadmap step names its owner"):
             site.validate_done_means(steps)
 
+    def test_the_walking_step_cannot_hand_the_accepted_controller_to_another_step(self):
+        # Another step holds the owner file while the walking step, marked done, names a
+        # different one or the same file under a different spelling.
+        for owner in ("evidence.md", "./configs/accepted_controller.json"):
+            with self.subTest(owner=owner):
+                steps = self.owned_steps(judged={"drift": {"pass": False}})
+                steps[1].update(owner=owner, done_means="A reviewer accepts " + owner + ".")
+                steps[3].update(
+                    owner=site.ACCEPTED_CONTROLLER,
+                    done_means="Each judged row of configs/accepted_controller.json passes.",
+                )
+                with self.assertRaisesRegex(ValueError, "walk and stop step must name"):
+                    site.validate_done_means(steps)
+
+    def test_walk_and_stop_is_not_done_when_the_file_judges_nothing(self):
+        steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+        accepted = site.ROOT / "configs/accepted_controller.json"
+        for judged in ({}, None, ["drift"], "all pass"):
+            with self.subTest(judged=judged):
+                accepted.write_text(
+                    json.dumps({"video_accepted_by": "Fixture reviewer", "judged": judged})
+                )
+                with self.assertRaisesRegex(ValueError, "has no judged rows"):
+                    site.validate_done_means(steps)
+        accepted.write_text(json.dumps({"video_accepted_by": "Fixture reviewer"}))
+        with self.assertRaisesRegex(ValueError, "has no judged rows"):
+            site.validate_done_means(steps)
+        accepted.write_text(
+            json.dumps({"video_accepted_by": "Fixture reviewer", "judged": {"drift": True}})
+        )
+        with self.assertRaisesRegex(ValueError, "judged rows fail.*drift"):
+            site.validate_done_means(steps)
+
 
 if __name__ == "__main__":
     unittest.main()
