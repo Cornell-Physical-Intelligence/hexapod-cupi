@@ -1,0 +1,23 @@
+{
+  "id": "20261109T201232_navigation_guides_pose_source",
+  "date": "2026-11-09T20:12:32Z",
+  "title": "Correct the GPS-only lines in the navigation and mission guides",
+  "summary": "The navigation guide said that position will come from onboard GPS only, and the mission guide said that navigation uses GPS only. The walking requirements name the pose source since 7 November: Mid-360 odometry for local position and heading, with GPS for the global frame. The navigation guide now cites that pose source, and the mission guide says that navigation does not use its Mid-360 prototypes yet. The pose estimate remains pending.",
+  "areas": [
+    "navigation",
+    "mission"
+  ],
+  "next": "Run the Spark renewal campaign on the 26 cases when the GPU is free. Re-review PRs 87 and 92 and review PR 99.",
+  "changes": [
+    "site/updates/20261109T201232_navigation_guides_pose_source.json",
+    "src/mission/README.md",
+    "src/navigation/README.md"
+  ],
+  "evidence": [
+    "configs/walking_requirements.json",
+    "src/navigation/README.md",
+    "src/mission/README.md"
+  ],
+  "no_project_impact": true,
+  "reason": "Two guide lines change to match the pose source that the requirements file already decides. No code, result or gate changes."
+}
