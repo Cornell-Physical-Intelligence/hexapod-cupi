@@ -3,7 +3,7 @@
   "title": "Hexapod",
   "repository": "Cornell-Physical-Intelligence/hexapod-cupi",
   "status_source": "STATUS.md",
-  "mission": "We are building a six-legged robot that walks a planned route across a mapped area and stops at each survey point. It finds its way with GPS alone.",
+  "mission": "We are building a six-legged robot that walks a planned route across a mapped area and stops at each survey point. It finds its way with a Livox Mid-360 laser scanner and GPS.",
   "latest": {
     "date": "2026-10-12",
     "title": "One training run passes all 13 movement tests",
@@ -169,7 +169,7 @@
     {
       "id": "position",
       "title": "Track position",
-      "text": "GPS tells the route follower where the robot is on the map.",
+      "text": "The laser scanner and GPS tell the route follower where the robot is.",
       "state": "not_started",
       "column": 1,
       "row": 1,
@@ -361,7 +361,7 @@
     },
     {
       "term": "Movement test",
-      "meaning": "One case from the walking requirements: a fixed command, such as walking sideways at 5 cm/s for 20 s and then stopping, with limits on drift, stopping distance, tilt and motor torque; or a route, where the waypoint follower drives the body to goals and it must stop within 12 cm of the last one. There are 26; walk and stop needs all of them and a review of the videos."
+      "meaning": "One of the 26 walking requirements: a fixed command, such as walking sideways at 5 cm/s and then stopping, with limits on drift, stopping distance, tilt and motor torque; or a route that must end within 12 cm of its last goal. Walk and stop needs all 26 and a review of the videos."
     },
     {
       "term": "Training run",
