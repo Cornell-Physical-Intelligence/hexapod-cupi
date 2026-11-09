@@ -18,7 +18,7 @@ shows each part and joint of the approved robot.
 | Directory | Contents |
 | --- | --- |
 | `src/locomotion/` | Simulation, rewards, training, the movement tests and the guarded Spark launcher. |
-| `src/navigation/` | A waypoint follower example; the route planner and GPS position come later. |
+| `src/navigation/` | A waypoint follower and a grid route planner; the position estimate from the laser scanner and GPS comes later. |
 | `src/contracts/` | Shared message types, such as speed and direction commands and planar poses. |
 | `src/mission/` | Sensor-pattern and transport prototypes. |
 | `robot/` | The approved robot model (18 motors, 7.47 kg) and its hash-pinned simulation inputs. |
