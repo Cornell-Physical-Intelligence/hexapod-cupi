@@ -279,6 +279,25 @@ class ProgressTests(unittest.TestCase):
                     site.validate_done_means(self.owned_steps(**accepted))
         site.validate_done_means(self.owned_steps(video_accepted_by="Fixture reviewer"))
 
+    def test_each_owner_file_must_exist_in_the_repository(self):
+        for owner in ("configs/renamed.json", "configs", "https://example.org/owner.json"):
+            with self.subTest(owner=owner):
+                steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+                steps[3].update(owner=owner, done_means="A reviewer accepts " + owner + ".")
+                with self.assertRaisesRegex(ValueError, "Missing|owner file is missing"):
+                    site.validate_done_means(steps)
+        steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+        (site.ROOT / "configs/accepted_controller.json").unlink()
+        with self.assertRaisesRegex(ValueError, "Missing"):
+            site.validate_done_means(steps)
+
+    def test_the_accepted_controller_must_own_a_roadmap_step(self):
+        # Pointing the walking step at another owner would otherwise skip its rule.
+        steps = self.owned_steps(judged={"drift": {"pass": False}})
+        steps[1].update(owner="evidence.md", done_means="A reviewer accepts evidence.md.")
+        with self.assertRaisesRegex(ValueError, "No roadmap step names its owner"):
+            site.validate_done_means(steps)
+
 
 if __name__ == "__main__":
     unittest.main()

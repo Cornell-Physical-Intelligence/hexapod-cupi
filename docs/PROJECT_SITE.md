@@ -52,10 +52,10 @@ Change `site/project.json` when a result changes:
 2. `accomplishments`: one line per result, newest first, with its evidence path.
 3. `roadmap`: move `now` when a step finishes; completed steps come first. A
    step becomes `done` only with `accepted_by` (the person who accepted it) and
-   a `source` path. Each step names its `owner` file and states in `done_means`
-   what that file must show. The check refuses `done` on the step that
-   `configs/accepted_controller.json` owns while a judged row fails or the file
-   names no `video_accepted_by`.
+   a `source` path. Each step names its `owner` file, which must exist, and
+   states in `done_means` what that file must show. The check refuses `done` on
+   the step that `configs/accepted_controller.json` owns while a judged row
+   fails or the file names no `video_accepted_by`.
 4. `nodes`: a part's one sentence and its state (`working`, `in_progress`,
    `not_started`).
 

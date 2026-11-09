@@ -329,15 +329,22 @@ ACCEPTED_CONTROLLER = "configs/accepted_controller.json"
 def validate_done_means(steps):
     """Each roadmap step says what done means and names the owner file that decides it.
 
-    The accepted controller file decides its step: the step cannot be done while a
-    judged row fails or while nobody is named as having accepted the videos.
+    The owner file must exist in the repository. The accepted controller file must own
+    a step and decides it: the step cannot be done while a judged row fails or while
+    nobody is named as having accepted the videos.
     """
+    require(
+        any(step.get("owner") == ACCEPTED_CONTROLLER for step in steps),
+        "No roadmap step names its owner as " + ACCEPTED_CONTROLLER,
+    )
     for step in steps:
         owner = step.get("owner")
         require(
             nonempty(step.get("done_means")) and nonempty(owner) and owner in step["done_means"],
             "A roadmap step needs done_means naming its owner file: " + step["id"],
         )
+        path = reference(owner)
+        require(path is not None and path.is_file(), "Roadmap owner file is missing: " + owner)
         if owner == ACCEPTED_CONTROLLER and step["state"] == "done":
             accepted = read(ROOT / owner)
             failing = sorted(

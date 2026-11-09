@@ -1,0 +1,22 @@
+{
+  "id": "20261109T200221_roadmap_owner_files_exist",
+  "date": "2026-11-09T20:02:21Z",
+  "title": "Check that each roadmap owner file exists",
+  "summary": "The site checker now fails when a roadmap step names an owner file that is not a file in the repository, with the same path and capitalization rules as evidence references. It also fails when no step names configs/accepted_controller.json as its owner. Without that rule, an edit that pointed the walk and stop step at another owner would skip the judged-row and video-acceptance rule and admit a done marker. The four owner files that the six steps name exist today: robot/active_model.json, configs/approved_code_version.json, configs/accepted_controller.json and configs/walking_requirements.json. Two new tests cover a renamed or deleted owner, a directory, a URL and a walking step with a different owner.",
+  "areas": [
+    "site"
+  ],
+  "next": "Rewrite ARCHITECTURE so that it cites the owner files; then correct the GPS-only line in the navigation guide.",
+  "changes": [
+    "docs/PROJECT_SITE.md",
+    "site/updates/20261109T200221_roadmap_owner_files_exist.json",
+    "tests/test_project_progress.py",
+    "tools/project_site.py"
+  ],
+  "evidence": [
+    "site/project.json",
+    "tests/test_project_progress.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A checker rule and its tests change. No result, roadmap state, owner file or published page text changes."
+}
