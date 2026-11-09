@@ -1,0 +1,328 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Leg Stand Height</title>
+<style>
+:root {
+  --bg: #f4f4f2; --surface: #fcfcfb; --border: #e3e2de; --grid: #ecebe7;
+  --text: #0b0b0b; --text-2: #52514e; --muted: #85847f;
+  --series: #2a78d6; --accent: #2a78d6;
+  --good: #0ca30c; --warn: #b77800; --crit: #d03b3b;
+  --btn: #ffffff; --btn-hover: #f0efec;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #111110; --surface: #1a1a19; --border: #2e2e2b; --grid: #262624;
+    --text: #f0efec; --text-2: #c3c2b7; --muted: #8b8a83;
+    --series: #3987e5; --accent: #3987e5;
+    --good: #2fbf2f; --warn: #fab219; --crit: #e66767;
+    --btn: #232321; --btn-hover: #2c2c29;
+  }
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", sans-serif; -webkit-font-smoothing: antialiased; }
+.num { font-variant-numeric: tabular-nums; }
+header { display: flex; align-items: center; gap: 10px; padding: 12px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; }
+header h1 { font-size: 16px; font-weight: 600; margin: 0 6px 0 0; letter-spacing: -0.01em; }
+.pill { display: inline-flex; align-items: center; gap: 6px; padding: 3px 10px; border-radius: 999px;
+  border: 1px solid var(--border); font-size: 12px; color: var(--text-2); background: var(--surface); }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); flex: none; }
+.dot.good { background: var(--good); } .dot.warn { background: var(--warn); } .dot.crit { background: var(--crit); }
+header .spacer { flex: 1; }
+select, input, button { font: inherit; color: var(--text); }
+select, input { background: var(--btn); border: 1px solid var(--border); border-radius: 8px; padding: 6px 8px; }
+button { background: var(--btn); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; cursor: pointer;
+  transition: background .12s, transform .08s; white-space: nowrap; }
+button:hover { background: var(--btn-hover); } button:active { transform: scale(0.97); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover { filter: brightness(1.08); }
+main { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(320px, 1fr); gap: 16px; padding: 16px 20px; }
+@media (max-width: 900px) { main { grid-template-columns: 1fr; padding: 12px 16px; } header { padding: 12px 16px; } }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px; min-width: 0; }
+.video { padding: 0; overflow: hidden; position: relative; background: #000; aspect-ratio: 16 / 9; }
+.video img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.video .overlay { position: absolute; inset: 0; display: grid; place-items: center; color: #ddd; text-align: center; padding: 24px; }
+.hero-label { color: var(--text-2); font-size: 13px; display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.hero { font-size: 64px; font-weight: 600; letter-spacing: -0.03em; line-height: 1.05; margin: 6px 0 2px; transition: opacity .15s; }
+.hero.stale { opacity: .35; }
+.hero small { font-size: 22px; font-weight: 500; color: var(--text-2); letter-spacing: 0; margin-left: 4px; }
+.hero-sub { color: var(--text-2); font-size: 13px; min-height: 18px; }
+.metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 10px 16px; margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border); }
+.metric .k { color: var(--muted); font-size: 12px; }
+.metric .v { font-size: 16px; font-weight: 500; }
+.notes { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
+.note { display: flex; gap: 8px; align-items: flex-start; font-size: 13px; color: var(--text-2); }
+.note .dot { margin-top: 5px; }
+.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.side { display: flex; flex-direction: column; gap: 16px; }
+h2 { font-size: 13px; font-weight: 600; margin: 0 0 10px; }
+.chart-card { grid-column: 1 / -1; }
+.chart-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 6px; }
+.chart-head .hint { color: var(--muted); font-size: 12px; }
+.chart-wrap { position: relative; height: 240px; }
+canvas { width: 100%; height: 100%; display: block; }
+.tip { position: absolute; pointer-events: none; background: var(--surface); border: 1px solid var(--border); border-radius: 8px;
+  padding: 6px 9px; font-size: 12px; box-shadow: 0 4px 14px rgba(0,0,0,.12); white-space: nowrap; display: none; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; margin-top: 10px; }
+th { text-align: right; color: var(--muted); font-weight: 500; padding: 4px 6px; border-bottom: 1px solid var(--border); }
+td { text-align: right; padding: 5px 6px; border-bottom: 1px solid var(--grid); }
+th:first-child, td:first-child { text-align: left; }
+td button { padding: 1px 8px; font-size: 12px; }
+.help { color: var(--muted); font-size: 13px; margin-top: 8px; }
+.calline { font-size: 13px; color: var(--text-2); margin-top: 10px; }
+.ref { width: 100px; }
+a { color: var(--accent); }
+.seg { display: inline-flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; }
+.seg button { border: 0; border-radius: 0; padding: 3px 8px; font-size: 12px; background: var(--btn); color: var(--text-2); }
+.seg button.on { background: var(--accent); color: #fff; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Leg stand · tag height</h1>
+  <span class="pill"><span class="dot" id="statusDot"></span><span id="statusText">connecting</span></span>
+  <span class="pill num" id="camInfo">–</span>
+  <span class="pill"><span class="dot" id="lockDot"></span><span id="lockText">–</span></span>
+  <span class="spacer"></span>
+  <label class="row" style="gap:6px;color:var(--text-2);font-size:13px">Camera
+    <select id="camSel">
+      <option value="0">0</option><option value="1">1</option>
+      <option value="2">2</option><option value="3">3</option>
+    </select>
+  </label>
+  <button id="relock" title="Re-solve the camera orientation from the next 60 frames. Do this after the camera mount is bumped, then set the zero again.">Re-lock orientation</button>
+</header>
+
+<main>
+  <div class="card video">
+    <img id="video" src="/stream.mjpg" alt="Camera view with detected tags outlined">
+    <div class="overlay" id="videoOverlay">Waiting for the camera…</div>
+  </div>
+
+  <div class="side">
+    <div class="card">
+      <div class="hero-label">
+        <span id="heroLabel">Camera-to-plate distance</span>
+        <span class="seg" id="smooth" title="Averaging window for the big number">
+          <button data-s="0">raw</button><button data-s="0.1" class="on">0.1 s</button><button data-s="0.5">0.5 s</button><button data-s="2">2 s</button>
+        </span>
+      </div>
+      <div class="hero num" id="hero">–<small>mm</small></div>
+      <div class="hero-sub num" id="heroSub">&nbsp;</div>
+      <div class="metrics">
+        <div class="metric"><div class="k">Noise (sd, last 2 s)</div><div class="v num" id="mNoise">–</div></div>
+        <div class="metric"><div class="k">Camera / processed</div><div class="v num" id="mFps">–</div></div>
+        <div class="metric"><div class="k">Frame to number</div><div class="v num" id="mLat">–</div></div>
+        <div class="metric"><div class="k">Tags seen 0 / 1 (2 s)</div><div class="v num" id="mSeen">–</div></div>
+        <div class="metric"><div class="k">Reprojection error</div><div class="v num" id="mReproj">–</div></div>
+        <div class="metric"><div class="k">Camera tilt</div><div class="v num" id="mTilt">–</div></div>
+      </div>
+      <div class="notes" id="notes"></div>
+    </div>
+
+    <div class="card">
+      <h2>Zero and reference points</h2>
+      <div class="row">
+        <button class="primary" id="zero" title="The current position becomes 0 mm (1 s average)">Set zero here</button>
+        <input class="ref num" id="ref" type="number" step="0.01" placeholder="ref mm">
+        <button id="point" title="Average 1 s here and pair it with the reference distance from the zero">Add point</button>
+      </div>
+      <div class="calline num" id="calLine"></div>
+      <div id="pointsWrap"></div>
+      <div class="row" style="margin-top:10px;font-size:13px">
+        <button id="flip" title="Which way is positive while no reference points exist">Flip direction</button>
+        <button id="clear">Clear zero and points</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="card chart-card">
+    <div class="chart-head">
+      <h2 id="chartTitle">Height, last 30 s (mm)</h2>
+      <span class="hint">Every processed frame. Hover for values.</span>
+    </div>
+    <div class="chart-wrap" id="chartWrap"><canvas id="chart"></canvas><div class="tip num" id="tip"></div></div>
+  </div>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const fmt = (v, d = 2) => (v === null || v === undefined || !isFinite(v)) ? '–' : v.toFixed(d);
+const WINDOW = 30;                              // seconds on the chart
+let buf = [];                                   // [t, h_raw|null, both]
+let lastT = 0, lastRecv = 0, last = null, S = null, smooth = 0.1, dirty = true;
+
+async function post(url) { const r = await fetch(url, { method: 'POST' }); const j = await r.json(); refreshState(); return j; }
+
+// ---------------------------------------------------------------- calibration on the client (same formula as the server)
+function z(h) {
+  if (h === null || h === undefined) return null;
+  if (!S || S.cal.h0 === null) return h;
+  return S.cal.a * (h - S.cal.h0);
+}
+const calibrated = () => S && S.cal.h0 !== null;
+
+// ---------------------------------------------------------------- controls
+$('relock').onclick = () => post('/relock');
+$('camSel').onchange = e => post('/camera?index=' + e.target.value);
+$('zero').onclick = async () => { const r = await post('/zero'); if (r.error) alert(r.error); };
+$('point').onclick = async () => {
+  const ref = $('ref').value.trim();
+  if (!ref) { $('ref').focus(); return; }
+  const r = await post('/point?ref=' + encodeURIComponent(ref));
+  if (r.error) alert(r.error); else $('ref').value = '';
+};
+$('ref').addEventListener('keydown', e => { if (e.key === 'Enter') $('point').click(); });
+$('flip').onclick = () => post('/flip');
+$('clear').onclick = () => { if (confirm('Clear the zero and all reference points?')) post('/clear'); };
+document.querySelectorAll('#smooth button').forEach(b => b.onclick = () => {
+  smooth = parseFloat(b.dataset.s);
+  document.querySelectorAll('#smooth button').forEach(x => x.classList.toggle('on', x === b));
+  updateHero();
+});
+const setDot = (el, k) => el.className = 'dot' + (k ? ' ' + k : '');
+
+// ---------------------------------------------------------------- per-frame stream
+function connect() {
+  const es = new EventSource('/events');
+  es.onmessage = e => {
+    const s = JSON.parse(e.data);
+    last = s; lastRecv = performance.now();
+    buf.push([s.t, s.h, s.both ? 1 : 0]);
+    lastT = s.t;
+    while (buf.length && buf[0][0] < lastT - WINDOW - 1) buf.shift();
+    updateHero(); dirty = true;
+  };
+  es.onerror = () => { es.close(); setTimeout(connect, 1000); };
+}
+
+function recent(sec) { const out = []; for (let i = buf.length - 1; i >= 0 && buf[i][0] >= lastT - sec; i--) if (buf[i][1] !== null) out.push(buf[i][1]); return out; }
+function sd(a) { if (a.length < 2) return null; const m = a.reduce((x, y) => x + y) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)); }
+
+function updateHero() {
+  if (!last) return;
+  let vals = smooth > 0 ? recent(smooth) : (last.h !== null ? [last.h] : []);
+  if (!vals.length) { const r = recent(0.5); if (r.length) vals = [r[0]]; }
+  const stale = last.h === null;
+  const h = vals.length ? vals.reduce((x, y) => x + y) / vals.length : null;
+  const v = z(h);
+  $('hero').innerHTML = (v === null ? '–' : (calibrated() && v > 0 ? '+' : '') + v.toFixed(2)) + '<small>mm</small>';
+  $('hero').classList.toggle('stale', stale);
+  const tags = last.ids.length === 2 ? 'both tags' : last.ids.length === 1 ? `tag ${last.ids[0]} only (offset-corrected)` : 'no tags this frame';
+  $('heroSub').textContent = (calibrated() && h !== null ? `camera distance ${h.toFixed(2)} mm · ` : '') + tags;
+  const n = sd(recent(2).map(z));
+  $('mNoise').textContent = n === null ? '–' : `${n.toFixed(3)} mm`;
+  $('mReproj').textContent = last.reproj === null ? '–' : `${last.reproj.toFixed(2)} px`;
+  $('mTilt').textContent = last.tilt === null ? '–' : `${last.tilt.toFixed(2)}°`;
+  $('mLat').textContent = `${fmt(last.lat, 0)} ms`;
+}
+
+// ---------------------------------------------------------------- slow state (1 Hz)
+async function refreshState() {
+  try { S = await (await fetch('/state', { cache: 'no-store' })).json(); } catch (e) { $('statusText').textContent = 'server not reachable'; setDot($('statusDot'), 'crit'); return; }
+  const live = S.status === 'live' || S.status === 'simulated';
+  setDot($('statusDot'), live ? 'good' : (S.status === 'no camera' ? 'crit' : 'warn'));
+  $('statusText').textContent = S.status + (live && S.camera !== null ? ` · index ${S.camera}` : '');
+  $('camInfo').textContent = `ELP · 1280×720 · ${S.variant} contrast`;
+  setDot($('lockDot'), S.locked ? 'good' : 'warn');
+  $('lockText').textContent = S.locked ? 'orientation locked' : `locking ${S.lock_progress}/${S.lock_needed}`;
+  $('videoOverlay').style.display = live ? 'none' : 'grid';
+  $('videoOverlay').textContent = S.error || 'Waiting for the camera…';
+  $('mFps').textContent = `${fmt(S.camera_fps, 0)} / ${fmt(S.process_fps, 0)} fps`;
+  $('mSeen').textContent = S.seen['0'] === null ? '–' : `${Math.round(S.seen['0'] * 100)} / ${Math.round(S.seen['1'] * 100)} %`;
+  $('heroLabel').textContent = calibrated() ? 'Height from zero' : 'Camera-to-plate distance';
+  $('chartTitle').textContent = (calibrated() ? 'Height from zero' : 'Camera-to-plate distance') + `, last ${WINDOW} s (mm)`;
+
+  const c = S.cal;
+  if (c.h0 === null) $('calLine').textContent = 'No zero yet: the number is the raw lens-to-plate distance.';
+  else $('calLine').textContent = `Zero at camera distance ${c.h0.toFixed(3)} mm · scale ${c.a.toFixed(5)} ` +
+      (c.fitted ? `(fitted to ${c.n_ref} point${c.n_ref > 1 ? 's' : ''})` : `(default, ${c.a < 0 ? 'toward camera' : 'away from camera'} = +)`);
+  $('flip').style.display = c.fitted ? 'none' : '';
+  if (!c.points.length) {
+    $('pointsWrap').innerHTML = c.h0 === null
+      ? '<div class="help">1. Put the carriage at the reference position and press Set zero. 2. Move to known offsets (gauge blocks or the encoder), type the offset in mm and press Add point. Two or three points fix the scale; more show the residuals.</div>'
+      : '<div class="help">Zero set. Move to a known offset, type it and press Add point to fit the scale.</div>';
+  } else {
+    $('pointsWrap').innerHTML = '<table class="num"><thead><tr><th>#</th><th>ref</th><th>measured</th><th>error</th><th>sd</th><th></th></tr></thead><tbody>' +
+      c.points.map((p, i) => `<tr><td>${i + 1}</td><td>${p.ref_mm.toFixed(2)}</td><td>${fmt(p.z_mm, 3)}</td>` +
+        `<td>${p.resid_mm === null ? '–' : (p.resid_mm >= 0 ? '+' : '') + p.resid_mm.toFixed(3)}</td><td>${p.sd_mm.toFixed(3)}</td>` +
+        `<td><button data-i="${i}" title="Delete this point">×</button></td></tr>`).join('') + '</tbody></table>';
+    $('pointsWrap').querySelectorAll('button').forEach(b => b.onclick = () => post('/delete?i=' + b.dataset.i));
+  }
+
+  const notes = [];
+  if (live && last && last.reproj > 2) notes.push(['warn', `Reprojection error ${last.reproj.toFixed(1)} px is high: blur, glare on the tags, or intrinsics that don't match this camera.`]);
+  if (live && S.seen['0'] !== null && Math.min(S.seen['0'], S.seen['1']) < 0.9) notes.push(['warn', 'A tag drops out in some frames. Single-tag frames are offset-corrected, but sharper contrast helps: black tags on white (printed paper or white filament), even light, no glare.']);
+  if (live && S.camera_fps && S.camera_fps < 25 && S.status === 'live') notes.push(['warn', `The camera delivers ${S.camera_fps.toFixed(0)} fps: auto-exposure in dim light. More light on the plate raises it.`]);
+  if (S.status === 'no camera') notes.push(['crit', S.error]);
+  $('notes').innerHTML = notes.map(([k, t]) => `<div class="note"><span class="dot ${k}"></span><span>${t}</span></div>`).join('');
+  updateHero(); dirty = true;
+}
+
+// ---------------------------------------------------------------- chart (canvas, single series, crosshair)
+const cv = $('chart'), ctx = cv.getContext('2d');
+let hoverX = null, geom = null;
+function css(v) { return getComputedStyle(document.documentElement).getPropertyValue(v).trim(); }
+function niceStep(span, n) { const raw = span / n, p = Math.pow(10, Math.floor(Math.log10(raw))), f = raw / p; return (f < 1.5 ? 1 : f < 3 ? 2 : f < 7 ? 5 : 10) * p; }
+function draw() {
+  requestAnimationFrame(draw);
+  if (!dirty) return; dirty = false;
+  const dpr = window.devicePixelRatio || 1, W = cv.clientWidth, H = cv.clientHeight;
+  if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
+  ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
+  const m = { l: 60, r: 14, t: 10, b: 24 };
+  const pts = buf.filter(p => p[1] !== null && p[0] >= lastT - WINDOW).map(p => [p[0], z(p[1]), p[2]]);
+  let lo = 0, hi = 1;
+  if (pts.length) {
+    lo = Infinity; hi = -Infinity; for (const p of pts) { if (p[1] < lo) lo = p[1]; if (p[1] > hi) hi = p[1]; }
+    const mid = (lo + hi) / 2, span = Math.max(hi - lo, 1.0) * 1.15; lo = mid - span / 2; hi = mid + span / 2;
+  }
+  const X = t => m.l + (t - (lastT - WINDOW)) / WINDOW * (W - m.l - m.r);
+  const Y = v => m.t + (hi - v) / (hi - lo) * (H - m.t - m.b);
+  ctx.font = '11px -apple-system, BlinkMacSystemFont, sans-serif'; ctx.fillStyle = css('--muted'); ctx.strokeStyle = css('--grid'); ctx.lineWidth = 1;
+  const step = niceStep(hi - lo, 4), dec = step < 0.1 ? 2 : step < 1 ? 1 : 0;
+  ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+  for (let v = Math.ceil(lo / step) * step; v <= hi; v += step) { const y = Math.round(Y(v)) + 0.5; ctx.beginPath(); ctx.moveTo(m.l, y); ctx.lineTo(W - m.r, y); ctx.stroke(); ctx.fillText(v.toFixed(dec), m.l - 8, y); }
+  ctx.textAlign = 'center'; ctx.textBaseline = 'alphabetic';
+  for (let s = 0; s <= WINDOW; s += 5) ctx.fillText(s === 0 ? 'now' : `−${s} s`, X(lastT - s), H - 6);
+  if (!pts.length) { ctx.fillText('No height yet', (m.l + W - m.r) / 2, H / 2); geom = null; return; }
+  ctx.strokeStyle = css('--series'); ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+  ctx.beginPath(); let prev = null;
+  for (const p of pts) { const x = X(p[0]), y = Y(p[1]); if (prev === null || p[0] - prev > 0.5) ctx.moveTo(x, y); else ctx.lineTo(x, y); prev = p[0]; }
+  ctx.stroke();
+  const lp = pts[pts.length - 1];
+  ctx.fillStyle = css('--series'); ctx.strokeStyle = css('--surface'); ctx.lineWidth = 2;
+  ctx.beginPath(); ctx.arc(X(lp[0]), Y(lp[1]), 4, 0, 7); ctx.fill(); ctx.stroke();
+  geom = { pts, X, Y, m, W, H };
+  if (hoverX !== null) {
+    let best = null, bd = Infinity; for (const p of pts) { const d = Math.abs(X(p[0]) - hoverX); if (d < bd) { bd = d; best = p; } }
+    const tip = $('tip');
+    if (best && bd < 30) {
+      const x = X(best[0]), y = Y(best[1]);
+      ctx.strokeStyle = css('--text-2'); ctx.lineWidth = 1; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(x, m.t); ctx.lineTo(x, H - m.b); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = css('--series'); ctx.strokeStyle = css('--surface'); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(x, y, 5, 0, 7); ctx.fill(); ctx.stroke();
+      tip.style.display = 'block';
+      tip.innerHTML = `<b>${best[1].toFixed(3)} mm</b><br><span style="color:var(--muted)">${(lastT - best[0]).toFixed(1)} s ago · ${best[2] ? 'both tags' : 'one tag'}</span>`;
+      const tw = tip.offsetWidth; tip.style.left = (x + 12 + tw > W ? x - tw - 12 : x + 12) + 'px'; tip.style.top = Math.max(y - 46, 0) + 'px';
+    } else tip.style.display = 'none';
+  }
+}
+$('chartWrap').addEventListener('mousemove', e => { hoverX = e.clientX - cv.getBoundingClientRect().left; dirty = true; });
+$('chartWrap').addEventListener('mouseleave', () => { hoverX = null; $('tip').style.display = 'none'; dirty = true; });
+window.addEventListener('resize', () => dirty = true);
+
+// ---------------------------------------------------------------- start
+(async () => {
+  await refreshState();
+  try { for (const p of await (await fetch('/history')).json()) buf.push(p); if (buf.length) lastT = buf[buf.length - 1][0]; } catch (e) {}
+  connect(); draw();
+  setInterval(refreshState, 1000);
+  setInterval(() => { if (last && performance.now() - lastRecv > 600) { $('hero').classList.add('stale'); $('heroSub').textContent = 'no new frames'; } }, 300);
+})();
+$('video').onerror = () => setTimeout(() => { $('video').src = '/stream.mjpg?' + Date.now(); }, 1000);
+</script>
+</body>
+</html>
