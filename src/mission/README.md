@@ -2,8 +2,8 @@
 
 You can reuse the Mid-360 ray pattern and sensor transport/noise prototype under
 `sensors/`. CPU tests preserve the transport regressions. The ray-pattern module
-requires the pinned Isaac Lab runtime. Navigation uses GPS only, so these
-prototypes have no navigation role.
+requires the pinned Isaac Lab runtime. Navigation does not use these
+prototypes yet.
 
 Survey request handling and mission controls remain pending. GeoData owns survey
 recording and export.

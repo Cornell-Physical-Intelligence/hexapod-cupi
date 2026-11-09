@@ -124,50 +124,33 @@ def smoothed_policy(evaluate, env, action_smoothing):
 
 
 def run_evaluation(env, args, policy, state, started):
-    """Score the policy on the selected cases, then require a complete set of load summaries."""
+    """Record and judge every requirement case, then require a complete set of load summaries."""
     from locomotion.amp.features import extract_features
-    from locomotion.evaluation.runner import evaluate_suite, run_learning_probe_suite
+    from locomotion.evaluation import requirements
+    from locomotion.evaluation.runner import run_cases
 
     env.render = NativePolicyCamera(env)
     remaining = max(0.001, args.max_wall_seconds - (time.monotonic() - started))
-    options = dict(
-        progress=print_progress, max_wall_seconds=remaining, motion_features=extract_features
+    first = requirements.cases(requirements.load_requirements()[0])[0]["case_id"]
+    state["evaluation"] = run_cases(
+        env,
+        policy,
+        args.output / "evaluation",
+        args.geometry_extrema,
+        args.checkpoint,
+        video_case_id=args.video_case or first,
+        seed=args.seed,
+        progress=print_progress,
+        max_wall_seconds=remaining,
+        motion_features=extract_features,
     )
-    if args.eval_scope == "full":
-        result = evaluate_suite(
-            env,
-            policy,
-            args.output / "evaluation",
-            args.geometry_extrema,
-            args.checkpoint,
-            **options,
-        )
-    else:
-        selected = (
-            ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
-            if args.eval_scope == "focus"
-            else None
-        )
-        result = run_learning_probe_suite(
-            env,
-            policy,
-            args.output / "evaluation",
-            args.geometry_extrema,
-            args.checkpoint,
-            selected_case_ids=selected,
-            record_video=True,
-            video_case_id=args.video_case,
-            seed=args.seed,
-            **options,
-        )
-    state["evaluation"] = result
     summaries = list((args.output / "evaluation").rglob("force_metrics.json"))
     if not summaries or any(json.loads(p.read_text())["status"] != "available" for p in summaries):
         raise ValueError("Evaluation has no complete set of load summaries")
 
 
 def evaluate(env, session):
-    """Load the checkpoint actor and score it on the selected cases."""
+    """Load the checkpoint actor and judge it on the requirement cases."""
     args = session.args
     config = learner_config(args, session.identity, session.state)
     policy = evaluation_policy(

@@ -231,7 +231,7 @@ const PACKAGES=[
 ['hexapod','hexapod','The stock Isaac Lab task on the hexapod with scripted-tripod BC and PPO fine-tuning.'],
 ['amp','amp','Motion demonstrations, motion features and AMP learning.'],
 ['surrogate','surrogate','CPU MuJoCo training and trace replay.'],
-['evaluation','evaluation','Native capture, scene checks, admission, scoring and training diagnostics.'],
+['evaluation','evaluation','Native capture, scene checks, admission, the requirements judge and training diagnostics.'],
 ['robots','robots','Robot identity, RS05 motor model and Isaac actuator.'],
 ['rl','rl','RSL-RL wrapper, PPO subclasses and action distributions.'],
 ['scripts','scripts','Container entry points: train, play and diagnose.'],

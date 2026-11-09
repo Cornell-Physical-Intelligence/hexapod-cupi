@@ -452,8 +452,8 @@ class PolicyTests(unittest.TestCase):
         def check(status):
             return {
                 "pass": status == "pass",
-                "failed_bounds": [] if status == "pass" else ["bound"],
-                "checks": {"bound": {"status": status}},
+                "failed_checks": [] if status == "pass" else ["bound"],
+                "checks": {"bound": {"pass": status == "pass"}},
             }
 
         agreed = evaluate.consensus(
@@ -472,7 +472,7 @@ class PolicyTests(unittest.TestCase):
             }
         )
         self.assertEqual(
-            (split["verdict"], split["checks"], split["failed_bounds_in_all"]),
+            (split["verdict"], split["checks"], split["failed_checks_in_all"]),
             ("unresolved", {"bound": "unresolved"}, []),
         )
 

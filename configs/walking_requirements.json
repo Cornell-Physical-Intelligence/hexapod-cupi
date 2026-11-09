@@ -1,0 +1,104 @@
+{
+  "schema_version": 1,
+  "purpose": "Everything the survey asks of the walking controller, with numbers. Navigation sends only these commands. The accepted controller is judged only on the set it claims. No guide restates these values.",
+  "decided_by": "program lead",
+  "sets": {
+    "stage2_flat": {
+      "decided_on": "2026-11-07",
+      "ground": "flat, level, obstacle-free; drawn exclusions are avoided by the route planner, not by the controller",
+      "commands": {
+        "translate_speeds_mps": [
+          0.025,
+          0.05
+        ],
+        "translate_bearings": 8,
+        "turn_rate_rad_s": 0.2,
+        "arc": {
+          "speed_mps": 0.04,
+          "turn_rate_rad_s": 0.15
+        },
+        "stand": true
+      },
+      "hold_min_s": 2.0,
+      "hold_max_s": 20.0,
+      "stop": {
+        "settle_s": 2.0,
+        "position_tolerance_m": 0.12,
+        "stay_stopped_s": 20.0,
+        "routes_m": {
+          "forward_0.5m": [
+            [
+              0.5,
+              0.0
+            ]
+          ],
+          "diagonal_0.5m": [
+            [
+              0.3536,
+              0.3536
+            ]
+          ],
+          "left_0.5m": [
+            [
+              0.0,
+              0.5
+            ]
+          ],
+          "back_0.5m": [
+            [
+              -0.5,
+              0.0
+            ]
+          ],
+          "L_0.8m": [
+            [
+              0.4,
+              0.0
+            ],
+            [
+              0.4,
+              0.4
+            ]
+          ]
+        },
+        "measured_against": "the simulator's true root pose with the waypoint follower driving each route from the start pose; the body must end within position_tolerance_m of the last goal and stay there under a zero command for stay_stopped_s; src/locomotion/evaluation/requirements.py stop_position_m"
+      },
+      "tilt_max_deg": 1.7,
+      "tilt_measured_against": "the body's up axis against world up while standing and after each stop, from stop.settle_s after the zero command to the end of the trial; the body may tilt while it moves",
+      "motor_torque_max_nm": 1.6,
+      "pose_source": "Livox Mid-360 lidar-inertial odometry for local position and heading; GPS without RTK (3 m error bound) for the global frame",
+      "payload": {
+        "device": "Livox Mid-360 lidar",
+        "mass_kg": 0.265,
+        "size_m": [
+          0.065,
+          0.065,
+          0.06
+        ],
+        "power_w": 6.5,
+        "supply_v": [
+          9,
+          27
+        ],
+        "note": "Sensor only. Mount, cable and any compute or battery on the deck add to this mass and are not decided."
+      },
+      "controller": {
+        "stopping_distance_max_m": 0.05,
+        "drift_per_hold_max_m": 0.1,
+        "drift_hold_s": 20.0,
+        "drift_speed_mps": 0.05,
+        "measured_against": "the simulator's true root pose against the path the command would trace, actor mean, one trial per case; src/locomotion/evaluation/requirements.py"
+      }
+    }
+  },
+  "sources": {
+    "commands, hold_min_s, stop.position_tolerance_m": "src/navigation/waypoint.py command bank and follower defaults, bound by src/navigation/tests/test_requirements.py",
+    "tilt_max_deg": "the retired scorer's TAIL maximum_tilt_degrees, a stop-tail bound (src/locomotion/evaluation/scoring.py until a8d1a825, archive bound in configs/source_inventory.json); program lead decision 2026-11-08 that it applies standing and after each stop only, since c48_long tilts 2.0 to 2.4 degrees while moving on both simulators",
+    "motor_torque_max_nm": "docs/RS05_SPEC_REVIEW.md rated rotating torque",
+    "ground, pose_source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20 (ground); program lead decision 2026-11-07 that the Mid-360 is the localization sensor (pose_source)",
+    "hold_max_s, stop.settle_s, stop.stay_stopped_s": "program lead, 2026-11-07",
+    "payload": "https://www.livoxtech.com/mid-360/specs, program lead decision 2026-11-07",
+    "controller": "program lead, 2026-11-07",
+    "stop.routes_m": "program lead, 2026-11-08; goals in metres relative to the start pose in its forward frame, each route at most 0.9 m so one trial fits the 60 s native episode at the slowest speed plus the stay window and two settles"
+  }
+}

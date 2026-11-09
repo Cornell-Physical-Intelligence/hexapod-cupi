@@ -1,0 +1,26 @@
+{
+  "id": "20261109T203413_guides_retire_scorer_lines",
+  "date": "2026-11-09T20:34:13Z",
+  "title": "Remove the 96-case scorer and GPS-only lines that remained in the guides",
+  "summary": "Three guides still described the state before the walking requirements. AGENTS said that Stage 2 needs the full 96-case manifest, that the scorer and the 96-case suite judge, and that agents take numbers from the scorer. It now names the judged rows of configs/accepted_controller.json against the walking requirements, the requirements judge and unchanged limits. CONTRIBUTING said that Ruff excludes src/locomotion/evaluation/scoring.py and that tests keep the scorer byte-identical; commit a8d1a825 removed that file, so the guide now says the retired scorer stays archived in the source inventory. The README contents row said that the route planner and GPS position come later; the planner exists, and the row now names it and the position estimate from the laser scanner and GPS. No rule about gates, tests or evidence changes.",
+  "areas": [
+    "site",
+    "locomotion",
+    "navigation"
+  ],
+  "next": "Run the Spark renewal campaign on the 26 cases when the GPU is free. Re-review PRs 87 and 92 and review PR 99.",
+  "changes": [
+    "AGENTS.md",
+    "CONTRIBUTING.md",
+    "README.md",
+    "site/updates/20261109T203413_guides_retire_scorer_lines.json"
+  ],
+  "evidence": [
+    "docs/TRAINING.md",
+    "configs/accepted_controller.json",
+    "configs/walking_requirements.json",
+    "src/navigation/README.md"
+  ],
+  "no_project_impact": true,
+  "reason": "Three guides change to match decisions and code that earlier commits on this branch already made. No code, result or gate changes."
+}

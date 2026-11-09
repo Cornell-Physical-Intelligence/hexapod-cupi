@@ -53,12 +53,12 @@ def read_run(root, role):
         or cleanup["container_id"] != job["container_id"]
     ):
         raise ValueError("Native attempt or cleanup did not complete")
-    summary = json.loads((root / "evaluation/summary.json").read_text())
+    summary = json.loads((root / "evaluation/judgement.json").read_text())
     if summary["allocation"]["checkpoint_sha256"] != CHECKPOINT_SHA:
         raise ValueError("Native checkpoint provenance differs")
     loads = sorted((root / "evaluation").glob("batch_*/force_metrics.json"))
-    if len(loads) != 13:
-        raise ValueError("Require contact and motor loads from all 13 probes")
+    if len(loads) != len(summary["allocation"]["cases"]):
+        raise ValueError("Require contact and motor loads from every declared case")
     summary["loads"] = {}
     for path in loads:
         value = json.loads(path.read_text())
@@ -68,7 +68,7 @@ def read_run(root, role):
     summary["provenance"] = {
         "run": str(root),
         "state_sha256": sha(root / "state.json"),
-        "summary_sha256": sha(root / "evaluation/summary.json"),
+        "summary_sha256": sha(root / "evaluation/judgement.json"),
         "source_freeze_sha256": freeze,
         "source_declaration_sha256": sha(pack / "source/PARITY.json"),
         "binding_sha256": sha(pack / "binding.json"),
@@ -133,7 +133,6 @@ def main():
             receipt = {
                 "schema": compat.SCHEMA,
                 "mode": "evaluate",
-                "eval_scope": "probes",
                 "checkpoint_sha256": compat.CHECKPOINT_SHA,
                 "declaration_sha256": compat.DECLARATION_SHA,
                 "original_identity": record["identity"],

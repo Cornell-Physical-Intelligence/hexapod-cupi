@@ -1,0 +1,25 @@
+{
+  "id": "20261109T201132_architecture_cites_owner_files",
+  "date": "2026-11-09T20:11:32Z",
+  "title": "Rewrite ARCHITECTURE to cite the owner files",
+  "summary": "ARCHITECTURE said that the robot locates itself with GPS and told a command producer to match its envelope to the controller's demonstrated range. Five owner files now decide those points, so the guide gains an owner-file table: the robot model, the walking requirements, the accepted controller, the approved code version and the roadmap, each with what it decides and what reads it. The guide cites the files and does not restate their numbers. The pose source is the one the requirements name, Mid-360 lidar-inertial odometry with GPS without RTK for the global frame. Navigation sends only the commands of a requirement set, bound by the navigation requirements test. The status paragraph now names the closed-loop routes in simulation and the grid route planner, and lists what remains open. The section headings that code comments and tests cite are unchanged. An independent review checked each statement against its source; the table states that the site check reports a lapsed code approval without failing and that no check reads pose_source.",
+  "areas": [
+    "navigation",
+    "locomotion",
+    "site"
+  ],
+  "next": "Correct the GPS-only lines in the navigation and mission guides.",
+  "changes": [
+    "ARCHITECTURE.md",
+    "site/updates/20261109T201132_architecture_cites_owner_files.json"
+  ],
+  "evidence": [
+    "ARCHITECTURE.md",
+    "configs/walking_requirements.json",
+    "configs/accepted_controller.json",
+    "configs/approved_code_version.json",
+    "robot/active_model.json"
+  ],
+  "no_project_impact": true,
+  "reason": "A guide changes to cite decisions that the owner files already record. No decision, result or gate changes."
+}

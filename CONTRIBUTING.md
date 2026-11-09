@@ -42,10 +42,10 @@ Review fixes and run the affected tests. CI runs both checks without modifying
 files and fails on violations. Do not use unsafe fixes without reviewing their
 behavior. Keep a rule suppression local and explain the required exception.
 
-Ruff excludes published evidence, frozen test fixtures, the retained original
-`src/locomotion/hexapod/` experiment and `src/locomotion/evaluation/scoring.py`.
-Tests bind the retained experiment to its pinned source and require the scorer
-to remain byte-identical to the archived oracle. Formatting other native runtime files
+Ruff excludes published evidence, frozen test fixtures and the retained original
+`src/locomotion/hexapod/` experiment. Tests bind the retained experiment to its
+pinned source. The retired 96-case scorer stays archived in
+`configs/source_inventory.json`. Formatting other native runtime files
 changes their source hashes and requires fresh standing admission and checkpoint
 compatibility evidence before those files can run an admitted checkpoint.
 

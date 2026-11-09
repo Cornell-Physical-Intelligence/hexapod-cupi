@@ -1,0 +1,25 @@
+{
+  "id": "20261109T195935_roadmap_done_means",
+  "date": "2026-11-09T19:59:35Z",
+  "title": "State what done means for each roadmap step and name the file that decides it",
+  "summary": "Each of the six roadmap steps in site/project.json now carries an owner file and a done_means sentence that names it: the robot model for the design and the build, the approved code version campaign for standing, the accepted controller for walk and stop, and the walking requirements for rough ground and the survey. The site checker requires both fields on each step. It refuses the done state on the step that configs/accepted_controller.json owns while a judged row does not pass or while the file names no video_accepted_by. Today that file fails drift_per_hold_m and tilt_deg and has no video_accepted_by, so the checker refuses walk and stop as done. The checker reads the pass flags only: it cannot tell a surrogate measurement from a native one, so the native condition in the sentence stays with the program lead. Three new tests cover a missing sentence or owner, a failing row and a missing video acceptance. The page does not show the new sentences.",
+  "areas": [
+    "site",
+    "evaluation"
+  ],
+  "next": "Replace GPS alone in the mission sentence with the Mid-360 plus GPS pose source from the requirements file; then the owner-file existence check, the ARCHITECTURE rewrite and the navigation guide.",
+  "changes": [
+    "docs/PROJECT_SITE.md",
+    "site/project.json",
+    "site/updates/20261109T195935_roadmap_done_means.json",
+    "tests/test_project_progress.py",
+    "tools/project_site.py"
+  ],
+  "evidence": [
+    "site/project.json",
+    "configs/accepted_controller.json",
+    "tests/test_project_progress.py"
+  ],
+  "no_project_impact": false,
+  "reason": "The roadmap markers and states do not change. The checker gains a rule that blocks a future done marker on walk and stop."
+}

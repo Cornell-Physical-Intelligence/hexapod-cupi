@@ -12,8 +12,8 @@ from locomotion.amp import dataset
 from locomotion.amp.dataset import motion_cases
 from locomotion.amp.features import feature_contract
 from locomotion.evaluation.force_metrics import report_for
+from locomotion.evaluation.requirements import ghost_path
 from locomotion.robots.hexapod import JOINT_NAMES, MODEL_SHA256, USD_SHA256
-from locomotion.tests.test_evaluation import fixture as scoring_fixture
 
 
 def trace_fixture(command=(0.025, 0.0, 0.0), heading=0.0):
@@ -56,9 +56,16 @@ def replay_fixture(root):
     native.mkdir(parents=True)
     command = [0.025, 0.0, 0.0]
     trace, offset = trace_fixture(command)
-    for name, value in scoring_fixture(command=tuple(command)).items():
-        if name not in trace:
-            trace[name] = value[:, None]
+    # The body follows the path its command traces, so the judge's drift is zero; the motion
+    # features depend on velocities and body-relative positions, not on where the body is.
+    path = ghost_path((0.0, 0.0, 0.0), [command] * 1000)[:1000, :2]
+    shift = np.concatenate([path, np.zeros((1000, 1))], axis=1)
+    trace["toe_xyz_world_m"] = trace["toe_xyz_world_m"] + shift[:, None, None, :]
+    trace["root_pose_xyzw"][:, 0, :2] = path
+    for name in ("joint_target_rad", "computed_torque_nm", "applied_torque_nm"):
+        trace[name] = np.zeros((1000, 1, 18))
+    for name in ("applied_torque_abs_max_400hz", "nonfoot_contact_count_400hz"):
+        trace[name] = np.zeros((1000, 1))
     np.savez_compressed(evaluation / "control_trace.npz", **trace)
     # Video bytes stand in for a reviewed file; this fixture makes no visual claim.
     (evaluation / "rollout.mp4").write_bytes(b"synthetic video fixture")
