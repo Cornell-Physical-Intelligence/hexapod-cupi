@@ -12,7 +12,7 @@ shows definitions and imports.
 | `omniwalk/` | Omnidirectional walking task, Direct environment and learner recipe. | `env.py`, `task.py` |
 | `rl/` | RSL-RL wrapper, PPO subclasses and action distributions. | `wrapper.py` |
 | `scripts/` | Container entry points: train, play and diagnose. | `train.py` |
-| `evaluation/` | Native capture, scene checks, admission, scoring and training diagnostics. | `runner.py` |
+| `evaluation/` | Native capture, scene checks, admission, the requirements judge and training diagnostics. | `runner.py` |
 | `spark/` | Prepare, launch and bind native allocations. | `prepare.py` |
 | `amp/` | Motion demonstrations, motion features and AMP learning. | [README](amp/README.md) |
 | `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
@@ -222,8 +222,8 @@ files match the ones it binds. The 2 November 2026 campaign on the reformatted
 runtime renewed the receipt
 ([c48_receipt_renewal_20261102_001](../../site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json)):
 standing admission at 1 and 128 robots, 13 of 13 probes through the parity
-harness, and a CPU production-loader check; its 56 bound runtime files match
-main since PR 91 merged.
+harness, and a CPU production-loader check. `tools/project_site.py check`
+reports whether its 56 bound runtime files still match the tree.
 `tests/native_parity_pack.py` writes a candidate replay pack with the harness
 and its pinned ranges, and `spark/pack.py` records the root review of any pack
 before launch. Stage 2 is judged on the walking requirements, with visual

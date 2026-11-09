@@ -90,9 +90,8 @@ Use the detailed 19-body, 18-joint direct-drive robot after matching native
 admission. Preserve checkpoint bytes, published manifests, raw captures, failed
 attempts, incident/recovery records and the probe ledger. Use fresh result
 names and exact model/source/input hashes. Retain historical labels and source
-revisions. Stage 2 requires direction, transition, stop, torque, contact and
-visual acceptance. Native evaluations must record ground-contact force and
-motor torque before another optimizer/PPO sequence; these measurements add no
+revisions. Native evaluations must record ground-contact force and motor
+torque before another optimizer/PPO sequence; these measurements add no
 acceptance limits.
 
 ## Compute and publication
