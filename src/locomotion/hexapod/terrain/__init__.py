@@ -3,7 +3,7 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Hexapod rough-terrain task on terrain v2.1 (stairs, pits, boxes, slopes) with the terrain and speed curricula.
+"""Hexapod rough-terrain task on terrain v2.2 (stairs, pits, boxes, slopes) with the terrain and speed curricula.
 
 Import this module (callback ``locomotion.hexapod.terrain.register``) to register the task beside the original two.
 """
@@ -11,7 +11,7 @@ Import this module (callback ``locomotion.hexapod.terrain.register``) to registe
 import gymnasium as gym
 
 gym.register(
-    id="Hexapod-Rough-v21-Direct-v0",
+    id="Hexapod-Rough-v22-Direct-v0",
     entry_point=f"{__name__}.env:HexapodTerrainEnv",
     disable_env_checker=True,
     kwargs={

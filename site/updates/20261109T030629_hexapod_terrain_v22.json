@@ -1,23 +1,24 @@
 {
-  "id": "20261025T204142_hexapod_terrain_v21",
-  "date": "2026-10-25T20:41:42.000000Z",
+  "id": "20261109T030629_hexapod_terrain_v22",
+  "date": "2026-11-09T03:06:29Z",
   "title": "Add a stairs-and-boxes terrain task for the original hexapod environment",
-  "summary": "A new task, Hexapod-Rough-v21-Direct-v0, trains the original hexapod environment blind over a 10-level course of rough ground, slopes, stairs up, pits and boxes, with a terrain curriculum, a swing-clearance reward and an optional command-speed curriculum. The original Flat and Rough tasks are unchanged.",
+  "summary": "A new task, Hexapod-Rough-v22-Direct-v0, trains the original hexapod environment blind over a 10-level course of rough ground, slopes, stairs up, pits and boxes, with a terrain curriculum, a swing-clearance reward and an optional command-speed curriculum. Terrain v2.2 puts all six toes on level ground at every reset, sizes the course border for a successful episode at the largest command and fails episodes that leave the course; success is logged per completed episode and per terrain type. The original Flat and Rough tasks are unchanged.",
   "areas": [
     "locomotion"
   ],
-  "next": "Train Hexapod-Rough-v21-Direct-v0 natively on the Spark from a flat BC + PPO checkpoint and compare it under the common evaluator.",
+  "next": "Record ground-contact force and motor torque under the common evaluator, as AGENTS.md requires before another PPO sequence; only then train Hexapod-Rough-v22-Direct-v0 natively on the Spark from a flat BC + PPO checkpoint.",
   "changes": [
     "src/locomotion/hexapod/terrain/__init__.py",
     "src/locomotion/hexapod/terrain/agents.py",
     "src/locomotion/hexapod/terrain/curriculum.py",
     "src/locomotion/hexapod/terrain/env.py",
     "src/locomotion/hexapod/terrain/env_cfg.py",
+    "src/locomotion/hexapod/terrain/geometry.py",
     "src/locomotion/hexapod/terrain/terrains_cfg.py",
     "src/locomotion/tests/test_hexapod_terrain.py",
     "src/locomotion/README.md",
     "configs/source_inventory.json",
-    "site/updates/20261025T204142_hexapod_terrain_v21.json"
+    "site/updates/20261109T030629_hexapod_terrain_v22.json"
   ],
   "evidence": [
     "src/locomotion/tests/test_hexapod_terrain.py",

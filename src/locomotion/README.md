@@ -94,8 +94,10 @@ pinned Isaac Lab checkout. Use stock train/play scripts with callback
 `locomotion.hexapod.register` and task `Hexapod-Flat-Direct-v0` or
 `Hexapod-Rough-Direct-v0`. For blind walking over stairs, pits, boxes and slopes,
 use callback `locomotion.hexapod.terrain.register` and task
-`Hexapod-Rough-v21-Direct-v0` (`hexapod/terrain/`): a 10-level terrain
+`Hexapod-Rough-v22-Direct-v0` (`hexapod/terrain/`): a 10-level terrain
 curriculum, a swing-clearance reward and an optional command-speed curriculum.
+Terrain v2.2 gives every reset a level spawn area under all six toes; the
+stage1v21 checkpoints trained on the v2.1 geometry (see `terrains_cfg.py`).
 Run BC with
 `./isaaclab.sh -p -m locomotion.hexapod.tools.bc_clone` and the
 [original recipe](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/969ea5bc942df3122b2662650f29acd11644a41c/hexapod/METHOD.md#3-how-to-reproduce-inside-the-container)

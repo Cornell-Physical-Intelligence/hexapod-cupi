@@ -3,7 +3,9 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-"""Blind rough-terrain task on terrain v2.1, with the settings of the stage1v21 runs in hexapod-locomotion."""
+"""Blind rough-terrain task on terrain v2.2, with the task settings of the stage1v21 runs in hexapod-locomotion.
+
+Those runs trained on the v2.1 geometry; ``terrains_cfg`` lists what v2.2 changes."""
 
 import isaaclab.sim as sim_utils
 from isaaclab.scene import InteractiveSceneCfg
@@ -51,8 +53,11 @@ class HexapodTerrainEnvCfg(HexapodFlatEnvCfg):
     swing_clearance_reward_scale: float = 0.05
     swing_clearance_target: float = 0.06
 
-    # Success, logged as Metrics/success_eval: the episode reached time-out without a fall AND
-    # | episode-mean speed along the command - |command| | < success_speed_tol_ratio * |command|.
+    # Success, logged as Metrics/success_eval (one value per completed episode, also per terrain type, with the
+    # counts Metrics/success_eval_episodes / _successes): the episode reached time-out without a fall or leaving the
+    # course AND | episode-mean speed along the command - |command| | < success_speed_tol_ratio * |command|.
+    # Leaving the course (the root within the toe reach of the mesh edge) terminates the episode; it is counted in
+    # Episode_Termination/off_course and, since HexapodEnv counts every termination, also in base_contact.
     success_speed_tol_ratio: float = 0.25
     success_min_cmd_ratio: float = 0.1
     """Commands below this fraction of command_lin_vel_max use that floor as the tolerance base."""
@@ -61,12 +66,13 @@ class HexapodTerrainEnvCfg(HexapodFlatEnvCfg):
     terrain_curriculum: bool = True
     curriculum_move_down_speed_ratio: float = 0.5
 
-    # Command-speed curriculum (top-speed sweep), off by default: command_lin_vel_max starts at
+    # Command-speed curriculum (top-speed sweep), off by default: the largest sampled linear command starts at
     # command_curriculum_start and rises by command_curriculum_step whenever, over the last
     # command_curriculum_window_episodes finished episodes whose command was in the top bucket [max - step, max],
-    # the success rate is >= command_curriculum_success. Capped at command_curriculum_max.
-    # The top-speed runs were on flat ground (terrain_type "plane") with step 0.05 and max 0.8; the extension run
-    # resumed at start 0.55 and reached ~0.65 m/s.
+    # the success rate is >= command_curriculum_success. Capped at command_curriculum_max. Only the command sampler
+    # reads it: the reward sigma, gates and success thresholds keep using the fixed command_lin_vel_max. (The
+    # top-speed runs, on flat ground with step 0.05 and max 0.8, wrote it into command_lin_vel_max and so also moved
+    # those scales; their rewards are not reproduced here. The course border is sized for command_curriculum_max.)
     command_curriculum: bool = False
     command_curriculum_start: float = 0.15
     command_curriculum_step: float = 0.05

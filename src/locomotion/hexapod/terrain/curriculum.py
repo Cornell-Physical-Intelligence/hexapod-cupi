@@ -1,4 +1,5 @@
-"""Torch-only pieces of the terrain task: episode outcome, swing clearance and the command-speed curriculum.
+"""Torch-only pieces of the terrain task: episode outcome, its log entries, swing clearance and the command-speed
+curriculum.
 
 Kept free of Isaac Lab imports so the CPU tests can load this file directly.
 """
@@ -51,6 +52,52 @@ def swing_clearance(toe_z: torch.Tensor, in_contact: torch.Tensor, target: float
     ref = torch.where(in_contact.any(dim=1), (toe_z * in_contact).sum(dim=1) / n_contact, toe_z.min(dim=1).values)
     lift = (toe_z - ref[:, None]).clamp(0.0, target) / target
     return (lift * ~in_contact).sum(dim=1)
+
+
+SUCCESS_KEY = "Metrics/success_eval"
+SPEED_ERR_KEY = "Metrics/speed_err_along_cmd"
+EPISODES_KEY = "Metrics/success_eval_episodes"
+SUCCESSES_KEY = "Metrics/success_eval_successes"
+
+
+def episode_log(
+    success: torch.Tensor,
+    ran: torch.Tensor,
+    speed_err: torch.Tensor,
+    type_ids: torch.Tensor | None = None,
+    type_names: list[str] | None = None,
+) -> dict:
+    """Log entries for the episodes that just ended, aggregated per completed episode.
+
+    RSL-RL's logger concatenates each key's 1-D tensors over the steps of an iteration before taking the mean, so a
+    tensor with one value per completed episode averages to the per-episode rate. Episodes that did not run (the forced
+    reset at start-up) contribute nothing. The counts are per step; their ratio is the same rate. ``type_ids`` indexes
+    ``type_names`` per env and adds ``Metrics/success_eval/<type>``.
+    """
+    done = ran.bool()
+    log = {
+        SUCCESS_KEY: success[done].float(),
+        SPEED_ERR_KEY: speed_err[done].float(),
+        EPISODES_KEY: float(done.sum().item()),
+        SUCCESSES_KEY: float((success & done).sum().item()),
+    }
+    if type_names is not None:
+        for index, name in enumerate(type_names):
+            log[f"{SUCCESS_KEY}/{name}"] = success[done & (type_ids == index)].float()
+    return log
+
+
+def cleared_episode_log(log: dict, keys) -> dict:
+    """A copy of ``log`` in which ``keys`` record no episode: empty tensors, zero counts.
+
+    The environment hands the logger the same ``extras["log"]`` dict on every step until the next reset rebinds it, so
+    without this each step without a reset would repeat the last reset's outcomes. A new dict leaves the entries the
+    logger already holds unchanged.
+    """
+    cleared = dict(log)
+    for key in keys:
+        cleared[key] = 0.0 if key in (EPISODES_KEY, SUCCESSES_KEY) else torch.zeros(0)
+    return cleared
 
 
 class CommandCurriculum:
