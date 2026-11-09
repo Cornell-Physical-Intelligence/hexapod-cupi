@@ -22,8 +22,6 @@ six toes on level ground at the origin (``geometry.spawn_half_extent``):
   command from an edge tile (``geometry.required_course_border``).
 """
 
-import functools
-
 import numpy as np
 
 import isaaclab.terrains as terrain_gen
@@ -67,23 +65,29 @@ def random_uniform_terrain_leveled(difficulty: float, cfg: hf_terrains_cfg.HfRan
     return hf_terrains.random_uniform_terrain.__wrapped__(difficulty, cfg.replace(noise_range=(lo, hi_d)))
 
 
-def spawn_area_origin(func):
-    """Wrap a height-field terrain function so its origin height is the highest point under the spawn area.
+def _spawn_area_origin(generated, cfg):
+    """Replace the origin height of a height-field tile ``([mesh], origin)`` with the highest point under the spawn
+    area, in tile coordinates."""
+    meshes, origin = generated
+    hx, hy = spawn_half_extent()
+    pad = cfg.horizontal_scale
+    vertices = np.vstack([mesh.vertices for mesh in meshes])
+    origin = np.array(origin, dtype=float)
+    origin[2] = patch_max_height(vertices, origin[:2], (hx + pad, hy + pad))
+    return meshes, origin
 
-    The wrapped function returns ``([mesh], origin)`` in tile coordinates; only ``origin[2]`` changes.
-    """
 
-    @functools.wraps(func)
-    def wrapper(difficulty, cfg):
-        meshes, origin = func(difficulty, cfg)
-        hx, hy = spawn_half_extent()
-        pad = cfg.horizontal_scale
-        vertices = np.vstack([mesh.vertices for mesh in meshes])
-        origin = np.array(origin, dtype=float)
-        origin[2] = patch_max_height(vertices, origin[:2], (hx + pad, hy + pad))
-        return meshes, origin
+# The sub-terrain functions are plain module-level functions: Isaac Lab serializes ``cfg.function`` as
+# ``module:__name__`` (``callable_to_string``) and Hydra overrides rebuild it from that string, so a decorated wrapper
+# carrying the wrapped function's name would silently resolve back to the stock function.
+def random_rough_terrain(difficulty: float, cfg: hf_terrains_cfg.HfRandomUniformTerrainCfg):
+    """``random_uniform_terrain_leveled`` with its origin height from the spawn area."""
+    return _spawn_area_origin(random_uniform_terrain_leveled(difficulty, cfg), cfg)
 
-    return wrapper
+
+def sloped_terrain(difficulty: float, cfg: hf_terrains_cfg.HfPyramidSlopedTerrainCfg):
+    """Isaac Lab's ``pyramid_sloped_terrain`` (upright or inverted) with its origin height from the spawn area."""
+    return _spawn_area_origin(hf_terrains.pyramid_sloped_terrain(difficulty, cfg), cfg)
 
 
 def make_hexapod_terrains_cfg(
@@ -108,15 +112,15 @@ def make_hexapod_terrains_cfg(
     rough = terrain_gen.HfRandomUniformTerrainCfg(
         proportion=1.0, noise_range=(0.005, 0.02), noise_step=0.005, border_width=HF_BORDER
     )
-    rough.function = spawn_area_origin(random_uniform_terrain_leveled)  # instance attribute: never bound as a method
+    rough.function = random_rough_terrain  # instance attribute: never bound as a method
     slope = terrain_gen.HfPyramidSlopedTerrainCfg(
         proportion=1.0, slope_range=(0.0, 0.27), platform_width=SLOPE_PLATFORM, border_width=HF_BORDER
     )
-    slope.function = spawn_area_origin(hf_terrains.pyramid_sloped_terrain)
+    slope.function = sloped_terrain
     slope_inv = terrain_gen.HfInvertedPyramidSlopedTerrainCfg(
         proportion=1.0, slope_range=(0.0, 0.27), platform_width=SLOPE_PLATFORM, border_width=HF_BORDER
     )
-    slope_inv.function = spawn_area_origin(hf_terrains.pyramid_sloped_terrain)
+    slope_inv.function = sloped_terrain
     sub_terrains = {
         "random_rough": rough,
         "slope": slope,

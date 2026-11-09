@@ -45,6 +45,11 @@ class HexapodTerrainEnv(HexapodEnv):
         # this task reads it as the success tolerance floor and the swing-clearance gate.
         self._command_curriculum = None
         if cfg.command_curriculum:
+            if cfg.command_curriculum_start < cfg.command_lin_vel_min:
+                raise ValueError(
+                    f"command_curriculum_start {cfg.command_curriculum_start} is below command_lin_vel_min "
+                    f"{cfg.command_lin_vel_min}; the command sampler would draw from an empty range"
+                )
             self._command_curriculum = CommandCurriculum(
                 cfg.command_curriculum_start,
                 cfg.command_curriculum_step,

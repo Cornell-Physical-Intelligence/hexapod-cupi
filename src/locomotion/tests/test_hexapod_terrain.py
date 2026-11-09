@@ -471,6 +471,27 @@ class TerrainOffCourseTests(unittest.TestCase):
         torch.testing.assert_close(down, torch.tensor([True, False]))
 
 
+class TerrainFunctionIdentityTests(unittest.TestCase):
+    def test_sub_terrain_functions_are_module_level_names(self):
+        # Isaac Lab serializes cfg.function as module:__name__ and Hydra overrides rebuild it from that string, so each
+        # assigned function must be a plain def of terrains_cfg; a functools.wraps wrapper resolves to the stock one
+        tree = ast.parse((PACKAGE / "terrains_cfg.py").read_text())
+        defs = {n.name for n in tree.body if isinstance(n, ast.FunctionDef)}
+        assigned = [
+            node.value
+            for node in ast.walk(tree)
+            if isinstance(node, ast.Assign)
+            and isinstance(node.targets[0], ast.Attribute)
+            and node.targets[0].attr == "function"
+        ]
+        self.assertEqual(len(assigned), 3)
+        for value in assigned:
+            with self.subTest(function=ast.unparse(value)):
+                self.assertIsInstance(value, ast.Name)
+                self.assertIn(value.id, defs)
+        self.assertNotIn("functools", ast.unparse(tree))
+
+
 class TerrainEnvSourceTests(unittest.TestCase):
     def setUp(self):
         self.tree = ast.parse((PACKAGE / "env.py").read_text())
