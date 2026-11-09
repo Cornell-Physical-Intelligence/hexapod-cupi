@@ -266,6 +266,33 @@ class AdapterTests(unittest.TestCase):
             stepped[:, :3], torch.stack((velocity[:, 1], -velocity[:, 0], velocity[:, 2]), -1)
         )
 
+    def test_privileged_layout_places_friction_and_push_where_the_paper_critic_reads_them(self):
+        offsets, start = {}, 0
+        for name, width, source in amp_ppo.PRIVILEGED_LAYOUT:
+            offsets[name] = (start, start + width, source)
+            start += width
+        self.assertEqual(start, amp_ppo.PRIVILEGED_WIDTH)
+        self.assertEqual(offsets["ground_friction"][:2], (4, 5))
+        self.assertEqual(offsets["external_perturbation"][:2], (23, 29))
+        for name in ("ground_friction", "external_perturbation"):
+            self.assertTrue(offsets[name][2].startswith("environment "), offsets[name][2])
+        for name in ("base_linear_velocity_body", "base_height", "foot_contact_force"):
+            self.assertTrue(offsets[name][2].startswith("telemetry "), offsets[name][2])
+
+    def test_privileged_friction_and_push_read_the_environment(self):
+        task = TaskDouble()
+        task.env.ground_friction = torch.tensor([0.5, 1.5, 2.5])
+        task.env.external_wrench_body = torch.arange(18.0).reshape(3, 6) + 1.0
+        env = AMPVecEnv(task)
+        fresh = env.get_observations()["privileged"]
+        torch.testing.assert_close(fresh[:, 4], task.env.ground_friction)
+        self.assertEqual(float(fresh[:, 23:29].abs().sum()), 0.0)
+        task.terminate_next = torch.tensor([False, True, False])
+        stepped = env.step(torch.zeros(3, 18))[0]["privileged"]
+        torch.testing.assert_close(stepped[:, 4], task.env.ground_friction)
+        torch.testing.assert_close(stepped[[0, 2], 23:29], task.env.external_wrench_body[[0, 2]])
+        self.assertEqual(float(stepped[1, 23:29].abs().sum()), 0.0)
+
     def test_terminal_pairs_use_the_state_before_reset(self):
         task = TaskDouble()
         env = AMPVecEnv(task)

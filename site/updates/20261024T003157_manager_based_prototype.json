@@ -1,0 +1,33 @@
+{
+  "id": "20261024T003157_manager_based_prototype",
+  "date": "2026-10-24T00:31:57Z",
+  "title": "Prototype the walking task as an Isaac Lab manager-based environment",
+  "summary": "The MuJoCo surrogate now imports the native observation, termination, load and telemetry arithmetic in place of its own copies; a seeded surrogate run is bit-identical before and after. A manager-based prototype of the walking task sits beside the certified Direct task: one configuration with a slew-limited action term, a command-bank term, 26 reward terms (one per recorded reward component), a 400 Hz load recorder and the stock RSL-RL wrapper. CPU tests match its reward memory, command draws, state, loads and wrapper outputs to the Direct task bit for bit.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Run the native parity harness on the prototype in the certification run that renews the c48_long receipt for the reformatted runtime.",
+  "changes": [
+    "configs/source_inventory.json",
+    "src/locomotion/README.md",
+    "src/locomotion/omniwalk/mdp/loads.py",
+    "src/locomotion/omniwalk/mdp/memory.py",
+    "src/locomotion/omniwalk/mdp/state.py",
+    "src/locomotion/omniwalk/mdp/terminations.py",
+    "src/locomotion/omniwalk/manager_based/*",
+    "src/locomotion/rl/manager_wrapper.py",
+    "src/locomotion/rl/wrapper.py",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/replay.py",
+    "src/locomotion/surrogate/tests/test_manager_memory.py",
+    "src/locomotion/tests/test_manager_based.py",
+    "site/updates/20261024T003157_manager_based_prototype.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_manager_based.py",
+    "src/locomotion/surrogate/tests/test_manager_memory.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The prototype has no native run or admission. The c48_long receipts bind the runtime of source 717548d5, which the Ruff reformat already changed; the pending certification of main's runtime can bind these files as well."
+}

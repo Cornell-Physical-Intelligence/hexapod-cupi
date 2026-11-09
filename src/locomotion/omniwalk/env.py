@@ -4,7 +4,6 @@ import json
 import math
 from pathlib import Path
 
-import numpy as np
 import omni.physx
 import torch
 import warp as wp
@@ -18,10 +17,11 @@ from pxr import PhysxSchema, UsdPhysics
 
 from locomotion.omniwalk.env_cfg import make_config
 from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
-from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation, rotate
+from locomotion.omniwalk.mdp.loads import SubstepLoads, control_telemetry
 from locomotion.omniwalk.mdp.observations import observations, proprio
+from locomotion.omniwalk.mdp.state import measured_state, toe_points
+from locomotion.omniwalk.mdp.terminations import episode_timeout, physical_termination
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS, USD_SHA256, verify_assets
-from locomotion.robots.rs05 import RATED_TORQUE_NM
 
 
 class CaptureArticulation(Articulation):
@@ -123,18 +123,7 @@ class IsaacEnv(DirectRLEnv):
         self.sensor_map = [
             (self.roots.index(p.rsplit("/", 1)[0]), p.rsplit("/", 1)[1]) for p in paths
         ]
-        default_toes = []
-        for leg in LEGS:
-            shape = next(x for x in self.geometry_meta["shapes"] if x["body"] == leg + "_tibia")
-            transform = np.asarray(shape["shape_to_link"])
-            bounds = np.asarray(shape["cap_bounds_m"])
-            point = np.array([bounds[1, 0], 0.0, 0.0, 1.0])
-            default_toes.append((transform @ point)[:3])
-        self.toe_local = self.torch(
-            np.asarray(self.reference_metadata.get("toe_local_points_m", default_toes))
-        )
-        if self.toe_local.shape != (6, 3) or not torch.isfinite(self.toe_local).all():
-            raise ValueError("Invalid reference toe points")
+        self.toe_local = self.torch(toe_points(self.geometry_meta, self.reference_metadata))
         self.history = torch.zeros((config.num_envs, 5, 42), device=self.device)
         self.previous_action = torch.zeros((config.num_envs, 18), device=self.device)
         self.held = self.neutral.expand(config.num_envs, -1).clone()
@@ -252,12 +241,8 @@ class IsaacEnv(DirectRLEnv):
             self.config.action_scale_rad,
             self.config.target_slew_rad,
         )
-        self.saturation = torch.zeros_like(self.target, dtype=torch.long)
-        self.torque_square = torch.zeros_like(self.target)
-        self.requested_max = torch.zeros_like(self.target)
-        self.applied_max = torch.zeros_like(self.target)
-        self.other_force_max = torch.zeros(self.num_envs, device=self.device)
-        self.tibia_min_force = torch.full((self.num_envs, 6), torch.inf, device=self.device)
+        other = [i for i, name in enumerate(self.native_body_names) if not name.endswith("_tibia")]
+        self.loads = SubstepLoads(self.target, self.toe_index, other)
         self.substep = 0
         self.before_counter = self.sim.get_physics_step_count()
 
@@ -289,14 +274,7 @@ class IsaacEnv(DirectRLEnv):
         if forces.shape != (19 * self.num_envs, 1, 3) or not bool(torch.isfinite(forces).all()):
             raise FloatingPointError("Native floor-force shape/finite check failed")
         forces = forces[self.contact_index, 0].reshape(self.num_envs, 19, 3)
-        norms = torch.linalg.vector_norm(forces, dim=-1)
-        other = [i for i, name in enumerate(self.native_body_names) if not name.endswith("_tibia")]
-        self.other_force_max = torch.maximum(self.other_force_max, norms[:, other].amax(-1))
-        self.tibia_min_force = torch.minimum(self.tibia_min_force, norms[:, self.toe_index])
-        self.saturation += requested.abs() > RATED_TORQUE_NM
-        self.torque_square += applied.square()
-        self.requested_max = torch.maximum(self.requested_max, requested.abs())
-        self.applied_max = torch.maximum(self.applied_max, applied.abs())
+        self.loads.add(requested, applied, forces)
         if self.capture is not None:
             self.capture(
                 state,
@@ -319,12 +297,6 @@ class IsaacEnv(DirectRLEnv):
             raise RuntimeError("Control did not advance exactly eight physics steps")
         self.control_active = False
         target = self.target
-        requested, applied = self.requested, self.applied
-        forces = self.forces
-        saturation, torque_square = self.saturation, self.torque_square
-        requested_max, applied_max = self.requested_max, self.applied_max
-        other_force_max, tibia_min_force = self.other_force_max, self.tibia_min_force
-        action = self.action
         state = self.read_state()
         self.held.copy_(target)
         self.previous_action.copy_(
@@ -334,43 +306,23 @@ class IsaacEnv(DirectRLEnv):
             torch.cat((self.history[:, 1:], proprio(state, self.neutral)[:, None]), dim=1)
         )
         self.total_controls += 1
-        velocity_nav = navigation(state["linear"])
-        joint_violation = ((state["q"] < self.lower - 2e-6) | (state["q"] > self.upper + 2e-6)).any(
-            -1
-        )
-        terminated = (
-            (state["root"][:, 2] < 0.045)
-            | (state["gravity"][:, 2] > -math.cos(0.85))
-            | joint_violation
-        )
-        truncated = self.episode_length_buf >= round(
-            self.config.episode_seconds / self.config.control_dt
+        terminated = physical_termination(state, self.lower, self.upper)
+        truncated = episode_timeout(
+            self.episode_length_buf, self.config.episode_seconds, self.config.control_dt
         )
         self.current = state
-        self.telemetry = {
-            "root_pose_xyzw": state["root"].clone(),
-            "linear_velocity_body": state["linear"].clone(),
-            "linear_velocity_nav": velocity_nav.clone(),
-            "angular_velocity_body": state["angular"].clone(),
-            "joint_position_rad": state["q"].clone(),
-            "joint_velocity_rad_s": state["dq"].clone(),
-            "joint_target_rad": target.clone(),
-            "computed_torque_nm": requested.clone(),
-            "applied_torque_nm": applied.clone(),
-            "saturation_count_400hz": saturation,
-            "torque_square_sum_400hz": torque_square,
-            "requested_torque_abs_max_400hz": requested_max,
-            "applied_torque_abs_max_400hz": applied_max,
-            "tibia_floor_force_world_n": forces[:, self.toe_index].clone(),
-            "tibia_floor_force_min_norm_400hz": tibia_min_force,
-            "other_body_force_max_400hz": other_force_max,
-            "toe_xyz_world": state["toe_world"].clone(),
-            "toe_xyz_body": state["toe_body"].clone(),
-            "command": self.commands.clone(),
-            "action": action.clone(),
-            "terminated": terminated.clone(),
-            "truncated": truncated.clone(),
-        }
+        self.telemetry = control_telemetry(
+            state,
+            target,
+            self.requested,
+            self.applied,
+            self.forces,
+            self.loads,
+            self.commands,
+            self.action,
+            terminated,
+            truncated,
+        )
         # The task owns episodes, so the stock loop never resets a row by itself.
         zeros = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)
         return zeros, zeros.clone()
@@ -434,42 +386,13 @@ class IsaacEnv(DirectRLEnv):
 
     def read_state(self):
         self.sim.physics_sim_view.update_articulations_kinematic()
-        q = self.get("get_dof_positions")[:, self.joint_index]
-        dq = self.get("get_dof_velocities")[:, self.joint_index]
-        root = self.get("get_root_transforms")
-        link = self.get("get_link_transforms")
-        velocity = self.get("get_root_velocities")
-        for key, value in (
-            ("q", q),
-            ("dq", dq),
-            ("root", root),
-            ("link", link),
-            ("velocity", velocity),
-        ):
-            if not bool(torch.isfinite(value).all()):
-                raise FloatingPointError("Nonfinite native " + key)
-        quaternion = root[:, 3:]
-        angular = inverse_rotate(quaternion, velocity[:, 3:])
-        com_offset_world = rotate(quaternion, self.root_com_local)
-        origin_velocity = velocity[:, :3] - torch.cross(velocity[:, 3:], com_offset_world, dim=-1)
-        linear = inverse_rotate(quaternion, origin_velocity)
-        gravity = inverse_rotate(quaternion, self.torch([0.0, 0.0, -1.0]).expand(self.num_envs, -1))
-        toe_pose = link[:, self.toe_index]
-        toe_world = toe_pose[:, :, :3] + rotate(
-            toe_pose[:, :, 3:], self.toe_local.expand(self.num_envs, -1, -1)
+        return measured_state(
+            self.get("get_dof_positions")[:, self.joint_index],
+            self.get("get_dof_velocities")[:, self.joint_index],
+            self.get("get_root_transforms"),
+            self.get("get_link_transforms"),
+            self.get("get_root_velocities"),
+            self.root_com_local,
+            self.toe_index,
+            self.toe_local,
         )
-        toe_body = inverse_rotate(
-            quaternion[:, None].expand(-1, 6, -1), toe_world - root[:, None, :3]
-        )
-        return {
-            "q": q,
-            "dq": dq,
-            "root": root,
-            "link": link,
-            "root_velocity": velocity,
-            "linear": linear,
-            "angular": angular,
-            "gravity": gravity,
-            "toe_world": toe_world,
-            "toe_body": toe_body,
-        }
