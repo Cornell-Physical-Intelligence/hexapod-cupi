@@ -24,7 +24,10 @@ The generated file is gitignored; regenerate it on demand. The variant has no na
 in `robot/active_model.json` forbids new training on it: it serves the throughput and fidelity diagnostics below until
 it is admitted. `HEXAPOD_USD=<that path>` (read by `src/locomotion/hexapod/hexapod_robot_cfg.py`) selects it for those.
 Each primitive carries the PhysxCollisionAPI offsets of the SDF parts it replaces (contactOffset 0.001 m,
-restOffset 0, as the approved recipe authors them), and the tool refuses an `--out` that resolves to `--src`.
+restOffset 0, as the approved recipe authors them), and the tool exits non-zero without
+writing when `--out` is outside the source directory, resolves to the source or any layer it depends on, or names
+an existing file the tool did not write, and when a radius setting is not finite and positive (explicit checks, kept
+under `python -O`; `src/locomotion/tests/test_simple_collision.py`).
 
 **One gotcha, found by the standing test:** the femur capsules (motor housings) overlap the body box at rest. PhysX
 ignores contacts between links joined by a joint, but body-femur is two joints apart, so the overlap produced
@@ -61,7 +64,9 @@ Bound to:
 - policy `bcmin/model_299`: checkpoint `model_299.pt` sha256 `93fbcbfb0a6a3abdbb85b8d085d50a26a5561669e803d51a300c09eca2d229b2`, exported `policy.pt` sha256 `5700391f75a1eaf7174d7d8c885548640c5232c4339a2030aeb07e677ce89cc4`
 - approved `robot.usda` sha256 `3be98420adc7923923757d6557d8492d5930f84128c1b1366b9c6db1bb03207c`
 - generated `robot_simple.usda` sha256 `0372cd514bbb5fdf2bdde802d152407cb5c732b2cc6cece6213aa2ca7e300bba`
-- tool `src/locomotion/hexapod/tools/make_simple_collision.py` sha256 `10a157625be5a4680ad2bb844ab56dbc218309219d754e8def45f29b918be9dc`
+- tool `src/locomotion/hexapod/tools/make_simple_collision.py` sha256 `10a157625be5a4680ad2bb844ab56dbc218309219d754e8def45f29b918be9dc` (the run's tool). The guarded tool at sha256
+  `ca90bdf74e9820f6c2e41f835c1d17b41738e0b3517d7ee2d640bafe9d6658ea` writes the same generated asset byte for byte
+  (checked by `test_default_conversion_reproduces_the_published_asset`), so these results stay bound to it.
 - rollout tool `src/locomotion/hexapod/tools/diag_policy_rollout.py` from `main` at `d05d1f5c`
 
 Raw logs: `~shaurya/src/isaaclab-learning/logs/collision_pr87/` on the Spark.
