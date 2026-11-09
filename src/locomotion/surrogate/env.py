@@ -1,8 +1,12 @@
-"""Run the interface of ``locomotion.omniwalk.adapter.OmniEnv`` on CPU MuJoCo physics."""
+"""Run the interface of ``locomotion.omniwalk.adapter.OmniEnv`` on CPU MuJoCo physics.
+Under a Step 7 randomization (``locomotion.randomization``) each replica owns a model copy that its
+reset redraws; under ``none`` every replica shares the compiled model and steps as before.
+"""
 
 from __future__ import annotations
 
 import ast
+import copy
 import hashlib
 import json
 import math
@@ -15,8 +19,14 @@ import torch
 from mujoco import rollout as mj_rollout
 from scipy.spatial import ConvexHull
 
+from locomotion import randomization as rnd
 from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
-from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation, rotate
+from locomotion.omniwalk.mdp.frames import inverse_rotate, rotate
+from locomotion.omniwalk.mdp.loads import SubstepLoads, control_telemetry
+from locomotion.omniwalk.mdp.observations import observations as assemble_observations
+from locomotion.omniwalk.mdp.observations import proprio
+from locomotion.omniwalk.mdp.state import toe_points
+from locomotion.omniwalk.mdp.terminations import episode_timeout, physical_termination
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG, MODEL_SHA256
 from locomotion.robots.rs05 import motor_force
 
@@ -34,6 +44,8 @@ NATIVE_JOINT_NAMES = [
     f"{leg}_{joint}" for joint in ("coxa_yaw", "femur_pitch", "tibia_pitch") for leg in LEGS
 ]
 MAX_JOINT_SPEED = 50.26548245743669
+# A push time that a replica never reaches.
+NEVER = np.iinfo(np.int64).max
 TOE_CAP_LOWER_X = 0.115
 # One floor-contact sensor per collision geom: 13 single-geom links, then each tibia's cap and shaft.
 CONTACT_GEOMS = (
@@ -396,9 +408,21 @@ class SurrogateEnv:
         threads=2,
         contact=None,
         substep_state=True,
+        randomization="none",
+        condition=None,
     ):
         """The constructor ignores ``asset`` (the native USD). ``reference_metadata``
-        defaults to the repository stance.json, which native training passes."""
+        defaults to the repository stance.json, which native training passes.
+        ``randomization`` names a ``locomotion.randomization`` declaration. ``condition`` is a
+        fixed ``randomization.ReplicaDraw`` that every reset applies to every replica, with no
+        push; a fixed-grid cell uses it under ``randomization="none"``."""
+        if randomization not in rnd.NAMES:
+            raise ValueError("Unknown randomization: " + str(randomization))
+        if condition is not None and randomization != "none":
+            raise ValueError("A fixed condition replaces the draws; use randomization='none'")
+        self.randomization = randomization
+        self.condition = condition
+        self.randomized = randomization != "none" or condition is not None
         self.cfg = SurrogateConfig() if cfg is None else cfg
         cfg = self.cfg
         self.device, self.num_envs = cfg.device, cfg.num_envs
@@ -496,34 +520,34 @@ class SurrogateEnv:
             ],
             dtype=torch.float64,
         )
-        default_toes = []
-        for leg in LEGS:
-            shape = next(x for x in self.geometry_meta["shapes"] if x["body"] == leg + "_tibia")
-            transform = np.asarray(shape["shape_to_link"])
-            bounds = np.asarray(shape["cap_bounds_m"])
-            default_toes.append((transform @ np.array([bounds[1, 0], 0.0, 0.0, 1.0]))[:3])
-        self.toe_local = self.torch(
-            np.asarray(self.reference_metadata.get("toe_local_points_m", default_toes))
-        )
-        if self.toe_local.shape != (6, 3) or not torch.isfinite(self.toe_local).all():
-            raise ValueError("Invalid reference toe points")
+        self.toe_local = self.torch(toe_points(self.geometry_meta, self.reference_metadata))
         self._toe_local64 = self.toe_local.to(torch.float64)
         # Batched stepping: one MjData per worker thread, one state row per replica.
         self.threads = max(0, int(threads))
         self._pool = mj_rollout.Rollout(nthread=self.threads)
         self._datas = [mujoco.MjData(m) for _ in range(max(1, self.threads))]
-        self._models = [m] * cfg.num_envs
+        # Under none the replicas share the compiled model; a randomized replica owns a copy.
+        self._models = (
+            [copy.deepcopy(m) for _ in range(cfg.num_envs)]
+            if self.randomized
+            else [m] * cfg.num_envs
+        )
         self._chunk = max(1, math.ceil(cfg.num_envs / max(1, self.threads)))
         self._nstate = mujoco.mj_stateSize(m, mujoco.mjtState.mjSTATE_FULLPHYSICS)
         self._state = np.zeros((cfg.num_envs, self._nstate))
         self._next = np.zeros((cfg.num_envs, 1, self._nstate))
         self._sensor = np.zeros((cfg.num_envs, 1, m.nsensordata))
         self._warmstart = np.zeros((cfg.num_envs, m.nv))
-        self._control = np.zeros((cfg.num_envs, 1, m.nu))
-        self._qpos0 = np.zeros(25)
-        self._qpos0[2] = self.reset_height
-        self._qpos0[3] = 1.0
-        self._qpos0[self._qpos_columns] = self.neutral.numpy().astype(np.float64)
+        # A randomized rollout also takes each body's applied wrench, which carries the pushes.
+        self._control_spec = mujoco.mjtState.mjSTATE_CTRL | (
+            mujoco.mjtState.mjSTATE_XFRC_APPLIED if self.randomized else 0
+        )
+        self._control = np.zeros((cfg.num_envs, 1, mujoco.mj_stateSize(m, self._control_spec)))
+        qpos0 = np.zeros(25)
+        qpos0[2] = self.reset_height
+        qpos0[3] = 1.0
+        qpos0[self._qpos_columns] = self.neutral.numpy().astype(np.float64)
+        self._qpos0 = np.tile(qpos0, (cfg.num_envs, 1))
         self.physics_steps = 0
         self.speed_clamp_events = 0
         self.peak_joint_speed = 0.0
@@ -542,6 +566,8 @@ class SurrogateEnv:
             mujoco.mju_quat2Mat(rotation, m.geom_quat[geom])
             self._tibia_body.append(int(m.geom_bodyid[geom]))
             self._toe_hull.append(m.geom_pos[geom] + vertices @ rotation.reshape(3, 3).T)
+        if self.randomized:
+            self._init_randomization(qpos0)
         self.sim = _StepCounter(self)
         self.native_errors = []
         self.substep_state = substep_state
@@ -581,10 +607,23 @@ class SurrogateEnv:
                 "contact_model": asdict(self.contact_model),
             },
             "config": cfg.declaration(),
+            "randomization": rnd.identity(randomization),
         }
+        if condition is not None:
+            self.native_readback["condition"] = condition.as_json()
+        self.reset()
+        if self.condition is not None:
+            # A fixed condition applies the same masses at every reset.
+            self.native_readback["mass_per_replica_kg"] = [
+                float(x.body_mass.sum()) for x in self._models
+            ]
+        elif self.randomized:
+            # Every reset redraws, and the first task reset replaces this draw; runs log no draws.
+            self.native_readback["mass_per_replica_kg_scope"] = (
+                "nominal ledger; each reset redraws link masses and payload, and runs log no draws"
+            )
         if self.output is not None:
             self.save("native_readback.json", self.native_readback)
-        self.reset()
 
     # ----- helpers -------------------------------------------------------------------------
     def save(self, name, value):
@@ -600,21 +639,166 @@ class SurrogateEnv:
             "surrogate": True,
         }
 
+    # ----- Step 7 randomization ------------------------------------------------------------
+    def _init_randomization(self, qpos0):
+        """Per-replica generators, the nominal properties each reset starts from, and draw state."""
+        m, n = self.mj_model, self.num_envs
+
+        def body(name):
+            return mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, name)
+
+        def geom(name):
+            return mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_GEOM, name)
+
+        self._generators = [
+            rnd.replica_generator(self.cfg.seed, i, self.randomization) for i in range(n)
+        ]
+        self._body_ids = np.array([body(name) for name in BODY_NAMES])
+        self._base_id = body("body")
+        # MuJoCo takes the larger geom coefficient of a contact pair. A zero floor coefficient
+        # leaves each pair at the robot geom's own value: the six toe caps carry the draw and the
+        # shafts and hulls keep 1.0, as PhysX gives with a floor material of 1.0.
+        self._friction_geoms = np.array([geom(leg + "_tibia_toe") for leg in LEGS])
+        self._nominal = {
+            key: getattr(m, key).copy()
+            for key in ("body_mass", "body_inertia", "body_ipos", "body_iquat", "geom_friction")
+        }
+        self._nominal["geom_friction"][geom("floor"), 0] = 0.0
+        self._nominal_qpos0 = qpos0
+        self._nominal_toe_low = self._lowest_toe(qpos0)
+        self._neutral64, self._lower64, self._upper64 = (
+            x.numpy().astype(np.float64) for x in (self.neutral, self.lower, self.upper)
+        )
+        self.root_com_local = self.root_com_local.clone()
+        self._root_com64 = self._root_com64.expand(n, -1).clone()
+        self._kp = torch.full((n, 1), rnd.KP)
+        self._kd = self.kd.expand(n, -1).clone()
+        self._strength = torch.ones((n, 18))
+        self._friction = np.ones(n)
+        self.ground_friction = torch.ones(n)
+        self._since_reset = np.zeros(n, dtype=np.int64)
+        self._push_start = np.zeros(n, dtype=np.int64)
+        self._push_end = np.zeros(n, dtype=np.int64)
+        self._push_force = np.zeros((n, 3))
+        self._push_body = np.zeros((n, self.cfg.decimation, 3))
+        self.external_wrench_body = torch.zeros((n, 6))
+
+    def _steps(self, seconds):
+        """A push time in whole physics steps."""
+        return round(seconds / self.cfg.physics_dt)
+
+    def _lowest_toe(self, qpos):
+        """Height of the lowest toe-cap hull vertex; kinematics alone, so the nominal model serves every replica."""
+        d = self._impact_data
+        d.qpos[:] = qpos
+        mujoco.mj_kinematics(self.mj_model, d)
+        return min(
+            float((d.xpos[b] + hull @ d.xmat[b].reshape(3, 3).T)[:, 2].min())
+            for b, hull in zip(self._tibia_body, self._toe_hull)
+        )
+
+    def _redraw(self, i):
+        """Draw replica ``i``'s conditions from its own generator and apply them to its model."""
+        draw = (
+            self.condition
+            if self.condition is not None
+            else rnd.draw(self.randomization, self._generators[i])
+        )
+        model, base = self._models[i], self._base_id
+        for key, value in self._nominal.items():
+            getattr(model, key)[:] = value
+        model.body_mass[self._body_ids] *= draw.link_mass_scale
+        model.body_inertia[self._body_ids] *= draw.link_mass_scale[:, None]
+        # Payload: the base tensor in the base frame, the point mass added, then principal axes again.
+        # Without a payload the base keeps its inertial frame, so a nominal cell is the nominal model.
+        centre = model.body_ipos[base].copy()
+        if draw.payload_mass_kg > 0:
+            rotation = np.zeros(9)
+            mujoco.mju_quat2Mat(rotation, model.body_iquat[base])
+            rotation = rotation.reshape(3, 3)
+            tensor = rotation @ np.diag(model.body_inertia[base]) @ rotation.T
+            mass, centre, tensor = rnd.combined_base_inertial(
+                model.body_mass[base],
+                model.body_ipos[base],
+                tensor,
+                draw.payload_mass_kg,
+                draw.payload_position_m,
+            )
+            principal, axes = np.linalg.eigh(tensor)
+            if np.linalg.det(axes) < 0:
+                axes[:, 0] *= -1
+            quaternion = np.zeros(4)
+            mujoco.mju_mat2Quat(quaternion, axes.flatten())
+            model.body_mass[base], model.body_ipos[base] = mass, centre
+            model.body_inertia[base], model.body_iquat[base] = principal, quaternion
+        model.geom_friction[self._friction_geoms, 0] = draw.foot_friction
+        # Masses set the constants that scale constraint softness (invweight) and the solver tolerance.
+        mujoco.mj_setConst(model, self._impact_data)
+        # Reset pose: the drawn offsets, with the lowest toe at the nominal clearance.
+        qpos = self._nominal_qpos0.copy()
+        qpos[self._qpos_columns] = rnd.reset_pose(
+            self._neutral64, draw.joint_offset_rad, self._lower64, self._upper64
+        )
+        qpos[2] += self._nominal_toe_low - self._lowest_toe(qpos)
+        self._qpos0[i] = qpos
+        self.root_com_local[i] = torch.as_tensor(centre, dtype=torch.float32)
+        self._root_com64[i] = torch.as_tensor(centre, dtype=torch.float64)
+        self._kp[i] = rnd.KP * draw.kp_scale
+        self._kd[i] = self.kd * draw.kd_scale
+        self._strength[i] = torch.as_tensor(draw.motor_strength, dtype=torch.float32)
+        self._friction[i] = draw.foot_friction
+        self.ground_friction[i] = draw.foot_friction
+        self._since_reset[i] = 0
+        self._schedule_push(i, 0, first=True)
+        self.external_wrench_body[i] = 0.0
+
+    def _schedule_push(self, i, after, first):
+        """Draw replica ``i``'s next push, timed in physics steps from its reset."""
+        push = rnd.next_push(self.randomization, self._generators[i], first)
+        if push is None or self.condition is not None:
+            # No push: the window never opens, so the push end never arrives either.
+            self._push_start[i] = self._push_end[i] = NEVER
+            self._push_force[i] = 0.0
+            return
+        self._push_start[i] = after + self._steps(push.delay_s)
+        self._push_end[i] = self._push_start[i] + self._steps(push.duration_s)
+        self._push_force[i] = push.force_body_n
+
+    def _apply_pushes(self, substep):
+        """Write this substep's push into the base wrench: the body-frame force rotated into the world."""
+        active = (self._since_reset >= self._push_start) & (self._since_reset < self._push_end)
+        force = np.where(active[:, None], self._push_force, 0.0)
+        w, v = self._state[:, 4:5], self._state[:, 5:8]
+        twice = 2.0 * np.cross(v, force)
+        world = force + w * twice + np.cross(v, twice)
+        # MuJoCo applies xfrc_applied at the body's centre of mass, so the push adds no torque.
+        column = self.mj_model.nu + 6 * self._base_id
+        self._control[:, 0, column : column + 3] = world
+        self._push_body[:, substep] = force
+
+    def _advance_pushes(self):
+        self._since_reset += 1
+        for i in np.flatnonzero(self._since_reset == self._push_end):
+            self._schedule_push(i, int(self._push_end[i]), first=False)
+
     def _joint_state(self):
         q = torch.from_numpy(self._state[:, 1 + self._qpos_columns].astype(np.float32))
         dq = torch.from_numpy(self._state[:, 26 + self._qvel_columns].astype(np.float32))
         return q, dq
 
-    def _advance(self, applied):
+    def _advance(self, applied, substep=0):
         """One 400 Hz step of every replica with the given float32 joint torques."""
         m = self.mj_model
-        self._control[:, 0] = applied.numpy()
+        self._control[:, 0, : m.nu] = applied.numpy()
+        if self.randomized:
+            self._apply_pushes(substep)
         before = sum(d.warning[mujoco.mjtWarning.mjWARN_BADQACC].number for d in self._datas)
         self._pool.rollout(
             self._models,
             self._datas,
             self._state,
             self._control,
+            control_spec=self._control_spec,
             nstep=1,
             initial_warmstart=self._warmstart,
             state=self._next,
@@ -669,6 +853,8 @@ class SurrogateEnv:
         self._touching = touching
         self._state[:] = new
         self.physics_steps += 1
+        if self.randomized:
+            self._advance_pushes()
         normal = torch.from_numpy(
             self._sensor[:, 0].reshape(self.num_envs, 25, 6)[:, :, 2].astype(np.float32)
         )
@@ -692,8 +878,9 @@ class SurrogateEnv:
 
     def _touchdown(self, replica, leg, new):
         """Apply the calibrated friction correction at toe touchdown."""
-        m, d, old = self.mj_model, self._impact_data, self._state[replica]
-        step, friction = m.opt.timestep, self.contact_model.friction[0]
+        m, d, old = self._models[replica], self._impact_data, self._state[replica]
+        step = m.opt.timestep
+        friction = self._friction[replica] if self.randomized else self.contact_model.friction[0]
         d.qpos[:] = old[1:26]
         mujoco.mj_kinematics(m, d)
         mujoco.mj_comPos(m, d)
@@ -803,23 +990,15 @@ class SurrogateEnv:
             )
         return result
 
-    def _proprio(self, state):
-        return torch.cat(
-            (
-                navigation(state["angular"]),
-                navigation(state["gravity"]),
-                state["q"] - self.neutral,
-                state["dq"],
-            ),
-            dim=-1,
-        )
-
     def observations(self, state):
-        obs = torch.cat((self.history.flatten(1), self.commands, self.previous_action), dim=-1)
-        critic = torch.cat((obs, navigation(state["linear"])), dim=-1)
-        return {"obs": obs, "critic": critic}
+        return assemble_observations(self.history, self.commands, self.previous_action, state)
 
     # ----- OmniEnv interface ---------------------------------------------------------------
+    @property
+    def reset_heights(self):
+        """Each replica's root height at its reset: a randomized draw lifts the root to the nominal toe clearance."""
+        return torch.as_tensor(self._qpos0[:, 2], dtype=torch.float32)
+
     def reset(self, indices=None):
         if self.native_errors:
             raise RuntimeError("Cannot reset across a physics error")
@@ -837,7 +1016,10 @@ class SurrogateEnv:
             raise ValueError("Invalid selected reset rows")
         if len(indices):
             rows = indices.numpy()
-            self._state[rows, 1:26] = self._qpos0
+            if self.randomized:
+                for row in rows:
+                    self._redraw(int(row))
+            self._state[rows, 1:26] = self._qpos0[rows]
             self._state[rows, 26:] = 0.0
             self._warmstart[rows] = 0.0
             self._forces[indices] = 0.0
@@ -849,7 +1031,7 @@ class SurrogateEnv:
             self.previous_action[indices] = 0
             self.episode_steps[indices] = 0
             state = self._read()
-            self.history[indices] = self._proprio(state)[indices, None].expand(-1, 5, -1)
+            self.history[indices] = proprio(state, self.neutral)[indices, None].expand(-1, 5, -1)
         else:
             state = self._read()
         self.current = state
@@ -868,12 +1050,7 @@ class SurrogateEnv:
             self.cfg.action_scale_rad,
             self.cfg.target_slew_rad,
         )
-        saturation = torch.zeros_like(target, dtype=torch.long)
-        torque_square = torch.zeros_like(target)
-        requested_max = torch.zeros_like(target)
-        applied_max = torch.zeros_like(target)
-        other_force_max = torch.zeros(self.num_envs)
-        tibia_min_force = torch.full((self.num_envs, 6), torch.inf)
+        loads = SubstepLoads(target, self.toe_index, self._other_index)
         toe_cap_min = torch.full((self.num_envs, 6), torch.inf)
         shaft_max = torch.zeros((self.num_envs, 6))
         last = self.cfg.decimation - 1
@@ -881,8 +1058,13 @@ class SurrogateEnv:
             q, dq = self._joint_state()
             if not bool(torch.isfinite(q).all() and torch.isfinite(dq).all()):
                 raise FloatingPointError("Nonfinite pre-servo state")
-            requested, applied, ceiling = motor_force(q, dq, target, self.kd)
-            forces = self._advance(applied)
+            if self.randomized:
+                requested, applied, ceiling = rnd.motor_force(
+                    q, dq, target, self._kd, self._kp, self._strength
+                )
+            else:
+                requested, applied, ceiling = motor_force(q, dq, target, self.kd)
+            forces = self._advance(applied, substep)
             # The control endpoint needs link poses. Earlier substeps build a state for a capture
             # hook alone: full with substep_state, otherwise without link and toe poses.
             # A hook that declares uses_state = False (TrainingLoads reads none) gets None.
@@ -892,15 +1074,9 @@ class SurrogateEnv:
                 state = self._read(full=self.substep_state)
             else:
                 state = None
-            norms = torch.linalg.vector_norm(forces, dim=-1)
-            other_force_max = torch.maximum(other_force_max, norms[:, self._other_index].amax(-1))
-            tibia_min_force = torch.minimum(tibia_min_force, norms[:, self.toe_index])
+            loads.add(requested, applied, forces)
             toe_cap_min = torch.minimum(toe_cap_min, self._toe_cap)
             shaft_max = torch.maximum(shaft_max, self._shaft)
-            saturation += requested.abs() > 1.6
-            torque_square += applied.square()
-            requested_max = torch.maximum(requested_max, requested.abs())
-            applied_max = torch.maximum(applied_max, applied.abs())
             if self.capture is not None:
                 self.capture(
                     self,
@@ -919,51 +1095,50 @@ class SurrogateEnv:
         self.previous_action = executed_action_feature(
             target, self.neutral, self.cfg.action_scale_rad
         ).clone()
-        self.history = torch.cat((self.history[:, 1:], self._proprio(state)[:, None]), dim=1)
+        self.history = torch.cat(
+            (self.history[:, 1:], proprio(state, self.neutral)[:, None]), dim=1
+        )
         self.episode_steps += 1
         self.total_controls += 1
-        velocity_nav = navigation(state["linear"])
-        joint_violation = ((state["q"] < self.lower - 2e-6) | (state["q"] > self.upper + 2e-6)).any(
-            -1
+        terminated = physical_termination(state, self.lower, self.upper)
+        truncated = episode_timeout(
+            self.episode_steps, self.cfg.episode_seconds, self.cfg.control_dt
         )
-        terminated = (
-            (state["root"][:, 2] < 0.045)
-            | (state["gravity"][:, 2] > -math.cos(0.85))
-            | joint_violation
-        )
-        truncated = self.episode_steps >= round(self.cfg.episode_seconds / self.cfg.control_dt)
         self.current = state
         self.contact_detail = {
             "toe_cap_force_n": state["toe_cap_force_n"].clone(),
             "shaft_force_n": state["shaft_force_n"].clone(),
         }
         self.telemetry = {
-            "root_pose_xyzw": state["root"].clone(),
-            "linear_velocity_body": state["linear"].clone(),
-            "linear_velocity_nav": velocity_nav.clone(),
-            "angular_velocity_body": state["angular"].clone(),
-            "joint_position_rad": state["q"].clone(),
-            "joint_velocity_rad_s": state["dq"].clone(),
-            "joint_target_rad": target.clone(),
-            "computed_torque_nm": requested.clone(),
-            "applied_torque_nm": applied.clone(),
-            "saturation_count_400hz": saturation,
-            "torque_square_sum_400hz": torque_square,
-            "requested_torque_abs_max_400hz": requested_max,
-            "applied_torque_abs_max_400hz": applied_max,
-            "tibia_floor_force_world_n": forces[:, self.toe_index].clone(),
-            "tibia_floor_force_min_norm_400hz": tibia_min_force,
-            "other_body_force_max_400hz": other_force_max,
-            "toe_xyz_world": state["toe_world"].clone(),
-            "toe_xyz_body": state["toe_body"].clone(),
-            "command": self.commands.clone(),
-            "action": action.clone(),
-            "terminated": terminated.clone(),
-            "truncated": truncated.clone(),
+            **control_telemetry(
+                state,
+                target,
+                requested,
+                applied,
+                forces,
+                loads,
+                self.commands,
+                action,
+                terminated,
+                truncated,
+            ),
             # Keys that the surrogate adds: the native compact telemetry does not separate toe cap from shaft.
             "surrogate_toe_cap_force_min_400hz": toe_cap_min,
             "surrogate_shaft_force_max_400hz": shaft_max,
         }
+        if self.randomized:
+            # Privileged values: the drawn coefficient and the mean push over the control (torque is zero).
+            self.external_wrench_body = torch.cat(
+                (
+                    torch.as_tensor(self._push_body.mean(1), dtype=torch.float32),
+                    torch.zeros((self.num_envs, 3)),
+                ),
+                dim=-1,
+            )
+            self.telemetry.update(
+                ground_friction=self.ground_friction.clone(),
+                external_wrench_body=self.external_wrench_body.clone(),
+            )
         result = self.observations(state)
         result.update(terminated=terminated, truncated=truncated)
         return result
@@ -987,6 +1162,7 @@ def make_env(
     output=None,
     substep_state=True,
     seed=20260914,
+    randomization="none",
 ):
     cfg = SurrogateConfig(
         num_envs=num_envs,
@@ -1003,6 +1179,7 @@ def make_env(
         threads=threads,
         contact=contact,
         substep_state=substep_state,
+        randomization=randomization,
     )
 
 

@@ -1,0 +1,24 @@
+{
+  "id": "20261106T211443_route_planner_review",
+  "date": "2026-11-06T21:14:43Z",
+  "title": "Tidy the route search after review",
+  "summary": "The route search now keeps each cell's cost from the start in its queue and skips cells whose cost is already final, so it calls the distance estimate less often. A route's reported cost is now the true sum of its steps, whatever the estimate returns at the goal. Routes between two points still cost the same, though some equal-cost routes now take a different path. The architecture guide now says that +x is east and +y is north, and that a GPS adapter must convert its heading to match. The 78 navigation tests pass.",
+  "areas": [
+    "mission"
+  ],
+  "next": "Get the program lead's answer on the search's stored values and on a blocked start in the entry corridor or after an abort. Then place the stop points in back-and-forth rows and chain a_star from the start pose through each stop, marking unreachable stops.",
+  "changes": [
+    "ARCHITECTURE.md",
+    "src/navigation/graph.py",
+    "src/navigation/planner.py",
+    "src/navigation/tests/test_planner.py",
+    "site/updates/20261106T211443_route_planner_review.json"
+  ],
+  "evidence": [
+    "src/navigation/planner.py",
+    "src/navigation/tests/test_planner.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/95",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20"
+  ],
+  "no_project_impact": false
+}
