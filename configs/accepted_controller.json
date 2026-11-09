@@ -1,0 +1,75 @@
+{
+  "schema_version": 1,
+  "purpose": "The one checkpoint the project calls its walking controller, the requirement set it is judged against, and the evidence. A candidate becomes the controller only by replacing this file.",
+  "accepted_by": "program lead",
+  "accepted_on": "2026-11-07",
+  "acceptance": "c48_long meets the stage 2 commands, the stop and the stop tolerance under the follower in the surrogate. It exceeds the drift limit open loop; the closed loop corrects that drift. It is accepted because every input has a sensor on the robot and nothing better exists with that property.",
+  "controller": {
+    "name": "c48_long",
+    "checkpoint_sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+    "declaration_sha256": "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3",
+    "bytes": "/srv/cupi/hexapod/runs/julian/ppo_v4_stride_c48_u2500_seed20260917_20261011_001/run/standing/checkpoint_update002500.pt",
+    "inputs": "231 proprioception, command and last-target values plus a 60-control gait clock; every input has a sensor on the robot",
+    "robot_model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+    "trained_at_commit": "b2a6168c35156dfe0a8202201aa574b8d9e43fb1"
+  },
+  "requirements_set": "stage2_flat",
+  "requirements_sha256": "eb6622e701d222f14128a941ba9143e17d00db957f755162b4ff796b0ed2f87a",
+  "judged": {
+    "commands": {
+      "value": "13 of 13 native learning probes",
+      "pass": true,
+      "evidence": "site/assets/floor_contact_20261016_002/verification.json"
+    },
+    "stopping_distance_m": {
+      "value": 0.0097,
+      "limit": 0.05,
+      "pass": true,
+      "evidence": "site/assets/c48_requirements_20261107_001/judgement.json"
+    },
+    "drift_per_hold_m": {
+      "value": 0.298,
+      "limit": 0.1,
+      "pass": false,
+      "note": "native: 7 of 8 walks at 0.05 m/s over the limit, median 0.152; surrogate, 26 cases: 7 of 8 at 0.05 (median 0.168, max 0.299) and 6 of 8 at 0.025 (median 0.107, max 0.232) over the limit; the follower corrects the drift in closed loop",
+      "evidence": [
+        "site/assets/c48_requirements_20261107_001/judgement.json",
+        "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+      ]
+    },
+    "stop_position_tolerance_m": {
+      "value": 0.064,
+      "limit": 0.12,
+      "pass": true,
+      "note": "worst of the file's five routes in the surrogate, true pose, one trial each; 0.058 to 0.064 m; not yet judged natively",
+      "evidence": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+    },
+    "tilt_deg": {
+      "value": 1.805,
+      "limit": 1.7,
+      "pass": false,
+      "note": "largest tilt standing and after each stop over the 26 surrogate cases: 1.81 degrees after the 0.05 m/s walks at 270 and 315 degrees, 24 of 26 cases inside the limit; the body tilts 2.0 to 2.4 degrees while moving, which the limit does not cover",
+      "evidence": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+    },
+    "motor_torque_nm": {
+      "value": 1.171,
+      "limit": 1.6,
+      "pass": true,
+      "note": "native applied torque, 2 November campaign; the surrogate clamps at the rating and cannot judge it",
+      "evidence": "site/assets/c48_receipt_renewal_20261102_001/compatibility/summary.json"
+    }
+  },
+  "not_judged": [
+    "closed loop with a simulated Mid-360 odometry pose",
+    "payload on the deck",
+    "disturbance: no noise, delay or randomization in training",
+    "full 96-case manifest, 512-robot admission, terrain, hardware",
+    "closed loop natively on Spark (the five routes)"
+  ],
+  "compatibility_receipt": {
+    "path": "site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json",
+    "sha256": "f84b2548add6a1c2d29e706736d0d5579284fe10f598799e6e5ae83d6967534d",
+    "binds_commit": "dc9f5be7025db617b7ed972a5baf2bc2e2fd56f4",
+    "note": "Renewed 2 November 2026; configs/approved_code_version.json reports whether the tree still matches it"
+  }
+}

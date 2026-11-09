@@ -1,4 +1,4 @@
-"""Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate."""
+"""Evaluate a checkpoint's no-noise policy on the walking requirement cases, on the surrogate."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ import torch
 import locomotion.rl.ppo as algorithms
 import locomotion.rl.wrapper as omni_wrapper
 from locomotion.amp.features import extract_features
+from locomotion.evaluation.checkpoint import configuration
 from locomotion.spark.sources import source_files
 from locomotion.surrogate.train import (
     build_wrapper,
@@ -24,10 +25,8 @@ from locomotion.surrogate.train import (
     wrapper_options,
 )
 
-FOCUS = ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
+FOCUS = ["walk_0.050_0deg", "stand"]
 DEFAULT_TASK = "locomotion.omniwalk.task:TrainingTask"
-# Profiles whose verdict rests on a static pose.
-STATIC_PROFILES = ("quiet_stand", "stage2_long_quiet", "stop_to_stand")
 CONSENSUS_VARIANTS = {
     "pyramidal_cone": {"cone": "pyramidal"},
     "friction_0.9": {"friction": (0.9, 0.005, 0.0001)},
@@ -35,7 +34,7 @@ CONSENSUS_VARIANTS = {
 CONSENSUS_SCOPE = (
     "The default, pyramidal-cone and friction-0.9 runs differ in two contact settings. Agreement shows "
     "that a surrogate verdict does not rest on those settings. It is no native verdict: "
-    "locomotion/surrogate/README.md records static probes that pass in each run and fail on native."
+    "locomotion/surrogate/README.md records cases that pass in each run and fail on native."
 )
 # A fixed-grid cell sets the toe and floor friction, so its friction variant scales the cell's own
 # coefficient: elliptic mu (the default run), pyramidal mu and elliptic 0.9 mu.
@@ -198,53 +197,19 @@ class VideoWriter:
 
 
 def case_summary(result, batch, limits=None, joint_names=None):
-    """Headline numbers of one probe, plus gait descriptors that carry no gate."""
-    metrics = result.get("metrics", {})
+    """The judge's verdict and checks of one case, plus gait descriptors that carry no gate."""
     row = {
         "case_id": result["case_id"],
         "pass": result["pass"],
-        "passed_numeric_screen": result.get("passed_numeric_screen"),
-        "failed_bounds": result.get("failed_bounds"),
-        "missing_evidence": result.get("missing_evidence"),
-        "batch_failure": result.get("batch_failure"),
-        "metrics": {
-            key: metrics.get(key)
-            for key in (
-                "planar_error_mps",
-                "yaw_error_rad_s",
-                "tilt_rms_degrees",
-                "vertical_velocity_rms_mps",
-                "computed_demand_over_rating_fraction",
-                "nonfoot_fraction",
-                "mean_velocity_mps",
-                "mean_yaw_rate_rad_s",
-                "max_planar_excursion_m",
-                "max_heading_excursion_deg",
-                "max_joint_velocity_rms_rad_s",
-                "max_joint_position_range_rad",
-                "max_target_step_abs_p95_rad_per_20ms",
-                "max_requested_torque_saturation_fraction",
-                "max_applied_torque_nm",
-                "requested_saturation_fraction_400hz",
-            )
-            if key in metrics
-        },
-        "six_toe_and_nonfoot_checks": {
-            key: result.get("checks", {}).get(key)
-            for key in (
-                "missing_six_toe_count_400hz",
-                "nonfoot_contact_count_400hz",
-                "minimum_non_toe_floor_m",
-                "minimum_plate_height_m",
-            )
-            if key in result.get("checks", {})
-        },
-        "native_contact_screen": result.get("native_contact_screen"),
+        "failed_checks": result["failed_checks"],
+        "checks": result["checks"],
+        "holds": result["holds"],
+        "stop": result["stop"],
     }
     trace = batch / "control_trace.npz"
     if trace.exists():
         with np.load(trace) as data:
-            start = min(result.get("window_start_control", 100), len(data["time_s"]) - 1)
+            start = min(100, len(data["time_s"]) - 1)
             nav = data["velocity_navigation_mps"][:, 0]
             toe = data["toe_xyz_world_m"][:, 0, :, 2]
             contact = data["distal_contact"][:, 0]
@@ -328,12 +293,12 @@ def case_summary(result, batch, limits=None, joint_names=None):
 
 
 def consensus(results, scope=CONSENSUS_SCOPE):
-    """Verdict and checks of one probe across contact models: a value where all agree, else ``unresolved``."""
+    """Verdict and checks of one case across contact models: a value where all agree, else ``unresolved``."""
     verdicts = {name: bool(result["pass"]) for name, result in results.items()}
     names = sorted(set().union(*(result.get("checks", {}) for result in results.values())))
     statuses = {
         check: {
-            name: result.get("checks", {}).get(check, {}).get("status")
+            name: "pass" if result.get("checks", {}).get(check, {}).get("pass") else "fail"
             for name, result in results.items()
         }
         for check in names
@@ -342,15 +307,15 @@ def consensus(results, scope=CONSENSUS_SCOPE):
         check: next(iter(values.values())) if len(set(values.values())) == 1 else "unresolved"
         for check, values in statuses.items()
     }
-    bounds = {name: sorted(result.get("failed_bounds") or []) for name, result in results.items()}
+    failed = {name: sorted(result.get("failed_checks") or []) for name, result in results.items()}
     return {
         "verdict": ("pass" if all(verdicts.values()) else "fail")
         if len(set(verdicts.values())) == 1
         else "unresolved",
         "verdicts": verdicts,
-        "failed_bounds": bounds,
-        "failed_bounds_in_all": sorted(
-            set.intersection(*(set(value) for value in bounds.values()))
+        "failed_checks": failed,
+        "failed_checks_in_all": sorted(
+            set.intersection(*(set(value) for value in failed.values()))
         ),
         "unresolved_checks": {
             check: statuses[check] for check, value in agreed.items() if value == "unresolved"
@@ -369,12 +334,12 @@ def build_parser():
     parser.add_argument("--checkpoint", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True, help="New directory.")
     parser.add_argument(
-        "--cases", default="focus", help="focus, all, or comma-separated learning probe ids."
+        "--cases", default="focus", help="focus, all, or comma-separated requirement case ids."
     )
     parser.add_argument(
         "--video",
         default="first",
-        help="first, all, none, or comma-separated probe ids to render as MP4.",
+        help="first, all, none, or comma-separated case ids to render as MP4.",
     )
     parser.add_argument("--view", choices=["three_quarter", "side"], default="three_quarter")
     parser.add_argument("--seed", type=int, help="Defaults to the checkpoint record's seed.")
@@ -406,15 +371,15 @@ def build_parser():
     parser.add_argument(
         "--foot-load",
         action="store_true",
-        help="Write foot_load.json: the floor force on each foot after each control, by probe.",
+        help="Write foot_load.json: the floor force on each foot after each control, by case.",
     )
     parser.add_argument("--contact", action="append", default=[], metavar="FIELD=VALUE")
     parser.add_argument(
         "--randomization",
         choices=["none", "table2_v1"],
         default="none",
-        help="Step 7 declaration for the probes, independent of the checkpoint's training; "
-        "each probe reset draws new conditions.",
+        help="Step 7 declaration for the cases, independent of the checkpoint's training; "
+        "each case reset draws new conditions.",
     )
     parser.add_argument(
         "--grid",
@@ -428,12 +393,12 @@ def build_parser():
     parser.add_argument(
         "--no-contact-consensus",
         action="store_true",
-        help="Skip the two extra contact models on quiet and stop probes.",
+        help="Skip the two extra contact models.",
     )
     parser.add_argument(
         "--keep-variant-captures",
         action="store_true",
-        help="Keep the 400 Hz captures of the consensus runs (about 15 MB per probe).",
+        help="Keep the 400 Hz captures of the consensus runs (about 15 MB per case).",
     )
     parser.add_argument(
         "--threads", type=int, default=2, help="Torch threads for this process (1 to 6)."
@@ -447,7 +412,7 @@ def effective_seed(seed_option, identity):
 
 
 def selected_cases(cases_option, probes):
-    """The probe ids that ``--cases`` selects from ``probes``, in order."""
+    """The case ids that ``--cases`` selects from ``probes``, in order."""
     if cases_option == "focus":
         return list(FOCUS)
     return list(probes) if cases_option == "all" else cases_option.split(",")
@@ -505,9 +470,10 @@ def main(argv=None):
 
 
 def evaluate_checkpoint(args):
-    """Run the selected probes for parsed arguments and write ``surrogate_summary.json``."""
+    """Run the selected cases for parsed arguments and write ``surrogate_summary.json``."""
     import mujoco
 
+    import locomotion.evaluation.requirements as requirements
     import locomotion.evaluation.runner as evaluation
     import locomotion.omniwalk.task as task_module
     import locomotion.randomization as rnd
@@ -551,10 +517,11 @@ def evaluate_checkpoint(args):
     )
     if config is None:
         raise ValueError("The checkpoint has no JSON record; pass --ppo-config")
+    # A record written before the package migration names the old class paths.
+    config = configuration(config)
     seed = effective_seed(args.seed, identity)
     task_spec, wrapper_spec = task_and_wrapper(args, identity)
-    profiles = {case["case_id"]: case["profile"] for case in evaluation.learning_probe_cases()}
-    probes = list(profiles)
+    probes = [case["case_id"] for case in requirements.cases(requirements.load_requirements()[0])]
     selected = selected_cases(args.cases, probes)
     video = (
         []
@@ -566,7 +533,7 @@ def evaluate_checkpoint(args):
         else args.video.split(",")
     )
     if any(case not in probes for case in selected) or any(case not in selected for case in video):
-        raise ValueError("Unknown probe id, or a video case outside the selected probes")
+        raise ValueError("Unknown case id, or a video case outside the selected cases")
     contact = contact_overrides(args.contact)
     # The checkpoint's PPO configuration records the wrapper options of its training.
     options = wrapper_options(config)
@@ -578,7 +545,7 @@ def evaluate_checkpoint(args):
     started = time.monotonic()
 
     def run(model, cases, directory, videos, record_loads=False, condition=condition):
-        """One probe suite under one contact model: the suite summary, the per-case rows, the videos and the loads."""
+        """One case run under one contact model: the judgement, the per-case rows, the videos and the loads."""
         torch.manual_seed(seed)
         np.random.seed(seed)
         cfg = SurrogateConfig(
@@ -652,14 +619,13 @@ def evaluate_checkpoint(args):
                     writers[case].add()
             return deterministic(observation)
 
-        summary = evaluation.run_learning_probe_suite(
+        summary = evaluation.run_cases(
             env,
             policy,
             directory / "evaluation",
             env.geometry_extrema_path,
             args.checkpoint,
-            selected_case_ids=cases,
-            record_video=False,
+            case_ids=cases,
             seed=seed,
             progress=lambda value: print(json.dumps(value), flush=True),
             motion_features=extract_features,
@@ -674,7 +640,7 @@ def evaluate_checkpoint(args):
             case_summary(
                 result, directory / "evaluation" / f"batch_{index:03d}", limits, env.joint_names
             )
-            for index, result in enumerate(summary["results"])
+            for index, result in enumerate(summary["cases"])
         ]
         for row, speed in zip(rows, speeds):
             row.setdefault(
@@ -692,14 +658,14 @@ def evaluate_checkpoint(args):
         foot_load = {
             "path": "foot_load.json",
             "legs": list(LEGS),
-            "rows": "Norm of the tibia floor force in N after each control, by probe; default contact model.",
+            "rows": "Norm of the tibia floor force in N after each control, by case; default contact model.",
             "rest_load_mean_n": loads.rest_load(),
             "rest_controls": REST_CONTROLS,
         }
-    static = [case for case in selected if profiles[case] in STATIC_PROFILES]
+    static = list(selected)
     variants = {}
     if static and not args.no_contact_consensus:
-        results = {"default": {result["case_id"]: result for result in summary["results"]}}
+        results = {"default": {result["case_id"]: result for result in summary["cases"]}}
         if condition is None:
             plan = {name: (fields, None) for name, fields in CONSENSUS_VARIANTS.items()}
         else:
@@ -717,7 +683,7 @@ def evaluate_checkpoint(args):
                 [],
                 condition=variant_condition,
             )[:2]
-            results[name] = {result["case_id"]: result for result in variant_summary["results"]}
+            results[name] = {result["case_id"]: result for result in variant_summary["cases"]}
             variants[name] = {
                 "contact_model_fields": {
                     key: list(value) if isinstance(value, tuple) else value
@@ -773,9 +739,11 @@ def evaluate_checkpoint(args):
             "consensus": "relative_friction",
         },
         "identity": source_identity(),
-        "failed_probe_cases": summary["failed_probe_cases"],
+        "requirements_set": summary["requirements_set"],
+        "requirements_sha256": summary["requirements_sha256"],
+        "failed_probe_cases": summary["failed_cases"],
         "unresolved_probe_cases": unresolved,
-        "acquisition_failure": summary["acquisition_failure"],
+        "acquisition_failure": summary["failure"],
         "videos": {
             case: {"path": str(writer.path), "frames": writer.frames}
             for case, writer in writers.items()
@@ -795,7 +763,7 @@ def evaluate_checkpoint(args):
                 {
                     "case": row["case_id"],
                     "pass": row["pass"],
-                    "failed": row["failed_bounds"],
+                    "failed": row["failed_checks"],
                     "consensus": row.get("contact_consensus", {}).get("verdict"),
                     "planar_error": row["metrics"].get("planar_error_mps"),
                     "mean_velocity": gait.get("mean_velocity_nav_mps"),

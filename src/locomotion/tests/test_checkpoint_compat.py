@@ -15,9 +15,9 @@ class CheckpointCompatibilityTests(unittest.TestCase):
 
         summary = NativeRangeTests().suite(1.0)
         summary["allocation"].update(
-            checkpoint_sha256=checkpoints.CHECKPOINT_SHA, evaluator_sha256="a" * 64
+            checkpoint_sha256=checkpoints.CHECKPOINT_SHA, judge_sha256="a" * 64
         )
-        summary["loads"] = {str(index): {"status": "available"} for index in range(13)}
+        summary["loads"] = {str(index): {"status": "available"} for index in range(3)}
         ranges = checkpoints.freeze([deepcopy(summary) for _ in range(3)])
         ranges["baseline_provenance"] = [{"fixture": index} for index in range(3)]
         for name, value in (("ranges.json", ranges), ("summary.json", summary)):
@@ -25,10 +25,11 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         receipt = {
             "schema": checkpoints.SCHEMA,
             "mode": "evaluate",
-            "eval_scope": "probes",
             "checkpoint_sha256": checkpoints.CHECKPOINT_SHA,
             "declaration_sha256": checkpoints.DECLARATION_SHA,
-            "candidate_runtime_sources": {"files": {"locomotion/evaluation/scoring.py": "a" * 64}},
+            "candidate_runtime_sources": {
+                "files": {"locomotion/evaluation/requirements.py": "a" * 64}
+            },
             "files": {
                 name: checkpoints.sha(directory / name) for name in ("ranges.json", "summary.json")
             },
@@ -47,7 +48,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
                 checkpoints.read_compatibility_receipt(path, "0" * 64)
             summary_path = directory / "summary.json"
             summary = json.loads(summary_path.read_text())
-            summary["results"][0]["metrics"]["drift"] = 2.0
+            summary["cases"][0]["stop"]["final_distance_m"] = 2.0
             summary_path.write_text(json.dumps(summary))
             with self.assertRaisesRegex(ValueError, "evidence hash"):
                 checkpoints.read_compatibility_receipt(path, digest)
@@ -149,7 +150,6 @@ class CheckpointCompatibilityTests(unittest.TestCase):
                 checkpoint_declaration_sha=checkpoints.DECLARATION_SHA,
                 checkpoint_compatibility="/srv/cupi/hexapod/runs/james/certified/receipt.json",
                 checkpoint_compatibility_sha256="a" * 64,
-                eval_scope="probes",
             )
             binding = prepare(root / "pack", "/srv/cupi/hexapod/runs/james/fresh", **options)
             self.assertIn(
@@ -159,7 +159,6 @@ class CheckpointCompatibilityTests(unittest.TestCase):
             self.assertIn("/compatibility/receipt.json", binding["command_args"])
             for changed in (
                 {"mode": "train"},
-                {"eval_scope": "full"},
                 {"checkpoint_compatibility_sha256": None},
             ):
                 with self.subTest(changed=changed), self.assertRaises(ValueError):

@@ -1,7 +1,6 @@
-"""Waypoint command producers that consume shared contracts."""
+"""Waypoint command producers that consume shared contracts.
 
-from __future__ import annotations
-
-from . import graph, grid, planner, producer, region, waypoint
-
-__all__ = ["graph", "grid", "planner", "producer", "region", "waypoint"]
+Import the module you need, such as ``navigation.waypoint``. The package does not import its
+modules on its own: ``grid``, ``region``, ``graph`` and ``planner`` need shapely, and the native
+evaluation container, which runs the waypoint follower, has no shapely.
+"""

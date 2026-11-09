@@ -1,7 +1,8 @@
-"""Check checkpoint declarations, freeze native probe ranges and read the compatibility receipt.
+"""Check checkpoint declarations, freeze native judgement ranges and read the compatibility receipt.
 
-A compatibility receipt binds one recorded checkpoint to the current package class
-paths. Its native probe evidence must lie inside the ranges of three baseline replays.
+A compatibility receipt binds one recorded checkpoint to the current package class paths. Its
+native evidence is a complete judgement of the requirement cases whose every measurement must lie
+inside the ranges of three baseline replays.
 """
 
 import hashlib
@@ -158,27 +159,25 @@ def numbers(value, path=""):
     return {}
 
 
-def measurements(summary):
-    rows = summary["results"]
+def measurements(judgement):
+    """Every number of a complete judgement, by case, and the bounds it judged against."""
+    rows = judgement["cases"]
+    declared = [case["case_id"] for case in judgement["allocation"]["cases"]]
     if (
-        summary["diagnostic_screens_passed"] is not True
-        or summary["missing_probe_cases"]
-        or summary["failed_probe_cases"]
-        or len(rows) != 13
-        or len({row["case_id"] for row in rows}) != 13
-        or not all(row["pass"] for row in rows)
+        judgement.get("failure") is not None
+        or [row["case_id"] for row in rows] != declared
+        or len(set(declared)) != len(declared)
+        or any("complete_trace" in row["checks"] for row in rows)
     ):
-        raise ValueError("Require 13/13 unchanged native probes")
+        raise ValueError("Require one complete recorded trial of every declared case")
     values, gates = {}, {}
     for row in rows:
         name = row["case_id"]
-        values.update(numbers(row["metrics"], name + "/metrics"))
+        values.update(numbers({"holds": row["holds"], "stop": row["stop"]}, name))
         for key, check in row["checks"].items():
-            values.update(numbers(check.get("value"), name + "/checks/" + key))
-            gates[name + "/" + key] = {
-                field: value for field, value in check.items() if field != "value"
-            }
-    values.update(numbers(summary.get("loads", {}), "loads"))
+            values[name + "/checks/" + key] = check["value"]
+            gates[name + "/" + key] = {"bound": check["bound"]}
+    values.update(numbers(judgement.get("loads", {}), "loads"))
     return values, gates
 
 
@@ -188,7 +187,8 @@ def freeze(summaries):
     measured = [measurements(summary) for summary in summaries]
     values, gates = measured[0]
     identity = {
-        key: summaries[0]["allocation"][key] for key in ("checkpoint_sha256", "evaluator_sha256")
+        key: summaries[0]["allocation"][key]
+        for key in ("checkpoint_sha256", "judge_sha256", "requirements_sha256")
     }
     if any(
         set(other) != set(values) or other_gates != gates for other, other_gates in measured[1:]
@@ -221,7 +221,7 @@ def compare(limits, summary):
         if gates != limits["gates"]:
             failures.append("Gate definitions differ")
         if any(summary["allocation"][key] != value for key, value in limits["identity"].items()):
-            failures.append("Weights or scorer differ")
+            failures.append("Weights, judge or requirements differ")
         if set(values) != set(limits["ranges"]):
             failures.append("Metric schema differs")
         for key, bounds in limits["ranges"].items():
@@ -246,7 +246,6 @@ def read_compatibility_receipt(path, digest):
     if (
         receipt.get("schema") != SCHEMA
         or receipt.get("mode") != "evaluate"
-        or receipt.get("eval_scope") != "probes"
         or receipt.get("checkpoint_sha256") != CHECKPOINT_SHA
         or receipt.get("declaration_sha256") != DECLARATION_SHA
     ):
@@ -267,11 +266,13 @@ def read_compatibility_receipt(path, digest):
         raise ValueError("Compatibility evidence checkpoint differs")
     summary = evidence["summary.json"]
     if (
-        len(summary.get("loads", {})) != 13
+        len(summary.get("loads", {})) != len(summary["allocation"]["cases"])
         or any(row.get("status") != "available" for row in summary["loads"].values())
         or len(evidence["ranges.json"].get("baseline_provenance", [])) != 3
-        or summary["allocation"]["evaluator_sha256"]
-        != receipt["candidate_runtime_sources"]["files"].get("locomotion/evaluation/scoring.py")
+        or summary["allocation"]["judge_sha256"]
+        != receipt["candidate_runtime_sources"]["files"].get(
+            "locomotion/evaluation/requirements.py"
+        )
     ):
         raise ValueError("Compatibility provenance or load evidence differs")
     if not compare(evidence["ranges.json"], evidence["summary.json"])["pass"]:

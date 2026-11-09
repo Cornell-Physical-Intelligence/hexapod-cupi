@@ -17,13 +17,12 @@ HARNESS = ("native_parity.py",)
 def candidate(
     output, remote_root, *, source_commit, ranges, baseline_sources, checkpoint_sha, **options
 ):
-    """Write the probes evaluation pack, add the harness and declare the candidate role with its pinned ranges."""
+    """Write the evaluation pack, add the harness and declare the candidate role with its pinned ranges."""
     output, ranges = Path(output), Path(ranges)
     prepare(
         output,
         remote_root,
         mode="evaluate",
-        eval_scope="probes",
         num_envs=1,
         checkpoint_sha=checkpoint_sha,
         **options,

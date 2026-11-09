@@ -45,7 +45,6 @@ def prepare(
     seed=20260917,
     num_envs=None,
     inputs=None,
-    eval_scope="focus",
     checkpoint=None,
     checkpoint_sha=None,
     checkpoint_declaration_sha=None,
@@ -148,7 +147,6 @@ def prepare(
         num_envs not in REPLICA_COUNTS
         or (mode in ("evaluate", "replay") and num_envs != 1)
         or (mode in ("train", "probe") and num_envs not in TRAINING_COUNTS)
-        or eval_scope not in ("focus", "probes", "full")
     ):
         raise ValueError("Invalid replica count for this mode")
     wandb_valid = (
@@ -203,9 +201,9 @@ def prepare(
         )
     validate_decay(mode, updates, learner_options["action_std_decay_updates"])
     if video_case is not None and (
-        mode != "evaluate" or eval_scope == "full" or not video_case.startswith("learning:")
+        mode != "evaluate" or not re.fullmatch(r"[A-Za-z0-9_.+-]{1,64}", video_case)
     ):
-        raise ValueError("A video case applies to a learning-probe evaluation")
+        raise ValueError("A video case applies to an evaluation and names one requirement case")
     if type(episode_seconds) is not float or (
         episode_seconds != 20.0 and (mode != "train" or not 5.0 <= episode_seconds <= 20.0)
     ):
@@ -254,9 +252,7 @@ def prepare(
         checkpoint_compatibility is not None,
         checkpoint_compatibility_sha256 is not None,
     )
-    if any(compatibility) and (
-        mode != "evaluate" or eval_scope != "probes" or not all(compatibility)
-    ):
+    if any(compatibility) and (mode != "evaluate" or not all(compatibility)):
         raise ValueError("Compatibility requires evaluation and both receipt arguments")
     if all(compatibility):
         receipt = Path(checkpoint_compatibility)
@@ -303,10 +299,15 @@ def prepare(
     if learner == "amp":
         bank = Path("locomotion/priors/datasets/amp_demonstrations_001")
         shutil.copytree(tree / bank, source / bank)
-    contracts = source / "contracts"
-    contracts.mkdir()
-    for name in ("__init__.py", "release.py"):
-        shutil.copy2(tree / "contracts" / name, contracts / name)
+    # The evaluation runs the waypoint follower in closed loop; it and its contracts travel too.
+    for package_name, names in (
+        ("contracts", ("__init__.py", "release.py", "command.py", "pose.py")),
+        ("navigation", ("__init__.py", "producer.py", "waypoint.py")),
+    ):
+        directory = source / package_name
+        directory.mkdir()
+        for name in names:
+            shutil.copy2(tree / package_name / name, directory / name)
     write_runtime(source)
     save(
         source / "FREEZE_SHA256.json",
@@ -389,8 +390,6 @@ def prepare(
             "--wandb-mode",
             wandb_mode,
         ]
-    if mode == "evaluate":
-        binding["command_args"] += ["--eval-scope", eval_scope]
     if video_case is not None:
         binding["command_args"] += ["--video-case", video_case]
     if episode_seconds != 20.0:
@@ -494,7 +493,6 @@ def main():
         "diagnostic.",
     )
     parser.add_argument("--num-envs", type=int)
-    parser.add_argument("--eval-scope", choices=["focus", "probes", "full"], default="focus")
     parser.add_argument("--updates", type=int, default=512)
     parser.add_argument(
         "--extended-updates",

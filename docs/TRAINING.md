@@ -63,9 +63,11 @@ settings when comparing PPO with AMP. Use `amp/` for that workflow.
 
 ## Acceptance
 
-You qualify Stage 2 against the full 96-case manifest and the unchanged gates
-in [the scorer](../src/locomotion/evaluation/scoring.py). The 13 learning probes
-provide intermediate diagnostics; they do not replace full qualification.
+You qualify Stage 2 against [the walking requirements](../configs/walking_requirements.json).
+[The judge](../src/locomotion/evaluation/requirements.py) enumerates the set's
+cases, records one native trial per case and measures drift, stopping distance,
+tilt and motor torque against the file's limits. The historical 96-case scorer
+is retired; its bytes remain archived in `configs/source_inventory.json`.
 The program lead must also accept the gait's appearance.
 
 Each native evaluation must capture ground contact and requested/applied motor
