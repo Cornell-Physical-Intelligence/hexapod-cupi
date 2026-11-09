@@ -226,6 +226,59 @@ class ProgressTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "finite"):
             site.validate_progress(self.project)
 
+    def owned_steps(self, judged=None, **accepted):
+        """The fixture roadmap with owner files; the walking step is done unless a test resets it."""
+        (site.ROOT / "configs").mkdir(exist_ok=True)
+        rows = judged or {"stop": {"pass": True}, "drift": {"pass": True}}
+        (site.ROOT / "configs/accepted_controller.json").write_text(
+            json.dumps(dict(accepted, judged=rows))
+        )
+        steps = copy.deepcopy(self.project["roadmap"])
+        for step in steps:
+            step.update(owner="evidence.md", done_means="A reviewer accepts evidence.md.")
+        steps[1].update(
+            owner=site.ACCEPTED_CONTROLLER,
+            done_means="Each judged row of configs/accepted_controller.json passes.",
+            state="done",
+            accepted_by="Fixture reviewer",
+            source="evidence.md",
+        )
+        steps[2]["state"] = "now"
+        return steps
+
+    def test_each_step_says_what_done_means_and_names_its_owner_file(self):
+        site.validate_done_means(self.owned_steps(video_accepted_by="Fixture reviewer"))
+        for change in (
+            {"done_means": ""},
+            {"owner": ""},
+            {"done_means": "A reviewer accepts the evidence."},
+        ):
+            with self.subTest(change=change):
+                steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+                steps[3].update(change)
+                with self.assertRaisesRegex(ValueError, "done_means naming its owner file"):
+                    site.validate_done_means(steps)
+        steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+        del steps[0]["done_means"]
+        with self.assertRaisesRegex(ValueError, "done_means naming its owner file: design"):
+            site.validate_done_means(steps)
+
+    def test_walk_and_stop_is_not_done_while_a_judged_row_fails(self):
+        failing = {"stop": {"pass": True}, "drift": {"pass": False}, "tilt": {"value": 1.8}}
+        steps = self.owned_steps(judged=failing, video_accepted_by="Fixture reviewer")
+        with self.assertRaisesRegex(ValueError, "Walk is not done: judged rows fail.*drift, tilt"):
+            site.validate_done_means(steps)
+        # The same failing rows do not block the step while it is the current one.
+        steps[1]["state"], steps[2]["state"] = "now", "next"
+        site.validate_done_means(steps)
+
+    def test_walk_and_stop_is_not_done_until_the_videos_are_accepted_by_name(self):
+        for accepted in ({}, {"video_accepted_by": ""}, {"video_accepted_by": None}):
+            with self.subTest(accepted=accepted):
+                with self.assertRaisesRegex(ValueError, "names no video_accepted_by"):
+                    site.validate_done_means(self.owned_steps(**accepted))
+        site.validate_done_means(self.owned_steps(video_accepted_by="Fixture reviewer"))
+
 
 if __name__ == "__main__":
     unittest.main()

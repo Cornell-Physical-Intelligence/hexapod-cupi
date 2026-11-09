@@ -39,6 +39,8 @@
     {
       "id": "design",
       "title": "Robot design",
+      "owner": "robot/active_model.json",
+      "done_means": "The program lead approves the robot model that robot/active_model.json selects.",
       "state": "done",
       "accepted_by": "Program lead",
       "source": "docs/UPDATED_CAD_IMPORT.md"
@@ -46,6 +48,8 @@
     {
       "id": "standing",
       "title": "Stand",
+      "owner": "configs/approved_code_version.json",
+      "done_means": "The approved robot stands without a fall in the native simulator, alone and in a group of 128, in the campaign that configs/approved_code_version.json records.",
       "state": "done",
       "accepted_by": "Program lead",
       "source": "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/5e65918020dc9ef2d72da8dad0a346016b98728d/artifacts/restart_2026-09-14/paper_walk_execution_001/admission_002/verification.json"
@@ -53,21 +57,29 @@
     {
       "id": "stage2",
       "title": "Walk and stop",
+      "owner": "configs/accepted_controller.json",
+      "done_means": "Each judged row of configs/accepted_controller.json passes in the native simulator, and video_accepted_by in that file names the person who accepted the videos.",
       "state": "now"
     },
     {
       "id": "stage3",
       "title": "Rough ground",
+      "owner": "configs/walking_requirements.json",
+      "done_means": "configs/walking_requirements.json holds a stage3 set for rough ground, and the accepted controller passes each judged row of that set.",
       "state": "next"
     },
     {
       "id": "hardware",
       "title": "Build the robot",
+      "owner": "robot/active_model.json",
+      "done_means": "We build the robot, and robot/active_model.json binds the motor torque that we measure on it.",
       "state": "later"
     },
     {
       "id": "mission",
       "title": "Survey an area",
+      "owner": "configs/walking_requirements.json",
+      "done_means": "In the route rehearsal of issue 20, the robot stops within 0.12 m of each survey point, the stop tolerance that configs/walking_requirements.json sets.",
       "state": "later"
     }
   ],

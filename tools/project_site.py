@@ -198,6 +198,7 @@ def registry():
     for item in p["nodes"] + p["accomplishments"] + [p["robot"]]:
         reference(item["source"])
     validate_progress(p)
+    validate_done_means(p["roadmap"])
     return p
 
 
@@ -320,6 +321,36 @@ def validate_progress(project):
         all(nonempty(g.get("term")) and nonempty(g.get("meaning")) for g in project["glossary"]),
         "Each term needs a meaning",
     )
+
+
+ACCEPTED_CONTROLLER = "configs/accepted_controller.json"
+
+
+def validate_done_means(steps):
+    """Each roadmap step says what done means and names the owner file that decides it.
+
+    The accepted controller file decides its step: the step cannot be done while a
+    judged row fails or while nobody is named as having accepted the videos.
+    """
+    for step in steps:
+        owner = step.get("owner")
+        require(
+            nonempty(step.get("done_means")) and nonempty(owner) and owner in step["done_means"],
+            "A roadmap step needs done_means naming its owner file: " + step["id"],
+        )
+        if owner == ACCEPTED_CONTROLLER and step["state"] == "done":
+            accepted = read(ROOT / owner)
+            failing = sorted(
+                name for name, row in accepted["judged"].items() if row.get("pass") is not True
+            )
+            require(
+                not failing,
+                f"{step['title']} is not done: judged rows fail in {owner}: " + ", ".join(failing),
+            )
+            require(
+                nonempty(accepted.get("video_accepted_by")),
+                f"{step['title']} is not done: {owner} names no video_accepted_by",
+            )
 
 
 def native_approval():
