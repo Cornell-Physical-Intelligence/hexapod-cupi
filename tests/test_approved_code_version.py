@@ -39,7 +39,14 @@ class ApprovedCodeVersionTests(unittest.TestCase):
     def test_certified_commit_is_on_this_branch(self):
         commit = self.approved["certified_commit"]
         known = subprocess.run(["git", "cat-file", "-e", commit], cwd=ROOT, capture_output=True)
-        if known.returncode != 0:
-            self.skipTest("shallow clone without the certified commit")
+        # A partial clone fetches the commit on demand, so its presence does not show history.
+        shallow = subprocess.run(
+            ["git", "rev-parse", "--is-shallow-repository"],
+            cwd=ROOT,
+            capture_output=True,
+            text=True,
+        )
+        if known.returncode != 0 or shallow.stdout.strip() == "true":
+            self.skipTest("shallow clone cannot check ancestry")
         ancestor = subprocess.run(["git", "merge-base", "--is-ancestor", commit, "HEAD"], cwd=ROOT)
         self.assertEqual(ancestor.returncode, 0, commit + " is not an ancestor of HEAD")
