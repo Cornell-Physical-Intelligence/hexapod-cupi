@@ -37,6 +37,7 @@ CRIT = (cv2.TERM_CRITERIA_COUNT | cv2.TERM_CRITERIA_EPS, 50, 1e-12)
 TAGS = {0: (-17.775, 0.0), 1: (17.775, 0.0)}
 HALF = 10.4
 SQUARE = ((-1, 1), (1, 1), (1, -1), (-1, -1))  # cv2.aruco corner order: TL, TR, BR, BL
+MIN_TRAVEL = 5.0  # mm from the zero before a reference point can set the scale
 CORNERS = {
     i: np.array([[x + dx * HALF, y + dy * HALF, 0.0] for dx, dy in SQUARE])
     for i, (x, y) in TAGS.items()
@@ -152,7 +153,10 @@ def solve(dets, R_lock=None):
 
 
 def mean_rotation(Rs):
-    return cv2.Rodrigues(np.median([cv2.Rodrigues(R)[0].ravel() for R in Rs], axis=0))[0]
+    """The rotation nearest the mean of the matrices. The plate faces the camera, so the angle is
+    near 180 degrees, where a rotation vector flips sign from frame to frame and has no mean."""
+    U, _, Vt = np.linalg.svd(np.mean(Rs, axis=0))
+    return U @ np.diag([1.0, 1.0, np.linalg.det(U @ Vt)]) @ Vt
 
 
 class Calibration:
@@ -198,7 +202,7 @@ class Tracker:
         self.seen = collections.deque(maxlen=60)
         self.status, self.error, self.camera, self.reopen = "starting", None, a.camera, True
         self.R_lock = np.array(json.loads(LOCK.read_text())["R"]) if LOCK.exists() else None
-        self.lock_Rs, self.relock = [], False
+        self.lock_Rs, self.relock, self.lock_t = [], False, -math.inf
         self.off, self.off_n = dict.fromkeys(TAGS, 0.0), dict.fromkeys(TAGS, 0)
         self.t0 = time.monotonic()
 
@@ -263,7 +267,7 @@ class Tracker:
         if both and self.R_lock is None and res["reproj_px"] < 2:
             self.lock_Rs.append(res["R"])
             if len(self.lock_Rs) >= self.a.lock:
-                self.R_lock = mean_rotation(self.lock_Rs)
+                self.R_lock, self.lock_t = mean_rotation(self.lock_Rs), round(ts - self.t0, 4)
                 LOCK.write_text(json.dumps({"R": self.R_lock.tolist()}))
         elif res and self.R_lock is not None:
             if both:  # learn each tag's own-height offset from the two-tag height
@@ -324,10 +328,18 @@ class Tracker:
         }
 
     def average(self):
-        """Mean of the frames with both tags over the last --avg seconds."""
-        hs = np.array([r[1] for r in self.window(self.a.avg) if r[2]])
-        if not len(hs):
-            raise ValueError(f"no frames with both tags in the last {self.a.avg:g} s")
+        """Mean of the frames with both tags over the last --avg seconds. The frames must follow
+        the orientation lock, span the window and hold still: a zero or a point from other
+        frames is wrong and nothing downstream can tell."""
+        if self.R_lock is None:
+            raise ValueError("wait for the orientation lock")
+        rows = [r for r in self.window(self.a.avg) if r[2] and r[0] > self.lock_t]
+        hs, third = np.array([r[1] for r in rows]), len(rows) // 3
+        if not third or rows[-1][0] - rows[0][0] < 0.8 * self.a.avg:
+            raise ValueError(f"hold both tags in view for {self.a.avg:g} s after the lock")
+        moved = abs(float(hs[-third:].mean() - hs[:third].mean()))
+        if moved > self.a.steady:
+            raise ValueError(f"the height moved {moved:.2f} mm during the average; hold still")
         return {"height_mm": float(hs.mean()), "sd_mm": float(hs.std()), "n": len(hs)}
 
     def action(self, path, q):
@@ -341,7 +353,14 @@ class Tracker:
         elif path == "/point":
             if cal.h0 is None:
                 raise ValueError("set the zero first")
-            cal.points.append(dict(self.average(), ref_mm=float(q["ref"][0])))
+            avg, ref = self.average(), float(q["ref"][0])
+            if not MIN_TRAVEL <= abs(ref) < math.inf:  # nan fails both comparisons
+                raise ValueError(
+                    f"the reference must be a number at least {MIN_TRAVEL:g} mm from 0"
+                )
+            if abs(avg["height_mm"] - cal.h0) < MIN_TRAVEL:
+                raise ValueError(f"move at least {MIN_TRAVEL:g} mm from the zero first")
+            cal.points.append(dict(avg, ref_mm=ref))
         elif path == "/delete":
             cal.points.pop(int(q["i"][0]))
         elif path == "/flip":
@@ -508,6 +527,9 @@ def main():
     s.add_argument("--camera", type=int, default=0, help="OpenCV camera index")
     s.add_argument("--fps", type=int, default=60, help="frame rate requested from the camera")
     s.add_argument("--avg", type=float, default=1.0, help="seconds averaged per zero or point")
+    s.add_argument(
+        "--steady", type=float, default=0.5, help="mm the average may move, start to end"
+    )
     s.add_argument("--lock", type=int, default=60, help="two-tag frames for the orientation lock")
     s.add_argument("--port", type=int, default=8765)
     s.add_argument("--sim", action="store_true", help="simulated frames instead of the camera")

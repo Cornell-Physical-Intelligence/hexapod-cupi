@@ -1,0 +1,22 @@
+{
+  "id": "20261109T224500_leg_stand_lock_and_calibration_guards",
+  "date": "2026-11-09T22:45:00Z",
+  "title": "Fix the leg-stand orientation lock and guard its calibration",
+  "summary": "Review of the height tracker found three ways to get a wrong or missing height with no warning. The lock took a per-component median of rotation vectors; the plate faces the camera, so the angle is near 180 degrees and the vector flips sign between frames, and locks landed up to 180 degrees off. The lock is now the rotation nearest the mean of the matrices: at the noise that gives the measured 0.2 mm sd, 60 frames lock within 1 degree and the lock adds under 0.1 mm of height error. Set zero and Add point now need the lock, frames that span the 1 s window since the lock, and a height that moves under 0.5 mm from the first third of the window to the last (--steady). Add point refuses an offset that is not finite or is under 5 mm, and a point under 5 mm from the zero; before, an offset of 0 set the scale to 0 and nan was saved to calibration.json. Eleven tests in the unit check cover this; nine of them fail on the earlier code. The README no longer names the borrowed intrinsics as the cause of the 2.9 % scale correction, because the focal length agrees within 0.3 % across units; it names oversized tag squares as a candidate to measure.",
+  "areas": [
+    "leg stand"
+  ],
+  "next": "Measure the inked tag squares with calipers, then record at least five reference points plus two held-out points over the full stroke.",
+  "changes": [
+    "site/updates/20261109T224500_leg_stand_lock_and_calibration_guards.json",
+    "testing/leg_stand/README.md",
+    "testing/leg_stand/tag_height.py",
+    "tests/test_leg_stand_tag_height.py"
+  ],
+  "evidence": [
+    "tests/test_leg_stand_tag_height.py",
+    "testing/leg_stand/tag_height.py",
+    "testing/leg_stand/README.md"
+  ],
+  "no_project_impact": false
+}

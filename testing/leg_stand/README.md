@@ -35,6 +35,10 @@ the ELP in the dashboard's Camera menu. `serve --sim` shows a simulated plate.
    point**. The scale is the least-squares fit through the zero; the table shows each error.
    With no points, a move toward the camera reads positive (**Flip direction** reverses it).
 
+The zero and each point need the lock and 1 s of two-tag frames that hold still: the page refuses
+an average that moves more than 0.5 mm from its first third to its last (`--steady`). A point
+needs a finite offset and at least 5 mm of travel from the zero.
+
 The zero and the points are kept in `calibration.json`. Both JSON files stay out of Git.
 
 ## Method
@@ -44,7 +48,7 @@ The zero and the points are kept in `calibration.json`. Both JSON files stay out
    filament turns light, black ink stays dark), luma and CLAHE, with loosened thresholds. If the
    tags are lost, a full-frame search runs with one variant per frame.
 2. **Undistort** the eight corners with the fisheye model.
-3. **Solve.** The first 60 frames that show both tags solve the full pose, and their median
+3. **Solve.** The first 60 frames that show both tags solve the full pose, and their mean
    orientation is locked. After that only the translation is solved, by linear least squares,
    because the rail only translates the plate.
 4. **Fill dropouts.** After the lock, a frame with one tag uses that tag alone. It is corrected by
@@ -72,9 +76,13 @@ pose drifts by several millimetres at 470 mm. The simulation does not model lens
 
 ## Limits and next steps
 
-- The scale correction (2.9 %) and the tag-0 offset point to the borrowed intrinsics. Calibrate
-  this camera with the [Camera-Calibration](https://github.com/Cornell-Physical-Intelligence/Camera-Calibration)
-  tool, or add at least five reference points plus two held-out points over the full stroke.
+- The cause of the scale correction (2.9 %) is open. The focal length agrees within 0.3 % across
+  units, so the borrowed intrinsics do not explain it. One candidate: with exact simulated
+  corners, squares 0.5 mm wider per edge than 20.8 mm on unchanged centres read a 90 mm move as
+  87.4 mm, give a 1.6 px reprojection error at 255 mm and raise the tilt shown by 2.5°. Measure
+  the inked squares with calipers. Calibrate this camera with the
+  [Camera-Calibration](https://github.com/Cornell-Physical-Intelligence/Camera-Calibration)
+  tool, and add at least five reference points plus two held-out points over the full stroke.
 - The tags are inked by marker on light-blue filament. Black-on-white tags (printed matte paper on
   the raised squares, or black filament on white) give more contrast; avoid glare.
 - Check the 7.35° tilt against the camera mount design.
