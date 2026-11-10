@@ -2,10 +2,10 @@
 
 Each cell runs ``locomotion.surrogate.evaluate --grid --cell`` in its own process under
 ``<output>/cells/<cell id>``, so any cell can be reproduced alone. ``grid_summary.json`` collects
-the verdict of each probe in each cell: the relative-friction consensus for quiet and stop probes,
-else the probe's own verdict. ``--continue`` finishes an interrupted sweep: it keeps a finished
-cell only when its summary matches this request (checkpoint bytes, sources, grid, cell, probes and
-seed) and refuses the sweep on any mismatch. It sets every incomplete or acquisition-failed
+the verdict of each case in each cell: the relative-friction consensus where the cell ran it, else
+the case's own verdict. ``--continue`` finishes an interrupted sweep: it keeps a finished cell only
+when its summary matches this request (checkpoint bytes, sources, grid, cell, cases and seed) and
+refuses the sweep on any mismatch. It sets every incomplete or acquisition-failed
 attempt aside under a fresh name and runs that cell again.
 """
 
@@ -33,11 +33,11 @@ def build_parser():
     parser.add_argument("--grid", choices=["table2_v1_grid"], default="table2_v1_grid")
     parser.add_argument("--cells", default="all", help="all, or comma-separated cell ids.")
     parser.add_argument(
-        "--cases", default="focus", help="focus, all, or comma-separated learning probe ids."
+        "--cases", default="focus", help="focus, all, or comma-separated requirement case ids."
     )
     parser.add_argument("--seed", type=int, help="Defaults to the checkpoint record's seed.")
     parser.add_argument(
-        "--video", default="none", help="first, all, none or probe ids, in every cell."
+        "--video", default="none", help="first, all, none or case ids, in every cell."
     )
     parser.add_argument("--jobs", type=int, default=1, help="Cells that run at once.")
     parser.add_argument(
@@ -129,7 +129,7 @@ def cell_state(path, expected):
 
 
 def probe_verdict(row):
-    """The consensus verdict of a quiet or stop probe, else the probe's own pass or fail."""
+    """The consensus verdict of a case where the cell ran one, else the case's own pass or fail."""
     if "contact_consensus" in row:
         return row["contact_consensus"]["verdict"]
     return "pass" if row["pass"] else "fail"
@@ -146,7 +146,7 @@ def cell_row(cell, values, summary):
     if summary is None:
         row["status"] = "missing"
         return row
-    # The probe suite stops at an acquisition failure; the cell then holds no complete screen.
+    # The case run stops at an acquisition failure; the cell then holds no complete screen.
     failure = summary.get("acquisition_failure")
     row["status"] = "evaluated" if failure is None else "acquisition_failure"
     if failure is not None:
@@ -156,11 +156,10 @@ def cell_row(cell, values, summary):
     row["cases"] = {
         case["case_id"]: {
             "verdict": probe_verdict(case),
-            "failed_bounds": case["failed_bounds"],
-            "consensus_failed_bounds": case.get("contact_consensus", {}).get("failed_bounds"),
-            "planar_error_mps": case["metrics"].get("planar_error_mps"),
+            "failed_checks": case["failed_checks"],
+            "consensus_failed_checks": case.get("contact_consensus", {}).get("failed_checks"),
+            "checks": {name: check["value"] for name, check in case["checks"].items()},
             "mean_velocity_nav_mps": case.get("gait", {}).get("mean_velocity_nav_mps"),
-            "max_applied_torque_nm": case["metrics"].get("max_applied_torque_nm"),
         }
         for case in summary["cases"]
     }
@@ -168,7 +167,7 @@ def cell_row(cell, values, summary):
 
 
 def main(argv=None):
-    import locomotion.evaluation.runner as evaluation
+    import locomotion.evaluation.requirements as requirements
     import locomotion.randomization as rnd
     from locomotion.surrogate.env import repository_state, sha
     from locomotion.surrogate.evaluate import effective_seed, selected_cases, source_identity
@@ -198,7 +197,8 @@ def main(argv=None):
         "checkpoint_sha256": checkpoint_sha256,
         "grid_sha256": rnd.grid_declaration(args.grid)["sha256"],
         "selected_case_ids": selected_cases(
-            args.cases, [case["case_id"] for case in evaluation.learning_probe_cases()]
+            args.cases,
+            [case["case_id"] for case in requirements.cases(requirements.load_requirements()[0])],
         ),
         "seed": effective_seed(args.seed, record.get("identity", {})),
     }
@@ -258,7 +258,7 @@ def main(argv=None):
     declaration = rnd.grid_declaration(args.grid)
     summary = {
         "schema": SCHEMA,
-        "scope": "CPU MuJoCo surrogate screen at fixed conditions; design evidence. One trial per probe "
+        "scope": "CPU MuJoCo surrogate screen at fixed conditions; design evidence. One trial per case "
         "per cell. Native runs are the only acceptance evidence.",
         "checkpoint": str(args.checkpoint),
         "checkpoint_sha256": sha(args.checkpoint),

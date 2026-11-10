@@ -9,8 +9,9 @@ asserts the navigation-side bank equals `command_bank(TaskConfig())`. Its
 default envelope is the bank's per-axis extremes and a consumer may supply a
 narrower one. A translation command is held for the training minimum of 2 s
 before it is chosen again, so the policy sees the hold lengths it was trained
-on; reaching a goal or tripping the heading gate ends a hold. The follower has no obstacle avoidance. Position will come
-from onboard GPS only ([navigation contract](../../ARCHITECTURE.md#navigation-and-commands)); the pose estimate remains pending.
+on; reaching a goal or tripping the heading gate ends a hold. The heading gate has hysteresis (turn from 0.05 rad, release at 0.01 rad), and a goal is retired at 0.06 m, inside the 0.12 m stop tolerance by the body's stopping distance. The follower has no obstacle avoidance. Position and heading
+will come from the pose source that the walking requirements name: Mid-360 odometry, with GPS for the global frame
+([navigation contract](../../ARCHITECTURE.md#navigation-and-commands)); the pose estimate remains pending.
 Navigation imports shared contracts, not simulation.
 
 ## Route planning

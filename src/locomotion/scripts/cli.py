@@ -106,7 +106,6 @@ def add_common_arguments(parser):
     )
     parser.add_argument("--max-wall-seconds", type=float, default=6200.0)
     parser.add_argument("--allocation-profile", choices=ALLOCATION_PROFILES, default="standard")
-    parser.add_argument("--eval-scope", choices=["focus", "probes", "full"], default="focus")
     parser.add_argument("--checkpoint", type=Path)
     parser.add_argument("--checkpoint-sha256")
     parser.add_argument("--checkpoint-compatibility", type=Path)
@@ -123,7 +122,7 @@ def add_common_arguments(parser):
     )
     parser.add_argument(
         "--video-case",
-        help="Learning probe to record on video; the first selected probe by default.",
+        help="Requirement case to record on video; the first case by default.",
     )
     parser.add_argument(
         "--experiment",
@@ -277,7 +276,6 @@ def validate(args):
     ):
         if (
             args.mode != "evaluate"
-            or args.eval_scope != "probes"
             or args.num_envs != 1
             or args.checkpoint_compatibility is None
             or args.checkpoint_compatibility_sha256 is None
@@ -314,8 +312,8 @@ def validate(args):
         args.mode not in ("train", "evaluate") or args.learner != "ppo"
     ):
         raise ValueError("An experiment applies to PPO training and evaluation")
-    if args.video_case is not None and (args.mode != "evaluate" or args.eval_scope == "full"):
-        raise ValueError("A video case applies to a learning-probe evaluation")
+    if args.video_case is not None and args.mode != "evaluate":
+        raise ValueError("A video case applies to an evaluation")
     if args.episode_seconds != 20.0 and (
         args.mode != "train" or not 5.0 <= args.episode_seconds <= 20.0
     ):
@@ -346,17 +344,12 @@ def validate(args):
 
 
 def environment_config(args):
-    """Build the environment configuration for the mode; full evaluation uses the evaluation configuration."""
-    from locomotion.evaluation.runner import EvaluationEnvConfig
-
-    config_class = (
-        EvaluationEnvConfig if args.mode == "evaluate" and args.eval_scope == "full" else EnvConfig
-    )
-    if args.mode == "evaluate":
-        episode_seconds = 90.0 if args.eval_scope == "full" else 60.0
+    """Build the environment configuration for the mode."""
+    if args.mode in ("evaluate", "diagnostic"):
+        episode_seconds = 60.0
     else:
-        episode_seconds = 60.0 if args.mode == "diagnostic" else args.episode_seconds
-    return config_class(
+        episode_seconds = args.episode_seconds
+    return EnvConfig(
         num_envs=args.num_envs,
         seed=args.seed,
         record_motion_features=args.mode == "evaluate" or args.learner == "amp",

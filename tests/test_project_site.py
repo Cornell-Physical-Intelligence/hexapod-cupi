@@ -1,5 +1,6 @@
 """Protect the user-mandated public research update and evidence contract."""
 
+import hashlib
 import importlib.util
 import json
 import subprocess
@@ -104,6 +105,48 @@ class PosterContractTests(unittest.TestCase):
         with patch.object(site, "registry", return_value=({}, {}, {})):
             with self.assertRaisesRegex(ValueError, "append-only"):
                 site.check(base)
+
+    def approval_fixture(self, change=None):
+        bound = {"locomotion/a.py": "print(1)\n", "locomotion/b.py": "print(2)\n"}
+        for path, text in bound.items():
+            target = self.root / "src" / path
+            target.parent.mkdir(parents=True, exist_ok=True)
+            target.write_text(text)
+        files = {p: hashlib.sha256(t.encode()).hexdigest() for p, t in bound.items()}
+        receipt = self.root / "site/receipt.json"
+        receipt.write_text(json.dumps({"candidate_runtime_sources": {"files": files}}))
+        (self.root / "configs").mkdir(exist_ok=True)
+        (self.root / "configs/approved_code_version.json").write_text(
+            json.dumps(
+                {
+                    "certified_commit": "abcdef0123456789",
+                    "receipt": {"path": "site/receipt.json", "sha256": site.sha(receipt)},
+                }
+            )
+        )
+        if change:
+            (self.root / "src" / change).write_text("print(3)\n")
+
+    def test_native_approval_is_current_while_bound_files_match(self):
+        self.approval_fixture()
+        approval = site.native_approval()
+        self.assertEqual(approval["status"], "current")
+        self.assertEqual(approval["changed"], [])
+        self.assertIn("approved at abcdef01, all 2 bound files match", site.approval_line(approval))
+
+    def test_native_approval_lapses_when_a_bound_file_changes_and_names_it(self):
+        self.approval_fixture(change="locomotion/b.py")
+        approval = site.native_approval()
+        self.assertEqual(approval["status"], "lapsed")
+        self.assertEqual(approval["changed"], ["locomotion/b.py"])
+        self.assertIn("1 of 2 bound files changed since abcdef01", site.approval_line(approval))
+        self.assertIn("locomotion/b.py", site.approval_line(approval))
+
+    def test_native_approval_rejects_a_receipt_whose_bytes_changed(self):
+        self.approval_fixture()
+        (self.root / "site/receipt.json").write_text("{}")
+        with self.assertRaisesRegex(ValueError, "receipt bytes"):
+            site.native_approval()
 
     def test_no_impact_needs_reason(self):
         r = self.row()

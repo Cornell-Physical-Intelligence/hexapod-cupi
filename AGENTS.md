@@ -5,10 +5,11 @@ explanation. Give no time estimates. Preserve other contributors' work.
 
 ## Outcome
 
-The roadmap stage in progress is "Walk and stop" (Stage 2): the approved
-detailed robot passes the full 96-case manifest with unchanged gates, each
-native evaluation records ground-contact force and motor torque, and the
-program lead accepts the gait's appearance. [TRAINING](docs/TRAINING.md#acceptance)
+The roadmap stage in progress is "Walk and stop" (Stage 2): each judged row of
+`configs/accepted_controller.json` passes natively against its set in
+`configs/walking_requirements.json` with unchanged limits, each native
+evaluation records ground-contact force and motor torque, and the program lead
+accepts the gait's appearance. [TRAINING](docs/TRAINING.md#acceptance)
 defines acceptance. `site/project.json` holds the roadmap state and the
 current next step; read `latest.next` before you plan. Serve this outcome, not
 only the task in front of you. When a task is one step of a repeating job
@@ -22,8 +23,9 @@ Your reading of a log is not a result. These decide:
 
 - The CPU tests under each package and `tests/`, and the required checks in
   [CONTRIBUTING](CONTRIBUTING.md).
-- The scorer and the native parity and range tests under `src/locomotion/`, with
-  unchanged gates. The 13 probes are diagnostics; the 96-case suite qualifies.
+- The requirements judge (`src/locomotion/evaluation/requirements.py`) and the
+  native parity and range tests under `src/locomotion/`, with unchanged limits.
+  The 13 probes are diagnostics; the cases of the walking requirements qualify.
 - Green CI on the exact revision and the deployed Pages site.
 - The program lead's admission and visual acceptance.
 
@@ -39,7 +41,7 @@ data before you restate it from STATUS.md or the site. Report trial counts and
 spread; one passing seed is one trial, and a comparison without its control
 (the reward-term ablations are that control) shows no cause. Compare loads at
 matched achieved motion with the recorded 0.040 rad / 20 ms limiter. Use the
-scorer and the evaluator for numbers; do not hand-build a comparison table.
+judge and the evaluator for numbers; do not hand-build a comparison table.
 
 Apply the methods of the fields this project spans, as methods and not as
 personas: controls (tracking, limiters, settling), reinforcement learning
@@ -88,9 +90,8 @@ Use the detailed 19-body, 18-joint direct-drive robot after matching native
 admission. Preserve checkpoint bytes, published manifests, raw captures, failed
 attempts, incident/recovery records and the probe ledger. Use fresh result
 names and exact model/source/input hashes. Retain historical labels and source
-revisions. Stage 2 requires direction, transition, stop, torque, contact and
-visual acceptance. Native evaluations must record ground-contact force and
-motor torque before another optimizer/PPO sequence; these measurements add no
+revisions. Native evaluations must record ground-contact force and motor
+torque before another optimizer/PPO sequence; these measurements add no
 acceptance limits.
 
 ## Compute and publication

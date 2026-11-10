@@ -207,7 +207,10 @@ class ProgressTests(unittest.TestCase):
         ):
             project = site.registry()
             site.write_status(Path(temp) / "STATUS.md")
-            self.assertEqual((Path(temp) / "STATUS.md").read_text(), site.status_text(project))
+            self.assertEqual(
+                (Path(temp) / "STATUS.md").read_text(),
+                site.status_text(project, approval=site.native_approval()),
+            )
 
     def test_current_registry_validates_against_its_actual_evidence(self):
         with patch.object(site, "ROOT", ROOT), patch.object(site, "SITE", ROOT / "site"):
@@ -222,6 +225,111 @@ class ProgressTests(unittest.TestCase):
         self.project["latest"]["metric"]["value"] = float("nan")
         with self.assertRaisesRegex(ValueError, "finite"):
             site.validate_progress(self.project)
+
+    def owned_steps(self, judged=None, **accepted):
+        """The fixture roadmap with owner files; the walking step is done unless a test resets it."""
+        (site.ROOT / "configs").mkdir(exist_ok=True)
+        rows = judged or {"stop": {"pass": True}, "drift": {"pass": True}}
+        (site.ROOT / "configs/accepted_controller.json").write_text(
+            json.dumps(dict(accepted, judged=rows))
+        )
+        steps = copy.deepcopy(self.project["roadmap"])
+        for step in steps:
+            step.update(owner="evidence.md", done_means="A reviewer accepts evidence.md.")
+        steps[1].update(
+            owner=site.ACCEPTED_CONTROLLER,
+            done_means="Each judged row of configs/accepted_controller.json passes.",
+            state="done",
+            accepted_by="Fixture reviewer",
+            source="evidence.md",
+        )
+        steps[2]["state"] = "now"
+        return steps
+
+    def test_each_step_says_what_done_means_and_names_its_owner_file(self):
+        site.validate_done_means(self.owned_steps(video_accepted_by="Fixture reviewer"))
+        for change in (
+            {"done_means": ""},
+            {"owner": ""},
+            {"done_means": "A reviewer accepts the evidence."},
+        ):
+            with self.subTest(change=change):
+                steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+                steps[3].update(change)
+                with self.assertRaisesRegex(ValueError, "done_means naming its owner file"):
+                    site.validate_done_means(steps)
+        steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+        del steps[0]["done_means"]
+        with self.assertRaisesRegex(ValueError, "done_means naming its owner file: design"):
+            site.validate_done_means(steps)
+
+    def test_walk_and_stop_is_not_done_while_a_judged_row_fails(self):
+        failing = {"stop": {"pass": True}, "drift": {"pass": False}, "tilt": {"value": 1.8}}
+        steps = self.owned_steps(judged=failing, video_accepted_by="Fixture reviewer")
+        with self.assertRaisesRegex(ValueError, "Walk is not done: judged rows fail.*drift, tilt"):
+            site.validate_done_means(steps)
+        # The same failing rows do not block the step while it is the current one.
+        steps[1]["state"], steps[2]["state"] = "now", "next"
+        site.validate_done_means(steps)
+
+    def test_walk_and_stop_is_not_done_until_the_videos_are_accepted_by_name(self):
+        for accepted in ({}, {"video_accepted_by": ""}, {"video_accepted_by": None}):
+            with self.subTest(accepted=accepted):
+                with self.assertRaisesRegex(ValueError, "names no video_accepted_by"):
+                    site.validate_done_means(self.owned_steps(**accepted))
+        site.validate_done_means(self.owned_steps(video_accepted_by="Fixture reviewer"))
+
+    def test_each_owner_file_must_exist_in_the_repository(self):
+        for owner in ("configs/renamed.json", "configs", "https://example.org/owner.json"):
+            with self.subTest(owner=owner):
+                steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+                steps[3].update(owner=owner, done_means="A reviewer accepts " + owner + ".")
+                with self.assertRaisesRegex(ValueError, "Missing|owner file is missing"):
+                    site.validate_done_means(steps)
+        steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+        (site.ROOT / "configs/accepted_controller.json").unlink()
+        with self.assertRaisesRegex(ValueError, "Missing"):
+            site.validate_done_means(steps)
+
+    def test_the_accepted_controller_must_own_a_roadmap_step(self):
+        # Pointing the walking step at another owner would otherwise skip its rule.
+        steps = self.owned_steps(judged={"drift": {"pass": False}})
+        steps[1].update(owner="evidence.md", done_means="A reviewer accepts evidence.md.")
+        with self.assertRaisesRegex(ValueError, "No roadmap step names its owner"):
+            site.validate_done_means(steps)
+
+    def test_the_walking_step_cannot_hand_the_accepted_controller_to_another_step(self):
+        # Another step holds the owner file while the walking step, marked done, names a
+        # different one or the same file under a different spelling.
+        for owner in ("evidence.md", "./configs/accepted_controller.json"):
+            with self.subTest(owner=owner):
+                steps = self.owned_steps(judged={"drift": {"pass": False}})
+                steps[1].update(owner=owner, done_means="A reviewer accepts " + owner + ".")
+                steps[3].update(
+                    owner=site.ACCEPTED_CONTROLLER,
+                    done_means="Each judged row of configs/accepted_controller.json passes.",
+                )
+                with self.assertRaisesRegex(ValueError, "walk and stop step must name"):
+                    site.validate_done_means(steps)
+
+    def test_walk_and_stop_is_not_done_when_the_file_judges_nothing(self):
+        steps = self.owned_steps(video_accepted_by="Fixture reviewer")
+        accepted = site.ROOT / "configs/accepted_controller.json"
+        for judged in ({}, None, ["drift"], "all pass"):
+            with self.subTest(judged=judged):
+                accepted.write_text(
+                    json.dumps({"video_accepted_by": "Fixture reviewer", "judged": judged})
+                )
+                with self.assertRaisesRegex(ValueError, "has no judged rows"):
+                    site.validate_done_means(steps)
+        accepted.write_text(json.dumps({"video_accepted_by": "Fixture reviewer"}))
+        with self.assertRaisesRegex(ValueError, "has no judged rows"):
+            site.validate_done_means(steps)
+        accepted.write_text(
+            json.dumps({"video_accepted_by": "Fixture reviewer", "judged": {"drift": True}})
+        )
+        with self.assertRaisesRegex(ValueError, "judged rows fail.*drift"):
+            site.validate_done_means(steps)
 
 
 if __name__ == "__main__":

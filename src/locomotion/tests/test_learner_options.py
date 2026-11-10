@@ -468,11 +468,11 @@ class LearnerOptionTests(unittest.TestCase):
                 root / "video",
                 REMOTE,
                 mode="evaluate",
-                video_case="learning:forward_0.05_to_stop",
+                video_case="walk_0.050_0deg",
                 **checkpoint,
             )
             position = video["command_args"].index("--video-case")
-            self.assertEqual(video["command_args"][position + 1], "learning:forward_0.05_to_stop")
+            self.assertEqual(video["command_args"][position + 1], "walk_0.050_0deg")
             for index, bad in enumerate(
                 (
                     dict(mode="diagnostic", observation_scaling="fixed"),
@@ -483,14 +483,8 @@ class LearnerOptionTests(unittest.TestCase):
                     dict(episode_seconds=2.0),
                     dict(episode_seconds=10),
                     dict(mode="evaluate", episode_seconds=10.0, **checkpoint),
-                    dict(video_case="learning:quiet_20s"),
-                    dict(
-                        mode="evaluate",
-                        eval_scope="full",
-                        video_case="learning:quiet_20s",
-                        **checkpoint,
-                    ),
-                    dict(mode="evaluate", video_case="static:stand", **checkpoint),
+                    dict(video_case="stand"),
+                    dict(mode="evaluate", video_case="walk 0.05", **checkpoint),
                 )
             ):
                 with self.subTest(bad=bad), self.assertRaises(ValueError):

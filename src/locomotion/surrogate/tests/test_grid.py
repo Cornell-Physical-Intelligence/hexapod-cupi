@@ -12,7 +12,7 @@ from unittest import mock
 import numpy as np
 import torch
 
-import locomotion.evaluation.runner as runner
+import locomotion.evaluation.requirements as requirements
 from locomotion import randomization as rnd
 from locomotion.surrogate import evaluate, sweep
 from locomotion.surrogate.env import (
@@ -145,7 +145,7 @@ class CellEvaluationTests(unittest.TestCase):
                 "friction_0.9": {"friction": (0.9, 0.005, 0.0001)},
             },
         )
-        result = {"pass": True, "checks": {}, "failed_bounds": []}
+        result = {"pass": True, "checks": {}, "failed_checks": []}
         self.assertEqual(
             evaluate.consensus({"default": result, "pyramidal_cone": result})["scope"],
             evaluate.CONSENSUS_SCOPE,
@@ -164,11 +164,11 @@ def source_identity():
 def fake_summary(cell, verdict=True, failure=None, command=None):
     """A cell summary as the evaluator writes it, bound to the request in ``command``."""
     case = {
-        "case_id": "learning:quiet_20s",
+        "case_id": "stand",
         "pass": verdict,
-        "failed_bounds": [] if verdict else ["max_planar_excursion_m"],
-        "metrics": {"planar_error_mps": 0.0},
-        "contact_consensus": {"verdict": "pass" if verdict else "unresolved", "failed_bounds": {}},
+        "failed_checks": [] if verdict else ["tilt_deg"],
+        "checks": {"tilt_deg": {"value": 0.0, "bound": 1.7, "pass": True}},
+        "contact_consensus": {"verdict": "pass" if verdict else "unresolved", "failed_checks": {}},
     }
     summary = {
         "seed": 20260917,
@@ -181,7 +181,9 @@ def fake_summary(cell, verdict=True, failure=None, command=None):
         def option(name, default=None):
             return command[command.index(name) + 1] if name in command else default
 
-        probes = [case["case_id"] for case in runner.learning_probe_cases()]
+        probes = [
+            case["case_id"] for case in requirements.cases(requirements.load_requirements()[0])
+        ]
         summary["checkpoint_sha256"] = sha(Path(option("--checkpoint")))
         summary["seed"] = int(option("--seed", 20260917))
         summary["selected_case_ids"] = evaluate.selected_cases(option("--cases"), probes)
@@ -226,11 +228,11 @@ class SweepTests(unittest.TestCase):
             self.assertEqual(summary["cells_complete"], 27)
             self.assertEqual(summary["grid_sha256"], rnd.grid_declaration(GRID)["sha256"])
             self.assertEqual(
-                summary["verdict_counts"]["learning:quiet_20s"],
+                summary["verdict_counts"]["stand"],
                 {"pass": 26, "fail": 0, "unresolved": 1},
             )
             corner = next(row for row in summary["cells"] if row["cell"] == CORNER)
-            self.assertEqual(corner["cases"]["learning:quiet_20s"]["verdict"], "unresolved")
+            self.assertEqual(corner["cases"]["stand"]["verdict"], "unresolved")
             self.assertEqual((corner["foot_friction"], corner["motor_strength"]), (0.1, 0.8))
 
     def test_continue_keeps_finished_cells_and_sets_failed_attempts_aside(self):

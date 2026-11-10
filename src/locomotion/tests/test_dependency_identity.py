@@ -54,7 +54,6 @@ class DependencyIdentityTests(unittest.TestCase):
             "omniwalk/env.py",
             "robots/actuator.py",
             "evaluation/capture.py",
-            "evaluation/scoring.py",
         ):
             self.assertIn(name, physics)
             changed = dict(files, **{name: "0" * 64})

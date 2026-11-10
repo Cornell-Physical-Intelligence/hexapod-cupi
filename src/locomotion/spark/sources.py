@@ -40,7 +40,7 @@ def source_files(package):
 
 
 def physics_files(files, package=None):
-    """Follow project imports from the native environment, its scene checks, the standing capture and the scorer."""
+    """Follow project imports from the native environment, its scene checks and the standing capture."""
     package = Path(package) if package is not None else Path(__file__).resolve().parents[1]
     pending, seen = (
         [
@@ -49,7 +49,6 @@ def physics_files(files, package=None):
             "omniwalk/env.py",
             "evaluation/admission.py",
             "evaluation/capture.py",
-            "evaluation/scoring.py",
         ],
         set(),
     )

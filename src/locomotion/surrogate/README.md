@@ -8,7 +8,7 @@ the native experiment. You use native Isaac runs for acceptance.
 | --- | --- |
 | `env.py` | Implement `OmniEnv` on the approved robot: apply the limiter and motor curve, and record contacts and telemetry. |
 | `train.py` | Train through stock RSL-RL, save source-bound checkpoints and resume matching runs. |
-| `evaluate.py` | Run learning probes, render video and compare static results across contact settings. |
+| `evaluate.py` | Run the walking requirement cases, render video and compare results across contact settings. |
 | `replay.py` | Replay action traces or noise and score stored telemetry through the current task. |
 
 ```sh
