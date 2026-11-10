@@ -22,6 +22,7 @@ from .curriculum import (
     SUCCESSES_KEY,
     CommandCurriculum,
     cleared_episode_log,
+    course_dones,
     episode_log,
     episode_outcome,
     swing_clearance,
@@ -102,9 +103,9 @@ class HexapodTerrainEnv(HexapodEnv):
     def _get_dones(self) -> tuple[torch.Tensor, torch.Tensor]:
         died, time_out = super()._get_dones()
         if self._course_lo is not None:
-            xy = self._robot.data.root_pos_w.torch[:, :2]
-            self._off_course = torch.any((xy < self._course_lo) | (xy > self._course_hi), dim=1)
-            died = died | self._off_course
+            died, self._off_course = course_dones(
+                died, self._robot.data.root_pos_w.torch[:, :2], self._course_lo, self._course_hi
+            )
         return died, time_out
 
     def _get_rewards(self) -> torch.Tensor:

@@ -27,6 +27,77 @@ def load(name):
     return module
 
 
+class _Cfg(SimpleNamespace):
+    """Stand-in for an Isaac Lab terrain cfg: keyword fields and ``replace``."""
+
+    def replace(self, **kwargs):
+        return _Cfg(**{**vars(self), **kwargs})
+
+
+def load_terrains_cfg(pyramid_sloped_terrain, random_uniform_terrain=None):
+    """The shipped terrains_cfg.py with stand-ins for the isaaclab modules it imports. The stand-in sub-terrain
+    functions return ``([mesh], origin)`` like Isaac Lab's ``height_field_to_mesh``-wrapped ones."""
+    import sys
+    import types
+    from unittest import mock
+
+    def module(name, **attrs):
+        mod = types.ModuleType(name)
+        mod.__dict__.update(attrs)
+        return mod
+
+    def raw(f):
+        f.__wrapped__ = f
+        return f
+
+    hf_terrains = module(
+        "isaaclab.terrains.height_field.hf_terrains",
+        pyramid_sloped_terrain=pyramid_sloped_terrain,
+        random_uniform_terrain=raw(random_uniform_terrain or (lambda d, cfg: None)),
+    )
+    cfg_names = [
+        "HfRandomUniformTerrainCfg",
+        "HfPyramidSlopedTerrainCfg",
+        "HfInvertedPyramidSlopedTerrainCfg",
+        "MeshPyramidStairsTerrainCfg",
+        "MeshInvertedPyramidStairsTerrainCfg",
+        "MeshRandomGridTerrainCfg",
+        "TerrainGeneratorCfg",
+    ]
+    terrains = module("isaaclab.terrains", **{name: _Cfg for name in cfg_names})
+    height_field = module(
+        "isaaclab.terrains.height_field",
+        hf_terrains=hf_terrains,
+        hf_terrains_cfg=module("cfg", **{name: _Cfg for name in cfg_names}),
+    )
+    utils = module("isaaclab.terrains.height_field.utils", height_field_to_mesh=lambda f: f)
+    package = module("hexapod_terrain_pkg")
+    package.__path__ = [str(PACKAGE)]
+    stubs = {
+        "isaaclab": module("isaaclab", terrains=terrains),
+        "isaaclab.terrains": terrains,
+        "isaaclab.terrains.height_field": height_field,
+        "isaaclab.terrains.height_field.hf_terrains": hf_terrains,
+        "isaaclab.terrains.height_field.hf_terrains_cfg": height_field.hf_terrains_cfg,
+        "isaaclab.terrains.height_field.utils": utils,
+        "hexapod_terrain_pkg": package,
+    }
+    with mock.patch.dict(sys.modules, stubs):
+        spec = importlib.util.spec_from_file_location(
+            "hexapod_terrain_pkg.terrains_cfg", PACKAGE / "terrains_cfg.py"
+        )
+        mod = importlib.util.module_from_spec(spec)
+        sys.modules[spec.name] = mod
+        spec.loader.exec_module(mod)
+    return mod
+
+
+def height_field_mesh(heights, hs=0.02):
+    """Vertices of a height field on its grid, as ``height_field_to_mesh`` lays them out (tile corner at 0, 0)."""
+    i, j = np.meshgrid(np.arange(heights.shape[0]), np.arange(heights.shape[1]), indexing="ij")
+    return SimpleNamespace(vertices=np.c_[i.ravel() * hs, j.ravel() * hs, heights.ravel()])
+
+
 def load_curriculum():
     return load("curriculum")
 
@@ -341,6 +412,64 @@ class TerrainResetGeometryTests(unittest.TestCase):
         floor = pinned_sloped_terrain(0.95, True, 0.5)[0].min()
         self.assertAlmostEqual(floor, -0.135, delta=0.002)  # the reviewed 0.135 m spawn drop
 
+    def test_shipped_sloped_terrain_returns_the_spawn_area_origin_at_every_level(self):
+        # drives terrains_cfg.sloped_terrain (and so _spawn_area_origin) with the pinned slope model in place of
+        # Isaac Lab's pyramid_sloped_terrain, which returns the 2 m-window origin
+        def pinned(difficulty, cfg):
+            heights, window = pinned_sloped_terrain(difficulty, cfg.inverted, cfg.platform_width)
+            return [height_field_mesh(heights)], np.array([1.0, 1.0, window])
+
+        t = load_terrains_cfg(pinned)
+        hx, hy = self.g.spawn_half_extent()
+        for level in range(10):
+            difficulty = (level + 0.95) / 10
+            for inverted in (False, True):
+                with self.subTest(level=level, inverted=inverted):
+                    cfg = _Cfg(
+                        inverted=inverted, platform_width=t.SLOPE_PLATFORM, horizontal_scale=0.02
+                    )
+                    (mesh,), origin = t.sloped_terrain(difficulty, cfg)
+                    heights, window = pinned_sloped_terrain(difficulty, inverted, t.SLOPE_PLATFORM)
+                    v = mesh.vertices
+                    near = (np.abs(v[:, 0] - 1.0) <= hx + 0.02) & (
+                        np.abs(v[:, 1] - 1.0) <= hy + 0.02
+                    )
+                    np.testing.assert_allclose(origin[:2], [1.0, 1.0])
+                    np.testing.assert_allclose(v[near, 2], origin[2], atol=1e-9)
+                    if inverted:
+                        self.assertAlmostEqual(origin[2], heights.min(), places=9)
+                        if level > 0:
+                            self.assertLess(origin[2], window)  # not Isaac Lab's 2 m-window origin
+                    else:
+                        self.assertAlmostEqual(origin[2], window, places=9)
+
+    def test_shipped_spawn_area_origin_ignores_heights_outside_the_spawn_area(self):
+        t = load_terrains_cfg(lambda d, cfg: None)
+        heights = np.full((101, 101), -0.05)
+        heights[:3, :] = heights[-3:, :] = 0.0  # zero-height tile border, inside the 2 m window
+        heights[50, 50] = -0.04  # highest point under the toes
+        (mesh,), origin = t._spawn_area_origin(
+            ([height_field_mesh(heights)], (1.0, 1.0, 0.0)), _Cfg(horizontal_scale=0.02)
+        )
+        self.assertAlmostEqual(origin[2], -0.04)
+        np.testing.assert_allclose(origin[:2], [1.0, 1.0])
+
+    def test_shipped_rough_terrain_origin_is_the_highest_point_under_the_spawn_area(self):
+        rng = np.random.default_rng(0)
+        heights = rng.uniform(0.005, 0.02, (101, 101))
+        heights[:3, :] = 0.0
+        t = load_terrains_cfg(
+            lambda d, cfg: None,
+            lambda d, cfg: ([height_field_mesh(heights)], np.array([1.0, 1.0, 0.0])),
+        )
+        cfg = _Cfg(noise_range=(0.005, 0.02), noise_step=0.005, horizontal_scale=0.02)
+        (mesh,), origin = t.random_rough_terrain(0.5, cfg)
+        hx, hy = self.g.spawn_half_extent()
+        v = mesh.vertices
+        near = (np.abs(v[:, 0] - 1.0) <= hx + 0.02) & (np.abs(v[:, 1] - 1.0) <= hy + 0.02)
+        self.assertAlmostEqual(origin[2], v[near, 2].max())
+        self.assertGreater(origin[2], 0.0)
+
     def test_course_border_covers_a_successful_episode_from_an_edge_tile(self):
         max_command = max(
             literal("env_cfg.py", "command_lin_vel_max", "HexapodTerrainEnvCfg"),
@@ -470,6 +599,24 @@ class TerrainOffCourseTests(unittest.TestCase):
         torch.testing.assert_close(up, torch.tensor([False, True]))
         torch.testing.assert_close(down, torch.tensor([True, False]))
 
+    def test_leaving_the_course_ends_the_episode(self):
+        g = load("geometry")
+        origins = np.array([[[x, y] for y in (-1.0, 1.0)] for x in (-1.0, 1.0)])
+        lo, hi = (torch.tensor(b, dtype=torch.float) for b in g.course_bounds(origins, 2.0, 9.5))
+        xy = torch.tensor(
+            [
+                [0.0, 0.0],  # on the course
+                [float(hi[0]) + 0.01, 0.0],  # past +x
+                [0.0, float(lo[1]) - 0.01],  # past -y
+                [float(hi[0]), float(lo[1])],  # on the bound: still on the course
+                [0.0, 0.0],  # fell on the course
+            ]
+        )
+        died = torch.tensor([False, False, False, False, True])
+        died_out, off = self.c.course_dones(died, xy, lo, hi)
+        torch.testing.assert_close(off, torch.tensor([False, True, True, False, False]))
+        torch.testing.assert_close(died_out, torch.tensor([False, True, True, False, True]))
+
 
 class TerrainFunctionIdentityTests(unittest.TestCase):
     def test_sub_terrain_functions_are_module_level_names(self):
@@ -518,6 +665,24 @@ class TerrainEnvSourceTests(unittest.TestCase):
                 for target in targets:
                     if isinstance(target, ast.Attribute):
                         self.assertNotEqual(target.attr, "command_lin_vel_max", ast.unparse(node))
+
+    def test_get_dones_returns_the_off_course_mask(self):
+        dones = next(
+            n
+            for n in ast.walk(self.tree)
+            if isinstance(n, ast.FunctionDef) and n.name == "_get_dones"
+        )
+        (assign,) = [
+            n
+            for n in ast.walk(dones)
+            if isinstance(n, ast.Assign)
+            and isinstance(n.value, ast.Call)
+            and ast.unparse(n.value.func) == "course_dones"
+        ]
+        self.assertEqual(ast.unparse(assign.targets[0]), "(died, self._off_course)")
+        self.assertEqual(ast.unparse(assign.value.args[0]), "died")
+        (ret,) = [n for n in ast.walk(dones) if isinstance(n, ast.Return)]
+        self.assertEqual(ast.unparse(ret.value), "(died, time_out)")
 
     def test_scene_setup_extends_the_parent(self):
         setup = next(

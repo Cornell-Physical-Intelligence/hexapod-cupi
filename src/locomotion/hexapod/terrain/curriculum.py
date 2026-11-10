@@ -54,6 +54,17 @@ def swing_clearance(toe_z: torch.Tensor, in_contact: torch.Tensor, target: float
     return (lift * ~in_contact).sum(dim=1)
 
 
+def course_dones(
+    died: torch.Tensor, root_xy: torch.Tensor, lo: torch.Tensor, hi: torch.Tensor
+) -> tuple[torch.Tensor, torch.Tensor]:
+    """(died, off_course): an env whose root leaves the (lo, hi) xy course bounds terminates, as a fall does.
+
+    ``root_xy`` is (num_envs, 2); ``lo`` and ``hi`` are (2,) from ``geometry.course_bounds``.
+    """
+    off_course = torch.any((root_xy < lo) | (root_xy > hi), dim=1)
+    return died | off_course, off_course
+
+
 SUCCESS_KEY = "Metrics/success_eval"
 SPEED_ERR_KEY = "Metrics/speed_err_along_cmd"
 EPISODES_KEY = "Metrics/success_eval_episodes"
