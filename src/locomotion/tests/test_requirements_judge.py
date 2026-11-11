@@ -111,6 +111,41 @@ class JudgeTests(unittest.TestCase):
     def setUp(self):
         self.rules, _ = judge.load_requirements()
 
+    def test_declared_walk_rejects_stand_wrong_bearing_and_missing_stop(self):
+        case = next(c for c in judge.cases(self.rules) if c["case_id"] == "walk_0.050_0deg")
+        expected = np.asarray([judge.command_at(case, k) for k in range(case["controls"])])
+        wrong_bearing = expected[:, [1, 0, 2]]
+        missing_stop = np.tile(case["command"], (case["controls"], 1))
+        for commands in (np.zeros_like(expected), wrong_bearing, missing_stop):
+            with self.subTest(command=commands[0].tolist()):
+                trace = trace_from_path(judge.ghost_path((0, 0, 0), commands), commands)
+                result = judge.judge_case(trace, self.rules, case=case)
+                self.assertFalse(result["pass"])
+                self.assertEqual(result["failed_checks"], ["command_schedule"])
+                with tempfile.TemporaryDirectory() as directory:
+                    save_batch(Path(directory), 0, case, trace)
+                    self.assertFalse(judge.judge(directory)["pass"])
+
+    def test_declared_float32_diagonal_passes_without_a_schedule_tolerance(self):
+        case = next(c for c in judge.cases(self.rules) if c["case_id"] == "walk_0.050_45deg")
+        commands = [judge.command_at(case, k) for k in range(case["controls"])]
+        trace = trace_from_path(judge.ghost_path((0, 0, 0), commands), commands)
+        self.assertTrue(judge.judge_case(trace, self.rules, case=case)["pass"])
+
+    def test_missing_nonfinite_or_misaligned_measurements_fail(self):
+        commands = [[0, 0, 0]] * 10
+        original = trace_from_path(judge.ghost_path((0, 0, 0), commands), commands)
+        for field in ("root_pose_xyzw", "applied_torque_abs_max_400hz"):
+            for invalid in (None, original[field][:-1], np.full_like(original[field], np.nan)):
+                with self.subTest(field=field, missing=invalid is None):
+                    trace = dict(original)
+                    if invalid is None:
+                        del trace[field]
+                    else:
+                        trace[field] = invalid
+                    result = judge.judge_case(trace, self.rules, 10)
+                    self.assertEqual(result["failed_checks"], ["valid_trace"])
+
     def test_perfect_tracking_has_zero_drift_and_zero_stopping_distance(self):
         commands = [[0.05, 0.0, 0.0]] * 1000 + [[0.0, 0.0, 0.0]] * 200
         path = judge.ghost_path((0.0, 0.0, 0.3), commands)

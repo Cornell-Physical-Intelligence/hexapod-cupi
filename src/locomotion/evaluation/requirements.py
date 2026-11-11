@@ -132,7 +132,11 @@ def command_at(case, control):
     """The navigation command of ``case`` at ``control``: its command, then zero from the stop control."""
     if not 0 <= control < case["controls"]:
         raise ValueError("Control lies outside the declared case")
-    return list(case["command"]) if control < case["stop_control"] else [0.0, 0.0, 0.0]
+    return (
+        list(case["command"])
+        if control < case.get("stop_control", case["controls"])
+        else [0.0, 0.0, 0.0]
+    )
 
 
 def planar_pose(root_pose_xyzw):
@@ -256,6 +260,8 @@ def stop_position(trace, case, stay_stopped_s):
 def judge_case(trace, rules, controls=None, case=None):
     """One recorded trace against the controller, tilt, torque and, for a route, stop rows of a set."""
     n = len(trace["command"]) if "command" in trace else 0
+    if controls is None and case is not None:
+        controls = case["controls"]
     if n == 0 or (controls is not None and n != controls):
         check = {"value": float(n), "bound": float(controls or 0), "pass": False}
         return {
@@ -263,6 +269,31 @@ def judge_case(trace, rules, controls=None, case=None):
             "stop": None,
             "checks": {"complete_trace": check},
             "failed_checks": ["complete_trace"],
+            "pass": False,
+        }
+    # Validate the evidence before deciding which physical measurements apply. A zero-command
+    # trace must not turn a declared walk into a stand and silently omit drift and stop checks.
+    shapes = {"command": (n, 1, 3), "root_pose_xyzw": (n, 1, 7)}
+    valid = all(
+        key in trace and np.asarray(trace[key]).shape == shape and np.isfinite(trace[key]).all()
+        for key, shape in shapes.items()
+    )
+    torque = np.asarray(trace.get("applied_torque_abs_max_400hz", []))
+    valid = valid and torque.shape in ((n, 1), (n, 1, 18)) and np.isfinite(torque).all()
+    failure = None if valid else "valid_trace"
+    if valid and case is not None and "command" in case:
+        expected = np.asarray([command_at(case, k) for k in range(n)], dtype=np.float32)
+        # Native commands are recorded as float32; compare in that representation, without
+        # widening any motion limit or allowing an off-bank command through a tolerance.
+        if not np.array_equal(np.asarray(trace["command"][:, 0], dtype=np.float32), expected):
+            failure = "command_schedule"
+    if failure is not None:
+        return {
+            "holds": [],
+            "stop": None,
+            "route": None,
+            "checks": {failure: {"value": 0.0, "bound": 1.0, "pass": False}},
+            "failed_checks": [failure],
             "pass": False,
         }
     limits = rules["controller"]
