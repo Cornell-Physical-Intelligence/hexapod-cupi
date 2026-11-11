@@ -27,6 +27,7 @@ with a control trace are drawn, and the file lists the others.
 The exporter reads each verdict and failed check from `judgement.json` by case ID and records that
 file's SHA-256. It rejects missing, duplicate or malformed verdicts. Historical evaluations without
 that file retain their batch-report verdicts, and existing run files keep their format.
+Historical v1 judgements with no checks retain their null verdict and appear as "not judged".
 
 On the Runs page, open one or more run files or drop them on the page. Pick the cases to show from the
 table; each case shows:

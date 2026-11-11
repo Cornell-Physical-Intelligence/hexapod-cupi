@@ -162,7 +162,12 @@ def judgement_rows(evaluation):
         case_id = row["case_id"]
         if case_id in rows:
             raise ValueError("Duplicate judgement case: " + case_id)
-        if type(row.get("pass")) is not bool:
+        unjudged = (
+            value["schema"] == "hexapod_walking_requirements_judgement_v1"
+            and "pass" in row
+            and row["pass"] is None
+        )
+        if type(row.get("pass")) is not bool and not unjudged:
             raise ValueError("Judgement needs a boolean verdict: " + case_id)
         checks = row.get("checks")
         if not isinstance(checks, dict) or any(
@@ -178,7 +183,9 @@ def judgement_rows(evaluation):
             or len(failed) != len(set(failed))
         ):
             raise ValueError("Malformed judgement failed checks: " + case_id)
-        if set(failed) != set(false_checks) or row["pass"] != (not failed):
+        if unjudged and (checks or failed):
+            raise ValueError("Judgement cannot mark recorded checks as unjudged: " + case_id)
+        if not unjudged and (set(failed) != set(false_checks) or row["pass"] != (not failed)):
             raise ValueError("Judgement verdict and check flags disagree: " + case_id)
         rows[case_id] = dict(row, failed_checks=failed)
     return rows, hashlib.sha256(raw).hexdigest()
@@ -215,11 +222,15 @@ def case(batch, joints, judged=None):
         }
         for name in result.get("failed_checks", result.get("failed_bounds")) or []
     ]
+    try:
+        json.dumps(failed, allow_nan=False)
+    except ValueError as error:
+        raise ValueError("Nonfinite displayed check value or bound: " + case_id) from error
     metrics = result.get("metrics") or {}
     return {
         "case_id": case_id,
         "batch": batch.name,
-        "pass": bool(result["pass"]),
+        "pass": result["pass"],
         "failed": failed,
         "controls": len(pose),
         "fell": bool(trace["terminated"][:, 0].any()) if "terminated" in trace.files else False,
@@ -302,10 +313,11 @@ def main(argv=None):
     parser.add_argument("--model", type=Path, help="Robot model JSON; the active model by default")
     args = parser.parse_args(argv)
     value = build(args.folder, args.model)
-    args.output.write_text(json.dumps(value, separators=(",", ":")) + "\n")
+    args.output.write_text(json.dumps(value, separators=(",", ":"), allow_nan=False) + "\n")
     print(
         f"{args.output}: {len(value['cases'])} cases from a {value['source']} run, "
-        f"{sum(c['pass'] for c in value['cases'])} passing"
+        f"{sum(c['pass'] is True for c in value['cases'])} passing, "
+        f"{sum(c['pass'] is None for c in value['cases'])} not judged"
     )
 
 
