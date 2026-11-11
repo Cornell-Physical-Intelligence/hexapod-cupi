@@ -41,14 +41,32 @@ class OmniEnv:
     amp_width = 61
 
     def __init__(
-        self, cfg, asset, model_path, geometry_path, output, *, reference_metadata=None, verify=None
+        self,
+        cfg,
+        asset,
+        model_path,
+        geometry_path,
+        output,
+        *,
+        reference_metadata=None,
+        verify=None,
+        randomization="none",
     ):
         from locomotion.omniwalk.env import IsaacEnv
 
         self.cfg, self.device, self.num_envs = cfg, cfg.device, cfg.num_envs
+        # The nominal environment is constructed exactly as before Step 7.
+        extra = {} if randomization == "none" else {"randomization": randomization}
         self.isaac = isaac = IsaacEnv(
-            cfg, asset, model_path, geometry_path, output, reference_metadata=reference_metadata
+            cfg,
+            asset,
+            model_path,
+            geometry_path,
+            output,
+            reference_metadata=reference_metadata,
+            **extra,
         )
+        self.randomization = getattr(isaac, "randomization", "none")
         self.commands, self.history = isaac.commands, isaac.history
         self.held, self.previous_action = isaac.held, isaac.previous_action
         self.episode_steps = isaac.episode_length_buf
@@ -86,6 +104,21 @@ class OmniEnv:
         if verify is not None:
             verify(self)
         self.reset()
+
+    @property
+    def ground_friction(self):
+        """Each row's drawn friction coefficient, or None without randomization."""
+        return getattr(self.isaac, "ground_friction", None)
+
+    @property
+    def expected_materials(self):
+        """Shape materials as the environment wrote them, or None when nominal."""
+        return getattr(self.isaac, "expected_materials", None)
+
+    @property
+    def motor_law(self):
+        """The applied Step 7 motor draw in JOINT_NAMES order, or None under the nominal law."""
+        return getattr(self.isaac, "motor_law", None)
 
     def reset(self, indices=None):
         rows = reset_rows(indices, self.num_envs, self.device)

@@ -1009,7 +1009,7 @@ class SurrogateEnv:
             return None
         n = self.num_envs
         return {
-            name: np.array(value.expand(n, 18), dtype=np.float32)
+            name: np.array(value.expand(n, 18).numpy(), dtype=np.float32)
             for name, value in (("kp", self._kp), ("kd", self._kd), ("strength", self._strength))
         }
 

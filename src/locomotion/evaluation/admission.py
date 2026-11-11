@@ -119,8 +119,15 @@ def verify_native_recipe(env, phase):
     material = env.get("get_material_properties")
     offsets = env.get("get_contact_offsets")
     rests = env.get("get_rest_offsets")
+    # A Step 7 environment reads back the tibia friction it drew; every other value stays nominal.
+    expected = getattr(env, "expected_materials", None)
+    expected = (
+        env.torch([1.0, 1.0, 0.0]).expand_as(material)
+        if expected is None
+        else expected.to(material.device, material.dtype)
+    )
     if material.shape != (env.num_envs, 153, 3) or not torch.allclose(
-        material, env.torch([1.0, 1.0, 0.0]).expand_as(material), atol=1e-7, rtol=0
+        material, expected, atol=1e-7, rtol=0
     ):
         raise ValueError("Actual native materials differ")
     if (

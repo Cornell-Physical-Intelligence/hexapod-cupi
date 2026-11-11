@@ -143,9 +143,12 @@ departs from the declaration text, the notes below record it.
   strength to the unchanged `robots/rs05.py` law.
 - **Foot friction.** MuJoCo takes the larger of the two geom coefficients, so
   the surrogate sets a randomized replica's floor coefficient to zero and its
-  toe caps carry the draw; tibia shafts and hulls keep 1.0. PhysX multiplies
-  the toe material by the floor material 1.0. Each gives the drawn value at the
-  toes and 1.0 elsewhere.
+  toe caps carry the draw; tibia shafts and hulls keep 1.0. The native tibia is
+  one SDF collision shape for the fork and the foot, so native writes the draw
+  to every shape of the six tibia links. PhysX multiplies that material by the
+  floor material 1.0. Toe contacts get the drawn value in both engines; a
+  native shaft contact also gets it, and evaluation already counts a shaft
+  contact as a non-toe floor contact.
 - **Gains.** Both factors act through the explicit motor law. The implicit
   PhysX drive and the MuJoCo joint damping stay at zero.
 - **Pushes, adapted.** Section V-B applies velocity perturbations at

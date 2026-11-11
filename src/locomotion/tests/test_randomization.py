@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from locomotion.robots import randomization as rnd
-from locomotion.robots.hexapod import JOINT_NAMES, KD, MASS_KG
+from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, MASS_KG
 from locomotion.robots.rs05 import motor_force
 
 ROOT = __import__("pathlib").Path(__file__).resolve().parents[3]
@@ -335,6 +335,185 @@ class ProbeMotorLawTests(unittest.TestCase):
         args = (q.numpy(), dq.numpy(), target.numpy())
         for drawn, nominal in zip(expected_motor_law(*args, law), expected_motor_law(*args)):
             self.assertTrue(np.array_equal(drawn, nominal))
+
+
+def load_actuator():
+    """Import robots/actuator.py over stand-ins for the Isaac Lab actuator base and configclass."""
+    import importlib
+    import sys
+    from unittest import mock
+
+    stubs = {
+        "isaaclab": mock.MagicMock(),
+        "isaaclab.actuators": mock.MagicMock(ActuatorBase=object, ActuatorBaseCfg=object),
+        "isaaclab.utils": mock.MagicMock(configclass=lambda cls: cls),
+    }
+    saved = {name: sys.modules.get(name) for name in (*stubs, "locomotion.robots.actuator")}
+    sys.modules.update(stubs)
+    sys.modules.pop("locomotion.robots.actuator", None)
+    try:
+        return importlib.import_module("locomotion.robots.actuator")
+    finally:
+        for name, module in saved.items():
+            if module is None:
+                sys.modules.pop(name, None)
+            else:
+                sys.modules[name] = module
+
+
+class NativeMotorDrawTests(unittest.TestCase):
+    """The native actuator and environment apply the same motor draw as the surrogate."""
+
+    def setUp(self):
+        generator = torch.Generator().manual_seed(9)
+        self.q = 0.4 * torch.randn(4, 18, generator=generator)
+        self.dq = torch.linspace(-50.0, 50.0, 72).reshape(4, 18)
+        self.target = self.q + 0.3 * torch.randn(4, 18, generator=generator)
+        self.motor = object.__new__(load_actuator().Motor)
+        self.motor.damping = torch.tensor(KD).expand(4, -1).clone()
+
+    def compute(self):
+        from types import SimpleNamespace
+
+        action = SimpleNamespace(joint_positions=self.target.clone(), joint_velocities=None)
+        self.motor.compute(action, self.q, self.dq)
+        return self.motor.computed_effort, self.motor.applied_effort, self.motor.ceiling
+
+    def test_no_draw_keeps_the_nominal_law_and_a_nominal_draw_matches_it(self):
+        nominal = motor_force(self.q, self.dq, self.target, self.motor.damping)
+        for actual, expected in zip(self.compute(), nominal):
+            self.assertTrue(torch.equal(actual, expected))
+        self.motor.draw = {
+            "kp": torch.full((4, 18), rnd.KP),
+            "kd": self.motor.damping.clone(),
+            "strength": torch.ones(4, 18),
+        }
+        for actual, expected in zip(self.compute(), nominal):
+            self.assertTrue(torch.equal(actual, expected))
+
+    def test_a_draw_applies_the_randomized_law(self):
+        generator = torch.Generator().manual_seed(3)
+        draw = {
+            "kp": rnd.KP * (0.8 + 0.4 * torch.rand(4, 1, generator=generator)).expand(4, 18),
+            "kd": self.motor.damping * (0.8 + 0.4 * torch.rand(4, 1, generator=generator)),
+            "strength": 0.8 + 0.4 * torch.rand(4, 18, generator=generator),
+        }
+        self.motor.draw = draw
+        expected = rnd.motor_force(
+            self.q, self.dq, self.target, draw["kd"], draw["kp"], draw["strength"]
+        )
+        for actual, wanted in zip(self.compute(), expected):
+            self.assertTrue(torch.equal(actual, wanted))
+
+    def environment(self, n=3, seed=20260917):
+        from types import SimpleNamespace
+
+        from locomotion.tests.test_direct_environment import load_isaac
+
+        module = load_isaac()
+        module.wp = SimpleNamespace(
+            to_torch=lambda x: x,
+            from_torch=lambda x: x,
+            uint32=None,
+            array=lambda x, **kwargs: torch.as_tensor(x.astype("int64")),
+        )
+        env = object.__new__(module.IsaacEnv)
+        # Native actuator and link orders differ from the canonical ones; draws must follow names.
+        native = list(reversed(JOINT_NAMES))
+        links = list(reversed(BODY_NAMES))
+        # Two shapes on each tibia, three on the base and one elsewhere.
+        counts = [2 if b.endswith("_tibia") else 3 if b == "body" else 1 for b in links]
+        written = []
+        view = SimpleNamespace(
+            link_paths=[[f"/World/envs/env_0/Robot/{b}" for b in links]],
+            get_material_properties=lambda: torch.tensor([1.0, 1.0, 0.0]).expand(
+                n, sum(counts), -1
+            ),
+            set_material_properties=lambda data, rows: written.append((data.clone(), rows)),
+        )
+        env.config = SimpleNamespace(num_envs=n, seed=seed)
+        env.randomization = "table2_v1"
+        env.device = "cpu"
+        env.native_body_names = links
+        env.view = view
+        env.sim = SimpleNamespace(
+            physics_sim_view=SimpleNamespace(
+                create_rigid_body_view=lambda path: SimpleNamespace(
+                    max_shapes=counts[links.index(path.rsplit("/", 1)[1])]
+                )
+            )
+        )
+        env.torch = lambda x: torch.as_tensor(x, dtype=torch.float32)
+        env.motor = SimpleNamespace(
+            joint_names=native,
+            damping=torch.tensor([KD[JOINT_NAMES.index(j)] for j in native]).expand(n, -1).clone(),
+            draw=None,
+        )
+        env.motor_order = torch.tensor([native.index(j) for j in JOINT_NAMES])
+        env._init_randomization()
+        env.written, env.counts, env.links = written, counts, links
+        return env
+
+    def test_friction_covers_every_tibia_shape_of_the_reset_row_only(self):
+        env = self.environment()
+        env.redraw(torch.tensor([2]))
+        expected = rnd.draw("table2_v1", rnd.replica_generator(20260917, 2, "table2_v1"))
+        data, rows = env.written[-1]
+        self.assertEqual(rows.tolist(), [2])
+        starts = np.cumsum([0, *env.counts])
+        tibia = [
+            k
+            for name, start, count in zip(env.links, starts, env.counts)
+            if name.endswith("_tibia")
+            for k in range(start, start + count)
+        ]
+        self.assertEqual(sorted(env.tibia_shapes.tolist()), tibia)
+        self.assertEqual(len(tibia), 12)
+        friction = np.float32(expected.foot_friction)
+        self.assertTrue(torch.all(data[2, tibia, :2] == friction))
+        self.assertTrue(torch.all(data[2, tibia, 2] == 0.0))
+        others = [k for k in range(sum(env.counts)) if k not in tibia]
+        self.assertTrue(torch.all(data[2, others] == torch.tensor([1.0, 1.0, 0.0])))
+        self.assertTrue(torch.all(data[[0, 1]] == torch.tensor([1.0, 1.0, 0.0])))
+        self.assertTrue(torch.equal(env.expected_materials, data))
+        self.assertEqual(env.ground_friction.tolist()[2], float(friction))
+        self.assertEqual(env.ground_friction.tolist()[:2], [1.0, 1.0])
+
+    def test_a_link_layout_that_differs_from_the_body_order_is_refused(self):
+        env = self.environment()
+        env.native_body_names = list(BODY_NAMES)
+        with self.assertRaisesRegex(ValueError, "Native shape layout differs from the link order"):
+            env._init_randomization()
+
+    def test_each_reset_row_draws_from_its_own_generator_in_joint_name_order(self):
+        env = self.environment()
+        before = env.motor_law
+        self.assertTrue(np.array_equal(before["kd"], np.tile(np.float32(KD), (3, 1))))
+        env.redraw(torch.tensor([1]))
+        after = env.motor_law
+        for name in ("kp", "kd", "strength"):
+            self.assertTrue(np.array_equal(after[name][[0, 2]], before[name][[0, 2]]))
+        expected = rnd.draw("table2_v1", rnd.replica_generator(20260917, 1, "table2_v1"))
+        self.assertTrue(
+            np.array_equal(after["kp"][1], np.full(18, np.float32(rnd.KP * expected.kp_scale)))
+        )
+        self.assertTrue(
+            np.array_equal(after["kd"][1], (torch.tensor(KD) * expected.kd_scale).numpy())
+        )
+        self.assertTrue(np.array_equal(after["strength"][1], np.float32(expected.motor_strength)))
+
+    def test_the_native_motor_law_matches_the_surrogate_first_draw(self):
+        from locomotion.surrogate.env import make_env
+
+        surrogate = make_env(3, threads=0, randomization="table2_v1", seed=20260917)
+        try:
+            wanted = surrogate.motor_law
+        finally:
+            surrogate.close()
+        env = self.environment()
+        env.redraw(torch.arange(3))
+        for name in ("kp", "kd", "strength"):
+            self.assertTrue(np.array_equal(env.motor_law[name], wanted[name]), name)
 
 
 if __name__ == "__main__":

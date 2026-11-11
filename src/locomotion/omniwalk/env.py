@@ -21,6 +21,7 @@ from locomotion.omniwalk.mdp.loads import SubstepLoads, control_telemetry
 from locomotion.omniwalk.mdp.observations import observations, proprio
 from locomotion.omniwalk.mdp.state import measured_state, toe_points
 from locomotion.omniwalk.mdp.terminations import episode_timeout, physical_termination
+from locomotion.robots import randomization as rnd
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS, USD_SHA256, verify_assets
 
 
@@ -48,8 +49,17 @@ class IsaacEnv(DirectRLEnv):
     """
 
     def __init__(
-        self, config, asset, model_path, geometry_path, output, *, reference_metadata=None
+        self,
+        config,
+        asset,
+        model_path,
+        geometry_path,
+        output,
+        *,
+        reference_metadata=None,
+        randomization="none",
     ):
+        self.randomization = rnd.identity(randomization)["name"]
         self.config = config
         self.output = Path(output)
         self.output.mkdir(parents=True, exist_ok=True)
@@ -81,6 +91,9 @@ class IsaacEnv(DirectRLEnv):
         if self._physics_handles_decimation:
             raise RuntimeError("Direct candidate requires eight separate PhysX steps")
         self.motor = self.robot.actuators["motor"]
+        self.motor_order = torch.tensor(
+            [list(self.motor.joint_names).index(name) for name in JOINT_NAMES], device=self.device
+        )
         self.scene_prim_path = direct_cfg.sim.physics_prim_path
         self.origins = self.scene.env_origins.clone()
         self.roots = [path + "/Robot" for path in self.scene.env_prim_paths]
@@ -137,6 +150,8 @@ class IsaacEnv(DirectRLEnv):
         self.total_controls = 0
         self.telemetry = {}
         self.capture = None
+        if self.randomization != "none":
+            self._init_randomization()
 
     def _setup_scene(self):
         self.robot = CaptureArticulation(self.robot_cfg)
@@ -346,8 +361,79 @@ class IsaacEnv(DirectRLEnv):
         self.current = self.read_state()
         return self.current
 
+    # ----- Step 7 randomization ------------------------------------------------------------
+    def _init_randomization(self):
+        """Per-row generators, and the motor and friction draws that each reset replaces."""
+        n = self.config.num_envs
+        self.generators = [
+            rnd.replica_generator(self.config.seed, i, self.randomization) for i in range(n)
+        ]
+        self.nominal_kd = self.motor.damping.clone()
+        self.motor.draw = {
+            "kp": torch.full_like(self.nominal_kd, rnd.KP),
+            "kd": self.nominal_kd.clone(),
+            "strength": torch.ones_like(self.nominal_kd),
+        }
+        # Friction: the native tibia is one collision shape for the fork and the foot, so the draw
+        # covers every shape of the six tibia links. The floor material stays 1.0 with the multiply
+        # combine mode, which outranks the default average mode of the per-shape materials that
+        # PhysX creates here; each contact's coefficient is therefore the drawn value.
+        counts = [
+            self.sim.physics_sim_view.create_rigid_body_view(path).max_shapes
+            for path in self.view.link_paths[0]
+        ]
+        links = [str(path).rsplit("/", 1)[1] for path in self.view.link_paths[0]]
+        self.materials = wp.to_torch(self.view.get_material_properties()).cpu().clone()
+        if links != self.native_body_names or sum(counts) != self.materials.shape[1]:
+            raise ValueError("Native shape layout differs from the link order")
+        starts = [sum(counts[:i]) for i in range(len(counts))]
+        self.tibia_shapes = torch.tensor(
+            [
+                start + k
+                for name, start, count in zip(links, starts, counts)
+                if name.endswith("_tibia")
+                for k in range(count)
+            ]
+        )
+        if len(self.tibia_shapes) < 6:
+            raise ValueError("Native tibia shapes are missing")
+        self.ground_friction = torch.ones(n, device=self.device)
+
+    def redraw(self, rows):
+        """Draw each selected row's conditions from that row's generator; apply motor and friction terms."""
+        draw = self.motor.draw
+        for row in rows.tolist():
+            sample = rnd.draw(self.randomization, self.generators[row])
+            draw["kp"][row] = rnd.KP * sample.kp_scale
+            draw["kd"][row] = self.nominal_kd[row] * sample.kd_scale
+            draw["strength"][row, self.motor_order] = self.torch(sample.motor_strength)
+            self.materials[row, self.tibia_shapes, :2] = sample.foot_friction
+            self.ground_friction[row] = sample.foot_friction
+        self.view.set_material_properties(
+            wp.from_torch(self.materials),
+            wp.array(rows.cpu().numpy().astype("uint32"), dtype=wp.uint32, device="cpu"),
+        )
+
+    @property
+    def expected_materials(self):
+        """Each shape's static friction, dynamic friction and restitution as written, or None when nominal."""
+        return getattr(self, "materials", None)
+
+    @property
+    def motor_law(self):
+        """The applied draw's gain, damping and strength in JOINT_NAMES order, or None when nominal."""
+        if getattr(self.motor, "draw", None) is None:
+            return None
+        return {
+            name: value[:, self.motor_order].cpu().numpy().copy()
+            for name, value in self.motor.draw.items()
+        }
+
     def write_reset(self, rows):
         rows = rows.to(torch.long)
+        # The stock constructor binds the motor after any SDK reset; draws start with the task's.
+        if getattr(getattr(self, "motor", None), "draw", None) is not None:
+            self.redraw(rows)
         q = self.neutral[self.inverse_joint_index].expand(len(rows), -1).clone()
         zero = torch.zeros_like(q)
         pose = self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(len(rows), -1).clone()
