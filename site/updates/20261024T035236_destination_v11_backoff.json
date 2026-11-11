@@ -1,0 +1,21 @@
+{
+  "id": "20261024T035236_destination_v11_backoff",
+  "date": "2026-10-24T03:52:36.835946Z",
+  "title": "Add destination_v11: the speed curriculum with more rehearsal and a back-off",
+  "summary": "Two surrogate destination_v10 runs from v9 reached 0.1 m/s with every 0.05 to 0.1 m/s walk within a millimetre of the ghost, then let the destination pay fall from 0.73 to 0.42 at 0.125 m/s, which cost the 0.05 m/s walks their millimetre end gaps. destination_v11 keeps v10 but sends three quarters of the walks at the slower levels and lowers the top speed one step whenever a full window falls below 0.65.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v11 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261024T035236_destination_v11_backoff.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task and reward are unchanged."
+}

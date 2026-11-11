@@ -76,6 +76,7 @@ LEARNER_OPTION_DEFAULTS = {
     "observation_scaling": "none",
     "command_segments": "continuous",
     "learning_rate_max": None,
+    "learning_rate_min": None,
     "action_std": 0.15,
     "action_noise_correlation": 0.0,
     "action_std_final": None,

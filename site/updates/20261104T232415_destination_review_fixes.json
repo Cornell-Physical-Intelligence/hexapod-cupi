@@ -1,0 +1,27 @@
+{
+  "id": "20261104T232415_destination_review_fixes",
+  "date": "2026-11-04T23:24:15.000000Z",
+  "title": "Close three review gaps in the destination curriculum and its results",
+  "summary": "The speed curriculum's walking checks now include the evaluator's non-foot contact bound of 0.001, so a walk with continuous non-foot contact holds the level, as it fails the evaluator. Native telemetry does not separate a tibia's toe from its shaft, so native training counts non-tibia bodies only; the surrogate also counts its shaft force. Short runs now reach the metrics observer as truncated, matching the transition the step returns. build_results.py now refuses reports from another checkpoint, source or seed, and captures that differ from their declared hashes, before it writes, and results.json records those bindings for the speed suites and the required 96 cases. Regenerating results.json added the bindings and changed no published number. The native v9 run is held to its checkpoint, source, seed and cases; most of its captures stay on Spark and are not re-hashed here.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Teach the native evaluator the ghost_v11 inputs and the speed-scaled gait clock, then evaluate a checkpoint trained at that source natively on the 96 required cases.",
+  "changes": [
+    "site/assets/destination_curriculum_20261026_001/build_results.py",
+    "site/assets/destination_curriculum_20261026_001/results.json",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/omniwalk/task.py",
+    "src/locomotion/tests/test_destination.py",
+    "tests/test_destination_results.py",
+    "site/updates/20261104T232415_destination_review_fixes.json"
+  ],
+  "evidence": [
+    "site/assets/destination_curriculum_20261026_001/results.json",
+    "src/locomotion/tests/test_destination.py",
+    "tests/test_destination_results.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The published results and the trained checkpoints are unchanged; the fixes hold future curriculum levels to one more evaluator bound, correct a training metric and verify what the results builder reads."
+}

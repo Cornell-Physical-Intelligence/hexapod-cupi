@@ -106,6 +106,7 @@ class TrainingTask:
         command = self.env.commands.detach().clone()
         output = self.env.step(action)
         reward, components, telemetry = self._reward(command, output["terminated"])
+        output = self._end_runs(output)
         metric_previous_target = self.previous_target
         self.previous_target = self.env.telemetry["joint_target_rad"].detach().clone()
         self.last_components = {key: value.detach().clone() for key, value in components.items()}
@@ -123,6 +124,10 @@ class TrainingTask:
         result = self._next_command_observation(output)
         result["reward"] = reward
         return result
+
+    def _end_runs(self, output):
+        """The environment's step with any ends the task adds; the observer and the caller both see these."""
+        return output
 
     def reward_telemetry(self, command):
         velocity = displacement_velocity(

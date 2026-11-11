@@ -69,11 +69,13 @@ def training_wrapper(env, args, task):
 
     wrapper, options = OmniVecEnv, {}
     if args.experiment is not None:
-        from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS
+        from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_CLOCKS, EXPERIMENT_INPUTS
         from locomotion.rl.destination_wrapper import DestinationVecEnv
 
         wrapper = DestinationVecEnv
         options = {"destination_input": EXPERIMENT_INPUTS[args.experiment]}
+        if args.experiment in EXPERIMENT_CLOCKS:
+            options["gait_clock_scaling"] = EXPERIMENT_CLOCKS[args.experiment]
     if args.learner == "amp":
         from locomotion.amp.amp import AMPConfig, AMPVecEnv, CollisionCapture
 

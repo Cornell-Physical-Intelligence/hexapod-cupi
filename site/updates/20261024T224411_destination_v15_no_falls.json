@@ -1,0 +1,21 @@
+{
+  "id": "20261024T224411_destination_v15_no_falls",
+  "date": "2026-10-24T22:44:11.113184Z",
+  "title": "Add destination_v15: raise the speed level only after 10 updates without a fall",
+  "summary": "destination_v15 is destination_v14 that raises the curriculum level only when no robot fell during the 10 updates it judges. Surrogate checkpoints of destination_v14 taken at the 0.125 and 0.15 m/s levels fell within about 2 s in most directions; the back-off is unchanged.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v15 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261024T224411_destination_v15_no_falls.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task and reward are unchanged."
+}

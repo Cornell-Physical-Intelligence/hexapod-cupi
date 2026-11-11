@@ -1,0 +1,21 @@
+{
+  "id": "20261025T000547_destination_v18_pass_checks",
+  "date": "2026-10-25T00:05:47.000000Z",
+  "title": "Add destination_v18: raise the speed level only when every walk in the 30 updates passes the evaluator's checks",
+  "summary": "destination_v18 is destination_v17 that also needs every walk finished in the 30-update window to pass the evaluator's moving checks: mean planar error within a quarter of the commanded speed (at least 0.025 m/s), mean yaw-rate error within 0.06 rad/s, tilt RMS within 5 degrees, vertical velocity RMS within 0.04 m/s, torque demand above 1.6 Nm in at most 0.5% of joint-controls, no joint above the 50.3 rad/s speed limit and no fall, each over the walk after its first 100 controls. Replaying the destination_v17 update-500 and destination_v15 update-1750 surrogate traces through these sums gives the evaluator's values and verdicts on all 14 walks. At update 500, destination_v17 held 0.125 m/s within 6 mm of the ghost in seven directions but failed the planar-error check in all eight.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v18 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T000547_destination_v18_pass_checks.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task and reward are unchanged."
+}

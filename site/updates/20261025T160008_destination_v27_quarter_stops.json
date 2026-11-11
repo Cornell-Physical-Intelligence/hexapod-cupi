@@ -1,0 +1,21 @@
+{
+  "id": "20261025T160008_destination_v27_quarter_stops",
+  "date": "2026-10-25T16:00:08.000000Z",
+  "title": "Add destination_v27: destination_v26 with a quarter of the walks stopping",
+  "summary": "destination_v27 is destination_v26 with stop_fraction 0.25 instead of 0.5. Fine-tuned 600 updates from the native destination_v25 update-1350 checkpoint, destination_v26 stood still after stops but fell behind the ghost the longer it trained: the median end gap of the 0.05 m/s walk grew from 2.46 mm to 2.62, 3.32 and 3.96 mm at updates 100, 300 and 600.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Fine-tune the native destination_v25 update-1350 checkpoint for 600 updates on the surrogate and test it against v9 at updates 150, 300 and 600.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T160008_destination_v27_quarter_stops.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and evaluator are unchanged."
+}

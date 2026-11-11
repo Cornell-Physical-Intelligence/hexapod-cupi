@@ -5,6 +5,12 @@ from dataclasses import dataclass
 
 # One gait cycle in 50 Hz controls; the contact-schedule reward and the policy clock inputs share it.
 GAIT_CLOCK_CONTROLS = 60
+# Speed-scaled gait clocks by name: walking speeds (m/s) and, at each, the cycle in controls and the share
+# of it each tripod swings, linear between the speeds and held beyond them. speed_v1 keeps strides near
+# 55 mm, inside the +-0.35 rad action range and the 0.04 rad target slew; up to 0.075 m/s it is the fixed clock.
+GAIT_CLOCK_SCALINGS = {
+    "speed_v1": ((0.075, 0.1, 0.125, 0.15), (60.0, 52.0, 44.0, 40.0), (0.4, 0.48, 0.5, 0.5)),
+}
 
 
 def default_gait_clock(mode, networks):

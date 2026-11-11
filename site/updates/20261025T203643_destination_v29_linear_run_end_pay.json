@@ -1,0 +1,21 @@
+{
+  "id": "20261025T203643_destination_v29_linear_run_end_pay",
+  "date": "2026-10-25T20:36:43.000000Z",
+  "title": "Add destination_v29: a run-end ghost pay linear in the gap",
+  "summary": "destination_v29 is destination_v28 whose run-end pay is linear in the gap to the ghost: share * max(1 - d / 25 mm, -1), 1 at the ghost, 0 at 25 mm and -1 from 50 mm, still weighted by the share of the run done. destination_v28's narrow kernel paid about 0.07 at 30 mm and barely changed there; its update-600 surrogate checkpoint falls 31 mm behind the ghost in the first second of a 0.15 m/s walk and holds the lag, and its 0.05 m/s walk ends 5.08 mm from the ghost.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Fine-tune the destination_v28 update-600 surrogate checkpoint and test it against v9.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T203643_destination_v29_linear_run_end_pay.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and evaluator are unchanged."
+}

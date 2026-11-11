@@ -1,0 +1,21 @@
+{
+  "id": "20261024T215846_destination_v13_walks",
+  "date": "2026-10-24T21:58:46.327736Z",
+  "title": "Add destination_v13: walks in every direction and a ghost pay of 0.8 at 5 mm",
+  "summary": "destination_v13 is destination_v12 where every fresh command is a walk in a uniform direction (no zero commands, turns or arcs; a fifth still stop after 4 s to 12 s) and the rational destination pay keeps its shape but is four times wider, 0.8 at 5 mm instead of at 1.2 mm. On the surrogate, v10 to v12 never held the 0.8 window at 0.125 m/s, where walks stayed about 1.6 to 1.8 mm from the ghost on average.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v13 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261024T215846_destination_v13_walks.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task and reward are unchanged."
+}
