@@ -8,8 +8,27 @@ from pathlib import Path
 
 import locomotion.evaluation.checkpoint as checkpoints
 
+ROOT = Path(__file__).resolve().parents[3]
+HISTORICAL_CAMPAIGNS = (
+    "package_cutover_20261015_001",
+    "floor_contact_20261016_001",
+    "floor_contact_20261016_002",
+    "pr84_review_20261017_001",
+    "c48_receipt_renewal_20261102_001",
+)
+
 
 class CheckpointCompatibilityTests(unittest.TestCase):
+    def write_bundle(self, directory, receipt, ranges, summary):
+        for name, value in (("ranges.json", ranges), ("summary.json", summary)):
+            (directory / name).write_text(json.dumps(value))
+        receipt["files"] = {
+            name: checkpoints.sha(directory / name) for name in ("ranges.json", "summary.json")
+        }
+        path = directory / "receipt.json"
+        path.write_text(json.dumps(receipt))
+        return path
+
     def bundle(self, directory):
         from locomotion.tests.test_native_ranges import NativeRangeTests
 
@@ -25,6 +44,7 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         receipt = {
             "schema": checkpoints.SCHEMA,
             "mode": "evaluate",
+            "eval_scope": "requirements",
             "checkpoint_sha256": checkpoints.CHECKPOINT_SHA,
             "declaration_sha256": checkpoints.DECLARATION_SHA,
             "candidate_runtime_sources": {
@@ -37,6 +57,90 @@ class CheckpointCompatibilityTests(unittest.TestCase):
         path = directory / "receipt.json"
         path.write_text(json.dumps(receipt))
         return path
+
+    def test_all_preserved_v1_receipts_validate_their_original_probe_ranges(self):
+        for campaign in HISTORICAL_CAMPAIGNS:
+            path = ROOT / "site/assets" / campaign / "compatibility/receipt.json"
+            with self.subTest(campaign=campaign):
+                receipt = checkpoints.read_compatibility_receipt(path, checkpoints.sha(path))
+                self.assertEqual(receipt["schema"], checkpoints.LEGACY_SCHEMA)
+                self.assertEqual(receipt["eval_scope"], "probes")
+                ranges = json.loads(path.with_name("ranges.json").read_text())
+                summary = json.loads(path.with_name("summary.json").read_text())
+                self.assertEqual(len(ranges["ranges"]), 8088)
+                self.assertEqual(len(ranges["gates"]), 210)
+                self.assertTrue(checkpoints.compare(ranges, summary)["pass"])
+
+    def test_v1_receipts_still_reject_changed_probes_gates_metrics_and_provenance(self):
+        source = ROOT / "site/assets" / HISTORICAL_CAMPAIGNS[-1] / "compatibility"
+        original = [
+            json.loads((source / name).read_text())
+            for name in ("receipt.json", "ranges.json", "summary.json")
+        ]
+        mutations = {
+            "diagnostic failure": lambda r, b, s: s.update(diagnostic_screens_passed=False),
+            "missing probe": lambda r, b, s: s["missing_probe_cases"].append("missing"),
+            "failed probe": lambda r, b, s: s["failed_probe_cases"].append("failed"),
+            "short results": lambda r, b, s: s["results"].pop(),
+            "duplicate probe": lambda r, b, s: s["results"][1].update(
+                case_id=s["results"][0]["case_id"]
+            ),
+            "failed result": lambda r, b, s: s["results"][0].update({"pass": False}),
+            "changed gate": lambda r, b, s: s["results"][10]["checks"][
+                "max_applied_torque_nm"
+            ].update(bound=2.0),
+            "changed metric": lambda r, b, s: s["results"][0]["metrics"].update(
+                base_height_std_m=1.0
+            ),
+            "missing loads": lambda r, b, s: s["loads"].pop("batch_000"),
+            "unavailable loads": lambda r, b, s: s["loads"]["batch_000"].update(
+                status="unavailable"
+            ),
+            "missing baseline": lambda r, b, s: b["baseline_provenance"].pop(),
+            "changed scorer": lambda r, b, s: s["allocation"].update(evaluator_sha256="changed"),
+            "requirements receipt": lambda r, b, s: r.update(
+                schema=checkpoints.SCHEMA, eval_scope="requirements"
+            ),
+            "requirements ranges": lambda r, b, s: b.update(schema=checkpoints.RANGES_SCHEMA),
+            "requirements summary": lambda r, b, s: s.update(
+                schema=checkpoints.REQUIREMENTS_SCHEMA
+            ),
+            "missing scorer": lambda r, b, s: s["allocation"].pop("evaluator_sha256"),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            for name, mutate in mutations.items():
+                with self.subTest(mutation=name):
+                    receipt, ranges, summary = deepcopy(original)
+                    mutate(receipt, ranges, summary)
+                    path = self.write_bundle(Path(temporary), receipt, ranges, summary)
+                    with self.assertRaises(ValueError):
+                        checkpoints.read_compatibility_receipt(path, checkpoints.sha(path))
+
+    def test_receipt_scope_ranges_and_summary_must_use_the_same_format(self):
+        mutations = {
+            "unknown receipt": lambda r, b, s: r.update(schema="unknown"),
+            "legacy receipt with requirements": lambda r, b, s: r.update(
+                schema=checkpoints.LEGACY_SCHEMA, eval_scope="probes"
+            ),
+            "legacy scope": lambda r, b, s: r.update(eval_scope="probes"),
+            "missing scope": lambda r, b, s: r.pop("eval_scope"),
+            "legacy ranges": lambda r, b, s: b.update(schema=checkpoints.LEGACY_RANGES_SCHEMA),
+            "legacy summary": lambda r, b, s: s.update(schema=checkpoints.PROBE_SCHEMA),
+            "missing allocation": lambda r, b, s: s.pop("allocation"),
+        }
+        with tempfile.TemporaryDirectory() as temporary:
+            directory = Path(temporary)
+            for name, mutate in mutations.items():
+                with self.subTest(mutation=name):
+                    path = self.bundle(directory)
+                    receipt, ranges, summary = [
+                        json.loads((directory / filename).read_text())
+                        for filename in ("receipt.json", "ranges.json", "summary.json")
+                    ]
+                    mutate(receipt, ranges, summary)
+                    path = self.write_bundle(directory, receipt, ranges, summary)
+                    with self.assertRaises(ValueError):
+                        checkpoints.read_compatibility_receipt(path, checkpoints.sha(path))
 
     def test_receipt_pins_evidence_and_rejects_failed_or_incomplete_replay(self):
         with tempfile.TemporaryDirectory() as temporary:

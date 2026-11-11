@@ -2,7 +2,7 @@
 
 A compatibility receipt binds one recorded checkpoint to the current package class paths. Its
 native evidence is a complete judgement of the requirement cases whose every measurement must lie
-inside the ranges of three baseline replays.
+inside the ranges of three baseline replays. Historical v1 receipts retain their 13-probe contract.
 """
 
 import hashlib
@@ -15,7 +15,12 @@ from contracts.release import COMPATIBILITY_KEYS
 LEARNER_DEFAULTS = {"learner": "ppo", "networks": "mlp", "motion_prior": False}
 LEARNER_KEYS = ("learner", "networks", "motion_prior", "learner_source_files", "amp_dataset")
 # The receipt binds one recorded checkpoint and its declaration by hash.
-SCHEMA = "hexapod_checkpoint_compatibility_v1"
+SCHEMA = "hexapod_checkpoint_compatibility_v2"
+LEGACY_SCHEMA = "hexapod_checkpoint_compatibility_v1"
+RANGES_SCHEMA = "hexapod_refactor_ranges_v2"
+LEGACY_RANGES_SCHEMA = "hexapod_refactor_ranges_v1"
+REQUIREMENTS_SCHEMA = "hexapod_walking_requirements_judgement_v2"
+PROBE_SCHEMA = "canonical_learning_probe_suite_v1"
 CHECKPOINT_SHA = "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9"
 DECLARATION_SHA = "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3"
 # Class paths in the recorded learner configuration, mapped to the current package classes.
@@ -161,13 +166,19 @@ def numbers(value, path=""):
 
 def measurements(judgement):
     """Every number of a complete judgement, by case, and the bounds it judged against."""
+    if judgement.get("schema") != REQUIREMENTS_SCHEMA:
+        raise ValueError("Unsupported requirements judgement schema")
     rows = judgement["cases"]
     declared = [case["case_id"] for case in judgement["allocation"]["cases"]]
     if (
-        judgement.get("failure") is not None
+        not declared
+        or judgement.get("failure") is not None
         or [row["case_id"] for row in rows] != declared
         or len(set(declared)) != len(declared)
-        or any("complete_trace" in row["checks"] for row in rows)
+        or any(
+            {"complete_trace", "valid_trace", "command_schedule"} & row["checks"].keys()
+            for row in rows
+        )
     ):
         raise ValueError("Require one complete recorded trial of every declared case")
     values, gates = {}, {}
@@ -175,9 +186,38 @@ def measurements(judgement):
         name = row["case_id"]
         values.update(numbers({"holds": row["holds"], "stop": row["stop"]}, name))
         for key, check in row["checks"].items():
-            values[name + "/checks/" + key] = check["value"]
+            if type(check["value"]) not in (int, float):
+                raise ValueError("Nonnumeric native metric: " + key)
+            values.update(numbers(check["value"], name + "/checks/" + key))
             gates[name + "/" + key] = {"bound": check["bound"]}
     values.update(numbers(judgement.get("loads", {}), "loads"))
+    return values, gates
+
+
+def _probe_measurements(summary):
+    """Read the unchanged measurement and gate projection of historical v1 probe receipts."""
+    if summary.get("schema") != PROBE_SCHEMA:
+        raise ValueError("Unsupported historical probe summary schema")
+    rows = summary["results"]
+    if (
+        summary["diagnostic_screens_passed"] is not True
+        or summary["missing_probe_cases"]
+        or summary["failed_probe_cases"]
+        or len(rows) != 13
+        or len({row["case_id"] for row in rows}) != 13
+        or not all(row["pass"] for row in rows)
+    ):
+        raise ValueError("Require 13/13 unchanged native probes")
+    values, gates = {}, {}
+    for row in rows:
+        name = row["case_id"]
+        values.update(numbers(row["metrics"], name + "/metrics"))
+        for key, check in row["checks"].items():
+            values.update(numbers(check.get("value"), name + "/checks/" + key))
+            gates[name + "/" + key] = {
+                field: value for field, value in check.items() if field != "value"
+            }
+    values.update(numbers(summary.get("loads", {}), "loads"))
     return values, gates
 
 
@@ -200,7 +240,7 @@ def freeze(summaries):
     ):
         raise ValueError("Baseline weights or scorer differ")
     return {
-        "schema": "hexapod_refactor_ranges_v1",
+        "schema": RANGES_SCHEMA,
         "identity": identity,
         "gates": gates,
         "ranges": {
@@ -215,9 +255,17 @@ def freeze(summaries):
 def compare(limits, summary):
     failures = []
     try:
-        if limits["schema"] != "hexapod_refactor_ranges_v1" or limits["baseline_count"] != 3:
+        if limits["schema"] == LEGACY_RANGES_SCHEMA:
+            extract = _probe_measurements
+            identity_keys = {"checkpoint_sha256", "evaluator_sha256"}
+        elif limits["schema"] == RANGES_SCHEMA:
+            extract = measurements
+            identity_keys = {"checkpoint_sha256", "judge_sha256", "requirements_sha256"}
+        else:
             raise ValueError("Invalid frozen comparison ranges")
-        values, gates = measurements(summary)
+        if limits["baseline_count"] != 3 or set(limits["identity"]) != identity_keys:
+            raise ValueError("Invalid frozen comparison identity or baseline count")
+        values, gates = extract(summary)
         if gates != limits["gates"]:
             failures.append("Gate definitions differ")
         if any(summary["allocation"][key] != value for key, value in limits["identity"].items()):
@@ -227,7 +275,7 @@ def compare(limits, summary):
         for key, bounds in limits["ranges"].items():
             if key in values and not bounds[0] <= values[key] <= bounds[1]:
                 failures.append({"metric": key, "candidate": values[key], "baseline_range": bounds})
-    except (ValueError, KeyError) as error:
+    except (ValueError, KeyError, TypeError) as error:
         failures.append(str(error))
     return {
         "schema": "hexapod_refactor_comparison_v1",
@@ -244,8 +292,10 @@ def read_compatibility_receipt(path, digest):
         raise ValueError("Compatibility receipt hash differs")
     receipt = json.loads(path.read_text())
     if (
-        receipt.get("schema") != SCHEMA
+        receipt.get("schema") not in (LEGACY_SCHEMA, SCHEMA)
         or receipt.get("mode") != "evaluate"
+        or receipt.get("eval_scope")
+        != ("probes" if receipt.get("schema") == LEGACY_SCHEMA else "requirements")
         or receipt.get("checkpoint_sha256") != CHECKPOINT_SHA
         or receipt.get("declaration_sha256") != DECLARATION_SHA
     ):
@@ -262,20 +312,33 @@ def read_compatibility_receipt(path, digest):
         if entry.is_symlink() or sha(entry) != expected:
             raise ValueError("Compatibility evidence hash differs: " + name)
         evidence[name] = json.loads(entry.read_text())
-    if evidence["ranges.json"]["identity"]["checkpoint_sha256"] != CHECKPOINT_SHA:
-        raise ValueError("Compatibility evidence checkpoint differs")
-    summary = evidence["summary.json"]
-    if (
-        len(summary.get("loads", {})) != len(summary["allocation"]["cases"])
-        or any(row.get("status") != "available" for row in summary["loads"].values())
-        or len(evidence["ranges.json"].get("baseline_provenance", [])) != 3
-        or summary["allocation"]["judge_sha256"]
-        != receipt["candidate_runtime_sources"]["files"].get(
-            "locomotion/evaluation/requirements.py"
+    ranges, summary = evidence["ranges.json"], evidence["summary.json"]
+    legacy = receipt["schema"] == LEGACY_SCHEMA
+    if ranges.get("schema") != (LEGACY_RANGES_SCHEMA if legacy else RANGES_SCHEMA) or summary.get(
+        "schema"
+    ) != (PROBE_SCHEMA if legacy else REQUIREMENTS_SCHEMA):
+        raise ValueError("Compatibility receipt and evidence schemas differ")
+    try:
+        if ranges["identity"]["checkpoint_sha256"] != CHECKPOINT_SHA:
+            raise ValueError("Compatibility evidence checkpoint differs")
+        evaluator_key = "evaluator_sha256" if legacy else "judge_sha256"
+        evaluator_path = (
+            "locomotion/evaluation/scoring.py"
+            if legacy
+            else "locomotion/evaluation/requirements.py"
         )
-    ):
-        raise ValueError("Compatibility provenance or load evidence differs")
-    if not compare(evidence["ranges.json"], evidence["summary.json"])["pass"]:
+        expected_loads = 13 if legacy else len(summary["allocation"]["cases"])
+        if (
+            len(summary.get("loads", {})) != expected_loads
+            or any(row.get("status") != "available" for row in summary["loads"].values())
+            or len(ranges.get("baseline_provenance", [])) != 3
+            or summary["allocation"][evaluator_key]
+            != receipt["candidate_runtime_sources"]["files"].get(evaluator_path)
+        ):
+            raise ValueError("Compatibility provenance or load evidence differs")
+    except (KeyError, TypeError) as error:
+        raise ValueError("Malformed compatibility evidence") from error
+    if not compare(ranges, summary)["pass"]:
         raise ValueError("Compatibility native parity failed")
     return receipt
 
