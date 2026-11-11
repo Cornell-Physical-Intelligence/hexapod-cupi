@@ -300,6 +300,7 @@ def run_batch(
     progress=None,
     max_wall_seconds=None,
     motion_features=None,
+    rules=None,
 ):
     """One initial reset, full fixed-duration trials; a failure preserves prefixes.
 
@@ -313,7 +314,8 @@ def run_batch(
         raise ValueError("Batch cases must fit the environment and have one fixed duration")
     cases = [{"stop_control": case["controls"], **case} for case in cases]
     producers = [
-        requirements.producer(case) for case in cases + [cases[-1]] * (env.num_envs - len(cases))
+        requirements.producer(case, rules)
+        for case in cases + [cases[-1]] * (env.num_envs - len(cases))
     ]
     duration = cases[0]["controls"] * 0.02
     if env.cfg.episode_seconds <= duration:
@@ -555,6 +557,7 @@ def run_cases(
                 progress=progress,
                 max_wall_seconds=None if not math.isfinite(remaining) else remaining,
                 motion_features=motion_features,
+                rules=rules,
             )
         except Exception as error:
             failure = repr(error)

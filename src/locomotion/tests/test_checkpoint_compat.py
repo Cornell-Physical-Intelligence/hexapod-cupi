@@ -71,6 +71,18 @@ class CheckpointCompatibilityTests(unittest.TestCase):
                 self.assertEqual(len(ranges["gates"]), 210)
                 self.assertTrue(checkpoints.compare(ranges, summary)["pass"])
 
+    def test_current_measurements_reject_off_bank_route_trace(self):
+        from locomotion.tests.test_native_ranges import NativeRangeTests
+
+        summary = NativeRangeTests().suite(1.0)
+        summary["cases"][0]["checks"]["command_set"] = {
+            "value": 0,
+            "bound": 1,
+            "pass": False,
+        }
+        with self.assertRaisesRegex(ValueError, "complete recorded trial"):
+            checkpoints.measurements(summary)
+
     def test_v1_receipts_still_reject_changed_probes_gates_metrics_and_provenance(self):
         source = ROOT / "site/assets" / HISTORICAL_CAMPAIGNS[-1] / "compatibility"
         original = [

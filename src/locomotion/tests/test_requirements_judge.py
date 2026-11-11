@@ -300,6 +300,21 @@ class RouteTests(unittest.TestCase):
             (fixed(0, facing_x), fixed(1, facing_x)), ([0.0, 0.0, 0.2], [0.0, 0.0, 0.0])
         )
 
+    def test_route_producers_use_the_selected_requirements_command_set(self):
+        rules = {
+            **self.rules,
+            "commands": {**self.rules["commands"], "translate_speeds_mps": [0.025]},
+        }
+        produce = judge.producer(self.case, rules)
+        facing_x = [0.0, 0.0, 0.1, 0.0, 0.0, math.sin(math.pi / 4), math.cos(math.pi / 4)]
+        self.assertEqual(produce(0, facing_x), [0.025, 0.0, 0.0])
+
+    def test_a_route_cannot_pass_with_commands_outside_its_requirement_set(self):
+        trace = self.route_trace((0.45, 0.02), 1300)
+        trace["command"][0, 0] = [0.03, 0.0, 0.0]
+        result = judge.judge_case(trace, self.rules, None, self.case)
+        self.assertEqual(result["failed_checks"], ["command_set"])
+
     def route_trace(self, rest, zero_controls):
         n = self.case["controls"]
         commands = [[0.05, 0.0, 0.0]] * (n - zero_controls) + [[0.0, 0.0, 0.0]] * zero_controls

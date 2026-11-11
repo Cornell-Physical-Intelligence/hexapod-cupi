@@ -8,6 +8,7 @@ import tarfile
 import tempfile
 import types
 import unittest
+from array import array
 from dataclasses import asdict
 from pathlib import Path
 
@@ -79,7 +80,13 @@ class ActiveTaskTests(unittest.TestCase):
         del expected["yaw_gate_on"]
         self.assertEqual(asdict(reward.REWARD_CONFIG), expected)
         baseline = importlib.import_module("_active_task_baseline.task")
-        self.assertEqual(command_bank(TaskConfig()), baseline.command_bank(baseline.TaskConfig()))
+        actual_bank = command_bank(TaskConfig())
+        expected_bank = baseline.command_bank(baseline.TaskConfig())
+        self.assertEqual(actual_bank, expected_bank)
+        self.assertEqual(
+            array("d", (value for command in actual_bank for value in command)).tobytes(),
+            array("d", (value for command in expected_bank for value in command)).tobytes(),
+        )
 
     def test_reward_rng_episode_reset_and_reporting_match(self):
         traces = []

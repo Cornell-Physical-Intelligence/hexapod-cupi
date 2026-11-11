@@ -353,6 +353,28 @@ class CaseRunTests(unittest.TestCase):
                 **keywords,
             )
 
+    def test_custom_requirement_set_reaches_the_route_follower(self):
+        rules, _ = requirements.load_requirements()
+        rules["commands"]["translate_speeds_mps"] = [0.025]
+        rules["stop"]["routes_m"] = {"custom": [[0.2, 0.0]]}
+        with TemporaryDirectory() as temporary:
+            path = Path(temporary) / "requirements.json"
+            path.write_text(json.dumps({"sets": {"custom": rules}}))
+            result = self.run_cases(
+                FakeNative(),
+                temporary,
+                requirements_path=path,
+                requirements_set="custom",
+                case_ids=["route_custom"],
+            )
+            self.assertIsNone(result["failure"])
+            with np.load(Path(temporary) / "run/batch_000/control_trace.npz") as trace:
+                expected = np.tile(
+                    np.array([0.025, 0.0, 0.0], dtype=trace["command"].dtype),
+                    (len(trace["command"]), 1, 1),
+                )
+                np.testing.assert_array_equal(trace["command"], expected)
+
     def test_every_selected_case_is_recorded_and_judged_against_the_requirements_file(self):
         native = FakeNative()
         with TemporaryDirectory() as temporary:

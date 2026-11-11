@@ -24,58 +24,45 @@ Run: ``python -m locomotion.evaluation.requirements <evaluation dir> [--set stag
 from __future__ import annotations
 
 import argparse
-import hashlib
 import json
 import math
 from pathlib import Path
 
 import numpy as np
 
+from contracts.command import CommandSet, default_requirements_path, load_requirement_set
 from contracts.pose import Pose2D
 
-ROOT = Path(__file__).resolve().parents[3]
-REQUIREMENTS = ROOT / "configs/walking_requirements.json"
+REQUIREMENTS = default_requirements_path()
 CONTROL_DT_S = 0.02
 SCHEMA = "hexapod_walking_requirements_judgement_v2"
 
 
 def load_requirements(path=REQUIREMENTS, name="stage2_flat"):
     """The named requirement set and the SHA-256 of the file that owns it."""
-    data = json.loads(Path(path).read_text())
-    return data["sets"][name], hashlib.sha256(Path(path).read_bytes()).hexdigest()
+    return load_requirement_set(path, name)
 
 
 def cases(rules):
     """The cases of one requirement set: id, navigation command, controls and the stop control."""
     hold = round(rules["hold_max_s"] / CONTROL_DT_S)
     stop = round(2 * rules["stop"]["settle_s"] / CONTROL_DT_S)
-    commands = rules["commands"]
-    rows = [("stand", [0.0, 0.0, 0.0])] if commands["stand"] else []
-    step = 2 * math.pi / commands["translate_bearings"]
-    for speed in commands["translate_speeds_mps"]:
-        for bearing in range(commands["translate_bearings"]):
-            angle = bearing * step
-            rows.append(
-                (
-                    f"walk_{speed:.3f}_{round(math.degrees(angle))}deg",
-                    [speed * math.cos(angle), speed * math.sin(angle), 0.0],
-                )
-            )
-    rate = commands["turn_rate_rad_s"]
-    rows += [(f"turn_{sign * rate:+.2f}", [0.0, 0.0, sign * rate]) for sign in (-1, 1)]
-    arc = commands["arc"]
-    rows += [
-        (
-            f"arc_{sign * arc['turn_rate_rad_s']:+.2f}",
-            [arc["speed_mps"], 0.0, sign * arc["turn_rate_rad_s"]],
-        )
-        for sign in (-1, 1)
-    ]
+    commands = CommandSet.from_mapping(rules["commands"])
+    rows = [("stand", [0.0, 0.0, 0.0])] if commands.stand else []
+    for command in commands.nonzero():
+        if command.wz_rad_s == 0.0:
+            speed = math.hypot(command.vx_mps, command.vy_mps)
+            bearing = round(math.degrees(math.atan2(command.vy_mps, command.vx_mps))) % 360
+            case_id = f"walk_{speed:.3f}_{bearing}deg"
+        else:
+            kind = "arc" if command.vx_mps else "turn"
+            case_id = f"{kind}_{command.wz_rad_s:+.2f}"
+        rows.append((case_id, list(command.as_tuple())))
     fixed = [
         {"case_id": case_id, "command": command, "controls": hold + stop, "stop_control": hold}
         for case_id, command in rows
     ]
-    slowest = min(commands["translate_speeds_mps"])
+    slowest = min(commands.translate_speeds_mps)
     routes = []
     for name, goals in rules["stop"].get("routes_m", {}).items():
         points = [(0.0, 0.0)] + [tuple(goal) for goal in goals]
@@ -104,7 +91,7 @@ def route_goals(case, start):
     return [(x0 + c * gx - s * gy, y0 + s * gx + c * gy) for gx, gy in case["route_m"]]
 
 
-def producer(case):
+def producer(case, rules=None):
     """The command of ``case`` at each control: ``produce(control, root_pose_row)``.
 
     A fixed case ignores the pose. A route case builds the waypoint follower on its first call,
@@ -114,12 +101,20 @@ def producer(case):
         return lambda control, root: command_at(case, control)
     from navigation.waypoint import WaypointFollower
 
+    rules = load_requirements()[0] if rules is None else rules
+    commands = CommandSet.from_mapping(rules["commands"])
     follower = []
 
     def produce(control, root):
         x, y, heading = follower_pose(root)
         if not follower:
-            follower.append(WaypointFollower(route_goals(case, (x, y, heading))))
+            follower.append(
+                WaypointFollower(
+                    route_goals(case, (x, y, heading)),
+                    command_set=commands,
+                    hold_min_s=rules["hold_min_s"],
+                )
+            )
         command = follower[0].update(
             Pose2D(x_m=x, y_m=y, heading_rad=heading), control * CONTROL_DT_S
         )
@@ -287,6 +282,15 @@ def judge_case(trace, rules, controls=None, case=None):
         # widening any motion limit or allowing an off-bank command through a tolerance.
         if not np.array_equal(np.asarray(trace["command"][:, 0], dtype=np.float32), expected):
             failure = "command_schedule"
+    elif valid and case is not None and "route_m" in case:
+        commands = CommandSet.from_mapping(rules["commands"])
+        allowed = [command.as_tuple() for command in commands.nonzero()]
+        if commands.stand:
+            allowed.append((0.0, 0.0, 0.0))
+        recorded = np.asarray(trace["command"][:, 0], dtype=np.float32)
+        membership = (recorded[:, None, :] == np.asarray(allowed, dtype=np.float32)).all(-1).any(-1)
+        if not membership.all():
+            failure = "command_set"
     if failure is not None:
         return {
             "holds": [],

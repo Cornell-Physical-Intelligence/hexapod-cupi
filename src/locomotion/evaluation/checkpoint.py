@@ -176,7 +176,7 @@ def measurements(judgement):
         or [row["case_id"] for row in rows] != declared
         or len(set(declared)) != len(declared)
         or any(
-            {"complete_trace", "valid_trace", "command_schedule"} & row["checks"].keys()
+            {"complete_trace", "valid_trace", "command_schedule", "command_set"} & row["checks"].keys()
             for row in rows
         )
     ):

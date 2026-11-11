@@ -29,7 +29,9 @@ shows definitions and imports.
 - `mdp/actions.py`: slew limiter and executed-action feature.
 - `mdp/frames.py`: quaternion and navigation frames.
 - `mdp/observations.py`: proprioception frame and 231-value actor input.
-- `mdp/commands.py`: command bank and gait-clock period.
+- `mdp/commands.py`: training command settings and gait-clock period; the bank
+  uses `contracts.command.CommandSet` and the walking requirements. Training
+  keeps its own five-second maximum hold and zero-command quota.
 - `mdp/rewards.py`: recorded yaw-gated reward.
 - `mdp/loads.py`, `mdp/state.py`, `mdp/terminations.py`: 400 Hz loads and control telemetry, toe points and measured state, and the termination rule. `env.py` and the MuJoCo surrogate import them.
 - `agents/rsl_rl_ppo_cfg.py`: Torch-free `ppo_config` and the default `RECIPES['c48_long']`.
