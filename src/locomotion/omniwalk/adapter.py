@@ -125,6 +125,11 @@ class OmniEnv:
         """The applied Step 7 motor draw in JOINT_NAMES order, or None under the nominal law."""
         return getattr(self.isaac, "motor_law", None)
 
+    @property
+    def reset_heights(self):
+        """Each row's root height at its last reset under a draw, or None at the one nominal height."""
+        return getattr(self.isaac, "reset_heights", None)
+
     def reset(self, indices=None):
         rows = reset_rows(indices, self.num_envs, self.device)
         if self.native_errors:
@@ -134,14 +139,17 @@ class OmniEnv:
         if self.sim.get_physics_step_count() != before:
             raise RuntimeError("Reset unexpectedly advanced physics")
         if len(rows):
-            expected = self.neutral.expand(len(rows), -1)
+            # A randomized row resets to its drawn offsets with the root lifted to the nominal clearance.
+            drawn = getattr(self.isaac, "reset_q", None)
+            expected = self.neutral.expand(len(rows), -1) if drawn is None else drawn[rows]
             if not torch.allclose(self.current["q"][rows], expected, atol=2e-6, rtol=0):
                 raise RuntimeError("Selected joint reset readback differs")
             expected_root = (
                 self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(len(rows), -1).clone()
             )
             expected_root[:, :3] = self.origins[rows]
-            expected_root[:, 2] = self.reset_height
+            heights = self.reset_heights
+            expected_root[:, 2] = self.reset_height if heights is None else heights[rows]
             if not torch.allclose(self.current["root"][rows], expected_root, atol=2e-6, rtol=0):
                 raise RuntimeError("Selected root reset readback differs")
             self.history[rows] = proprio(self.current, self.neutral)[rows, None].expand(-1, 5, -1)

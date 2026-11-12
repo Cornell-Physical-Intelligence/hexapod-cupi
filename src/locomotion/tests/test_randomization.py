@@ -8,7 +8,7 @@ import numpy as np
 import torch
 
 from locomotion.robots import randomization as rnd
-from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, MASS_KG
+from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, KD, LEGS, MASS_KG
 from locomotion.robots.rs05 import motor_force
 
 ROOT = __import__("pathlib").Path(__file__).resolve().parents[3]
@@ -405,8 +405,10 @@ class NativeMotorDrawTests(unittest.TestCase):
         for actual, wanted in zip(self.compute(), expected):
             self.assertTrue(torch.equal(actual, wanted))
 
-    def environment(self, n=3, seed=20260917):
+    def environment(self, n=3, seed=20260917, kinematics=None, init=True):
+        """A native environment over stand-in PhysX views; ``kinematics`` (a surrogate) poses its links."""
         from types import SimpleNamespace
+        from unittest import mock
 
         from locomotion.tests.test_direct_environment import load_isaac
 
@@ -424,23 +426,110 @@ class NativeMotorDrawTests(unittest.TestCase):
         # Two shapes on each tibia, three on the base and one elsewhere.
         counts = [2 if b.endswith("_tibia") else 3 if b == "body" else 1 for b in links]
         written = []
+        model = json.loads(MODEL.read_text())
+        named = {link["name"]: link for link in model["links"]}
+        # PhysX state: the ledger's inertial values and the pose last written for each row.
+        physx = {
+            "masses": torch.tensor([named[b]["mass"] for b in links]).expand(n, -1).clone(),
+            "coms": torch.tensor([[*named[b]["com"], 0.0, 0.0, 0.0, 1.0] for b in links])
+            .expand(n, -1, -1)
+            .clone(),
+            "inertias": torch.tensor([named[b]["inertia"] for b in links])
+            .reshape(1, -1, 9)
+            .expand(n, -1, -1)
+            .clone(),
+            "root": torch.tensor([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(n, -1).clone(),
+            "q": torch.zeros(n, 18),
+        }
+
+        def setter(key):
+            def write(data, rows):
+                physx[key][rows] = data[rows]
+
+            return write
+
+        def link_transforms():
+            # The surrogate's MuJoCo kinematics stand in for PhysX: same frames, xyzw quaternions.
+            import mujoco
+
+            m = kinematics.mj_model
+            d = mujoco.MjData(m)
+            result = torch.zeros(n, len(links), 7)
+            for row in range(n):
+                root = physx["root"][row].double().numpy()
+                d.qpos[:3], d.qpos[3:7] = root[:3], root[[6, 3, 4, 5]]
+                d.qpos[kinematics._qpos_columns] = (
+                    physx["q"][row].double().numpy()[env.joint_index.numpy()]
+                )
+                mujoco.mj_kinematics(m, d)
+                for k, name in enumerate(links):
+                    b = mujoco.mj_name2id(m, mujoco.mjtObj.mjOBJ_BODY, name)
+                    result[row, k] = torch.tensor([*d.xpos[b], *d.xquat[b][[1, 2, 3, 0]]])
+            return result
+
         view = SimpleNamespace(
             link_paths=[[f"/World/envs/env_0/Robot/{b}" for b in links]],
             get_material_properties=lambda: torch.tensor([1.0, 1.0, 0.0]).expand(
                 n, sum(counts), -1
             ),
             set_material_properties=lambda data, rows: written.append((data.clone(), rows)),
+            get_link_transforms=link_transforms,
+            get_root_transforms=lambda: physx["root"].clone(),
+            **{"get_" + k: (lambda k=k: physx[k].clone()) for k in ("masses", "coms", "inertias")},
+            **{"set_" + k: setter(k) for k in ("masses", "coms", "inertias")},
+        )
+
+        def write_root(root_pose, env_ids):
+            physx["root"][env_ids.long()] = root_pose
+
+        def write_q(position, env_ids):
+            physx["q"][env_ids.long()] = position
+
+        composer = SimpleNamespace(out_force_b=None, out_torque_b=None)
+
+        def set_wrench(forces, torques, body_ids, env_ids):
+            force, torque = torch.zeros(n, len(links), 3), torch.zeros(n, len(links), 3)
+            force[env_ids.long()[:, None], body_ids.long()] = forces
+            torque[env_ids.long()[:, None], body_ids.long()] = torques
+            composer.out_force_b = SimpleNamespace(warp=force)
+            composer.out_torque_b = SimpleNamespace(warp=torque)
+
+        composer.set_forces_and_torques_index = set_wrench
+        env.robot = mock.MagicMock(
+            body_names=links,
+            permanent_wrench_composer=composer,
+            write_root_link_pose_to_sim_index=write_root,
+            write_joint_position_to_sim_index=write_q,
         )
         env.config = SimpleNamespace(num_envs=n, seed=seed, physics_dt=0.0025, decimation=8)
         env.randomization = "table2_v1"
         env.device = "cpu"
+        env.model = model
+        env.geometry_path = ROOT / "robot/hexapod_mkii_updated_v1/geometry/geometry.json"
+        env.geometry_meta = json.loads(env.geometry_path.read_text())
         env.native_body_names = links
+        env.native_joint_names = native
+        env.joint_index = torch.tensor([native.index(j) for j in JOINT_NAMES])
+        env.inverse_joint_index = torch.argsort(env.joint_index)
+        env.body_index = links.index("body")
+        env.toe_index = torch.tensor([links.index(leg + "_tibia") for leg in LEGS])
+        env.root_com_local = physx["coms"][:, env.body_index, :3].clone()
+        surrogate = kinematics
+        env.neutral = surrogate.neutral.clone() if surrogate else torch.zeros(18)
+        env.lower, env.upper = (
+            (surrogate.lower.clone(), surrogate.upper.clone())
+            if surrogate
+            else (torch.full((18,), -3.0), torch.full((18,), 3.0))
+        )
+        env.reset_height = surrogate.reset_height if surrogate else 0.1
+        env.origins = torch.zeros(n, 3)
         env.view = view
         env.sim = SimpleNamespace(
             physics_sim_view=SimpleNamespace(
                 create_rigid_body_view=lambda path: SimpleNamespace(
                     max_shapes=counts[links.index(path.rsplit("/", 1)[1])]
-                )
+                ),
+                update_articulations_kinematic=lambda: None,
             )
         )
         env.torch = lambda x: torch.as_tensor(x, dtype=torch.float32)
@@ -450,8 +539,9 @@ class NativeMotorDrawTests(unittest.TestCase):
             draw=None,
         )
         env.motor_order = torch.tensor([native.index(j) for j in JOINT_NAMES])
-        env._init_randomization()
-        env.written, env.counts, env.links = written, counts, links
+        env.written, env.counts, env.links, env.physx = written, counts, links, physx
+        if init:
+            env._init_randomization()
         return env
 
     def test_friction_covers_every_tibia_shape_of_the_reset_row_only(self):
@@ -562,13 +652,119 @@ class NativeMotorDrawTests(unittest.TestCase):
         finally:
             surrogate.close()
 
-    def test_the_native_environment_refuses_randomization_until_every_draw_is_applied(self):
-        from locomotion.tests.test_direct_environment import load_isaac
+    def test_the_native_link_masses_and_payload_match_the_surrogate_models(self):
+        """Each row's 19 masses, centres of mass and link-axis tensors equal the surrogate's draw."""
+        import mujoco
 
-        module = load_isaac()
-        env = object.__new__(module.IsaacEnv)
-        with self.assertRaisesRegex(NotImplementedError, "incomplete"):
-            module.IsaacEnv.__init__(env, None, None, None, None, None, randomization="table2_v1")
+        from locomotion.surrogate.env import make_env
+
+        surrogate = make_env(3, threads=0, randomization="table2_v1", seed=20260917)
+        try:
+            env = self.environment()
+            env.redraw(torch.arange(3))
+            order = [env.links.index(b) for b in BODY_NAMES]
+            payloads = 0
+            for row in range(3):
+                model = surrogate._models[row]
+                ids = surrogate._body_ids
+                tensors = []
+                for b in ids:
+                    rotation = np.zeros(9)
+                    mujoco.mju_quat2Mat(rotation, model.body_iquat[b])
+                    rotation = rotation.reshape(3, 3)
+                    tensors.append(rotation @ np.diag(model.body_inertia[b]) @ rotation.T)
+                tensors = torch.tensor(np.array(tensors))
+                native = env.physx["inertias"][row, order].double().reshape(-1, 3, 3)
+                scale = tensors.abs().amax((-2, -1), keepdim=True)
+                self.assertTrue(torch.all((native - tensors).abs() <= 1e-6 * scale), row)
+                self.assertTrue(
+                    np.allclose(
+                        env.physx["masses"][row, order].numpy(),
+                        model.body_mass[ids],
+                        rtol=1e-6,
+                        atol=0,
+                    ),
+                    row,
+                )
+                self.assertTrue(
+                    np.allclose(
+                        env.physx["coms"][row, order, :3].numpy(), model.body_ipos[ids], atol=1e-7
+                    ),
+                    row,
+                )
+                self.assertTrue(
+                    torch.allclose(
+                        env.root_com_local[row],
+                        torch.tensor(model.body_ipos[surrogate._base_id], dtype=torch.float32),
+                    )
+                )
+                payloads += int(model.body_mass[surrogate._base_id] > 2.5)
+            self.assertGreater(payloads, 0)
+        finally:
+            surrogate.close()
+
+    def test_the_native_reset_pose_and_root_lift_match_the_surrogate(self):
+        """The drawn offsets reach the joints and the root rises to the nominal toe clearance."""
+        from locomotion.surrogate.env import make_env
+
+        surrogate = make_env(3, threads=0, randomization="table2_v1", seed=20260917)
+        try:
+            env = self.environment(kinematics=surrogate)
+            env.view.get_dof_actuation_forces = lambda: torch.zeros(3, 18)
+            env.view.set_dof_actuation_forces = lambda *args: None
+            env.held, env.previous_action = torch.zeros(3, 18), torch.zeros(3, 18)
+            env.write_reset(torch.arange(3))
+            wanted = surrogate._qpos0[:, surrogate._qpos_columns]
+            self.assertTrue(np.allclose(env.reset_q.numpy(), wanted, atol=1e-6))
+            canonical = env.physx["q"][:, env.joint_index]
+            self.assertTrue(torch.equal(canonical, env.reset_q))
+            self.assertTrue(
+                torch.allclose(env.reset_heights, surrogate.reset_heights, atol=2e-6, rtol=0)
+            )
+            self.assertTrue(torch.equal(env.physx["root"][:, 2], env.reset_heights))
+            # The draws lift every row; the held target keeps the nominal pose.
+            self.assertTrue(torch.all(env.reset_heights > env.reset_height))
+            target = env.robot.set_joint_position_target_index.call_args.kwargs["target"]
+            self.assertTrue(torch.equal(target, env.neutral[env.inverse_joint_index].expand(3, -1)))
+        finally:
+            surrogate.close()
+
+    def test_a_drawn_pose_outside_the_named_limits_is_refused(self):
+        env = self.environment()
+        env.redraw(torch.arange(3))
+        env.nominal_toe_low = 0.0
+        env.upper = env.neutral.clone()
+        with self.assertRaisesRegex(ValueError, "named joint limits"):
+            env.drawn_pose_lift(torch.arange(3), torch.arange(3, dtype=torch.int32))
+
+    def test_the_push_reaches_the_base_wrench_and_is_read_back(self):
+        env = self.environment()
+        env.redraw(torch.arange(3))
+        env.since_reset[:] = env.push_start
+        env.push_window(0)
+        env.verify_push(0)
+        force = env.robot.permanent_wrench_composer.out_force_b.warp
+        self.assertTrue(
+            torch.equal(force[:, env.body_index], torch.tensor(env.push_force, dtype=torch.float32))
+        )
+        self.assertTrue(torch.any(force[:, env.body_index] != 0))
+        others = [k for k in range(len(env.links)) if k != env.body_index]
+        self.assertTrue(torch.all(force[:, others] == 0))
+        force[0, env.body_index, 0] += 1.0
+        with self.assertRaisesRegex(RuntimeError, "push wrench"):
+            env.verify_push(0)
+
+    def test_an_inertial_write_that_does_not_read_back_is_refused(self):
+        env = self.environment()
+        env.view.set_masses = lambda data, rows: None
+        with self.assertRaisesRegex(ValueError, "drawn masses"):
+            env.redraw(torch.arange(3))
+
+    def test_a_nominal_tensor_off_the_ledger_axes_is_refused(self):
+        env = self.environment(init=False)
+        env.physx["inertias"][:, env.links.index("body"), 1] = 1e-3
+        with self.assertRaisesRegex(ValueError, "ledger"):
+            env._init_randomization()
 
     def test_a_reset_clears_the_row_wrench_and_restarts_its_clock(self):
         env = self.environment()
