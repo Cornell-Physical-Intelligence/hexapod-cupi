@@ -1,0 +1,23 @@
+{
+  "id": "20261109T200138_mission_pose_source",
+  "date": "2026-11-09T20:01:38Z",
+  "title": "Name the Mid-360 and GPS as the way the robot finds its position",
+  "summary": "The mission sentence on the site and in the README said the robot finds its way with GPS alone. The stage 2 walking requirements name the pose source since 7 November: Livox Mid-360 lidar-inertial odometry for local position and heading, and GPS without RTK for the global frame. The mission sentence and the Track position part of the system diagram now say a Livox Mid-360 laser scanner and GPS. The page had grown to 662 words after the Movement test term changed on this branch, over the 650-word limit of site/test_render.mjs; the term is shorter and the page shows 650 words, so the render test passes again. The limit is unchanged.",
+  "areas": [
+    "site",
+    "navigation"
+  ],
+  "next": "Add the owner-file existence check to the site checker; then the ARCHITECTURE rewrite and the navigation guide.",
+  "changes": [
+    "README.md",
+    "site/project.json",
+    "site/updates/20261109T200138_mission_pose_source.json"
+  ],
+  "evidence": [
+    "configs/walking_requirements.json",
+    "site/project.json",
+    "site/test_render.mjs"
+  ],
+  "no_project_impact": false,
+  "reason": "The published mission sentence changes to match the pose source that the requirements file decides. No result, roadmap state or gate changes."
+}

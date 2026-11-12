@@ -1,0 +1,32 @@
+{
+  "id": "20260927T155931_route_planner_scaffold",
+  "date": "2026-09-27T15:59:31.397071+00:00",
+  "title": "Add the route-planning seam and its specification tests",
+  "summary": "navigation/ gains region, grid, graph and planner modules for issue #20 task 3. CostGraph is the three-method interface a planner searches and other mission work builds against; GridGraph implements it over a CostGrid that rasterises a SurveyRegion inflated by a PlanMargin. PlanMargin carries R-05 clearance as three separate terms, one being R-03's GPS position error bound, supplied per plan rather than held as a constant. The algorithms are deliberately unimplemented: seven bodies raise NotImplementedError behind a stated required result, and 42 of the 86 navigation tests fail until they are written. No manifest is added, because pull request #45 moves manifest generation into CI and removes CURRENT_MANIFEST.",
+  "areas": [
+    "mission",
+    "source ownership"
+  ],
+  "next": "Implement the seven challenge bodies so the 42 failing navigation tests pass, and freeze #20's footprint radius, stop tolerance, cell size and GPS error bound. The recorded margin arithmetic shows a several-metre bound leaves no feasible region inside the agreed 6 x 4 m area, so that area or that bound has to change before the demonstration can run.",
+  "changes": [
+    "configs/source_inventory.json",
+    "navigation/README.md",
+    "navigation/__init__.py",
+    "navigation/graph.py",
+    "navigation/grid.py",
+    "navigation/planner.py",
+    "navigation/region.py",
+    "navigation/tests/test_grid.py",
+    "navigation/tests/test_planner.py",
+    "navigation/tests/test_region.py",
+    "site/updates/20260927T155931_route_planner_scaffold.json"
+  ],
+  "evidence": [
+    "navigation/README.md",
+    "navigation/graph.py",
+    "navigation/tests/test_grid.py",
+    "ARCHITECTURE.md",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20"
+  ],
+  "no_project_impact": false
+}

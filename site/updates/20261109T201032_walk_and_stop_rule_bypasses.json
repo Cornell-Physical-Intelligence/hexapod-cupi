@@ -1,0 +1,23 @@
+{
+  "id": "20261109T201032_walk_and_stop_rule_bypasses",
+  "date": "2026-11-09T20:10:32Z",
+  "title": "Close two ways around the walk and stop rule",
+  "summary": "An independent review of the roadmap rule built two inputs that the site checker admitted with walk and stop marked done. In the first, the walking step named another owner, or the same file with a different spelling, while a later step held configs/accepted_controller.json; the rule followed the owner name and skipped the walking step. The checker now requires the step with the id stage2 to name configs/accepted_controller.json exactly. In the second, the accepted controller file held an empty judged table, so the rule that every judged row passes held with no rows. The checker now refuses a judged table that is missing, empty or not a table, and a row that is not a table. Two new tests reproduce both inputs. One hole stays open for the program lead to decide: the checker does not fix which rows the table must hold, so a deleted failing row would pass. The survey step's done_means sentence no longer repeats the 0.12 m stop tolerance; it names the requirements file that sets it.",
+  "areas": [
+    "site"
+  ],
+  "next": "Rewrite ARCHITECTURE so that it cites the owner files; then correct the GPS-only lines in the navigation and mission guides.",
+  "changes": [
+    "docs/PROJECT_SITE.md",
+    "site/project.json",
+    "site/updates/20261109T201032_walk_and_stop_rule_bypasses.json",
+    "tests/test_project_progress.py",
+    "tools/project_site.py"
+  ],
+  "evidence": [
+    "tests/test_project_progress.py",
+    "tools/project_site.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A checker rule, its tests and one unpublished roadmap sentence change. No result, roadmap state or owner file changes."
+}

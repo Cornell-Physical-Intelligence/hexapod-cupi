@@ -1,0 +1,30 @@
+{
+  "schema_version": 1,
+  "purpose": "The code version approved to run native evaluations of the accepted controller: the receipt that proves its runtime reproduces the controller's recorded native measurements. The tree is approved while every runtime file the receipt binds matches it byte for byte; tools/project_site.py reports that as a status, and the loader refuses a runtime the receipt does not bind.",
+  "approved_by": "program lead",
+  "approved_on": "2026-11-08",
+  "certified_commit": "dc9f5be7025db617b7ed972a5baf2bc2e2fd56f4",
+  "merged_as": "c7595386",
+  "controller_checkpoint_sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+  "receipt": {
+    "path": "site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json",
+    "sha256": "f84b2548add6a1c2d29e706736d0d5579284fe10f598799e6e5ae83d6967534d",
+    "runtime_files_bound": 56,
+    "ranges_sha256": "866dfd2a0f5bcdbf9d13cb94cf6198014ef32ffb4ca436a9d55bab9a28a4aab5"
+  },
+  "campaign": {
+    "date": "2026-11-02",
+    "standing_admission": "1 and 128 robots, pass",
+    "native_parity": "13 of 13 probes through the harness, all measurements inside the frozen ranges",
+    "production_loader": "CPU check, pass",
+    "not_performed": ["native 13-probe replay through the production loader"],
+    "records": "site/assets/c48_receipt_renewal_20261102_001/records/result.json",
+    "raw_runs": "/srv/cupi/hexapod/runs/james/pr91_native_parity_20261102_053924Z_*"
+  },
+  "renewal": "Repeat the campaign on the new runtime: standing admission at 1 and 128 robots, the parity harness replay against the frozen ranges, the loader check, then replace this file. About two hours of GPU, no training.",
+  "superseded": {
+    "path": "site/assets/floor_contact_20261016_002/compatibility/receipt.json",
+    "bound_commit": "717548d5e897fb2e59aaa8a83268cae0e6ccb160",
+    "reason": "The Ruff reformat of the runtime (PR 86) changed 39 of its 50 bound files"
+  }
+}

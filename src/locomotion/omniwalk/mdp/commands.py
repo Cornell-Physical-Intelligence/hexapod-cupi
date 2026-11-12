@@ -1,7 +1,11 @@
 """Declare the omnidirectional command bank, its hold times and the gait-clock period."""
 
-import math
 from dataclasses import dataclass
+
+from contracts.command import CommandSet, load_requirement_set
+
+_DEFAULT_RULES, _ = load_requirement_set()
+COMMAND_SET = CommandSet.from_mapping(_DEFAULT_RULES["commands"])
 
 # One gait cycle in 50 Hz controls; the contact-schedule reward and the policy clock inputs share it.
 GAIT_CLOCK_CONTROLS = 60
@@ -15,18 +19,18 @@ def default_gait_clock(mode, networks):
 @dataclass(frozen=True)
 class TaskConfig:
     seed: int = 20260914
-    hold_min_seconds: float = 2.0
+    hold_min_seconds: float = _DEFAULT_RULES["hold_min_s"]
     hold_max_seconds: float = 5.0
     zero_command_fraction: float = 0.15
-    speed_levels_mps: tuple = (0.025, 0.05)
-    maximum_speed_mps: float = 0.05
-    yaw_rate_rad_s: float = 0.2
-    arc_speed_mps: float = 0.04
-    arc_yaw_rate_rad_s: float = 0.15
+    speed_levels_mps: tuple = COMMAND_SET.translate_speeds_mps
+    maximum_speed_mps: float = max(COMMAND_SET.translate_speeds_mps)
+    yaw_rate_rad_s: float = COMMAND_SET.turn_rate_rad_s
+    arc_speed_mps: float = COMMAND_SET.arc_speed_mps
+    arc_yaw_rate_rad_s: float = COMMAND_SET.arc_turn_rate_rad_s
 
     def validate(self):
         if (self.hold_min_seconds, self.hold_max_seconds, self.zero_command_fraction) != (
-            2.0,
+            _DEFAULT_RULES["hold_min_s"],
             5.0,
             0.15,
         ):
@@ -34,11 +38,12 @@ class TaskConfig:
         if type(self.seed) is not int or self.seed < 0:
             raise ValueError("Nonnegative integer seed required")
         if (
-            self.speed_levels_mps != (0.025, 0.05)
+            self.speed_levels_mps != COMMAND_SET.translate_speeds_mps
             or self.maximum_speed_mps not in self.speed_levels_mps
-            or self.yaw_rate_rad_s != 0.2
-            or self.arc_speed_mps != 0.04
-            or self.arc_yaw_rate_rad_s != 0.15
+            or self.yaw_rate_rad_s != COMMAND_SET.turn_rate_rad_s
+            or self.arc_speed_mps != COMMAND_SET.arc_speed_mps
+            or self.arc_yaw_rate_rad_s != COMMAND_SET.arc_turn_rate_rad_s
+            or not COMMAND_SET.stand
         ):
             raise ValueError("Command bank differs from the recorded task")
 
@@ -46,18 +51,4 @@ class TaskConfig:
 def command_bank(config):
     """Nonzero navigation-frame commands; zero has a separate reserved quota."""
     config.validate()
-    result = []
-    for speed in config.speed_levels_mps:
-        if speed <= config.maximum_speed_mps:
-            for bearing in range(8):
-                angle = bearing * math.pi / 4
-                result.append([speed * math.cos(angle), speed * math.sin(angle), 0.0])
-    result.extend([[0.0, 0.0, -config.yaw_rate_rad_s], [0.0, 0.0, config.yaw_rate_rad_s]])
-    if config.arc_speed_mps <= config.maximum_speed_mps:
-        result.extend(
-            [
-                [config.arc_speed_mps, 0.0, -config.arc_yaw_rate_rad_s],
-                [config.arc_speed_mps, 0.0, config.arc_yaw_rate_rad_s],
-            ]
-        )
-    return result
+    return [list(command.as_tuple()) for command in COMMAND_SET.nonzero(config.maximum_speed_mps)]

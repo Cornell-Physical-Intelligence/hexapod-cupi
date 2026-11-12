@@ -24,6 +24,13 @@ export async function readRun(value) {
   return run;
 }
 
+export function caseVerdict(c) {
+  if (c.pass === null) return { label: 'not judged', className: '' };
+  return c.pass
+    ? { label: 'passed', className: 'pass' }
+    : { label: c.fell ? 'failed, fell' : 'failed', className: 'fail' };
+}
+
 // Point k of leg `leg` (0 coxa, 1 femur, 2 tibia joint, 3 toe) at fractional frame `f`, in metres.
 export function point(c, f, leg, k) {
   const i0 = Math.max(0, Math.min(c.frames - 1, Math.floor(f)));

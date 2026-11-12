@@ -1,0 +1,30 @@
+{
+  "id": "20261104T224034_route_planner_membership",
+  "date": "2026-11-04T22:40:34Z",
+  "title": "Refuse a route that starts or ends on a blocked cell",
+  "summary": "The cost graph that a_star searches now says which cells belong to it, and a_star returns None when the start or goal is blocked or off the grid. Before this, a request whose start and goal were the same blocked cell returned a one-cell route. A grid with no passable cell is still returned as a valid grid; the step that chains stops decides what to tell the operator. The 77 navigation tests pass, and the planner files now follow the repository's Ruff format. NumPy, which the grid imports directly, is now a declared runtime dependency instead of arriving only through Shapely.",
+  "areas": [
+    "mission"
+  ],
+  "next": "Place the stop points in back-and-forth rows and chain a_star from the start pose through each stop, marking unreachable stops. Decide what the caller does when the start or goal is blocked, and freeze #20's footprint radius, stop tolerance, cell size and GPS error bound.",
+  "changes": [
+    "pyproject.toml",
+    "uv.lock",
+    "src/navigation/README.md",
+    "src/navigation/graph.py",
+    "src/navigation/grid.py",
+    "src/navigation/planner.py",
+    "src/navigation/region.py",
+    "src/navigation/tests/test_grid.py",
+    "src/navigation/tests/test_planner.py",
+    "src/navigation/tests/test_region.py",
+    "site/updates/20261104T224034_route_planner_membership.json"
+  ],
+  "evidence": [
+    "src/navigation/planner.py",
+    "src/navigation/graph.py",
+    "src/navigation/tests/test_planner.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20"
+  ],
+  "no_project_impact": false
+}

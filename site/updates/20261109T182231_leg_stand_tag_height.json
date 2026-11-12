@@ -1,0 +1,20 @@
+{
+  "id": "20261109T182231_leg_stand_tag_height",
+  "date": "2026-11-09T18:22:31Z",
+  "title": "Measure the leg-stand carriage height with a camera",
+  "summary": "A camera at the top of the leg-stand rail now reads the carriage height from two AprilTags at about 60 frames per second, with 10 to 16 ms from frame to number and 0.2 mm noise at 255 mm. A browser dashboard shows the video, the height and a 30 s chart, sets a zero and fits the scale to reference points. The simulated self-test passes; on hardware, one 90 mm reference point read 87.44 mm before the scale correction, because the camera intrinsics come from another unit.",
+  "areas": [
+    "leg stand"
+  ],
+  "next": "Calibrate this camera's intrinsics, replace the marker-inked tags with black-on-white tags, and record at least five reference points plus two held-out points against the ENC4110 encoder over the full stroke.",
+  "changes": [
+    "README.md",
+    "testing/leg_stand/*",
+    "site/updates/20261109T182231_leg_stand_tag_height.json"
+  ],
+  "evidence": [
+    "testing/leg_stand/README.md",
+    "testing/leg_stand/tag_height.py"
+  ],
+  "no_project_impact": false
+}

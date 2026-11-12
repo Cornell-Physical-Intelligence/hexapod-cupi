@@ -12,7 +12,7 @@ shows definitions and imports.
 | `omniwalk/` | Omnidirectional walking task, Direct environment and learner recipe. | `env.py`, `task.py` |
 | `rl/` | RSL-RL wrapper, PPO subclasses and action distributions. | `wrapper.py` |
 | `scripts/` | Container entry points: train, play and diagnose. | `train.py` |
-| `evaluation/` | Native capture, scene checks, admission, scoring and training diagnostics. | `runner.py` |
+| `evaluation/` | Native capture, scene checks, admission, the requirements judge and training diagnostics. | `runner.py` |
 | `spark/` | Prepare, launch and bind native allocations. | `prepare.py` |
 | `amp/` | Motion demonstrations, motion features and AMP learning. | [README](amp/README.md) |
 | `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
@@ -28,7 +28,9 @@ shows definitions and imports.
 - `mdp/actions.py`: slew limiter and executed-action feature.
 - `mdp/frames.py`: quaternion and navigation frames.
 - `mdp/observations.py`: proprioception frame and 231-value actor input.
-- `mdp/commands.py`: command bank and gait-clock period.
+- `mdp/commands.py`: training command settings and gait-clock period; the bank
+  uses `contracts.command.CommandSet` and the walking requirements. Training
+  keeps its own five-second maximum hold and zero-command quota.
 - `mdp/rewards.py`: recorded yaw-gated reward.
 - `mdp/loads.py`, `mdp/state.py`, `mdp/terminations.py`: 400 Hz loads and control telemetry, toe points and measured state, and the termination rule. `env.py` and the MuJoCo surrogate import them.
 - `agents/rsl_rl_ppo_cfg.py`: Torch-free `ppo_config` and the default `RECIPES['c48_long']`.
@@ -65,13 +67,13 @@ contact view. State reads use raw PhysX views until native parity admits
 
 ## Import direction
 
-Reviewers enforce the AST import audit: "`omniwalk -> [robots]`;
-`evaluation -> [omniwalk, robots]`; `spark -> [omniwalk, robots]`; `rl -> []`;
-`amp -> [evaluation, omniwalk, rl, robots, spark]`;
-`scripts -> [amp, evaluation, omniwalk, rl, robots, spark]`;
-`surrogate -> [amp, evaluation, omniwalk, rl, robots, spark]`;
-no cycles." `robots` imports no package, and no package imports `hexapod`. A new
-edge is a review failure.
+`tools/source_inventory.py check` enforces the cross-package edges in
+`IMPORT_BOUNDARIES`, using the same import resolver as the code map. It resolves
+absolute imports, relative imports and imports through package aliases. The
+learner wrappers depend on the task's interface; task-specific destination
+features stay in `omniwalk`. Navigation and mission cannot import locomotion,
+and maintained packages cannot import the retained `hexapod` experiment or
+artifact modules. A new edge needs a reviewed boundary change.
 
 ## Commands
 
@@ -93,10 +95,20 @@ recipe against the checkpoint's compatibility receipt.
 For the hexapod task, put this repository's `src/` on `PYTHONPATH` in the
 pinned Isaac Lab checkout. Use stock train/play scripts with callback
 `locomotion.hexapod.register` and task `Hexapod-Flat-Direct-v0` or
-`Hexapod-Rough-Direct-v0`. Run BC with
+`Hexapod-Rough-Direct-v0`. For blind walking over stairs, pits, boxes and slopes,
+use callback `locomotion.hexapod.terrain.register` and task
+`Hexapod-Rough-v22-Direct-v0` (`hexapod/terrain/`): a 10-level terrain
+curriculum, a swing-clearance reward and an optional command-speed curriculum.
+Terrain v2.2 gives every reset a level spawn area under all six toes; the
+stage1v21 checkpoints trained on the v2.1 geometry (see `terrains_cfg.py`).
+Run BC with
 `./isaaclab.sh -p -m locomotion.hexapod.tools.bc_clone` and the
 [original recipe](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/969ea5bc942df3122b2662650f29acd11644a41c/hexapod/METHOD.md#3-how-to-reproduce-inside-the-container)
 overrides. Use the common evaluator for acceptance.
+`locomotion.hexapod.tools.make_simple_collision` writes a gitignored variant of the
+approved USD with one primitive collider per link; `HEXAPOD_USD` selects it for this
+task alone. It has no standing admission. Read the
+[throughput study](../../site/assets/collision_simplification_20261015_001/README.md).
 
 ## Step 7: domain randomization declaration
 
@@ -199,8 +211,8 @@ cover motors, transitions, packs and hexapod sources.
 ## Native admission
 
 The physics identity hashes the import closure of `adapter.py`, `env_cfg.py`
-and `env.py` in `omniwalk/`, with `admission.py`, `capture.py` and `scoring.py`
-in `evaluation/`, and it names the floor. `EnvConfig.floor` selects a stock
+and `env.py` in `omniwalk/`, with `admission.py` and `capture.py` in
+`evaluation/`, and it names the floor. `EnvConfig.floor` selects a stock
 Isaac Lab floor: the recorded two-triangle mesh built by the terrain utility
 (the default), the grid ground plane or a cuboid. The recorded physics depends
 on the simulator's default collider offsets on that mesh, so the default keeps
@@ -229,8 +241,14 @@ is the one the production loader ran natively, passing the 13 probes again
 ([verification](../../site/assets/floor_contact_20261016_002/verification.json)).
 Both bind the runtime bytes of source `717548d5`. `scripts/play.py
 --checkpoint-compatibility` accepts a receipt only when the running runtime
-files match the ones it binds, so the 23 October 2026 Ruff reformat of the
-runtime (PR 86) needs its own receipt; that certification is pending.
+files match the ones it binds. The 2 November 2026 campaign on the reformatted
+runtime renewed the receipt
+([c48_receipt_renewal_20261102_001](../../site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json)):
+standing admission at 1 and 128 robots, 13 of 13 probes through the parity
+harness, and a CPU production-loader check. `tools/project_site.py check`
+compares the full native pack selection with the receipt, including added and
+removed files and the frozen walking requirements.
 `tests/native_parity_pack.py` writes a candidate replay pack with the harness
 and its pinned ranges, and `spark/pack.py` records the root review of any pack
-before launch. Stage 2 adds the 96-case suite and visual acceptance.
+before launch. Stage 2 is judged on the walking requirements, with visual
+acceptance; the 13 probes and the 96-case scorer above are history.

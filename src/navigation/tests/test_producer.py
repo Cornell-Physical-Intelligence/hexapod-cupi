@@ -241,6 +241,50 @@ class WaypointFollowerTests(unittest.TestCase):
         for earlier, later in zip(errors, errors[1:]):
             self.assertLess(later, earlier, "heading error must shrink while turning")
 
+    def test_heading_gate_turns_until_the_release_not_for_one_tick(self) -> None:
+        goal = [(3.0, 0.0)]
+        follower = WaypointFollower(goal, heading_gate_rad=0.05, heading_release_rad=0.01)
+        # Below the gate: walk. At the gate: turn. Then still turning at 0.03, inside the gate.
+        self.assertEqual(follower.update(Pose2D(0.0, 0.0, 0.04), 0.0).wz_rad_s, 0.0)
+        self.assertNotEqual(follower.update(Pose2D(0.0, 0.0, 0.05), 0.02).wz_rad_s, 0.0)
+        self.assertNotEqual(follower.update(Pose2D(0.0, 0.0, 0.03), 0.04).wz_rad_s, 0.0)
+        # Inside the release: walk again, and a fresh 0.03 error no longer turns.
+        self.assertEqual(follower.update(Pose2D(0.0, 0.0, 0.005), 0.06).wz_rad_s, 0.0)
+        self.assertEqual(follower.update(Pose2D(0.0, 0.0, 0.03), 0.08).wz_rad_s, 0.0)
+
+    def test_creeping_heading_does_not_produce_one_tick_turns(self) -> None:
+        # A policy whose heading drifts 0.014 rad/s while walking (c48_long's measured
+        # drift) must get turns of several ticks, not a turn and a walk every other tick.
+        follower = WaypointFollower([(2.0, 0.0)])
+        pose, t, segments, previous = Pose2D(0.0, 0.0, 0.0), 0.0, [], None
+        for _ in range(3000):
+            command = follower.update(pose, t)
+            if follower.is_finished:
+                break
+            kind = "turn" if command.wz_rad_s and not command.vx_mps else "walk"
+            if previous is None or previous[0] != kind:
+                segments.append([kind, 0])
+            segments[-1][1] += 1
+            previous = (kind, command)
+            pose = _integrate(pose, command, POLICY_STEP_DT_S)
+            if kind == "walk":
+                pose = Pose2D(
+                    pose.x_m, pose.y_m, wrap_to_pi(pose.heading_rad + 0.014 * POLICY_STEP_DT_S)
+                )
+            t += POLICY_STEP_DT_S
+        self.assertTrue(follower.is_finished)
+        turns = [n for kind, n in segments if kind == "turn"]
+        self.assertTrue(turns, "the drift must trip the gate at least once")
+        self.assertGreaterEqual(min(turns), 5, segments)
+        # 0.04 rad of hysteresis at 0.014 rad/s is one turn every 2.9 s of walking.
+        self.assertLessEqual(len(turns), 15, segments)
+
+    def test_rejects_a_release_outside_the_gate(self) -> None:
+        with self.assertRaises(ValueError):
+            WaypointFollower([(1.0, 0.0)], heading_gate_rad=0.05, heading_release_rad=0.05)
+        with self.assertRaises(ValueError):
+            WaypointFollower([(1.0, 0.0)], heading_release_rad=-0.01)
+
     def test_heading_hold_turns_toward_the_nearest_bank_bearing(self) -> None:
         goal = [(3.0, 0.0)]
         # 0.30 rad is nearest 0: turn negative. -0.30 mirrors. 0.50 rad is
@@ -328,10 +372,30 @@ class WaypointFollowerTests(unittest.TestCase):
         follower = WaypointFollower([(2.0, 0.0)], envelope=narrow)
         command = follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
         command.validate(narrow)
-        self.assertAlmostEqual(command.vx_mps, 0.03, places=12)
-        turning = follower.update(Pose2D(0.0, 0.0, 0.30), 0.0)
-        turning.validate(narrow)
-        self.assertAlmostEqual(turning.wz_rad_s, -0.1, places=12)
+        self.assertEqual(command.as_tuple(), (0.025, 0.0, 0.0))
+        self.assertTrue(_is_bank_or_stand(command))
+        # No trained yaw fits: clipping to 0.1 rad/s would leave the permitted bank.
+        with self.assertRaisesRegex(ValueError, "Required yaw .* unavailable"):
+            follower.update(Pose2D(0.0, 0.0, 0.30), 0.0)
+
+    def test_narrow_envelope_keeps_diagonal_bearing_and_uses_a_bank_speed(self) -> None:
+        narrow = CommandEnvelope((-0.03, 0.03), (-0.03, 0.03), (-0.2, 0.2))
+        follower = WaypointFollower([(2.0, 2.0)], envelope=narrow)
+        command = follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
+        self.assertTrue(_is_bank_or_stand(command))
+        self.assertEqual(command.as_tuple(), tuple(command_bank()[1]))
+        command.validate(narrow)
+
+    def test_unavailable_bearing_does_not_select_another_direction(self) -> None:
+        narrow = CommandEnvelope((0.0, 0.03), (0.0, 0.0), (-0.2, 0.2))
+        follower = WaypointFollower([(0.0, 2.0)], envelope=narrow)
+        with self.assertRaisesRegex(ValueError, "Required translation bearing .* unavailable"):
+            follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
+
+    def test_follower_rejects_an_envelope_that_cannot_stand(self) -> None:
+        moving_only = CommandEnvelope((0.025, 0.05), (0, 0), (0, 0), allow_stand=False)
+        with self.assertRaises(ValueError):
+            WaypointFollower([(1.0, 0.0)], envelope=moving_only)
 
     def test_rejects_bad_construction(self) -> None:
         with self.assertRaises(ValueError):

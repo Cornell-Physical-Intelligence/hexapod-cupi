@@ -18,7 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 SITE_URL = "https://cornell-physical-intelligence.github.io/hexapod-cupi/"
 sys.path.insert(0, str(ROOT))
-from tools import archive, code_map  # noqa: E402 (direct script execution)
+sys.path.insert(0, str(ROOT / "src"))
+from contracts.release import runtime_changes  # noqa: E402
+from locomotion.spark.sources import allocation_manifest  # noqa: E402
+from tools import archive, code_map, controller_evidence  # noqa: E402 (direct script execution)
 
 
 def git(*args):
@@ -198,6 +201,7 @@ def registry():
     for item in p["nodes"] + p["accomplishments"] + [p["robot"]]:
         reference(item["source"])
     validate_progress(p)
+    validate_done_means(p["roadmap"])
     return p
 
 
@@ -222,7 +226,7 @@ def field(value, keys):
 
 
 def count(value):
-    """A total is a number in the source, or the size of the list or table it names."""
+    """A value or total is a number in the source, or the size of the list or table it names."""
     return len(value) if isinstance(value, (dict, list)) else value
 
 
@@ -247,7 +251,7 @@ def validate_progress(project):
         require(path is not None and path.is_file(), "Metric source must be a local file")
         raw = read(path)
         for key, pointer, read_value in [
-            ("value", "field", field),
+            ("value", "field", lambda r, k: count(field(r, k))),
             ("total", "total_field", lambda r, k: count(field(r, k))),
         ]:
             actual = read_value(raw, source[pointer])
@@ -322,7 +326,102 @@ def validate_progress(project):
     )
 
 
-def status_text(project, link=lambda value: value):
+ACCEPTED_CONTROLLER = "configs/accepted_controller.json"
+WALK_AND_STOP = "stage2"
+
+
+def validate_done_means(steps):
+    """Each roadmap step says what done means and names the owner file that decides it.
+
+    The owner file must exist in the repository. The accepted controller file must own
+    the walk and stop step and decides it: the step cannot be done while a judged row
+    fails, while the file judges nothing, or while nobody is named as having accepted
+    the videos.
+    """
+    require(
+        any(step.get("owner") == ACCEPTED_CONTROLLER for step in steps),
+        "No roadmap step names its owner as " + ACCEPTED_CONTROLLER,
+    )
+    require(
+        all(s.get("owner") == ACCEPTED_CONTROLLER for s in steps if s["id"] == WALK_AND_STOP),
+        "The walk and stop step must name its owner as " + ACCEPTED_CONTROLLER,
+    )
+    for step in steps:
+        owner = step.get("owner")
+        require(
+            nonempty(step.get("done_means")) and nonempty(owner) and owner in step["done_means"],
+            "A roadmap step needs done_means naming its owner file: " + step["id"],
+        )
+        path = reference(owner)
+        require(path is not None and path.is_file(), "Roadmap owner file is missing: " + owner)
+        if owner == ACCEPTED_CONTROLLER and step["state"] == "done":
+            accepted = read(ROOT / owner)
+            judged = accepted.get("judged")
+            require(
+                isinstance(judged, dict) and judged,
+                f"{step['title']} is not done: {owner} has no judged rows",
+            )
+            failing = sorted(
+                name
+                for name, row in judged.items()
+                if not isinstance(row, dict) or row.get("pass") is not True
+            )
+            require(
+                not failing,
+                f"{step['title']} is not done: judged rows fail in {owner}: " + ", ".join(failing),
+            )
+            require(
+                nonempty(accepted.get("video_accepted_by")),
+                f"{step['title']} is not done: {owner} names no video_accepted_by",
+            )
+
+
+def native_approval():
+    """Whether the tree still matches the runtime the approved code version's receipt binds.
+
+    A status, not a gate: a changed runtime file lapses native approval until a new
+    campaign writes a new receipt. The loader enforces the receipt at native run time.
+    """
+    declared = ROOT / "configs/approved_code_version.json"
+    if not declared.exists():
+        return None
+    approved = read(declared)
+    receipt_path = ROOT / approved["receipt"]["path"]
+    require(sha(receipt_path) == approved["receipt"]["sha256"], "Approved receipt bytes differ")
+    receipt = read(receipt_path)
+    bound = receipt["candidate_runtime_sources"]
+    current = allocation_manifest(
+        ROOT,
+        learner=receipt.get("original_identity", {}).get("learner", "ppo"),
+        allow_missing=True,
+    )
+    differences = runtime_changes(bound, current)
+    changed = sorted(set().union(*(differences[name] for name in ("added", "removed", "modified"))))
+    return {
+        "status": "lapsed" if any(differences.values()) else "current",
+        "certified_commit": approved["certified_commit"],
+        "receipt_sha256": approved["receipt"]["sha256"],
+        "bound": len(bound["files"]),
+        "changed": changed,
+        **differences,
+    }
+
+
+def approval_line(approval):
+    if approval is None:
+        return "Native evaluation runtime: no approved code version declared."
+    short = approval["certified_commit"][:8]
+    if approval["status"] == "current":
+        return f"Native evaluation runtime: approved at {short}, all {approval['bound']} bound files match."
+    counts = ", ".join(f"{len(approval[name])} {name}" for name in ("added", "removed", "modified"))
+    first = (approval["changed"] or approval["metadata"])[0]
+    return (
+        f"Native evaluation runtime: approval lapsed, {counts} files since {short}; "
+        f"renewal due (first: {first})."
+    )
+
+
+def status_text(project, link=lambda value: value, approval=None):
     """Deterministic text projection; STATUS is never an input to this renderer."""
     latest = project["latest"]
     metric = latest["metric"]
@@ -345,6 +444,8 @@ def status_text(project, link=lambda value: value):
         "",
     ]
     lines.extend(f"- {step['title']}: {STEP_LABELS[step['state']]}" for step in project["roadmap"])
+    if approval is not None:
+        lines.extend(["", approval_line(approval)])
     lines.extend(["", "## Accomplishments", ""])
     lines.extend(
         f"- {a['date']}: {a['text']} [Evidence]({link(a['source'])})"
@@ -359,7 +460,7 @@ def status_text(project, link=lambda value: value):
 def write_status(output=None):
     project = registry()
     path = ROOT / project["status_source"] if output is None else Path(output)
-    path.write_text(status_text(project))
+    path.write_text(status_text(project, approval=native_approval()))
     print("Generated", path, "from site/project.json (untracked)")
 
 
@@ -509,6 +610,8 @@ def changed_paths(base):
 
 def check(base=None):
     project = registry()
+    if (ROOT / ACCEPTED_CONTROLLER).exists():
+        controller_evidence.validate(ROOT)
     updates = records()
     if base:
         changed = changed_paths(base)
@@ -541,6 +644,7 @@ def check(base=None):
             not uncovered,
             "Repository changes lack a new central update record:\n" + "\n".join(uncovered),
         )
+    print(approval_line(native_approval()))
     return project, updates
 
 

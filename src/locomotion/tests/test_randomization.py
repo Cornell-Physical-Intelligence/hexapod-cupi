@@ -336,6 +336,30 @@ class ProbeMotorLawTests(unittest.TestCase):
         for drawn, nominal in zip(expected_motor_law(*args, law), expected_motor_law(*args)):
             self.assertTrue(np.array_equal(drawn, nominal))
 
+    def test_the_native_capture_source_checks_the_reset_draw(self):
+        from types import SimpleNamespace
+
+        from locomotion.evaluation.runner import NativeCaptureSource, expected_motor_law
+
+        q, dq, target, kp, kd, factor = self.batch(1.2)
+        law = {"kp": kp.expand(64, 18).numpy(), "kd": kd.numpy(), "strength": factor.numpy()}
+        env = SimpleNamespace(motor_law={k: v.copy() for k, v in law.items()})
+        source = NativeCaptureSource(env)
+        env.motor_law["strength"][:] = 0.8  # a later redraw must not move the snapshot
+        args = (q.numpy(), dq.numpy(), target.numpy())
+        torques = rnd.motor_force(q, dq, target, kd, kp, factor)
+        for actual, wanted in zip(torques, source.servo(*args)):
+            self.assertTrue(np.array_equal(actual.numpy(), wanted))
+        self.assertEqual(
+            source.metadata["motor_law"], "canonical_rs05_with_reset_gains_and_strength"
+        )
+        self.assertEqual(source.metadata["motor_snapshot"]["strength"], law["strength"].tolist())
+        nominal = NativeCaptureSource(SimpleNamespace(motor_law=None))
+        self.assertEqual(nominal.metadata["motor_law"], "canonical_rs05")
+        self.assertNotIn("motor_snapshot", nominal.metadata)
+        for drawn, wanted in zip(nominal.servo(*args), expected_motor_law(*args)):
+            self.assertTrue(np.array_equal(drawn, wanted))
+
 
 def load_actuator():
     """Import robots/actuator.py over stand-ins for the Isaac Lab actuator base and configclass."""

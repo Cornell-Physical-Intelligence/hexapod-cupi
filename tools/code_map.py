@@ -34,25 +34,14 @@ def module_name(path):
     return name[: -len(".__init__")] if name.endswith(".__init__") else name
 
 
-def dependencies(tree, path, known):
-    """Repository files that this file imports, each resolved by its longest known module prefix."""
+def imported_modules(tree, path):
+    """Resolve absolute and relative import spellings without importing their modules."""
     here = module_name(path)
     package = here if path.endswith("/__init__.py") else here.rpartition(".")[0]
-    found = set()
-
-    def resolve(name):
-        parts = name.split(".")
-        for end in range(len(parts), 0, -1):
-            target = known.get(".".join(parts[:end]))
-            if target:
-                if target != path:
-                    found.add(target)
-                return
-
     for node in ast.walk(tree):
         if isinstance(node, ast.Import):
             for alias in node.names:
-                resolve(alias.name)
+                yield alias.name
         elif isinstance(node, ast.ImportFrom):
             if node.level:
                 base = package.split(".")
@@ -61,7 +50,20 @@ def dependencies(tree, path, known):
             else:
                 prefix = node.module or ""
             for alias in node.names:
-                resolve(prefix + "." + alias.name if prefix else alias.name)
+                yield prefix + "." + alias.name if prefix else alias.name
+
+
+def dependencies(tree, path, known):
+    """Repository files that this file imports, each resolved by its longest known module prefix."""
+    found = set()
+    for name in imported_modules(tree, path):
+        parts = name.split(".")
+        for end in range(len(parts), 0, -1):
+            target = known.get(".".join(parts[:end]))
+            if target:
+                if target != path:
+                    found.add(target)
+                break
     return sorted(found)
 
 
@@ -231,7 +233,7 @@ const PACKAGES=[
 ['hexapod','hexapod','The stock Isaac Lab task on the hexapod with scripted-tripod BC and PPO fine-tuning.'],
 ['amp','amp','Motion demonstrations, motion features and AMP learning.'],
 ['surrogate','surrogate','CPU MuJoCo training and trace replay.'],
-['evaluation','evaluation','Native capture, scene checks, admission, scoring and training diagnostics.'],
+['evaluation','evaluation','Native capture, scene checks, admission, the requirements judge and training diagnostics.'],
 ['robots','robots','Robot identity, RS05 motor model and Isaac actuator.'],
 ['rl','rl','RSL-RL wrapper, PPO subclasses and action distributions.'],
 ['scripts','scripts','Container entry points: train, play and diagnose.'],

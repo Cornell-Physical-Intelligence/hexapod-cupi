@@ -1,0 +1,21 @@
+{
+  "id": "20261109T211544_certified_commit_test_shallow_clone",
+  "date": "2026-11-09T21:15:44Z",
+  "title": "Skip the certified-commit ancestry test on a shallow clone",
+  "summary": "The unit check failed on the first CI run of this branch. test_certified_commit_is_on_this_branch asks git whether the certified commit of configs/approved_code_version.json is an ancestor of HEAD, and it skipped only when that commit was absent. CI clones at depth 1 with a blob filter; git fetches the commit on demand there, so the test did not skip, and the ancestry question failed because the clone holds no history. A fresh shallow partial clone of the branch reproduces it: cat-file exits 0 and merge-base --is-ancestor exits 1. With the program lead's approval the test now also skips when git reports a shallow repository. It still runs on full clones, where it passes. CI no longer checks ancestry.",
+  "areas": [
+    "evaluation"
+  ],
+  "next": "Merge after green CI, then post the issue rewrites.",
+  "changes": [
+    "site/updates/20261109T211544_certified_commit_test_shallow_clone.json",
+    "tests/test_approved_code_version.py"
+  ],
+  "evidence": [
+    "tests/test_approved_code_version.py",
+    "configs/approved_code_version.json",
+    ".github/workflows/tests.yml"
+  ],
+  "no_project_impact": true,
+  "reason": "One test gains a skip condition for shallow clones. No result, gate value or owner file changes."
+}
