@@ -234,9 +234,13 @@ class TrainingTask:
         zero_count = after - before
         selected_zero = torch.randperm(size, generator=self.rng)[:zero_count].to(self.env.device)
         values[selected_zero] = 0
-        durations = torch.randint(100, 251, (size,), generator=self.rng, dtype=torch.long).to(
-            self.env.device
-        )
+        durations = torch.randint(
+            round(self.config.hold_min_seconds / self.cfg.control_dt),
+            round(self.config.hold_max_seconds / self.cfg.control_dt) + 1,
+            (size,),
+            generator=self.rng,
+            dtype=torch.long,
+        ).to(self.env.device)
         self.env.commands[indices] = values
         self.remaining_controls[indices] = durations
         self.command_draws += size

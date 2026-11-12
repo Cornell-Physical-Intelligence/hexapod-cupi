@@ -19,13 +19,15 @@
     "commands": {
       "value": "13 of 13 native learning probes",
       "pass": true,
-      "evidence": "site/assets/floor_contact_20261016_002/verification.json"
+      "evidence": "site/assets/floor_contact_20261016_002/verification.json",
+      "evidence_sha256": "587748f05fe476aba6c124c3f2634974e9529f7fc6e24931f1a581d4027f81af"
     },
     "stopping_distance_m": {
       "value": 0.0097,
       "limit": 0.05,
       "pass": true,
-      "evidence": "site/assets/c48_requirements_20261107_001/judgement.json"
+      "evidence": "site/assets/c48_requirements_20261107_001/judgement.json",
+      "evidence_sha256": "7179dbcd8eca07400bbbc9006e957c2622dce8c8f0efa21aa534ff43578ee12c"
     },
     "drift_per_hold_m": {
       "value": 0.298,
@@ -35,6 +37,10 @@
       "evidence": [
         "site/assets/c48_requirements_20261107_001/judgement.json",
         "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+      ],
+      "evidence_sha256": [
+        "7179dbcd8eca07400bbbc9006e957c2622dce8c8f0efa21aa534ff43578ee12c",
+        "cf3d18e9d6ff8097139880b2892572f0fda8b5f6a655b5b14f2153664c610a73"
       ]
     },
     "stop_position_tolerance_m": {
@@ -42,21 +48,26 @@
       "limit": 0.12,
       "pass": true,
       "note": "worst of the file's five routes in the surrogate, true pose, one trial each; 0.058 to 0.064 m; not yet judged natively",
-      "evidence": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+      "evidence": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json",
+      "evidence_sha256": "cf3d18e9d6ff8097139880b2892572f0fda8b5f6a655b5b14f2153664c610a73"
     },
     "tilt_deg": {
       "value": 1.805,
       "limit": 1.7,
       "pass": false,
       "note": "largest tilt standing and after each stop over the 26 surrogate cases: 1.81 degrees after the 0.05 m/s walks at 270 and 315 degrees, 24 of 26 cases inside the limit; the body tilts 2.0 to 2.4 degrees while moving, which the limit does not cover",
-      "evidence": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+      "evidence": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json",
+      "evidence_sha256": "cf3d18e9d6ff8097139880b2892572f0fda8b5f6a655b5b14f2153664c610a73"
     },
     "motor_torque_nm": {
       "value": 1.171,
       "limit": 1.6,
       "pass": true,
-      "note": "native applied torque, 2 November campaign; the surrogate clamps at the rating and cannot judge it",
-      "evidence": "site/assets/c48_receipt_renewal_20261102_001/compatibility/summary.json"
+      "note": "Native applied torque in the learning:quiet_20s judged window, controls 200 through 999, in the 2 November campaign. This value does not cover all native motion or all Stage 2 cases. The surrogate clamps at the rating and cannot judge torque.",
+      "evidence": "site/assets/c48_receipt_renewal_20261102_001/compatibility/summary.json",
+      "evidence_sha256": "3ed97831c3869bcf4867dac12363a5e282e98f7838dd5e8f67999f351c670647",
+      "case_id": "learning:quiet_20s",
+      "scope": "native_quiet_window"
     }
   },
   "not_judged": [

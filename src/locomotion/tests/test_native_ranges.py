@@ -10,6 +10,7 @@ from pathlib import Path
 class NativeRangeTests(unittest.TestCase):
     def suite(self, value, count=3):
         return {
+            "schema": "hexapod_walking_requirements_judgement_v2",
             "failure": None,
             "allocation": {
                 "checkpoint_sha256": "weights",
@@ -68,6 +69,7 @@ class NativeRangeTests(unittest.TestCase):
 
         baseline = [self.suite(value) for value in (1.0, 2.0, 3.0)]
         limits = freeze(baseline)
+        self.assertEqual(limits["schema"], "hexapod_refactor_ranges_v2")
         before = deepcopy(limits)
         self.assertTrue(compare(limits, self.suite(2.0))["pass"])
         self.assertFalse(compare(limits, self.suite(3.00001))["pass"])
@@ -92,6 +94,45 @@ class NativeRangeTests(unittest.TestCase):
         candidate = self.suite(1.0)
         candidate["cases"][1]["checks"]["complete_trace"] = {"value": 5, "bound": 9, "pass": False}
         self.assertFalse(compare(limits, candidate)["pass"])
+
+    def test_new_ranges_reject_legacy_or_unknown_formats_and_missing_identity_fields(self):
+        from locomotion.evaluation import checkpoint
+
+        baseline = [self.suite(1.0) for _ in range(3)]
+        limits = checkpoint.freeze(baseline)
+        for schema in (checkpoint.LEGACY_RANGES_SCHEMA, "unknown"):
+            with self.subTest(schema=schema):
+                changed = {**limits, "schema": schema}
+                self.assertFalse(checkpoint.compare(changed, self.suite(1.0))["pass"])
+        for schema in (checkpoint.PROBE_SCHEMA, "unknown", None):
+            with self.subTest(summary_schema=schema):
+                changed = {**self.suite(1.0), "schema": schema}
+                self.assertFalse(checkpoint.compare(limits, changed)["pass"])
+                with self.assertRaises(ValueError):
+                    checkpoint.freeze([changed] * 3)
+        for key in limits["identity"]:
+            with self.subTest(identity=key):
+                changed = deepcopy(limits)
+                changed["identity"].pop(key)
+                self.assertFalse(checkpoint.compare(changed, self.suite(1.0))["pass"])
+
+    def test_invalid_acquisition_cannot_be_frozen_as_a_repeatable_baseline(self):
+        from locomotion.evaluation.checkpoint import freeze
+
+        for check in ("complete_trace", "valid_trace", "command_schedule"):
+            with self.subTest(check=check):
+                summary = self.suite(1.0)
+                summary["cases"][0]["checks"] = {check: {"value": 0.0, "bound": 1.0, "pass": False}}
+                with self.assertRaisesRegex(ValueError, "complete recorded trial"):
+                    freeze([deepcopy(summary) for _ in range(3)])
+        for value in (float("nan"), float("inf"), "1.0"):
+            with self.subTest(value=value):
+                summary = self.suite(1.0)
+                summary["cases"][0]["checks"]["drift_per_hold_m"]["value"] = value
+                with self.assertRaises(ValueError):
+                    freeze([deepcopy(summary) for _ in range(3)])
+        with self.assertRaisesRegex(ValueError, "complete recorded trial"):
+            freeze([self.suite(1.0, count=0) for _ in range(3)])
 
     def test_host_receipts_survive_native_process_exit_and_reject_tampering(self):
         from locomotion.tests.native_parity import BASELINE_COMMIT, CHECKPOINT_SHA, DECLARATION_SHA

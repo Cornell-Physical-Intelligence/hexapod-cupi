@@ -1,8 +1,7 @@
 """The navigation bank equals the stage 2 walking requirements.
 
 ``configs/walking_requirements.json`` owns the commands the survey may send.
-The bank constants in ``navigation.waypoint`` restate them for the follower, so
-this test fails when either side changes alone.
+The follower and training bank read them through ``contracts.command``.
 """
 
 from __future__ import annotations

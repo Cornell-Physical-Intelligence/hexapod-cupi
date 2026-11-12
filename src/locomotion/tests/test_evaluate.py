@@ -334,6 +334,7 @@ class RecordingTests(unittest.TestCase):
             self.assertEqual(row["computed_torque_nm"].max(), 0.0)
             np.testing.assert_allclose(row["velocity_navigation_mps"], [[1.0, 2.0, 3.0]], atol=1e-6)
             self.assertEqual(receipt["steps"], 8)
+            self.assertEqual(receipt["contact_classification"], "exact_distal_points")
             self.assertEqual(receipt["nonfoot_contact_steps_400hz"], [1])
             with np.load(Path(temporary) / "raw/substeps_000.npz") as saved:
                 self.assertEqual(len(saved["sequence"]), 8)
@@ -352,6 +353,28 @@ class CaseRunTests(unittest.TestCase):
                 checkpoint,
                 **keywords,
             )
+
+    def test_custom_requirement_set_reaches_the_route_follower(self):
+        rules, _ = requirements.load_requirements()
+        rules["commands"]["translate_speeds_mps"] = [0.025]
+        rules["stop"]["routes_m"] = {"custom": [[0.2, 0.0]]}
+        with TemporaryDirectory() as temporary:
+            path = Path(temporary) / "requirements.json"
+            path.write_text(json.dumps({"sets": {"custom": rules}}))
+            result = self.run_cases(
+                FakeNative(),
+                temporary,
+                requirements_path=path,
+                requirements_set="custom",
+                case_ids=["route_custom"],
+            )
+            self.assertIsNone(result["failure"])
+            with np.load(Path(temporary) / "run/batch_000/control_trace.npz") as trace:
+                expected = np.tile(
+                    np.array([0.025, 0.0, 0.0], dtype=trace["command"].dtype),
+                    (len(trace["command"]), 1, 1),
+                )
+                np.testing.assert_array_equal(trace["command"], expected)
 
     def test_every_selected_case_is_recorded_and_judged_against_the_requirements_file(self):
         native = FakeNative()

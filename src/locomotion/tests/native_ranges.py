@@ -133,6 +133,7 @@ def main():
             receipt = {
                 "schema": compat.SCHEMA,
                 "mode": "evaluate",
+                "eval_scope": "requirements",
                 "checkpoint_sha256": compat.CHECKPOINT_SHA,
                 "declaration_sha256": compat.DECLARATION_SHA,
                 "original_identity": record["identity"],

@@ -8,6 +8,7 @@ from pathlib import Path
 
 SCHEMA = "hexapod_runtime_sources_v2"
 MANIFEST = "RUNTIME_SOURCES.json"
+REQUIREMENTS_INPUT = "configs/walking_requirements.json"
 
 
 def digest(path):
@@ -37,6 +38,56 @@ def runtime_paths(package):
 def source_files(package):
     package = Path(package)
     return {path.relative_to(package).as_posix(): digest(path) for path in runtime_paths(package)}
+
+
+def allocation_files(root, *, learner="ppo", mode="evaluate"):
+    """The checkout files shipped in a native pack, keyed by their frozen source paths."""
+    root = Path(root)
+    source = root / "src"
+    paths = set(runtime_paths(source / "locomotion"))
+    for package, names in (
+        ("contracts", ("__init__.py", "release.py", "command.py", "pose.py")),
+        ("navigation", ("__init__.py", "producer.py", "waypoint.py")),
+    ):
+        paths.update(source / package / name for name in names)
+    prior = (
+        (
+            "__init__.py",
+            "amp.py",
+            "discriminator.py",
+            "networks.py",
+            "dataset.py",
+            "processing_sources_v2.json",
+        )
+        if learner == "amp"
+        else ("__init__.py", "replay_native.py")
+        if mode == "replay"
+        else ()
+    )
+    paths.update(source / "locomotion/amp" / name for name in prior)
+    if learner == "amp":
+        paths.update(
+            p
+            for p in (source / "locomotion/priors/datasets/amp_demonstrations_001").rglob("*")
+            if p.is_file()
+        )
+    return {
+        **{p.relative_to(source).as_posix(): p for p in sorted(paths)},
+        REQUIREMENTS_INPUT: root / REQUIREMENTS_INPUT,
+    }
+
+
+def allocation_manifest(root, *, allow_missing=False, **options):
+    """The same runtime identity before the selected files are copied into a pack."""
+    return {
+        "schema": SCHEMA,
+        "files": {
+            name: digest(path)
+            for name, path in allocation_files(root, **options).items()
+            if (name.endswith(".py") or name == REQUIREMENTS_INPUT)
+            and (not allow_missing or path.is_file())
+        },
+    }
 
 
 def physics_files(files, package=None):
@@ -80,6 +131,8 @@ def physics_files(files, package=None):
 def runtime_manifest(source):
     source = Path(source)
     paths = sorted(source.rglob("*.py"))
+    if (source / REQUIREMENTS_INPUT).exists():
+        paths.append(source / REQUIREMENTS_INPUT)
     if source.is_symlink() or any(path.is_symlink() for path in source.rglob("*")):
         raise ValueError("Runtime dependency uses a symbolic path")
     return {

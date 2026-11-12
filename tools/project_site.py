@@ -18,7 +18,10 @@ ROOT = Path(__file__).resolve().parents[1]
 SITE = ROOT / "site"
 SITE_URL = "https://cornell-physical-intelligence.github.io/hexapod-cupi/"
 sys.path.insert(0, str(ROOT))
-from tools import archive, code_map  # noqa: E402 (direct script execution)
+sys.path.insert(0, str(ROOT / "src"))
+from contracts.release import runtime_changes  # noqa: E402
+from locomotion.spark.sources import allocation_manifest  # noqa: E402
+from tools import archive, code_map, controller_evidence  # noqa: E402 (direct script execution)
 
 
 def git(*args):
@@ -385,18 +388,22 @@ def native_approval():
     approved = read(declared)
     receipt_path = ROOT / approved["receipt"]["path"]
     require(sha(receipt_path) == approved["receipt"]["sha256"], "Approved receipt bytes differ")
-    bound = read(receipt_path)["candidate_runtime_sources"]["files"]
-    changed = sorted(
-        path
-        for path, digest in bound.items()
-        if not (ROOT / "src" / path).exists() or sha(ROOT / "src" / path) != digest
+    receipt = read(receipt_path)
+    bound = receipt["candidate_runtime_sources"]
+    current = allocation_manifest(
+        ROOT,
+        learner=receipt.get("original_identity", {}).get("learner", "ppo"),
+        allow_missing=True,
     )
+    differences = runtime_changes(bound, current)
+    changed = sorted(set().union(*(differences[name] for name in ("added", "removed", "modified"))))
     return {
-        "status": "lapsed" if changed else "current",
+        "status": "lapsed" if any(differences.values()) else "current",
         "certified_commit": approved["certified_commit"],
         "receipt_sha256": approved["receipt"]["sha256"],
-        "bound": len(bound),
+        "bound": len(bound["files"]),
         "changed": changed,
+        **differences,
     }
 
 
@@ -406,10 +413,11 @@ def approval_line(approval):
     short = approval["certified_commit"][:8]
     if approval["status"] == "current":
         return f"Native evaluation runtime: approved at {short}, all {approval['bound']} bound files match."
+    counts = ", ".join(f"{len(approval[name])} {name}" for name in ("added", "removed", "modified"))
+    first = (approval["changed"] or approval["metadata"])[0]
     return (
-        f"Native evaluation runtime: approval lapsed, {len(approval['changed'])} of "
-        f"{approval['bound']} bound files changed since {short}; renewal due "
-        f"(first: {approval['changed'][0]})."
+        f"Native evaluation runtime: approval lapsed, {counts} files since {short}; "
+        f"renewal due (first: {first})."
     )
 
 
@@ -602,6 +610,8 @@ def changed_paths(base):
 
 def check(base=None):
     project = registry()
+    if (ROOT / ACCEPTED_CONTROLLER).exists():
+        controller_evidence.validate(ROOT)
     updates = records()
     if base:
         changed = changed_paths(base)

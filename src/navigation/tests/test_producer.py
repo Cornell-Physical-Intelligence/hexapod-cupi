@@ -372,10 +372,30 @@ class WaypointFollowerTests(unittest.TestCase):
         follower = WaypointFollower([(2.0, 0.0)], envelope=narrow)
         command = follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
         command.validate(narrow)
-        self.assertAlmostEqual(command.vx_mps, 0.03, places=12)
-        turning = follower.update(Pose2D(0.0, 0.0, 0.30), 0.0)
-        turning.validate(narrow)
-        self.assertAlmostEqual(turning.wz_rad_s, -0.1, places=12)
+        self.assertEqual(command.as_tuple(), (0.025, 0.0, 0.0))
+        self.assertTrue(_is_bank_or_stand(command))
+        # No trained yaw fits: clipping to 0.1 rad/s would leave the permitted bank.
+        with self.assertRaisesRegex(ValueError, "Required yaw .* unavailable"):
+            follower.update(Pose2D(0.0, 0.0, 0.30), 0.0)
+
+    def test_narrow_envelope_keeps_diagonal_bearing_and_uses_a_bank_speed(self) -> None:
+        narrow = CommandEnvelope((-0.03, 0.03), (-0.03, 0.03), (-0.2, 0.2))
+        follower = WaypointFollower([(2.0, 2.0)], envelope=narrow)
+        command = follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
+        self.assertTrue(_is_bank_or_stand(command))
+        self.assertEqual(command.as_tuple(), tuple(command_bank()[1]))
+        command.validate(narrow)
+
+    def test_unavailable_bearing_does_not_select_another_direction(self) -> None:
+        narrow = CommandEnvelope((0.0, 0.03), (0.0, 0.0), (-0.2, 0.2))
+        follower = WaypointFollower([(0.0, 2.0)], envelope=narrow)
+        with self.assertRaisesRegex(ValueError, "Required translation bearing .* unavailable"):
+            follower.update(Pose2D(0.0, 0.0, 0.0), 0.0)
+
+    def test_follower_rejects_an_envelope_that_cannot_stand(self) -> None:
+        moving_only = CommandEnvelope((0.025, 0.05), (0, 0), (0, 0), allow_stand=False)
+        with self.assertRaises(ValueError):
+            WaypointFollower([(1.0, 0.0)], envelope=moving_only)
 
     def test_rejects_bad_construction(self) -> None:
         with self.assertRaises(ValueError):

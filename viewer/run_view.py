@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
 """Write a run file for the viewer's Runs page from a native Spark or surrogate evaluation folder.
 
-Both evaluators write ``evaluation/batch_*/report.json`` and ``control_trace.npz``. Each batch with a trace
-becomes one case: its leg points in the start frame's navigation axes (forward, left, up; millimetres,
+Both evaluators write ``evaluation/judgement.json``, ``batch_*/report.json`` and ``control_trace.npz``.
+The judgement supplies each case's recorded verdict; older runs keep verdicts in their batch reports.
+Each batch with a trace becomes one case: its leg points in the start frame's navigation axes
+(forward, left, up; millimetres,
 every second control), foot contacts, heading, command, the destination ("ghost") and the evaluator's own
 pass/fail and failed checks. The ghost starts at the reset pose (the origin, heading zero) and moves exactly
 along the command once per control; a new command restarts it at the body, as the destination experiments
@@ -135,9 +137,72 @@ def attempt_name(evaluation):
     return parents[0].name if evaluation.name == "evaluation" else evaluation.name
 
 
-def case(batch, joints):
+def judgement_rows(evaluation):
+    """Return recorded verdicts by case ID and their hash; None selects historical batch reports."""
+    path = evaluation / "judgement.json"
+    if not path.exists():
+        return None, None
+    raw = path.read_bytes()
+    value = json.loads(raw)
+    if not isinstance(value, dict) or value.get("schema") not in {
+        "hexapod_walking_requirements_judgement_v1",
+        "hexapod_walking_requirements_judgement_v2",
+    }:
+        raise ValueError("Unsupported judgement schema")
+    if not isinstance(value.get("cases"), list):
+        raise ValueError("Judgement cases must be a list")
+    rows = {}
+    for row in value["cases"]:
+        if (
+            not isinstance(row, dict)
+            or not isinstance(row.get("case_id"), str)
+            or not row["case_id"]
+        ):
+            raise ValueError("Judgement needs a nonempty case ID")
+        case_id = row["case_id"]
+        if case_id in rows:
+            raise ValueError("Duplicate judgement case: " + case_id)
+        unjudged = (
+            value["schema"] == "hexapod_walking_requirements_judgement_v1"
+            and "pass" in row
+            and row["pass"] is None
+        )
+        if type(row.get("pass")) is not bool and not unjudged:
+            raise ValueError("Judgement needs a boolean verdict: " + case_id)
+        checks = row.get("checks")
+        if not isinstance(checks, dict) or any(
+            not isinstance(check, dict) or type(check.get("pass")) is not bool
+            for check in checks.values()
+        ):
+            raise ValueError("Malformed judgement checks: " + case_id)
+        false_checks = [name for name, check in checks.items() if not check["pass"]]
+        failed = row.get("failed_checks", false_checks)
+        if (
+            not isinstance(failed, list)
+            or any(not isinstance(name, str) or name not in checks for name in failed)
+            or len(failed) != len(set(failed))
+        ):
+            raise ValueError("Malformed judgement failed checks: " + case_id)
+        if unjudged and (checks or failed):
+            raise ValueError("Judgement cannot mark recorded checks as unjudged: " + case_id)
+        if not unjudged and (set(failed) != set(false_checks) or row["pass"] != (not failed)):
+            raise ValueError("Judgement verdict and check flags disagree: " + case_id)
+        rows[case_id] = dict(row, failed_checks=failed)
+    return rows, hashlib.sha256(raw).hexdigest()
+
+
+def case(batch, joints, judged=None):
     report = json.loads((batch / "report.json").read_text())
-    result, trace = report["results"][0], np.load(batch / "control_trace.npz")
+    case_id = report["assigned_case_ids"][0]
+    if judged is None:
+        result = report["results"][0]
+        if type(result.get("pass")) is not bool:
+            raise ValueError("Missing recorded verdict; judgement.json is required for " + case_id)
+    else:
+        if case_id not in judged:
+            raise ValueError("Missing judgement case: " + case_id)
+        result = judged[case_id]
+    trace = np.load(batch / "control_trace.npz")
     pose = trace["root_pose_xyzw"][:, 0].astype(float)
     q = trace["joint_position_rad"][:, 0].astype(float)
     toe = trace["toe_xyz_world_m"][:, 0].astype(float)
@@ -155,13 +220,17 @@ def case(batch, joints):
             "value": checks.get(name, {}).get("value"),
             "bound": checks.get(name, {}).get("bound"),
         }
-        for name in result.get("failed_bounds") or []
+        for name in result.get("failed_checks", result.get("failed_bounds")) or []
     ]
+    try:
+        json.dumps(failed, allow_nan=False)
+    except ValueError as error:
+        raise ValueError("Nonfinite displayed check value or bound: " + case_id) from error
     metrics = result.get("metrics") or {}
     return {
-        "case_id": report["assigned_case_ids"][0],
+        "case_id": case_id,
         "batch": batch.name,
-        "pass": bool(result["pass"]),
+        "pass": result["pass"],
         "failed": failed,
         "controls": len(pose),
         "fell": bool(trace["terminated"][:, 0].any()) if "terminated" in trace.files else False,
@@ -195,6 +264,7 @@ def compress(data):
 def build(folder, model=None):
     """The run file as a dict; cases without a control trace are listed but not drawn."""
     evaluation = evaluation_folder(folder)
+    judged, judgement_sha = judgement_rows(evaluation)
     active = json.loads((ROOT / "robot/active_model.json").read_text())
     model = Path(model) if model else ROOT / active["model"]["path"]
     joints = {j["name"]: j for j in json.loads(model.read_text())["joints"]}
@@ -206,7 +276,7 @@ def build(folder, model=None):
                     json.loads((batch / "report.json").read_text())["assigned_case_ids"][0]
                 )
             continue
-        row = case(batch, joints)
+        row = case(batch, joints, judged)
         row["points_offset"] = sum(p.nbytes for p in points)
         row["contacts_offset"] = sum(c.nbytes for c in contacts)
         points.append(row.pop("_points"))
@@ -216,7 +286,7 @@ def build(folder, model=None):
         raise ValueError(f"No batch under {evaluation} has a control trace")
     blob = b"".join(p.tobytes() for p in points)
     summary = evaluation / "summary.json"
-    return {
+    value = {
         "schema": SCHEMA,
         "source": source_of(evaluation),
         "name": attempt_name(evaluation),
@@ -231,6 +301,9 @@ def build(folder, model=None):
         "cases": cases,
         "cases_without_trace": skipped,
     }
+    if judged is not None:
+        value["judgement_sha256"] = judgement_sha
+    return value
 
 
 def main(argv=None):
@@ -240,10 +313,11 @@ def main(argv=None):
     parser.add_argument("--model", type=Path, help="Robot model JSON; the active model by default")
     args = parser.parse_args(argv)
     value = build(args.folder, args.model)
-    args.output.write_text(json.dumps(value, separators=(",", ":")) + "\n")
+    args.output.write_text(json.dumps(value, separators=(",", ":"), allow_nan=False) + "\n")
     print(
         f"{args.output}: {len(value['cases'])} cases from a {value['source']} run, "
-        f"{sum(c['pass'] for c in value['cases'])} passing"
+        f"{sum(c['pass'] is True for c in value['cases'])} passing, "
+        f"{sum(c['pass'] is None for c in value['cases'])} not judged"
     )
 
 

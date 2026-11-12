@@ -12,8 +12,8 @@ Open the address Vite prints. Add `#runs` for the Runs page.
 
 ## Runs
 
-Both evaluators write `evaluation/batch_*/report.json` and `control_trace.npz`. `run_view.py` turns one
-evaluation into a run file:
+Both evaluators write `evaluation/judgement.json`, `batch_*/report.json` and `control_trace.npz`.
+`run_view.py` turns one evaluation into a run file:
 
 ```sh
 uv run python viewer/run_view.py /path/to/eval_attempt --output attempt.json
@@ -23,6 +23,11 @@ uv run python viewer/run_view.py /path/to/surrogate_output --output surrogate.js
 The folder can be a native attempt (`<attempt>/run/standing/evaluation`), a surrogate output folder
 (`<output>/evaluation`) or the evaluation folder itself. Copy native attempts from Spark first; only batches
 with a control trace are drawn, and the file lists the others.
+
+The exporter reads each verdict and failed check from `judgement.json` by case ID and records that
+file's SHA-256. It rejects missing, duplicate or malformed verdicts. Historical evaluations without
+that file retain their batch-report verdicts, and existing run files keep their format.
+Historical v1 judgements with no checks retain their null verdict and appear as "not judged".
 
 On the Runs page, open one or more run files or drop them on the page. Pick the cases to show from the
 table; each case shows:
@@ -38,5 +43,5 @@ table; each case shows:
 A server that serves the built viewer and the run files can open them directly: `?run=attempt.json#runs`,
 with `run` repeated for more files.
 
-`npm test` reads `test/fixtures/sample_run.json`. `tests/test_run_view.py` checks that `run_view.py` writes
-the same file from its synthetic attempt.
+`npm test` reads `test/fixtures/sample_run.json`. `tests/test_run_view.py` checks the historical fixture
+and exports a judgement written by the current evaluator with a CPU simulation double.
