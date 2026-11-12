@@ -226,7 +226,7 @@ def field(value, keys):
 
 
 def count(value):
-    """A total is a number in the source, or the size of the list or table it names."""
+    """A value or total is a number in the source, or the size of the list or table it names."""
     return len(value) if isinstance(value, (dict, list)) else value
 
 
@@ -251,7 +251,7 @@ def validate_progress(project):
         require(path is not None and path.is_file(), "Metric source must be a local file")
         raw = read(path)
         for key, pointer, read_value in [
-            ("value", "field", field),
+            ("value", "field", lambda r, k: count(field(r, k))),
             ("total", "total_field", lambda r, k: count(field(r, k))),
         ]:
             actual = read_value(raw, source[pointer])

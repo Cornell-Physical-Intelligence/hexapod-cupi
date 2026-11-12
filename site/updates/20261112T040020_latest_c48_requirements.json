@@ -1,0 +1,23 @@
+{
+  "id": "20261112T040020_latest_c48_requirements",
+  "date": "2026-11-12T04:00:20Z",
+  "title": "Lead the progress page with the walking controller's 26-case result",
+  "summary": "The latest-progress block still showed the 12 October probe result. It now reports c48_long, the walking controller accepted on 7 November, judged on the 26 stage2_flat cases in the CPU surrogate: judgement.json records 14 failed cases of 26, so 12 pass, including all five routes, which stop 58 to 64 mm from the last goal. Every failed case exceeds the 0.1 m drift limit, and two also exceed the 1.7 degree stop tilt by 0.05 and 0.11 degrees. The 8 November update record says three cases pass everything; that count predates the stand-and-stop tilt rule, and the judgement file rewritten under that rule (d846c3a2) gives 12. The progress check now counts a named list for the headline value as it already did for the total, so the number reads straight from the judgement's failed_cases list; a numeric field still reads as before. The page adds the term Drift and one accomplishment line, within the 650-word page limit. The videos are unchanged and the text says they show an earlier controller.",
+  "areas": [
+    "site",
+    "verification"
+  ],
+  "changes": [
+    "site/project.json",
+    "tools/project_site.py",
+    "tests/test_project_progress.py",
+    "site/updates/20261112T040020_latest_c48_requirements.json"
+  ],
+  "evidence": [
+    "site/assets/c48_surrogate_requirements_20261108_001/judgement.json",
+    "configs/accepted_controller.json",
+    "tests/test_project_progress.py"
+  ],
+  "next": "Run the 26 stage2_flat cases natively on Spark.",
+  "no_project_impact": false
+}

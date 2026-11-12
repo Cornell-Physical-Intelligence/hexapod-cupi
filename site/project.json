@@ -5,25 +5,21 @@
   "status_source": "STATUS.md",
   "mission": "We are building a six-legged robot that walks a planned route across a mapped area and stops at each survey point. It finds its way with a Livox Mid-360 laser scanner and GPS.",
   "latest": {
-    "date": "2026-10-12",
-    "title": "One training run passes all 13 movement tests",
-    "text": "The run added reward terms for turning and stride length, and it trained longer. Its heading still drifts during walks, by 16 degrees on average. The videos show our 11 October controller, which passed 10 of the 13.",
+    "date": "2026-11-08",
+    "title": "Our walking controller reaches every route goal but drifts",
+    "text": "In our fast simulator, our walking controller passes 12 of 26 flat-ground cases and ends all five routes within 64 mm of the goal. Every failure drifts over 0.1 m from its path. The videos show an earlier controller.",
     "metric": {
-      "value": 13,
-      "total": 13,
-      "label": "movement tests passed in one training run",
+      "value": 14,
+      "total": 26,
+      "label": "flat-ground cases our walking controller still fails",
       "sources": [
         {
-          "path": "site/assets/yaw_gated_stride_native_20261012_001/native_results.json",
+          "path": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json",
           "field": [
-            "evaluations",
-            "c48_long",
-            "passed"
+            "failed_cases"
           ],
           "total_field": [
-            "evaluations",
-            "c48_long",
-            "probes"
+            "cases"
           ]
         }
       ]
@@ -33,7 +29,7 @@
       "ppo_v4_omni512_seed20260917_turn_plus020_u2000",
       "ppo_v4_omni512_seed20260917_stop_20261011"
     ],
-    "next": "We are training that setup twice more, and twice without the new terms for comparison, to check that the result holds and that the new terms cause it. Then we compare it with a controller that learns from our demonstration motions."
+    "next": "Next we run the same 26 cases in our full simulator."
   },
   "roadmap": [
     {
@@ -84,6 +80,11 @@
     }
   ],
   "accomplishments": [
+    {
+      "date": "2026-11-08",
+      "text": "Our walking controller passes 12 of 26 flat-ground cases in fast simulation.",
+      "source": "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+    },
     {
       "date": "2026-10-12",
       "text": "A training run with new reward terms for turning and stride length passes all 13 movement tests.",
@@ -374,6 +375,10 @@
     {
       "term": "CAD",
       "meaning": "Computer-aided design: the 3D model of each part of the robot."
+    },
+    {
+      "term": "Drift",
+      "meaning": "How far the robot strays from its commanded path in 20 seconds."
     }
   ]
 }
