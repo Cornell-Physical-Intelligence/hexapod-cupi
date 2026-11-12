@@ -108,6 +108,16 @@ class ProgressTests(unittest.TestCase):
         metric["sources"][0]["total_field"] = ["count"]
         site.validate_progress(self.project)
 
+    def test_value_counts_the_named_list_or_reads_the_number(self):
+        (site.ROOT / "list.json").write_text(json.dumps({"failed": ["a", "b"], "cases": [1, 2, 3]}))
+        metric = self.project["latest"]["metric"]
+        metric.update(value=3, total=3)
+        metric["sources"] = [{"path": "list.json", "field": ["failed"], "total_field": ["cases"]}]
+        with self.assertRaisesRegex(ValueError, "differs from source"):
+            site.validate_progress(self.project)
+        metric["value"] = 2
+        site.validate_progress(self.project)
+
     def test_every_metric_source_must_agree(self):
         (site.ROOT / "other.json").write_text(json.dumps({"passed": 9, "probes": list(range(13))}))
         self.project["latest"]["metric"]["sources"].append(
