@@ -111,6 +111,11 @@ class OmniEnv:
         return getattr(self.isaac, "ground_friction", None)
 
     @property
+    def external_wrench_body(self):
+        """Each row's mean body-frame push force and zero torque over the last control, or None."""
+        return getattr(self.isaac, "external_wrench_body", None)
+
+    @property
     def expected_materials(self):
         """Shape materials as the environment wrote them, or None when nominal."""
         return getattr(self.isaac, "expected_materials", None)

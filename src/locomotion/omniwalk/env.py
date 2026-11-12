@@ -4,6 +4,7 @@ import json
 import math
 from pathlib import Path
 
+import numpy as np
 import omni.physx
 import torch
 import warp as wp
@@ -23,6 +24,8 @@ from locomotion.omniwalk.mdp.state import measured_state, toe_points
 from locomotion.omniwalk.mdp.terminations import episode_timeout, physical_termination
 from locomotion.robots import randomization as rnd
 from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS, USD_SHA256, verify_assets
+
+NEVER = np.iinfo(np.int64).max
 
 
 class CaptureArticulation(Articulation):
@@ -60,6 +63,10 @@ class IsaacEnv(DirectRLEnv):
         randomization="none",
     ):
         self.randomization = rnd.identity(randomization)["name"]
+        if self.randomization != "none":
+            # Motor, friction and the push schedule are in place; joint offsets, link mass, payload
+            # and the push force itself are not yet written to PhysX, so a run would be mislabelled.
+            raise NotImplementedError("Native Step 7 randomization is incomplete; use none")
         self.config = config
         self.output = Path(output)
         self.output.mkdir(parents=True, exist_ok=True)
@@ -263,6 +270,8 @@ class IsaacEnv(DirectRLEnv):
 
     def _apply_action(self):
         self.robot.set_joint_position_target_index(target=self.target[:, self.inverse_joint_index])
+        if getattr(self, "pushes", False):
+            self.push_window(self.substep)
         self.substep += 1
 
     def record_submitted_force(self):
@@ -306,6 +315,8 @@ class IsaacEnv(DirectRLEnv):
         if self.native_errors:
             raise RuntimeError("Native physics error during stepping")
         self.requested, self.applied, self.forces = requested, applied, forces
+        if getattr(self, "pushes", False):
+            self.advance_pushes()
 
     def _get_dones(self):
         if self.sim.get_physics_step_count() != self.before_counter + 8 or self.substep != 8:
@@ -398,6 +409,16 @@ class IsaacEnv(DirectRLEnv):
         if len(self.tibia_shapes) < 6:
             raise ValueError("Native tibia shapes are missing")
         self.ground_friction = torch.ones(n, device=self.device)
+        # Pushes run on the surrogate's timeline in 400 Hz physics steps from each row's reset, and
+        # each row's generator draws the next push when one ends, so both engines consume a row's
+        # stream in the same order: the reset draw, the first push, then one push per push end.
+        self.pushes = True
+        self.since_reset = np.zeros(n, dtype=np.int64)
+        self.push_start = np.zeros(n, dtype=np.int64)
+        self.push_end = np.zeros(n, dtype=np.int64)
+        self.push_force = np.zeros((n, 3))
+        self.push_body = np.zeros((n, self.config.decimation, 3))
+        self.external_wrench_body = torch.zeros((n, 6), device=self.device)
 
     def redraw(self, rows):
         """Draw each selected row's conditions from that row's generator; apply motor and friction terms."""
@@ -409,10 +430,41 @@ class IsaacEnv(DirectRLEnv):
             draw["strength"][row, self.motor_order] = self.torch(sample.motor_strength)
             self.materials[row, self.tibia_shapes, :2] = sample.foot_friction
             self.ground_friction[row] = sample.foot_friction
+            self.since_reset[row] = 0
+            self.schedule_push(row, 0, first=True)
+            self.external_wrench_body[row] = 0.0
         self.view.set_material_properties(
             wp.from_torch(self.materials),
             wp.array(rows.cpu().numpy().astype("uint32"), dtype=wp.uint32, device="cpu"),
         )
+
+    def schedule_push(self, row, after, first):
+        """Draw ``row``'s next push from its generator, timed in physics steps from its reset."""
+        push = rnd.next_push(self.randomization, self.generators[row], first)
+        if push is None:
+            self.push_start[row] = self.push_end[row] = NEVER
+            self.push_force[row] = 0.0
+            return
+        self.push_start[row] = after + round(push.delay_s / self.config.physics_dt)
+        self.push_end[row] = self.push_start[row] + round(push.duration_s / self.config.physics_dt)
+        self.push_force[row] = push.force_body_n
+
+    def push_window(self, substep):
+        """Record each row's body-frame push force for this physics step; zero outside its window."""
+        active = (self.since_reset >= self.push_start) & (self.since_reset < self.push_end)
+        self.push_body[:, substep] = np.where(active[:, None], self.push_force, 0.0)
+        if substep == self.config.decimation - 1:
+            # Privileged value, as the surrogate gives it: the mean push over the control, no torque.
+            mean = torch.as_tensor(self.push_body.mean(1), dtype=torch.float32)
+            self.external_wrench_body = torch.cat((mean, torch.zeros_like(mean)), dim=-1).to(
+                self.device
+            )
+
+    def advance_pushes(self):
+        """Count one physics step for each row and draw the next push where one ended."""
+        self.since_reset += 1
+        for row in np.flatnonzero(self.since_reset == self.push_end):
+            self.schedule_push(int(row), int(self.push_end[row]), first=False)
 
     @property
     def expected_materials(self):

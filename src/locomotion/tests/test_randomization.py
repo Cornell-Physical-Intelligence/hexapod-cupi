@@ -431,7 +431,7 @@ class NativeMotorDrawTests(unittest.TestCase):
             ),
             set_material_properties=lambda data, rows: written.append((data.clone(), rows)),
         )
-        env.config = SimpleNamespace(num_envs=n, seed=seed)
+        env.config = SimpleNamespace(num_envs=n, seed=seed, physics_dt=0.0025, decimation=8)
         env.randomization = "table2_v1"
         env.device = "cpu"
         env.native_body_names = links
@@ -514,6 +514,77 @@ class NativeMotorDrawTests(unittest.TestCase):
         env.redraw(torch.arange(3))
         for name in ("kp", "kd", "strength"):
             self.assertTrue(np.array_equal(env.motor_law[name], wanted[name]), name)
+
+    def test_pushes_keep_each_row_stream_in_step_with_the_surrogate(self):
+        """Over 30 s with mid-run resets, both engines time the same pushes and draw the same streams."""
+        from locomotion.surrogate.env import make_env
+
+        surrogate = make_env(3, threads=0, randomization="table2_v1", seed=20260917)
+        try:
+            env = self.environment()
+            env.redraw(torch.arange(3))
+            resets = {400: [1], 900: [0, 2], 1300: [1]}
+            ended = pushed = 0
+            for control in range(1500):
+                for substep in range(8):
+                    surrogate._apply_pushes(substep)
+                    env.push_window(substep)
+                    self.assertTrue(
+                        np.array_equal(env.push_body[:, substep], surrogate._push_body[:, substep])
+                    )
+                    before = env.push_end.copy()
+                    surrogate._advance_pushes()
+                    env.advance_pushes()
+                    ended += int(np.sum(env.push_end != before))
+                    pushed += int(np.any(env.push_body[:, substep] != 0))
+                self.assertTrue(
+                    torch.equal(env.external_wrench_body, surrogate_wrench(surrogate)), control
+                )
+                for row in resets.get(control, []):
+                    surrogate._redraw(row)
+                    env.redraw(torch.tensor([row]))
+                for name in ("since_reset", "push_start", "push_end", "push_force"):
+                    self.assertTrue(
+                        np.array_equal(getattr(env, name), getattr(surrogate, "_" + name)), name
+                    )
+            self.assertGreater(ended, 6)
+            self.assertGreater(pushed, 0)
+            for row in range(3):
+                self.assertEqual(
+                    env.generators[row].bit_generator.state,
+                    surrogate._generators[row].bit_generator.state,
+                )
+            for name in ("kp", "kd", "strength"):
+                self.assertTrue(
+                    np.array_equal(env.motor_law[name], surrogate.motor_law[name]), name
+                )
+            self.assertTrue(torch.equal(env.ground_friction, surrogate.ground_friction))
+        finally:
+            surrogate.close()
+
+    def test_the_native_environment_refuses_randomization_until_every_draw_is_applied(self):
+        from locomotion.tests.test_direct_environment import load_isaac
+
+        module = load_isaac()
+        env = object.__new__(module.IsaacEnv)
+        with self.assertRaisesRegex(NotImplementedError, "incomplete"):
+            module.IsaacEnv.__init__(env, None, None, None, None, None, randomization="table2_v1")
+
+    def test_a_reset_clears_the_row_wrench_and_restarts_its_clock(self):
+        env = self.environment()
+        env.redraw(torch.arange(3))
+        env.external_wrench_body[:] = 1.0
+        env.since_reset[:] = 50
+        env.redraw(torch.tensor([1]))
+        self.assertEqual(env.since_reset.tolist(), [50, 0, 50])
+        self.assertTrue(torch.all(env.external_wrench_body[1] == 0))
+        self.assertTrue(torch.all(env.external_wrench_body[[0, 2]] == 1))
+
+
+def surrogate_wrench(surrogate):
+    """The surrogate's privileged push wrench as its step computes it from the substep pushes."""
+    mean = torch.as_tensor(surrogate._push_body.mean(1), dtype=torch.float32)
+    return torch.cat((mean, torch.zeros((surrogate.num_envs, 3))), dim=-1)
 
 
 if __name__ == "__main__":

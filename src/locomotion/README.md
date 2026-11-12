@@ -167,9 +167,12 @@ departs from the declaration text, the notes below record it.
   20 ms limiter, the 0.35 rad action scale and the 1.6 N·m cap stay fixed.
 
 The surrogate applies these draws under `--randomization table2_v1`
-([surrogate guide](surrogate/README.md)). The native implementation and the
-`none` against `table2_v1` comparison follow under #67. This declaration admits
-nothing.
+([surrogate guide](surrogate/README.md)). The native environment applies the
+motor and friction draws and runs the push schedule on the surrogate's
+timeline, so each replica's generator yields the same draws in both engines
+across resets and pushes. It does not yet write joint offsets, link mass,
+payload or the push force to PhysX, so it refuses any randomization but `none`
+until it does (#67). This declaration admits nothing.
 
 `grid_declaration("table2_v1_grid")` declares the fixed-condition screen of
 issue #67, SHA-256
