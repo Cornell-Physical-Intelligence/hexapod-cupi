@@ -63,17 +63,20 @@ class DiagnosticGeometry:
 
 
 def classify_patches(data, sensor_map, poses, geometry, num_envs):
-    """Classify each actual native patch before force aggregation. No centroid proxy."""
+    """Validate and classify actual native patches before force aggregation."""
+    return classify_contacts(
+        native_contact_patches(data, sensor_map, num_envs), poses, geometry, num_envs
+    )
+
+
+def native_contact_patches(data, sensor_map, num_envs):
+    """Decode native buffers with their range, overlap and capacity checks unchanged."""
     force, point, normal, sep, counts, starts = [np.asarray(x) for x in data]
     if counts.shape != (19 * num_envs, 1) or starts.shape != counts.shape:
         raise ValueError("Incomplete sensor/filter contact layout")
     if np.any(counts < 0) or np.any(starts < 0):
         raise ValueError("Negative contact indexing")
-    feet = np.zeros((num_envs, 6, 3))
-    other = np.zeros((num_envs, 4, 3))
-    patches = []
     used = set()
-    cap_cache = {}
     for i, (e, body) in enumerate(sensor_map):
         start, count = int(starts[i, 0]), int(counts[i, 0])
         if count == 0:
@@ -88,63 +91,73 @@ def classify_patches(data, sensor_map, poses, geometry, num_envs):
             p = point[k]
             n = normal[k]
             d = float(sep[k, 0])
-            if not np.isfinite(np.r_[f, p, n, d]).all():
-                raise ValueError("Nonfinite used contact patch")
-            inactive_zero_normal = bool(f == 0.0 and np.all(n == 0.0) and d == 0.0)
-            if abs(np.linalg.norm(n) - 1) > 1e-3 and not inactive_zero_normal:
-                raise ValueError("Invalid patch normal")
-            local = None
-            if body.endswith("_tibia"):
-                key = (e, body)
-                if key not in cap_cache:
-                    s = geometry.shapes[body]
-                    pose = poses[e, geometry.names.index(body)]
-                    cap_cache[key] = (
-                        pose,
-                        np.asarray(s["shape_to_link"]),
-                        diagnostic_rotation(np.asarray(pose)[3:]),
-                        np.asarray(s["cap_bounds_m"]),
-                        s["contact_offset_m"],
-                        s["cap_lower_x_m"],
-                    )
-                pose, T, R, b, skin, lower = cap_cache[key]
-                local = (np.asarray(p) - pose[:3]) @ R
-                local = (local - T[:3, 3]) @ T[:3, :3]
-                cap = bool(
-                    local[0] >= lower - 1e-12
-                    and local[0] <= b[1, 0] + skin
-                    and np.all(local[1:] >= b[0, 1:] - skin)
-                    and np.all(local[1:] <= b[1, 1:] + skin)
-                )
-                category = "toe" if cap else "shaft"
-            else:
-                category = (
-                    "coxa"
-                    if body.endswith("_coxa")
-                    else "femur"
-                    if body.endswith("_femur")
-                    else "body"
-                )
-            if category == "toe":
-                feet[e, LEGS.index(body[:2])] += f * n
-            else:
-                other[e, ["body", "coxa", "femur", "shaft"].index(category)] += f * n
-            patches.append(
-                {
-                    "buffer_index": k,
-                    "env": e,
-                    "body": body,
-                    "category": category,
-                    "normal_force_n": f,
-                    "point_world_m": p.tolist(),
-                    "normal_world": n.tolist(),
-                    "separation_m": d,
-                    "inactive_zero_normal": inactive_zero_normal,
-                    "shape_point_m": None if local is None else local.tolist(),
-                }
-            )
+            yield k, e, body, f, p, n, d
     if len(used) >= len(force):
         raise ValueError("Contact capacity exhausted; completeness is unknown")
+
+
+def classify_contacts(contacts, poses, geometry, num_envs):
+    """Classify normalized (index, env, body, force, point, normal, separation) contacts.
+
+    The source owns completeness and contact interpretation. Native inputs are actual patches;
+    a surrogate can supply sensor summaries and must declare that scope in capture metadata.
+    """
+    feet = np.zeros((num_envs, 6, 3))
+    other = np.zeros((num_envs, 4, 3))
+    patches = []
+    cap_cache = {}
+    for k, e, body, f, p, n, d in contacts:
+        if not np.isfinite(np.r_[f, p, n, d]).all():
+            raise ValueError("Nonfinite used contact patch")
+        inactive_zero_normal = bool(f == 0.0 and np.all(n == 0.0) and d == 0.0)
+        if abs(np.linalg.norm(n) - 1) > 1e-3 and not inactive_zero_normal:
+            raise ValueError("Invalid patch normal")
+        local = None
+        if body.endswith("_tibia"):
+            key = (e, body)
+            if key not in cap_cache:
+                s = geometry.shapes[body]
+                pose = poses[e, geometry.names.index(body)]
+                cap_cache[key] = (
+                    pose,
+                    np.asarray(s["shape_to_link"]),
+                    diagnostic_rotation(np.asarray(pose)[3:]),
+                    np.asarray(s["cap_bounds_m"]),
+                    s["contact_offset_m"],
+                    s["cap_lower_x_m"],
+                )
+            pose, T, R, b, skin, lower = cap_cache[key]
+            local = (np.asarray(p) - pose[:3]) @ R
+            local = (local - T[:3, 3]) @ T[:3, :3]
+            cap = bool(
+                local[0] >= lower - 1e-12
+                and local[0] <= b[1, 0] + skin
+                and np.all(local[1:] >= b[0, 1:] - skin)
+                and np.all(local[1:] <= b[1, 1:] + skin)
+            )
+            category = "toe" if cap else "shaft"
+        else:
+            category = (
+                "coxa" if body.endswith("_coxa") else "femur" if body.endswith("_femur") else "body"
+            )
+        if category == "toe":
+            feet[e, LEGS.index(body[:2])] += f * n
+        else:
+            other[e, ["body", "coxa", "femur", "shaft"].index(category)] += f * n
+        patches.append(
+            {
+                "buffer_index": k,
+                "env": e,
+                "body": body,
+                "category": category,
+                "normal_force_n": f,
+                "point_world_m": p.tolist(),
+                "normal_world": n.tolist(),
+                "separation_m": d,
+                "inactive_zero_normal": inactive_zero_normal,
+                "shape_point_m": None if local is None else local.tolist(),
+            }
+        )
     # Any nonfoot patch with >1N is retained even when vector cancellation would hide it.
     nonfoot = np.zeros(num_envs, dtype=bool)
     body_forces = {}
@@ -158,9 +171,8 @@ def classify_patches(data, sensor_map, poses, geometry, num_envs):
             body_forces[key] = body_forces[key] + p["normal_force_n"] * np.asarray(
                 p["normal_world"]
             )
-    for i, (e, body) in enumerate(sensor_map):
-        body_force = body_forces.get((e, body))
-        if body_force is not None and np.linalg.norm(body_force) > 1.0:
+    for (e, body), body_force in body_forces.items():
+        if np.linalg.norm(body_force) > 1.0:
             nonfoot[e] = True
     return {
         "distal_contact": np.linalg.norm(feet, axis=-1) > 1.0,
@@ -168,7 +180,7 @@ def classify_patches(data, sensor_map, poses, geometry, num_envs):
         "nonfoot_contact": nonfoot,
         "nonfoot_force_world": other,
         "patches": patches,
-        "used_patch_count": len(used),
+        "used_patch_count": len(patches),
     }
 
 

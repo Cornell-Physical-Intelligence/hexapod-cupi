@@ -13,3 +13,27 @@ COMPATIBILITY_KEYS = (
     "entry_sha256",
     "seed",
 )
+
+
+def runtime_changes(recorded, current):
+    """Compare the full runtime identity, including added files and manifest metadata."""
+    result = {name: [] for name in ("added", "removed", "modified", "metadata")}
+    if recorded == current:
+        return result
+    if not isinstance(recorded, dict) or not isinstance(current, dict):
+        result["metadata"] = ["manifest"]
+        return result
+    before, after = recorded.get("files", {}), current.get("files", {})
+    result["added"] = sorted(after.keys() - before.keys())
+    result["removed"] = sorted(before.keys() - after.keys())
+    result["modified"] = sorted(
+        name for name in before.keys() & after.keys() if before[name] != after[name]
+    )
+    result["metadata"] = sorted(
+        name
+        for name in (recorded.keys() | current.keys()) - {"files"}
+        if name not in recorded or name not in current or recorded[name] != current[name]
+    )
+    if ("files" in recorded) != ("files" in current):
+        result["metadata"].append("files")
+    return result

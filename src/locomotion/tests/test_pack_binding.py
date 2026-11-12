@@ -1,18 +1,64 @@
 """Check the prepared pack entry point, modes, reward record and source tampering without Isaac."""
 
 import json
+import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from pathlib import Path
 
 from locomotion.spark.prepare import prepare
-from locomotion.spark.sources import verify_runtime
+from locomotion.spark.sources import REQUIREMENTS_INPUT, allocation_manifest, verify_runtime
 
 ROOT = Path(__file__).resolve().parents[3]
 REMOTE = "/srv/cupi/hexapod/runs/jcc463/pack_binding_fixture"
 
 
 class PackBindingTests(unittest.TestCase):
+    def test_frozen_evaluation_loads_its_bound_requirements_outside_the_checkout(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            binding = prepare(
+                root / "pack",
+                REMOTE,
+                mode="evaluate",
+                num_envs=1,
+                checkpoint=REMOTE + "/checkpoint.pt",
+                checkpoint_sha="a" * 64,
+                checkpoint_declaration_sha="b" * 64,
+            )
+            source = root / "pack/source"
+            manifest = verify_runtime(source)
+            self.assertEqual(manifest, allocation_manifest(ROOT))
+            self.assertIn(REQUIREMENTS_INPUT, manifest["files"])
+            args = binding["command_args"]
+            self.assertEqual(
+                args[args.index("--requirements") + 1], "/source/" + REQUIREMENTS_INPUT
+            )
+            result = subprocess.run(
+                [
+                    sys.executable,
+                    "-c",
+                    "from pathlib import Path; import sys; "
+                    "from locomotion.evaluation import requirements; "
+                    "assert Path(requirements.__file__).is_relative_to(Path(sys.argv[1])); "
+                    "rules, digest = requirements.load_requirements(Path(sys.argv[1]) / sys.argv[2]); "
+                    "assert len(requirements.cases(rules)) == 26; print(digest)",
+                    str(source),
+                    REQUIREMENTS_INPUT,
+                ],
+                cwd=root,
+                env={**os.environ, "PYTHONPATH": str(source)},
+                capture_output=True,
+                text=True,
+                check=True,
+            )
+            self.assertEqual(result.stdout.strip(), manifest["files"][REQUIREMENTS_INPUT])
+            (source / REQUIREMENTS_INPUT).write_text("{}")
+            with self.assertRaisesRegex(ValueError, "manifest differs"):
+                verify_runtime(source)
+
     def test_pack_uses_one_backend_and_keeps_review_gate(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)

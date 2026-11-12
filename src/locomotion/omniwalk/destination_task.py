@@ -58,8 +58,10 @@ from pathlib import Path
 import torch
 
 from locomotion.omniwalk.mdp.destination import (
+    NEUTRAL_FEATURES,
     advance_destination,
     destination_distance,
+    destination_features,
     planar_pose,
 )
 from locomotion.omniwalk.mdp.rewards import RewardConfig
@@ -299,6 +301,12 @@ class DestinationTrainingTask(TrainingTask):
         self.stop_pending = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
         self.stop_rest = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
         super().__init__(env, config, output_dir, chosen)
+
+    def destination_inputs(self, pending):
+        """Five task-owned destination features; pending rows read neutral values."""
+        current = destination_features(self.current["root"], self.destination, self.command_elapsed)
+        neutral = torch.tensor(NEUTRAL_FEATURES, device=current.device).expand_as(current)
+        return torch.where(pending[:, None].to(current.device), neutral, current)
 
     def reset(self, indices=None):
         # A reset draws a fresh command; a stop scheduled for the ended episode lapses.

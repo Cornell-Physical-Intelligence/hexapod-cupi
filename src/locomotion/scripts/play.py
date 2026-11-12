@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from pathlib import Path
 
 from locomotion.evaluation.camera import NativePolicyCamera
 from locomotion.evaluation.checkpoint import (
@@ -26,6 +27,10 @@ from locomotion.scripts.cli import (
 def parse_args(argv=None):
     """Parse the command line and resolve the recipe and the evaluation gait-clock default."""
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    from locomotion.evaluation.requirements import REQUIREMENTS
+
+    parser.add_argument("--requirements", type=Path, default=REQUIREMENTS)
+    parser.add_argument("--requirements-set", default="stage2_flat")
     add_common_arguments(parser)
     add_learner_arguments(parser)
     add_app_arguments(parser, argv)
@@ -131,13 +136,16 @@ def run_evaluation(env, args, policy, state, started):
 
     env.render = NativePolicyCamera(env)
     remaining = max(0.001, args.max_wall_seconds - (time.monotonic() - started))
-    first = requirements.cases(requirements.load_requirements()[0])[0]["case_id"]
+    rules, _ = requirements.load_requirements(args.requirements, args.requirements_set)
+    first = requirements.cases(rules)[0]["case_id"]
     state["evaluation"] = run_cases(
         env,
         policy,
         args.output / "evaluation",
         args.geometry_extrema,
         args.checkpoint,
+        requirements_path=args.requirements,
+        requirements_set=args.requirements_set,
         video_case_id=args.video_case or first,
         seed=args.seed,
         progress=print_progress,

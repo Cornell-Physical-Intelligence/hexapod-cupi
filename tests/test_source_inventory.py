@@ -71,6 +71,42 @@ class SourceInventoryTests(unittest.TestCase):
             with self.assertRaisesRegex(ValueError, "imports evidence"):
                 inventory.check(root)
 
+    def test_import_audit_resolves_absolute_relative_and_package_imports(self):
+        path = "src/locomotion/rl/wrapper.py"
+        for statement in (
+            "from locomotion.omniwalk.mdp.destination import destination_features",
+            "from ..omniwalk.mdp.destination import destination_features",
+            "from locomotion import omniwalk as task",
+            "import locomotion.omniwalk as task",
+            "from locomotion import new_package",
+        ):
+            with (
+                self.subTest(statement=statement),
+                self.assertRaisesRegex(ValueError, "Forbidden import"),
+            ):
+                inventory.check_imports(path, statement)
+        inventory.check_imports(path, "from .wrapper import OmniVecEnv")
+        inventory.check_imports("src/locomotion/omniwalk/task.py", "from ..robots import hexapod")
+
+    def test_control_packages_cannot_import_simulation_or_retained_experiment(self):
+        for path in (
+            "src/navigation/waypoint.py",
+            "src/mission/controller.py",
+            "src/contracts/command.py",
+        ):
+            for statement in ("from locomotion.omniwalk import task", "import locomotion"):
+                with (
+                    self.subTest(path=path, statement=statement),
+                    self.assertRaisesRegex(ValueError, "Forbidden import"),
+                ):
+                    inventory.check_imports(path, statement)
+        for statement in ("from locomotion import hexapod", "from .. import hexapod"):
+            with (
+                self.subTest(statement=statement),
+                self.assertRaisesRegex(ValueError, "retained experiment"),
+            ):
+                inventory.check_imports("src/locomotion/rl/wrapper.py", statement)
+
     def test_relocated_cli_help_works_in_a_fresh_process_from_another_directory(self):
         paths = [
             "tools/archive.py",

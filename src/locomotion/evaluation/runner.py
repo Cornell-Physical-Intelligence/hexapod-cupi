@@ -59,19 +59,47 @@ def _deadline(seconds):
     return time.monotonic() + seconds
 
 
-class ExactEvaluationCapture:
-    """Capture all eight native samples, including full unedited patch packets."""
+class NativeCaptureSource:
+    """Read native counters and patches, and independently recompute its fixed motor law."""
 
-    def __init__(self, env, output, geometry_extrema):
+    def __init__(self, env):
+        self.env = env
+        self.metadata = {
+            "backend": "isaac",
+            "contacts": "native contact patches",
+            "contact_classification": "exact_distal_points",
+            "motor_law": "canonical_rs05",
+        }
+
+    def counter(self):
+        return self.env.sim.get_physics_step_count()
+
+    def contacts(self, poses, geometry):
+        buffers = [
+            np.array(x.numpy(), copy=True) for x in self.env.contact.get_contact_data(0.0025)
+        ]
+        return classify_patches(buffers, self.env.sensor_map, poses, geometry, self.env.num_envs)
+
+    def servo(self, q, dq, target):
+        return diagnostic_servo(
+            q, dq, target, np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32)
+        )
+
+
+class ExactEvaluationCapture:
+    """Capture all eight samples and enforce the shared evidence invariants."""
+
+    def __init__(self, env, output, geometry_extrema, *, source=None):
         if env.capture is not None:
             raise ValueError("Another owner already occupies the native capture hook")
         self.env, self.output = env, Path(output)
+        self.source = NativeCaptureSource(env) if source is None else source
         self.output.mkdir(parents=True, exist_ok=False)
         with np.load(geometry_extrema, allow_pickle=False) as data:
             self.geometry = DiagnosticGeometry(
                 env.geometry_meta, {k: data[k] for k in data.files}, env.native_body_names
             )
-        self.counter = env.sim.get_physics_step_count()
+        self.counter = self.source.counter()
         self.initial_counter = self.counter
         self.count = 0
         self.rows, self.last_control, self.files = [], [], []
@@ -87,6 +115,7 @@ class ExactEvaluationCapture:
         self.previous_q = _cpu(env.current["q"]).astype(float)
         self.native_limits = np.asarray(env.native_readback["limits"])
         self.native_speed = np.asarray(env.native_readback["native_max_velocity"])
+        _save(self.output / "source.json", self.source.metadata)
         _save(
             self.output / "initial_state.json",
             {k: _cpu(v).tolist() for k, v in env.current.items()},
@@ -103,7 +132,7 @@ class ExactEvaluationCapture:
             "control_index": np.array(self.count // 8),
             "substep_index": np.array(substep),
             "time_s": np.array((self.count + 1) * 0.0025),
-            "explicit_counter": np.array(env.sim.get_physics_step_count()),
+            "explicit_counter": np.array(self.source.counter()),
             "pre_joint_position_rad": _cpu(q),
             "pre_joint_velocity_rad_s": _cpu(dq),
             "joint_position_rad": _cpu(state["q"]),
@@ -121,10 +150,7 @@ class ExactEvaluationCapture:
             "toe_xyz_body_m": _cpu(state["toe_body"]),
         }
         try:
-            buffers = [np.array(x.numpy(), copy=True) for x in env.contact.get_contact_data(0.0025)]
-            contacts = classify_patches(
-                buffers, env.sensor_map, row["link_pose_xyzw"], self.geometry, env.num_envs
-            )
+            contacts = self.source.contacts(row["link_pose_xyzw"], self.geometry)
             minimum, non_toe = self.geometry.clearance(row["link_pose_xyzw"])
             row.update(
                 distal_contact=contacts["distal_contact"],
@@ -159,12 +185,10 @@ class ExactEvaluationCapture:
                 raise FloatingPointError("Nonfinite native evaluation evidence")
             if not np.array_equal(row["native_input_pre_nm"], row["applied_torque_nm"]):
                 raise RuntimeError("Actual native motor input differs")
-            wanted = diagnostic_servo(
+            wanted = self.source.servo(
                 row["pre_joint_position_rad"],
                 row["pre_joint_velocity_rad_s"],
                 row["joint_target_rad"],
-                np.full(18, STIFFNESS_NM_PER_RAD, np.float32),
-                np.asarray(KD, np.float32),
             )
             for name, expected in zip(
                 ("computed_torque_nm", "applied_torque_nm", "effort_ceiling_nm"), wanted
@@ -272,7 +296,7 @@ class ExactEvaluationCapture:
             "body_names": self.env.native_body_names,
             "joint_names": list(JOINT_NAMES),
             "files": {p.name: _sha(p) for p in sorted(self.output.iterdir()) if p.is_file()},
-            "contact_classification": "exact_distal_points",
+            "contact_classification": self.source.metadata["contact_classification"],
         }
         _save(self.output / "capture.json", receipt)
         return receipt
@@ -300,6 +324,8 @@ def run_batch(
     progress=None,
     max_wall_seconds=None,
     motion_features=None,
+    rules=None,
+    capture_source=None,
 ):
     """One initial reset, full fixed-duration trials; a failure preserves prefixes.
 
@@ -307,13 +333,15 @@ def run_batch(
     without a stop control holds its command throughout, and a route case asks the waypoint
     follower for its command from the body's true pose. ``motion_features`` maps the environment
     state to the motion features that the trace records before and after each control. The report
-    holds recording facts only; the judge decides pass or fail from the trace.
+    holds recording facts only; the judge decides pass or fail from the trace. ``capture_source``
+    constructs a backend source after reset; the default reads native counters and patches.
     """
     if not cases or len(cases) > env.num_envs or len({x["controls"] for x in cases}) != 1:
         raise ValueError("Batch cases must fit the environment and have one fixed duration")
     cases = [{"stop_control": case["controls"], **case} for case in cases]
     producers = [
-        requirements.producer(case) for case in cases + [cases[-1]] * (env.num_envs - len(cases))
+        requirements.producer(case, rules)
+        for case in cases + [cases[-1]] * (env.num_envs - len(cases))
     ]
     duration = cases[0]["controls"] * 0.02
     if env.cfg.episode_seconds <= duration:
@@ -326,7 +354,9 @@ def run_batch(
     np.random.seed(seed)
     env.commands.zero_()
     env.reset()
-    capture = ExactEvaluationCapture(env, out / "native400hz", geometry_extrema)
+    # Construct the source after reset so per-replica motor coefficients belong to this trial.
+    source = {} if capture_source is None else {"source": capture_source(env)}
+    capture = ExactEvaluationCapture(env, out / "native400hz", geometry_extrema, **source)
     rows = []
     failure = None
     failure_kind = None
@@ -348,7 +378,9 @@ def run_batch(
         "urdf_sha256": URDF_SHA256,
         "usd_sha256": USD_SHA256,
         "geometry_extrema_sha256": _sha(geometry_extrema),
-        "contact_classification": "exact_distal_points",
+        "contact_classification": source["source"].metadata["contact_classification"]
+        if source
+        else "exact_distal_points",
         "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation",
         "initial_resets": 1,
         "resets_during_trial": 0,
@@ -490,6 +522,7 @@ def run_cases(
     progress=None,
     max_wall_seconds=None,
     motion_features=None,
+    capture_source=None,
 ):
     """Run the cases of one requirement set, one native trial each, then judge the traces.
 
@@ -555,6 +588,8 @@ def run_cases(
                 progress=progress,
                 max_wall_seconds=None if not math.isfinite(remaining) else remaining,
                 motion_features=motion_features,
+                rules=rules,
+                capture_source=capture_source,
             )
         except Exception as error:
             failure = repr(error)

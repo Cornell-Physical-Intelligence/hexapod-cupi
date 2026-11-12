@@ -331,65 +331,6 @@ def quaternion_multiply(a, b):
     )
 
 
-class _StepCounter:
-    """The part of Isaac's SimulationContext that repository wrappers read."""
-
-    def __init__(self, env):
-        self._env = env
-
-    def get_physics_step_count(self):
-        return self._env.physics_steps
-
-
-class _Buffer:
-    """Stands in for a warp array: the repository reads contact buffers with ``.numpy()``."""
-
-    def __init__(self, array):
-        self._array = array
-
-    def numpy(self):
-        return self._array
-
-
-class _ContactView:
-    """The last substep's floor contacts in the layout of Isaac's rigid contact view."""
-
-    def __init__(self, env):
-        self.env = env
-        self.filter_count = 1
-        # Geoms of each native body, as indices into CONTACT_GEOMS.
-        self.geoms = [[i] for i in range(13)] + [[13 + k, 19 + k] for k in range(6)]
-
-    def get_contact_data(self, dt):
-        env = self.env
-        data = env._sensor[:, 0].reshape(env.num_envs, 25, 6)
-        origins = env._origins64.numpy()
-        force, point, normal, separation = [], [], [], []
-        counts = np.zeros((19 * env.num_envs, 1), dtype=np.int64)
-        starts = np.zeros((19 * env.num_envs, 1), dtype=np.int64)
-        for e in range(env.num_envs):
-            for b, geoms in enumerate(self.geoms):
-                starts[e * 19 + b, 0] = len(force)
-                for g in geoms:
-                    if data[e, g, 2] > 0.0:
-                        force.append([data[e, g, 2]])
-                        point.append(data[e, g, 3:] + origins[e])
-                        normal.append([0.0, 0.0, 1.0])
-                        separation.append([0.0])
-                        counts[e * 19 + b, 0] += 1
-        # One spare row: the repository reads a full buffer as a sign of truncation.
-        force.append([0.0])
-        point.append(np.zeros(3))
-        normal.append([0.0, 0.0, 0.0])
-        separation.append([0.0])
-        return tuple(
-            _Buffer(np.asarray(x, dtype=np.float64)) for x in (force, point, normal, separation)
-        ) + (_Buffer(counts), _Buffer(starts))
-
-    def get_contact_force_matrix(self, dt):
-        return _Buffer(self.env._forces.reshape(-1, 1, 3).numpy())
-
-
 class SurrogateEnv:
     num_actions = 18
     observation_width = 231
@@ -568,7 +509,6 @@ class SurrogateEnv:
             self._toe_hull.append(m.geom_pos[geom] + vertices @ rotation.reshape(3, 3).T)
         if self.randomized:
             self._init_randomization(qpos0)
-        self.sim = _StepCounter(self)
         self.native_errors = []
         self.substep_state = substep_state
         self.history = torch.zeros((cfg.num_envs, 5, 42))
@@ -588,10 +528,6 @@ class SurrogateEnv:
         self._toe_cap = torch.zeros((cfg.num_envs, 6))
         self._shaft = torch.zeros((cfg.num_envs, 6))
         self._touching = np.zeros((cfg.num_envs, 25), dtype=bool)
-        self.contact = _ContactView(self)
-        self.sensor_map = [
-            (e, name) for e in range(cfg.num_envs) for name in self.native_body_names
-        ]
         self.native_readback = {
             "native_joint_names": self.native_joint_names,
             "native_body_names": self.native_body_names,
@@ -1089,7 +1025,7 @@ class SurrogateEnv:
                     target,
                     forces,
                     substep,
-                    applied,
+                    torch.from_numpy(self._control[:, 0, : self.mj_model.nu].astype(np.float32)),
                 )
         self.held = target
         self.previous_action = executed_action_feature(

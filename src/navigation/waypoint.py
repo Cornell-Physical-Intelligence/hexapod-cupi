@@ -22,9 +22,9 @@ retired at ``stop_radius_m``, which sits inside the mission's stop tolerance by
 the body's stopping distance, so the stand command arrives before the goal
 and the body rolls to rest inside the tolerance.
 
-Navigation must not import locomotion (ARCHITECTURE.md), so the bank values are
-restated here; ``tests/test_producer.py`` asserts they equal
-``locomotion.omniwalk.mdp.commands.command_bank(TaskConfig())``.
+Navigation and training build their command banks from the shared command set
+in ``contracts.command`` and the owner in ``configs/walking_requirements.json``.
+A narrower envelope filters the bank; unavailable motion raises ``ValueError``.
 """
 
 from __future__ import annotations
@@ -34,8 +34,10 @@ from typing import Iterable, Sequence
 
 from contracts.command import (
     CommandEnvelope,
+    CommandSet,
     Frame,
     VelocityCommand,
+    load_requirement_set,
 )
 
 from .producer import Pose2D, wrap_to_pi
@@ -52,17 +54,16 @@ __all__ = [
     "command_bank",
 ]
 
-# Restated from locomotion.omniwalk.mdp.commands.TaskConfig; the navigation
-# tests assert equality with command_bank(TaskConfig()).
-BANK_SPEED_LEVELS_MPS: tuple[float, ...] = (0.025, 0.05)
-BANK_YAW_RATE_RAD_S = 0.2
-BANK_ARC_SPEED_MPS = 0.04
-BANK_ARC_YAW_RATE_RAD_S = 0.15
-BANK_BEARINGS = 8
-BEARING_STEP_RAD = math.pi / 4
-# Restated from TaskConfig.hold_min_seconds: the shortest command hold the
-# policy saw in training.
-TRAINING_HOLD_MIN_S = 2.0
+# Resolve owner data at import, before a follower starts its control loop.
+_DEFAULT_RULES, _ = load_requirement_set()
+COMMAND_SET = CommandSet.from_mapping(_DEFAULT_RULES["commands"])
+BANK_SPEED_LEVELS_MPS = COMMAND_SET.translate_speeds_mps
+BANK_YAW_RATE_RAD_S = COMMAND_SET.turn_rate_rad_s
+BANK_ARC_SPEED_MPS = COMMAND_SET.arc_speed_mps
+BANK_ARC_YAW_RATE_RAD_S = COMMAND_SET.arc_turn_rate_rad_s
+BANK_BEARINGS = COMMAND_SET.translate_bearings
+BEARING_STEP_RAD = COMMAND_SET.bearing_step_rad
+TRAINING_HOLD_MIN_S = _DEFAULT_RULES["hold_min_s"]
 # Retire a goal well inside the 0.12 m stop tolerance of configs/walking_requirements.json:
 # the body rolls up to the 0.05 m stopping distance after the stand command, and the
 # surrogate closed loop of 7 November 2026 ended 117 to 122 mm from goals retired at 0.12 m.
@@ -70,35 +71,11 @@ RETIRE_RADIUS_M = 0.06
 
 
 def command_bank() -> list[list[float]]:
-    """The nonzero navigation-frame bank, in the training module's order and arithmetic."""
-
-    result: list[list[float]] = []
-    for speed in BANK_SPEED_LEVELS_MPS:
-        for bearing in range(BANK_BEARINGS):
-            angle = bearing * math.pi / 4
-            result.append([speed * math.cos(angle), speed * math.sin(angle), 0.0])
-    result.extend([[0.0, 0.0, -BANK_YAW_RATE_RAD_S], [0.0, 0.0, BANK_YAW_RATE_RAD_S]])
-    result.extend(
-        [
-            [BANK_ARC_SPEED_MPS, 0.0, -BANK_ARC_YAW_RATE_RAD_S],
-            [BANK_ARC_SPEED_MPS, 0.0, BANK_ARC_YAW_RATE_RAD_S],
-        ]
-    )
-    return result
+    """The nonzero navigation-frame bank in its recorded training order."""
+    return [list(command.as_tuple()) for command in COMMAND_SET.nonzero()]
 
 
-def _bank_envelope() -> CommandEnvelope:
-    bank = command_bank()
-    limits = []
-    for axis in range(3):
-        values = [entry[axis] for entry in bank]
-        limits.append((min(values), max(values)))
-    return CommandEnvelope(limits[0], limits[1], limits[2], name="bank")
-
-
-# Per-axis extremes of the bank. The envelope admits more than the bank (any
-# point inside the box); the follower itself only emits bank entries.
-BANK_ENVELOPE = _bank_envelope()
+BANK_ENVELOPE = COMMAND_SET.envelope()
 
 STAND = VelocityCommand(vx_mps=0.0, vy_mps=0.0, wz_rad_s=0.0, frame=Frame.NAVIGATION)
 
@@ -115,8 +92,22 @@ class WaypointFollower:
         heading_release_rad: float = 0.01,
         stop_radius_m: float = RETIRE_RADIUS_M,
         hold_min_s: float = TRAINING_HOLD_MIN_S,
-        envelope: CommandEnvelope = BANK_ENVELOPE,
+        envelope: CommandEnvelope | None = None,
+        command_set: CommandSet = COMMAND_SET,
     ) -> None:
+        if not command_set.stand:
+            raise ValueError("WaypointFollower requires a permitted stand command")
+        self.command_set = command_set
+        self.envelope = command_set.envelope() if envelope is None else envelope
+        STAND.validate(self.envelope)
+        self._translations = [
+            [
+                (speed, command)
+                for speed in command_set.translate_speeds_mps
+                if (command := command_set.translation(speed, bearing)).is_within(self.envelope)
+            ]
+            for bearing in range(command_set.translate_bearings)
+        ]
         self.waypoints: list[tuple[float, float]] = []
         for index, waypoint in enumerate(waypoints):
             point = tuple(float(value) for value in waypoint)
@@ -140,11 +131,11 @@ class WaypointFollower:
                 "heading_release_rad must lie in [0, heading_gate_rad), "
                 f"got {heading_release_rad!r}"
             )
-        # The held heading is the nearest multiple of 45 degrees, so the error
-        # never exceeds 22.5 degrees; a gate at or past that never trips.
-        if float(heading_gate_rad) >= BEARING_STEP_RAD / 2.0:
+        # The held heading is the nearest bank bearing, so the error is at most
+        # half one bearing step; a gate at or past that never trips.
+        if float(heading_gate_rad) >= command_set.bearing_step_rad / 2.0:
             raise ValueError(
-                f"heading_gate_rad must be below {BEARING_STEP_RAD / 2.0:.4f}, "
+                f"heading_gate_rad must be below {command_set.bearing_step_rad / 2.0:.4f}, "
                 f"got {heading_gate_rad!r}"
             )
         self.approach_gain_per_s = float(approach_gain_per_s)
@@ -153,7 +144,6 @@ class WaypointFollower:
         self._turning = False
         self.stop_radius_m = float(stop_radius_m)
         self.hold_min_s = float(hold_min_s)
-        self.envelope = envelope
         self._index = 0
         self._held: VelocityCommand | None = None
         self._hold_until_s = -math.inf
@@ -173,10 +163,10 @@ class WaypointFollower:
         return self.waypoints[self._index]
 
     @staticmethod
-    def held_heading(heading_rad: float) -> float:
-        """The multiple of 45 degrees nearest ``heading_rad``, wrapped to ``(-pi, pi]``."""
+    def held_heading(heading_rad: float, bearing_step_rad: float = BEARING_STEP_RAD) -> float:
+        """The bank bearing nearest ``heading_rad``, wrapped to ``(-pi, pi]``."""
 
-        return wrap_to_pi(round(float(heading_rad) / BEARING_STEP_RAD) * BEARING_STEP_RAD)
+        return wrap_to_pi(round(float(heading_rad) / bearing_step_rad) * bearing_step_rad)
 
     def update(self, pose: Pose2D, t: float) -> VelocityCommand:
         """Return the bank command for the tick at ``t`` seconds; see the module docstring."""
@@ -200,7 +190,10 @@ class WaypointFollower:
         if self.is_finished:
             return STAND
 
-        heading_error = wrap_to_pi(self.held_heading(pose.heading_rad) - pose.heading_rad)
+        heading_error = wrap_to_pi(
+            self.held_heading(pose.heading_rad, self.command_set.bearing_step_rad)
+            - pose.heading_rad
+        )
         # A turn starts past the gate and ends inside the release, so a heading that
         # creeps across the gate does not alternate one-tick turns with walks.
         self._turning = abs(heading_error) >= self.heading_gate_rad or (
@@ -210,8 +203,10 @@ class WaypointFollower:
             # The gate ends a hold: the correction is a few ticks long and
             # holding it for hold_min_s would overshoot the held heading.
             self._held = None
-            yaw_rate = BANK_YAW_RATE_RAD_S if heading_error > 0.0 else -BANK_YAW_RATE_RAD_S
+            yaw_rate = self.command_set.turn_rate_rad_s * (1 if heading_error > 0.0 else -1)
             command = VelocityCommand(0.0, 0.0, yaw_rate, frame=Frame.NAVIGATION)
+            if not command.is_within(self.envelope):
+                raise ValueError(f"Required yaw {yaw_rate} rad/s is unavailable in the envelope")
         elif self._held is not None and t < self._hold_until_s:
             command = self._held
         else:
@@ -220,26 +215,21 @@ class WaypointFollower:
             delta_y = goal_y - pose.y_m
             distance = math.hypot(delta_x, delta_y)
             body_bearing = wrap_to_pi(math.atan2(delta_y, delta_x) - pose.heading_rad)
-            bearing = round(body_bearing / BEARING_STEP_RAD) % BANK_BEARINGS
-            angle = bearing * math.pi / 4
-            speed = _nearest_level(self.approach_gain_per_s * distance)
-            command = VelocityCommand(
-                vx_mps=speed * math.cos(angle),
-                vy_mps=speed * math.sin(angle),
-                wz_rad_s=0.0,
-                frame=Frame.NAVIGATION,
+            bearing = (
+                round(body_bearing / self.command_set.bearing_step_rad)
+                % self.command_set.translate_bearings
             )
+            choices = self._translations[bearing]
+            if not choices:
+                raise ValueError(
+                    f"Required translation bearing {bearing} is unavailable in the envelope"
+                )
+            speed_goal = self.approach_gain_per_s * distance
+            _, command = min(choices, key=lambda entry: (abs(entry[0] - speed_goal), entry[0]))
             self._held = command
             self._hold_until_s = t + self.hold_min_s
 
-        command = self.envelope.clamp(command)
         # Cheap and worth it: a producer that emits an inadmissible command
         # should fail here, next to the bug, not inside the policy.
         command.validate(self.envelope)
         return command
-
-
-def _nearest_level(speed_mps: float) -> float:
-    """The bank speed level nearest ``speed_mps``; a tie takes the lower level."""
-
-    return min(BANK_SPEED_LEVELS_MPS, key=lambda level: (abs(level - speed_mps), level))

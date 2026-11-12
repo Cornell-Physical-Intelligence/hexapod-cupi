@@ -12,7 +12,7 @@ from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS, RECIPES
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.robots.hexapod import sha
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
-from locomotion.spark.sources import runtime_paths, write_runtime
+from locomotion.spark.sources import REQUIREMENTS_INPUT, allocation_files, write_runtime
 from locomotion.spark.validation import (
     ALLOCATION_PROFILES,
     CLEANUP_MARGIN_SECONDS,
@@ -84,7 +84,6 @@ def prepare(
     """Write a native allocation pack. PPO training and evaluation start from the named recipe; a learner
     option that is not None replaces the recipe value."""
     output, remote_root, root = map(Path, (output, remote_root, root))
-    tree = root / "src"
     if (
         learner not in ("ppo", "amp")
         or networks not in ("mlp", "paper")
@@ -273,41 +272,10 @@ def prepare(
         raise ValueError("The stance file needs a recorded hash")
     output.mkdir(parents=True, exist_ok=False)
     source = output / "source"
-    package = source / "locomotion"
-    package.mkdir(parents=True)
-    for path in runtime_paths(tree / "locomotion"):
-        destination = package / path.relative_to(tree / "locomotion")
+    for name, path in allocation_files(root, learner=learner, mode=mode).items():
+        destination = source / name
         destination.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(path, destination)
-    prior_sources = (
-        (
-            "__init__.py",
-            "amp.py",
-            "discriminator.py",
-            "networks.py",
-            "dataset.py",
-            "processing_sources_v2.json",
-        )
-        if learner == "amp"
-        else (("__init__.py", "replay_native.py") if mode == "replay" else ())
-    )
-    if prior_sources:
-        prior_package = package / "amp"
-        prior_package.mkdir(exist_ok=True)
-        for name in prior_sources:
-            shutil.copy2(tree / "locomotion/amp" / name, prior_package / name)
-    if learner == "amp":
-        bank = Path("locomotion/priors/datasets/amp_demonstrations_001")
-        shutil.copytree(tree / bank, source / bank)
-    # The evaluation runs the waypoint follower in closed loop; it and its contracts travel too.
-    for package_name, names in (
-        ("contracts", ("__init__.py", "release.py", "command.py", "pose.py")),
-        ("navigation", ("__init__.py", "producer.py", "waypoint.py")),
-    ):
-        directory = source / package_name
-        directory.mkdir()
-        for name in names:
-            shutil.copy2(tree / package_name / name, directory / name)
     write_runtime(source)
     save(
         source / "FREEZE_SHA256.json",
@@ -362,6 +330,8 @@ def prepare(
     }
     if learner != "ppo":
         binding["command_args"] += ["--learner", learner, "--networks", networks]
+    if mode == "evaluate":
+        binding["command_args"] += ["--requirements", "/source/" + REQUIREMENTS_INPUT]
     if allocation_profile != "standard":
         binding["command_args"] += ["--allocation-profile", allocation_profile]
     if mode != "diagnostic":
