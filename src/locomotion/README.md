@@ -68,13 +68,13 @@ contact view. State reads use raw PhysX views until native parity admits
 
 ## Import direction
 
-Reviewers enforce the AST import audit: "`omniwalk -> [robots]`;
-`evaluation -> [omniwalk, robots]`; `spark -> [omniwalk, robots]`; `rl -> []`;
-`amp -> [evaluation, omniwalk, rl, robots, spark]`;
-`scripts -> [amp, evaluation, omniwalk, rl, robots, spark]`;
-`surrogate -> [amp, evaluation, omniwalk, rl, robots, spark]`;
-no cycles." `robots` imports no package, and no package imports `hexapod`. A new
-edge is a review failure.
+`tools/source_inventory.py check` enforces the cross-package edges in
+`IMPORT_BOUNDARIES`, using the same import resolver as the code map. It resolves
+absolute imports, relative imports and imports through package aliases. The
+learner wrappers depend on the task's interface; task-specific destination
+features stay in `omniwalk`. Navigation and mission cannot import locomotion,
+and maintained packages cannot import the retained `hexapod` experiment or
+artifact modules. A new edge needs a reviewed boundary change.
 
 ## Commands
 
@@ -235,7 +235,8 @@ runtime renewed the receipt
 ([c48_receipt_renewal_20261102_001](../../site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json)):
 standing admission at 1 and 128 robots, 13 of 13 probes through the parity
 harness, and a CPU production-loader check. `tools/project_site.py check`
-reports whether its 56 bound runtime files still match the tree.
+compares the full native pack selection with the receipt, including added and
+removed files and the frozen walking requirements.
 `tests/native_parity_pack.py` writes a candidate replay pack with the harness
 and its pinned ranges, and `spark/pack.py` records the root review of any pack
 before launch. Stage 2 is judged on the walking requirements, with visual

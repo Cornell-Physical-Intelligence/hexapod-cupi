@@ -9,7 +9,6 @@ has not run a control reads the destination at the body. It needs a ``Destinatio
 
 import torch
 
-from locomotion.omniwalk.mdp.destination import NEUTRAL_FEATURES, destination_features
 from locomotion.rl.wrapper import OmniVecEnv
 
 
@@ -25,10 +24,7 @@ class DestinationVecEnv(OmniVecEnv):
 
     def destination_inputs(self, pending):
         """The task's five inputs; rows in ``pending`` read the neutral values."""
-        task = self.task
-        current = destination_features(task.current["root"], task.destination, task.command_elapsed)
-        neutral = torch.tensor(NEUTRAL_FEATURES, device=current.device).expand_as(current)
-        return torch.where(pending[:, None].to(current.device), neutral, current)
+        return self.task.destination_inputs(pending)
 
     def observations(self, output):
         base = super().observations(output)

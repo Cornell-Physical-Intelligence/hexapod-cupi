@@ -77,14 +77,15 @@ def allocation_files(root, *, learner="ppo", mode="evaluate"):
     }
 
 
-def allocation_manifest(root, **options):
+def allocation_manifest(root, *, allow_missing=False, **options):
     """The same runtime identity before the selected files are copied into a pack."""
     return {
         "schema": SCHEMA,
         "files": {
             name: digest(path)
             for name, path in allocation_files(root, **options).items()
-            if name.endswith(".py") or name == REQUIREMENTS_INPUT
+            if (name.endswith(".py") or name == REQUIREMENTS_INPUT)
+            and (not allow_missing or path.is_file())
         },
     }
 

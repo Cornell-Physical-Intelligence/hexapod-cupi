@@ -23,8 +23,8 @@ reads each file; review covers a field that no check reads, such as
 | File | Decides | Read by |
 | --- | --- | --- |
 | [`robot/active_model.json`](robot/active_model.json) | The approved robot model and its motor corrections, with the hash of each model file. | `tools/check_pipeline_lineages.py current` binds the URDF, model and USD hashes. |
-| [`configs/walking_requirements.json`](configs/walking_requirements.json) | What the survey asks of the walking controller: the commands navigation may send, the hold times, the stop tolerance and routes, the tilt and motor torque limits, the pose source and the payload. | `src/navigation/tests/test_requirements.py` binds the commands to the follower; [the judge](src/locomotion/evaluation/requirements.py) reads the cases and limits. |
-| [`configs/accepted_controller.json`](configs/accepted_controller.json) | The one checkpoint the project calls its walking controller, the requirement set it claims, each judged row with its evidence, and what nobody has judged yet. | `tests/test_accepted_controller.py` binds the hashes, limits and judged values to their sources. |
+| [`configs/walking_requirements.json`](configs/walking_requirements.json) | What the survey asks of the walking controller: the commands navigation may send, the hold times, the stop tolerance and routes, the tilt and motor torque limits, the pose source and the payload. | `contracts.command.CommandSet` builds the bank used by training, navigation and [the judge](src/locomotion/evaluation/requirements.py); native packs freeze the owner file with their source manifest. |
+| [`configs/accepted_controller.json`](configs/accepted_controller.json) | The one checkpoint the project calls its walking controller, the requirement set it claims, each judged row with its evidence, and what nobody has judged yet. | `tools/controller_evidence.py` binds hashes, limits, values and verdicts to their source records in publication checks and regression tests. |
 | [`configs/approved_code_version.json`](configs/approved_code_version.json) | The code version approved to run native evaluations of the accepted controller, and the receipt that binds its runtime files. | `tests/test_approved_code_version.py` binds the receipt; `tools/project_site.py check` reports a lapsed approval and does not fail on it. |
 | [`site/project.json`](site/project.json) | The roadmap: the state of each step, its owner file and what done means. | `tools/project_site.py check` refuses a done step that its rules do not admit. |
 
@@ -90,7 +90,9 @@ Navigation sends only the `commands` of a requirement set in the walking
 requirements, and `src/navigation/tests/test_requirements.py` fails when the
 follower's command bank and the file differ. A command producer may supply a
 narrower envelope. The accepted controller is judged only on the set it claims,
-so a wider envelope needs a new requirement set and a new judgement first.
+so a wider envelope needs a new requirement set and a new judgement first. A
+narrower envelope selects permitted bank entries. It cannot clamp a bank entry
+into an untrained intermediate command; unavailable motion raises an error.
 
 ## Integration requirements
 

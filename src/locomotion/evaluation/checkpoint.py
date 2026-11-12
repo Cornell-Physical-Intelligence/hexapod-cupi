@@ -10,7 +10,7 @@ import json
 import math
 from pathlib import Path
 
-from contracts.release import COMPATIBILITY_KEYS
+from contracts.release import COMPATIBILITY_KEYS, runtime_changes
 
 LEARNER_DEFAULTS = {"learner": "ppo", "networks": "mlp", "motion_prior": False}
 LEARNER_KEYS = ("learner", "networks", "motion_prior", "learner_source_files", "amp_dataset")
@@ -122,7 +122,11 @@ def require_checkpoint_identity(record, identity):
     if any(recorded[key] != identity[key] for key in COMPATIBILITY_KEYS):
         raise ValueError("Checkpoint model, physics, seed or implementation differs")
     if identity["schema"] == "hexapod_locomotion_ppo_v2":
-        if recorded.get("runtime_sources") != identity.get("runtime_sources"):
+        if any(
+            runtime_changes(
+                recorded.get("runtime_sources"), identity.get("runtime_sources")
+            ).values()
+        ):
             raise ValueError("Checkpoint runtime dependencies differ")
     require_learner_identity(record, identity)
 
@@ -176,7 +180,8 @@ def measurements(judgement):
         or [row["case_id"] for row in rows] != declared
         or len(set(declared)) != len(declared)
         or any(
-            {"complete_trace", "valid_trace", "command_schedule", "command_set"} & row["checks"].keys()
+            {"complete_trace", "valid_trace", "command_schedule", "command_set"}
+            & row["checks"].keys()
             for row in rows
         )
     ):
@@ -353,7 +358,11 @@ def require_compatibility_identity(receipt, record, identity):
         raise ValueError("Compatibility original identity differs")
     if record.get("checkpoint_sha256") != CHECKPOINT_SHA:
         raise ValueError("Compatibility checkpoint differs")
-    if identity.get("runtime_sources") != receipt["candidate_runtime_sources"]:
+    if any(
+        runtime_changes(
+            receipt["candidate_runtime_sources"], identity.get("runtime_sources")
+        ).values()
+    ):
         raise ValueError("Compatibility candidate runtime differs")
     certified = receipt.get("certified_physics_config", record["identity"]["physics_config"])
     if identity["physics_config"] != certified:

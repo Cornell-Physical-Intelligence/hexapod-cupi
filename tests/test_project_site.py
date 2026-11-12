@@ -1,6 +1,5 @@
 """Protect the user-mandated public research update and evidence contract."""
 
-import hashlib
 import importlib.util
 import json
 import subprocess
@@ -112,9 +111,16 @@ class PosterContractTests(unittest.TestCase):
             target = self.root / "src" / path
             target.parent.mkdir(parents=True, exist_ok=True)
             target.write_text(text)
-        files = {p: hashlib.sha256(t.encode()).hexdigest() for p, t in bound.items()}
+        # Build the real pack selection, including its mandatory shared inputs.
+        from locomotion.spark.sources import allocation_files
+
+        for path in allocation_files(self.root).values():
+            if not path.exists():
+                path.parent.mkdir(parents=True, exist_ok=True)
+                path.write_text("{}\n" if path.suffix == ".json" else "")
+        manifest = site.allocation_manifest(self.root)
         receipt = self.root / "site/receipt.json"
-        receipt.write_text(json.dumps({"candidate_runtime_sources": {"files": files}}))
+        receipt.write_text(json.dumps({"candidate_runtime_sources": manifest}))
         (self.root / "configs").mkdir(exist_ok=True)
         (self.root / "configs/approved_code_version.json").write_text(
             json.dumps(
@@ -132,15 +138,44 @@ class PosterContractTests(unittest.TestCase):
         approval = site.native_approval()
         self.assertEqual(approval["status"], "current")
         self.assertEqual(approval["changed"], [])
-        self.assertIn("approved at abcdef01, all 2 bound files match", site.approval_line(approval))
+        self.assertIn(
+            "approved at abcdef01, all 10 bound files match", site.approval_line(approval)
+        )
 
     def test_native_approval_lapses_when_a_bound_file_changes_and_names_it(self):
         self.approval_fixture(change="locomotion/b.py")
         approval = site.native_approval()
         self.assertEqual(approval["status"], "lapsed")
         self.assertEqual(approval["changed"], ["locomotion/b.py"])
-        self.assertIn("1 of 2 bound files changed since abcdef01", site.approval_line(approval))
+        self.assertIn("0 added, 0 removed, 1 modified files", site.approval_line(approval))
         self.assertIn("locomotion/b.py", site.approval_line(approval))
+
+    def test_native_approval_lapses_for_a_new_runtime_dependency(self):
+        self.approval_fixture()
+        (self.root / "src/locomotion/new_dependency.py").write_text("VALUE = 1\n")
+        approval = site.native_approval()
+        self.assertEqual(approval["status"], "lapsed")
+        self.assertEqual(approval["added"], ["locomotion/new_dependency.py"])
+        self.assertIn("1 added", site.approval_line(approval))
+
+    def test_native_approval_names_removed_required_inputs(self):
+        for name in ("src/navigation/waypoint.py", "configs/walking_requirements.json"):
+            with self.subTest(name=name):
+                self.approval_fixture()
+                (self.root / name).unlink()
+                approval = site.native_approval()
+                self.assertEqual(approval["status"], "lapsed")
+                self.assertEqual(approval["removed"], [name.removeprefix("src/")])
+
+    def test_native_approval_lapses_for_changed_manifest_metadata(self):
+        self.approval_fixture()
+        current = site.allocation_manifest(self.root)
+        current["schema"] = "other"
+        with patch.object(site, "allocation_manifest", return_value=current):
+            approval = site.native_approval()
+        self.assertEqual(approval["status"], "lapsed")
+        self.assertEqual(approval["metadata"], ["schema"])
+        self.assertIn("first: schema", site.approval_line(approval))
 
     def test_native_approval_rejects_a_receipt_whose_bytes_changed(self):
         self.approval_fixture()
