@@ -53,6 +53,7 @@ class DependencyIdentityTests(unittest.TestCase):
             "omniwalk/mdp/frames.py",
             "omniwalk/env.py",
             "robots/actuator.py",
+            "robots/randomization.py",
             "evaluation/capture.py",
         ):
             self.assertIn(name, physics)

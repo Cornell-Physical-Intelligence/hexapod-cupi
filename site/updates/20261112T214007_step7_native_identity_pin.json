@@ -1,0 +1,21 @@
+{
+  "id": "20261112T214007_step7_native_identity_pin",
+  "date": "2026-11-12T21:40:07Z",
+  "title": "Pin the Step 7 declaration in the native physics source identity",
+  "summary": "The native physics source identity follows imports from the native environment. It reaches robots/randomization.py through omniwalk/env.py, so native training, evaluation and AMP replay bind its hash, and every native pack ships the file. A dependency identity test now names the file, so a change to the declaration cannot reuse a standing identity. No Isaac run has exercised this code.",
+  "areas": [
+    "training",
+    "simulation"
+  ],
+  "changes": [
+    "src/locomotion/tests/test_dependency_identity.py",
+    "site/updates/20261112T214007_step7_native_identity_pin.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_dependency_identity.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Push the branch and open the PR; then select the declaration on the native command line and record it in the run identity.",
+  "no_project_impact": true,
+  "reason": "A test addition only: no native run, admission result, gate threshold or accepted capability changes."
+}
