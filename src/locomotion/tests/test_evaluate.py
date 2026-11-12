@@ -334,6 +334,7 @@ class RecordingTests(unittest.TestCase):
             self.assertEqual(row["computed_torque_nm"].max(), 0.0)
             np.testing.assert_allclose(row["velocity_navigation_mps"], [[1.0, 2.0, 3.0]], atol=1e-6)
             self.assertEqual(receipt["steps"], 8)
+            self.assertEqual(receipt["contact_classification"], "exact_distal_points")
             self.assertEqual(receipt["nonfoot_contact_steps_400hz"], [1])
             with np.load(Path(temporary) / "raw/substeps_000.npz") as saved:
                 self.assertEqual(len(saved["sequence"]), 8)

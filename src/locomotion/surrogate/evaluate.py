@@ -477,6 +477,7 @@ def evaluate_checkpoint(args):
     import locomotion.evaluation.runner as evaluation
     import locomotion.omniwalk.task as task_module
     import locomotion.randomization as rnd
+    from locomotion.surrogate.capture import SurrogateCaptureSource
     from locomotion.surrogate.env import (
         DEFAULT_GEOMETRY,
         DEFAULT_MODEL,
@@ -629,6 +630,7 @@ def evaluate_checkpoint(args):
             seed=seed,
             progress=lambda value: print(json.dumps(value), flush=True),
             motion_features=extract_features,
+            capture_source=SurrogateCaptureSource,
         )
         close_case()
         for writer in writers.values():

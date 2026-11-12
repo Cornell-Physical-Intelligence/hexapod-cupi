@@ -9,6 +9,7 @@ the native experiment. You use native Isaac runs for acceptance.
 | `env.py` | Implement `OmniEnv` on the approved robot: apply the limiter and motor curve, and record contacts and telemetry. |
 | `train.py` | Train through stock RSL-RL, save source-bound checkpoints and resume matching runs. |
 | `evaluate.py` | Run the walking requirement cases, render video and compare results across contact settings. |
+| `capture.py` | Supply sensor contacts and a reset motor snapshot to the shared evidence checks. |
 | `replay.py` | Replay action traces or noise and score stored telemetry through the current task. |
 
 ```sh
@@ -35,7 +36,7 @@ random generators restart from the recorded seed.
 and reproduces the pre-change trajectory bit for bit. Each reset redraws that
 replica's masses, payload, friction, gains, motor strength and reset pose, and
 schedules its pushes. The identity records the declaration, its ranges and its
-SHA-256, so resume refuses a different declaration. Runs log no drawn values.
+SHA-256, so resume refuses a different declaration. Training runs log no drawn values.
 The evaluator's `--randomization` sets the probe conditions apart from the
 checkpoint's training; it needs `--no-contact-consensus`, because the draw sets
 the friction that the consensus varies.
@@ -56,10 +57,18 @@ probes and seed. Any mismatch stops the sweep before it renames or runs a cell;
 use a new `--output` for another request. Incomplete cells and cells with an
 acquisition failure move to `<id>.attempt_<n>` and run again.
 
-The probe runner verifies each substep against the nominal motor law, so a
-cell with motor strength 0.8 or 1.2, and `evaluate --randomization table2_v1`,
-stop at that check with an acquisition failure. The sweep records those cells as
-`acquisition_failure`, not as evaluated.
+The evaluator snapshots motor gains and strength after each case reset. It
+records those coefficients in `native400hz/source.json`, bound by the capture's
+file hashes. An independent NumPy motor oracle checks each substep against that
+snapshot, including the unchanged 1.6 Nm cap. Changed coefficients or a mismatched
+physics input stop acquisition and preserve the failed prefix. The same capture
+checks cover nominal runs, fixed cells and randomized evaluation.
+
+The capture source reads MuJoCo's per-geom floor-force and contact-point sensors.
+It records their scope in `source.json`; these summaries provide no native patch
+completeness claim. The common capture retains its array keys, dtypes, contact
+classification and continuity checks. Native capture continues to validate its
+actual patch buffers and fixed motor law.
 
 The evaluator reconstructs the recorded actor inputs with no observation noise.
 You can test joint-velocity input gains or force a two-control action mean. Static
