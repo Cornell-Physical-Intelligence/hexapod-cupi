@@ -189,6 +189,15 @@ the surrogate's toe-cap points, so both engines lift the root by the same rule.
 No Isaac run has exercised these writes yet (#67). This declaration admits
 nothing.
 
+A native training pack selects the declaration with `--randomization
+table2_v1` on `locomotion.spark.prepare`; the pack passes it to
+`scripts/train.py`. The run identity and `PACK.json` record the name, hash and
+canonical declaration under `randomization`. A nominal run records no
+`randomization` key, so its identity is unchanged. Evaluation, probes and
+diagnostics refuse a declaration and run the nominal robot; an evaluation
+records the checkpoint's declaration as `checkpoint_randomization`. The
+physics identity and the standing admission stay those of the nominal robot.
+
 `grid_declaration("table2_v1_grid")` declares the fixed-condition screen of
 issue #67, SHA-256
 `7d631f12e8abefd8141f0dc515eaa446b90b5563315fe41ea608db0ab2822882`. It crosses

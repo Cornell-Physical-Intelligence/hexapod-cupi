@@ -211,6 +211,93 @@ class DependencyIdentityTests(unittest.TestCase):
                     with self.assertRaisesRegex(ValueError, "experiment destination_v9 differs"):
                         preflight(play, evaluation(name, experiment))
 
+    def test_a_randomized_checkpoint_records_its_declaration_and_evaluates_on_the_nominal_robot(
+        self,
+    ):
+        """Training records the Step 7 declaration; its evaluation keeps it as the checkpoint's and draws nothing."""
+        from locomotion.robots import randomization as rnd
+
+        remote = "/srv/cupi/hexapod/runs/james/randomization_fixture"
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            command, preflight = self.entry_fixture(root, remote)
+            nominal = preflight(train, command("train", "nominal", updates=2000))
+            self.assertNotIn("randomization", nominal)
+            pack = command("train", "table2", updates=2000, randomization="table2_v1")
+            self.assertEqual(pack[pack.index("--randomization") + 1], "table2_v1")
+            recorded = json.loads((root / "table2/PACK.json").read_text())["randomization"]
+            trained = preflight(train, pack)
+            self.assertEqual(trained["randomization"], recorded)
+            self.assertEqual(
+                trained["randomization"]["declaration_sha256"],
+                rnd.identity("table2_v1")["declaration_sha256"],
+            )
+            self.assertEqual(
+                json.loads(rnd.declaration("table2_v1")["json"]),
+                trained["randomization"]["declaration"],
+            )
+            self.assertEqual(
+                {key: trained[key] for key in COMPATIBILITY_KEYS},
+                {key: nominal[key] for key in COMPATIBILITY_KEYS},
+            )
+            checkpoint_sha = cli.sha(root / "checkpoint.pt")
+            (root / "checkpoint.json").write_text(
+                json.dumps(
+                    {"identity": trained, "updates": 2000, "checkpoint_sha256": checkpoint_sha}
+                )
+            )
+            evaluated = preflight(
+                play,
+                command(
+                    "evaluate",
+                    checkpoint=remote + "/checkpoint.pt",
+                    checkpoint_sha=checkpoint_sha,
+                    checkpoint_declaration_sha="b" * 64,
+                ),
+            )
+            self.assertNotIn("randomization", evaluated)
+            self.assertEqual(evaluated["checkpoint_randomization"], trained["randomization"])
+            for mode in ("evaluate", "probe", "diagnostic"):
+                with self.subTest(mode=mode):
+                    with self.assertRaisesRegex(ValueError, "applies to training"):
+                        prepare(
+                            root / ("refused_" + mode), remote, mode=mode, randomization="table2_v1"
+                        )
+            with self.assertRaisesRegex(ValueError, "applies to training"):
+                prepare(root / "unknown", remote, randomization="table3")
+
+    def test_the_native_environment_is_built_with_the_requested_declaration(self):
+        import locomotion.omniwalk.adapter as adapter
+
+        args = train.parse_args(
+            [
+                *[
+                    item
+                    for name in (
+                        "asset",
+                        "model",
+                        "geometry",
+                        "geometry-extrema",
+                        "stance",
+                        "output",
+                    )
+                    for item in ("--" + name, "unused")
+                ],
+                "--source-freeze-sha256",
+                "0" * 64,
+                "--num-envs",
+                "128",
+                "--headless",
+                "--preflight-only",
+                "--randomization",
+                "table2_v1",
+            ]
+        )
+        args.mode = "train"
+        with patch.object(adapter, "OmniEnv") as built:
+            cli.create_env(args, None, {})
+        self.assertEqual(built.call_args.kwargs["randomization"], "table2_v1")
+
     def test_scripts_and_native_replay_declare_one_physics_identity(self):
         import ast
 
