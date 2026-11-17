@@ -32,16 +32,35 @@ import numpy as np
 
 from contracts.command import CommandSet, default_requirements_path, load_requirement_set
 from contracts.pose import Pose2D
-from locomotion.evaluation.requirement_cases import CONTROL_DT_S
-from locomotion.evaluation.requirement_cases import cases as cases
+from locomotion.evaluation.requirement_cases import case_definitions
 
 REQUIREMENTS = default_requirements_path()
+CONTROL_DT_S = 0.02
 SCHEMA = "hexapod_walking_requirements_judgement_v2"
 
 
 def load_requirements(path=REQUIREMENTS, name="stage2_flat"):
     """The named requirement set and the SHA-256 of the file that owns it."""
     return load_requirement_set(path, name)
+
+
+def cases(rules):
+    """Add the acquisition timing to each case in the declared requirement set."""
+    hold = round(rules["hold_max_s"] / CONTROL_DT_S)
+    stop = round(2 * rules["stop"]["settle_s"] / CONTROL_DT_S)
+    slowest = min(rules["commands"]["translate_speeds_mps"])
+    declared = case_definitions(rules)
+    for case in declared:
+        if "command" in case:
+            case.update(controls=hold + stop, stop_control=hold)
+        else:
+            points = [(0.0, 0.0), *case["route_m"]]
+            length = sum(math.dist(a, b) for a, b in zip(points, points[1:]))
+            seconds = (
+                length / slowest + rules["stop"]["stay_stopped_s"] + 2 * rules["stop"]["settle_s"]
+            )
+            case["controls"] = round(seconds / CONTROL_DT_S)
+    return declared
 
 
 def follower_pose(root_pose_xyzw):

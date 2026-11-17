@@ -12,7 +12,7 @@ import sys
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from locomotion.evaluation.requirement_cases import cases  # noqa: E402 (source checkout)
+from locomotion.evaluation.requirement_cases import case_definitions  # noqa: E402 (source checkout)
 
 
 def require(condition, message):
@@ -158,7 +158,7 @@ def _validate(root, accepted):
     )
     require(judged["commands"]["pass"] is command_pass, "command verdict differs")
 
-    required_ids = {case["case_id"] for case in cases(rules)}
+    required_ids = {case["case_id"] for case in case_definitions(rules)}
     probe_ids = indexed(documents["motor_torque_nm"][0]["results"]).keys()
     values = {}
     for name in (
