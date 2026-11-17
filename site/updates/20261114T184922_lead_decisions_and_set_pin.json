@@ -1,0 +1,32 @@
+{
+  "id": "20261114T184922_lead_decisions_and_set_pin",
+  "date": "2026-11-14T18:49:22Z",
+  "title": "Record the program lead's decisions, pin the accepted controller to its own requirement set and narrow the update record rule",
+  "summary": "The walking requirements now hold the decisions of 14 November 2026 for the next requirement sets: a top speed of 0.15 m/s, body sensors alone as controller inputs, a 5 cm smallest obstacle with its floor test, GPS alone for outside maps, the provisional joint target limit, and the onboard computer, camera and tilt sensor. The accepted controller file now states how the deck payload gets its judgement: hardware weighs each deck part, and the leg stand holds the standing load plus that weight. It names the shared test with the hexapod line as not judged. It corrects one entry: training adds noise to joint speed alone, at 0.5 rad/s. The accepted controller now pins the content of its claimed requirement set, so another set or a decision elsewhere in the requirements file leaves it valid; a change to the claimed set still fails the validator. An update record is now due when a change touches a published result, the roadmap or the accepted controller; other changes merge without one.",
+  "areas": [
+    "architecture",
+    "evaluation",
+    "site"
+  ],
+  "next": "Write the second requirement set at 0.15 m/s once its other rows are decided, and define the shared test for the omniwalk and hexapod lines.",
+  "changes": [
+    "configs/walking_requirements.json",
+    "configs/accepted_controller.json",
+    "tools/controller_evidence.py",
+    "tests/test_accepted_controller.py",
+    "tools/project_site.py",
+    "tests/test_project_site.py",
+    "docs/PROJECT_SITE.md",
+    "CONTRIBUTING.md",
+    "AGENTS.md",
+    ".github/pull_request_template.md",
+    ".github/workflows/pages.yml",
+    "site/updates/20261114T184922_lead_decisions_and_set_pin.json"
+  ],
+  "evidence": [
+    "tests/test_accepted_controller.py",
+    "tests/test_project_site.py",
+    "configs/walking_requirements.json"
+  ],
+  "no_project_impact": false
+}
