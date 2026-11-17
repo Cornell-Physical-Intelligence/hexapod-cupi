@@ -30,6 +30,12 @@ def read(root, reference, digest=None):
     return json.loads(data)
 
 
+def set_sha256(rules):
+    """Fingerprint one requirement set by its content, whatever its key order or layout."""
+    canonical = json.dumps(rules, sort_keys=True, separators=(",", ":"), allow_nan=False)
+    return hashlib.sha256(canonical.encode()).hexdigest()
+
+
 def finite(value, name):
     require(type(value) in (int, float) and math.isfinite(value), "nonfinite or nonnumeric " + name)
     return value
@@ -90,8 +96,11 @@ def validate(root, accepted=None):
 def _validate(root, accepted):
     require(accepted["schema_version"] == 1, "unsupported registry schema")
     controller = accepted["controller"]
-    requirements = read(root, "configs/walking_requirements.json", accepted["requirements_sha256"])
+    requirements = read(root, "configs/walking_requirements.json")
     rules = requirements["sets"][accepted["requirements_set"]]
+    # The pin covers the claimed set alone: another set or a decision elsewhere in the file leaves
+    # this controller valid. requirements_sha256 stays the fingerprint of the file as judged.
+    require(set_sha256(rules) == accepted["requirements_set_sha256"], "requirement set differs")
     receipt_ref = accepted["compatibility_receipt"]
     receipt = read(root, receipt_ref["path"], receipt_ref["sha256"])
     for key in ("checkpoint_sha256", "declaration_sha256"):

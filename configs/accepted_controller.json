@@ -15,6 +15,8 @@
   },
   "requirements_set": "stage2_flat",
   "requirements_sha256": "eb6622e701d222f14128a941ba9143e17d00db957f755162b4ff796b0ed2f87a",
+  "requirements_set_sha256": "042375995bd87f99e31992d1c8a6337686f091e8b8c8261b7fefbbe25b78090b",
+  "requirements_pin": "requirements_set_sha256 pins the content of the claimed set, so a change to that set needs a new judgement. requirements_sha256 is the fingerprint of configs/walking_requirements.json on the day of the judgement; each judgement carries it.",
   "judged": {
     "commands": {
       "value": "13 of 13 native learning probes",
@@ -72,10 +74,11 @@
   },
   "not_judged": [
     "closed loop with a simulated Mid-360 odometry pose",
-    "payload on the deck",
-    "disturbance: no noise, delay or randomization in training",
+    "payload on the deck: hardware weighs each deck part and the leg stand holds the standing load plus that weight before the mounts are fixed (program lead, 14 November 2026)",
+    "disturbance: training adds noise to joint speed alone (0.5 rad/s); no delay, no randomization",
     "full 96-case manifest, 512-robot admission, terrain, hardware",
-    "closed loop natively on Spark (the five routes)"
+    "closed loop natively on Spark (the five routes)",
+    "the shared test with the hexapod line: the same walks at 5, 15 and 28 cm/s on the approved robot shape, read by speed reached, distance off the line, stop distance and peak torque; it comes before any choice between the two lines (program lead, 14 November 2026)"
   ],
   "compatibility_receipt": {
     "path": "site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json",

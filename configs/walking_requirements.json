@@ -91,6 +91,23 @@
       }
     }
   },
+  "decided_for_next_sets": {
+    "purpose": "Decisions that the next requirement sets must carry. stage2_flat is unchanged, and the accepted controller pins its content.",
+    "decided_by": "program lead",
+    "decided_on": "2026-11-14",
+    "top_speed_mps": 0.15,
+    "top_speed_scope": "a second set beside stage2_flat asks for this speed; its other rows are open",
+    "controller_inputs": "a walking controller reads joint sensors and body-mounted sensors alone; the robot's position and heading stay in the route follower",
+    "joint_target_rate_limit": "0.040 rad per 20 ms stays as a provisional limit; the leg stand speed sweep measures its replacement, and robot/active_model.json records it",
+    "outside_map_frame": "GPS alone ties an outside map to the robot; the 3 m GPS error bound applies to each item of that map",
+    "smallest_obstacle_m": 0.05,
+    "smallest_obstacle_check": "floor test: place 2, 5 and 10 cm blocks, record the laser scanner at its mounting height, and count the blocks that the height map shows",
+    "onboard": {
+      "computer": "Jetson Orin Nano 8 GB",
+      "camera": "a light 2-megapixel camera; model open",
+      "tilt_sensor": "a separate chip with an accelerometer and a gyroscope; part number open. The Mid-360's built-in sensor is off for now."
+    }
+  },
   "sources": {
     "commands, hold_min_s, stop.position_tolerance_m": "src/navigation/waypoint.py command bank and follower defaults, bound by src/navigation/tests/test_requirements.py",
     "tilt_max_deg": "the retired scorer's TAIL maximum_tilt_degrees, a stop-tail bound (src/locomotion/evaluation/scoring.py until a8d1a825, archive bound in configs/source_inventory.json); program lead decision 2026-11-08 that it applies standing and after each stop only, since c48_long tilts 2.0 to 2.4 degrees while moving on both simulators",

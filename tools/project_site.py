@@ -1,4 +1,4 @@
-"""Validate the mandatory research-poster update contract and build GitHub Pages."""
+"""Validate the research-poster update contract and build GitHub Pages."""
 
 from __future__ import annotations
 
@@ -608,6 +608,14 @@ def changed_paths(base):
     return sorted(changed)
 
 
+def needs_record(name):
+    """A new update record is due for a published result, the roadmap or the accepted controller.
+
+    The program lead set this rule on 14 November 2026. Other changes merge without a record.
+    """
+    return name.startswith("site/assets/") or name in ("site/project.json", ACCEPTED_CONTROLLER)
+
+
 def check(base=None):
     project = registry()
     if (ROOT / ACCEPTED_CONTROLLER).exists():
@@ -637,12 +645,16 @@ def check(base=None):
             )
             require(not exists, "Research updates are append-only; add a new record: " + name)
             new_records.append(row)
-        substantive = [f for f in changed if not f.startswith("site/updates/")]
         patterns = [p for row in new_records for p in row["changes"]]
-        uncovered = [f for f in substantive if not any(fnmatch.fnmatchcase(f, p) for p in patterns)]
+        uncovered = [
+            f
+            for f in changed
+            if needs_record(f) and not any(fnmatch.fnmatchcase(f, p) for p in patterns)
+        ]
         require(
             not uncovered,
-            "Repository changes lack a new central update record:\n" + "\n".join(uncovered),
+            "A changed result, roadmap or accepted controller lacks a new update record:\n"
+            + "\n".join(uncovered),
         )
     print(approval_line(native_approval()))
     return project, updates

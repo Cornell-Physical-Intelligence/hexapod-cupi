@@ -65,14 +65,18 @@ identity, evidence path and a first-frame poster. Earlier results and their
 evidence links stay in the
 [registry of 13 October 2026](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/9d819c68f7311477fc5d1fd61b00026a146656a0/site/project.json).
 
-## Every repository change
+## Update records
 
-Every push includes a matching Pages update. The program lead set this rule on
-10 September 2026 and restated it on 14 September 2026. Add a new `site/updates/YYYYMMDDTHHMMSS_name.json` record with:
+A change needs a new update record when it touches a published result under
+`site/assets/`, the roadmap in `site/project.json` or
+`configs/accepted_controller.json`. Other changes merge without a record. The
+program lead set this rule on 14 November 2026. It replaces the rule of
+10 September 2026, which asked for a record with each push. Add a new
+`site/updates/YYYYMMDDTHHMMSS_name.json` record with:
 
 - `id` matching its filename and an ISO-8601 UTC `date`;
 - a plain-English `title`, `summary`, affected `areas` and the `next` action;
-- `changes`: exact repository-relative paths or bounded globs covering the diff;
+- `changes`: exact repository-relative paths or bounded globs covering those files;
 - `evidence`: existing repository paths or public HTTPS references;
 - boolean `no_project_impact`, and a specific `reason` when it is true.
 

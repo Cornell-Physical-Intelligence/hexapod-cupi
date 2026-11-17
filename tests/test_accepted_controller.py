@@ -161,14 +161,29 @@ class AcceptedControllerTests(unittest.TestCase):
         self.assertEqual(controller["checkpoint_sha256"], pinned("CHECKPOINT_SHA"))
         self.assertEqual(controller["declaration_sha256"], pinned("DECLARATION_SHA"))
 
-    def test_requirements_set_and_hash_match_the_file_on_disk(self):
+    def test_claimed_requirement_set_matches_the_file_on_disk(self):
         requirements = json.loads(REQUIREMENTS.read_text())
         self.assertIn(self.accepted["requirements_set"], requirements["sets"])
         self.assertEqual(
-            self.accepted["requirements_sha256"],
-            hashlib.sha256(REQUIREMENTS.read_bytes()).hexdigest(),
-            "the requirements changed; re-approve the accepted controller",
+            self.accepted["requirements_set_sha256"],
+            controller_evidence.set_sha256(requirements["sets"][self.accepted["requirements_set"]]),
+            "the claimed requirement set changed; re-approve the accepted controller",
         )
+
+    def test_pin_covers_the_claimed_set_and_nothing_else(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.evidence_fixture(root)
+            path = root / "configs/walking_requirements.json"
+            requirements = json.loads(path.read_text())
+            requirements["sets"]["another_set"] = {"decided_on": "2026-11-14"}
+            requirements["decided_for_next_sets"] = {"top_speed_mps": 0.15}
+            path.write_text(json.dumps(requirements))
+            controller_evidence.validate(root, self.accepted)
+            requirements["sets"][self.accepted["requirements_set"]]["hold_min_s"] = 3.0
+            path.write_text(json.dumps(requirements))
+            with self.assertRaisesRegex(ValueError, "requirement set differs"):
+                controller_evidence.validate(root, self.accepted)
 
     def test_limits_equal_the_requirement_rows(self):
         rules = json.loads(REQUIREMENTS.read_text())["sets"][self.accepted["requirements_set"]]
