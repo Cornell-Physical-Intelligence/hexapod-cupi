@@ -48,8 +48,8 @@ def cases(rules):
     """Add the acquisition timing to each case in the declared requirement set."""
     hold = round(rules["hold_max_s"] / CONTROL_DT_S)
     stop = round(2 * rules["stop"]["settle_s"] / CONTROL_DT_S)
-    slowest = min(rules["commands"]["translate_speeds_mps"])
     declared = case_definitions(rules)
+    slowest = min(map(float, rules["commands"]["translate_speeds_mps"]))
     for case in declared:
         if "command" in case:
             case.update(controls=hold + stop, stop_control=hold)
