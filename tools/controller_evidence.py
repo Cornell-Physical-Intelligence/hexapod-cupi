@@ -8,7 +8,11 @@ validating a projection does not qualify the controller on the current native re
 import hashlib
 import json
 import math
+import sys
 from pathlib import Path
+
+sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+from locomotion.evaluation.requirement_cases import case_definitions  # noqa: E402 (source checkout)
 
 
 def require(condition, message):
@@ -47,7 +51,7 @@ def indexed(rows):
     return by_id
 
 
-def judgement(value, controller, requirements_set):
+def judgement(value, controller, requirements_set, required_ids, probe_ids=None):
     require(
         value["schema"]
         in (
@@ -62,12 +66,11 @@ def judgement(value, controller, requirements_set):
     )
     require(value["requirements_set"] == requirements_set, "judgement requirement set differs")
     rows = indexed(value["cases"])
+    historical = value["schema"].endswith("_v1")
+    expected = probe_ids if historical and probe_ids is not None else required_ids
+    require(rows.keys() == expected, "judgement case coverage differs")
     # The v1 rescore counted only cases with a drift or stop measurement.
-    count = (
-        sum(bool(row["checks"]) for row in rows.values())
-        if value["schema"].endswith("_v1")
-        else len(rows)
-    )
+    count = sum(bool(row["checks"]) for row in rows.values()) if historical else len(rows)
     require(value["judged_cases"] == count, "judgement case count differs")
     return rows
 
@@ -179,6 +182,8 @@ def _validate(root, accepted):
     )
     require(judged["commands"]["pass"] is command_pass, "command verdict differs")
 
+    required_ids = {case["case_id"] for case in case_definitions(rules)}
+    probe_ids = indexed(documents["motor_torque_nm"][0]["results"]).keys()
     values = {}
     for name in (
         "stopping_distance_m",
@@ -187,7 +192,10 @@ def _validate(root, accepted):
         "stop_position_tolerance_m",
     ):
         evidence = documents[name][0]
-        rows = judgement(evidence, controller, accepted["requirements_set"])
+        historical_ids = probe_ids if name in ("stopping_distance_m", "drift_per_hold_m") else None
+        rows = judgement(
+            evidence, controller, accepted["requirements_set"], required_ids, historical_ids
+        )
         metric = "stop_position_m" if name == "stop_position_tolerance_m" else name
         selected_rows = list(rows.values())
         if name == "stop_position_tolerance_m":
@@ -206,7 +214,7 @@ def _validate(root, accepted):
             require(len(measured) == len(selected_rows), "missing evidence metric: " + metric)
         values[name] = max(measured)
         for supporting in documents[name][1:]:
-            support = judgement(supporting, controller, accepted["requirements_set"])
+            support = judgement(supporting, controller, accepted["requirements_set"], required_ids)
             check_values(support.values(), metric, limits[name])
 
     torque_row = judged["motor_torque_nm"]

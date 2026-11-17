@@ -124,6 +124,26 @@ class AcceptedControllerTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         controller_evidence.validate(root, accepted)
 
+    def test_removing_failed_walks_cannot_turn_tilt_into_a_pass(self):
+        reference = self.accepted["judged"]["tilt_deg"]["evidence"]
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.evidence_fixture(root)
+            path = root / reference
+            value = json.loads(path.read_bytes())
+            rows = [row for row in value["cases"] if row["checks"]["tilt_deg"]["pass"]]
+            value.update(
+                cases=rows,
+                judged_cases=len(rows),
+                failed_cases=[row["case_id"] for row in rows if not row["pass"]],
+            )
+            path.write_text(json.dumps(value))
+            self.repin(self.accepted, reference, path)
+            maximum = max(row["checks"]["tilt_deg"]["value"] for row in rows)
+            self.accepted["judged"]["tilt_deg"].update(value=round(maximum, 3), **{"pass": True})
+            with self.assertRaisesRegex(ValueError, "case coverage differs"):
+                controller_evidence.validate(root, self.accepted)
+
     def test_verdict_uses_the_unrounded_measurement(self):
         accepted = deepcopy(self.accepted)
         reference = accepted["judged"]["tilt_deg"]["evidence"]
