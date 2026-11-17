@@ -34,6 +34,7 @@ class AcceptedControllerTests(unittest.TestCase):
             "configs/accepted_controller.json",
             "configs/walking_requirements.json",
             "robot/active_model.json",
+            self.accepted["judged_requirements"],
             self.accepted["compatibility_receipt"]["path"],
         }
         for row in self.accepted["judged"].values():
@@ -183,6 +184,24 @@ class AcceptedControllerTests(unittest.TestCase):
             requirements["sets"][self.accepted["requirements_set"]]["hold_min_s"] = 3.0
             path.write_text(json.dumps(requirements))
             with self.assertRaisesRegex(ValueError, "requirement set differs"):
+                controller_evidence.validate(root, self.accepted)
+
+    def test_repinning_a_changed_hold_needs_a_new_judgement(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            self.evidence_fixture(root)
+            path = root / "configs/walking_requirements.json"
+            requirements = json.loads(path.read_bytes())
+            rules = requirements["sets"][self.accepted["requirements_set"]]
+            rules["hold_max_s"] = 40.0
+            path.write_text(json.dumps(requirements))
+            self.accepted["requirements_set_sha256"] = controller_evidence.set_sha256(rules)
+            with self.assertRaisesRegex(ValueError, "requirement set differs"):
+                controller_evidence.validate(root, self.accepted)
+
+            self.accepted["judged_requirements"] = "configs/walking_requirements.json"
+            self.accepted["requirements_sha256"] = hashlib.sha256(path.read_bytes()).hexdigest()
+            with self.assertRaisesRegex(ValueError, "judgement requirements hash differs"):
                 controller_evidence.validate(root, self.accepted)
 
     def test_limits_equal_the_requirement_rows(self):

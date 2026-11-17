@@ -98,9 +98,14 @@ def _validate(root, accepted):
     controller = accepted["controller"]
     requirements = read(root, "configs/walking_requirements.json")
     rules = requirements["sets"][accepted["requirements_set"]]
-    # The pin covers the claimed set alone: another set or a decision elsewhere in the file leaves
-    # this controller valid. requirements_sha256 stays the fingerprint of the file as judged.
-    require(set_sha256(rules) == accepted["requirements_set_sha256"], "requirement set differs")
+    fingerprint = accepted["requirements_sha256"]
+    require(isinstance(fingerprint, str) and len(fingerprint) == 64, "missing judged input hash")
+    judged_input = read(root, accepted["judged_requirements"], fingerprint)
+    judged_rules = judged_input["sets"][accepted["requirements_set"]]
+    require(
+        set_sha256(rules) == accepted["requirements_set_sha256"] == set_sha256(judged_rules),
+        "requirement set differs from the judged input",
+    )
     receipt_ref = accepted["compatibility_receipt"]
     receipt = read(root, receipt_ref["path"], receipt_ref["sha256"])
     for key in ("checkpoint_sha256", "declaration_sha256"):
@@ -134,6 +139,16 @@ def _validate(root, accepted):
         )
         require(name == "drift_per_hold_m" or len(paths) == 1, "ambiguous evidence: " + name)
         documents[name] = [read(root, path, digest) for path, digest in zip(paths, digests)]
+        for evidence in documents[name]:
+            # Only the historical probe rescore for drift and stopping predates this input.
+            if evidence["schema"] == "hexapod_walking_requirements_judgement_v2" or name in (
+                "tilt_deg",
+                "stop_position_tolerance_m",
+            ):
+                require(
+                    evidence["requirements_sha256"] == fingerprint,
+                    "judgement requirements hash differs",
+                )
         require(
             all(isinstance(digest, str) and len(digest) == 64 for digest in digests),
             "missing evidence hash: " + name,
@@ -173,13 +188,6 @@ def _validate(root, accepted):
     ):
         evidence = documents[name][0]
         rows = judgement(evidence, controller, accepted["requirements_set"])
-        # The native 13-probe rescore predates the routes and stand/stop tilt rule. Its two
-        # selected bounds remain unchanged; retain that historical requirements hash.
-        if name in ("tilt_deg", "stop_position_tolerance_m"):
-            require(
-                evidence["requirements_sha256"] == accepted["requirements_sha256"],
-                "judgement requirements hash differs",
-            )
         metric = "stop_position_m" if name == "stop_position_tolerance_m" else name
         selected_rows = list(rows.values())
         if name == "stop_position_tolerance_m":
