@@ -1,0 +1,24 @@
+{
+  "id": "20261118T234418_hexapod_obstacle_corridor",
+  "date": "2026-11-18T23:44:18.000000Z",
+  "title": "Add a walled obstacle corridor to the hexapod terrain generator",
+  "summary": "The terrain v2.2 generator can add an opt-in seventh tile type: a walled corridor of static boxes and pillars, with an open lane at least as wide as the gap. That gap shrinks from 0.90 m to 0.62 m with difficulty. The default v2.2 course is unchanged, and the standalone Isaac Sim obstacle-course script with its movable crates, balls, Jetbot and keyboard drive is removed. The policy is blind, so the corridor tests recovery from walking into walls, not navigation.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Load make_hexapod_terrains_cfg(obstacle_corridor=True) in Hexapod-Rough-v22-Direct-v0 natively on the Spark and check the corridor tiles render and reset on level ground.",
+  "changes": [
+    "src/locomotion/hexapod/terrain/corridor.py",
+    "src/locomotion/hexapod/terrain/terrains_cfg.py",
+    "src/locomotion/tests/test_hexapod_terrain.py",
+    "src/locomotion/README.md",
+    "configs/source_inventory.json",
+    "site/updates/20261118T234418_hexapod_obstacle_corridor.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_hexapod_terrain.py",
+    "https://github.com/isaac-sim/IsaacLab/blob/ffff603eafc6b74264a5261cc0183d6a65390d78/source/isaaclab/isaaclab/terrains/terrain_generator.py"
+  ],
+  "no_project_impact": true,
+  "reason": "An opt-in terrain type for the original hexapod task; the default course, admitted model, gates, roadmap marker and omniwalk runtime are unchanged, and no native result is recorded."
+}

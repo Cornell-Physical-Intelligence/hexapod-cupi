@@ -102,6 +102,10 @@ use callback `locomotion.hexapod.terrain.register` and task
 curriculum, a swing-clearance reward and an optional command-speed curriculum.
 Terrain v2.2 gives every reset a level spawn area under all six toes; the
 stage1v21 checkpoints trained on the v2.1 geometry (see `terrains_cfg.py`).
+`make_hexapod_terrains_cfg(obstacle_corridor=True)` adds a walled corridor of
+static boxes and pillars (`terrain/corridor.py`) whose minimum gap shrinks with
+difficulty. The policy is blind, so the corridor is a disturbance test (walking
+into walls and recovering), not navigation.
 Run BC with
 `./isaaclab.sh -p -m locomotion.hexapod.tools.bc_clone` and the
 [original recipe](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/969ea5bc942df3122b2662650f29acd11644a41c/hexapod/METHOD.md#3-how-to-reproduce-inside-the-container)
