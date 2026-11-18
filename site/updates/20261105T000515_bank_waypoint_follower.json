@@ -1,0 +1,20 @@
+{
+  "id": "20261105T000515_bank_waypoint_follower",
+  "date": "2026-11-05T00:05:15Z",
+  "title": "Restrict the waypoint follower to the training command bank",
+  "summary": "WaypointFollower now emits only omniwalk bank entries or stand: it holds the body heading at a multiple of 45 degrees, turns at the bank yaw rate when the heading passes a gate, and otherwise drives holonomically along the bank bearing nearest the goal at the nearest bank speed. The default envelope is derived from the bank. The navigation tests drive an eight-connected staircase route at 50 Hz and assert every command is a bank entry, the route completes, and the heading stays within the gate; a test asserts the navigation-side bank equals the locomotion command bank.",
+  "areas": ["navigation", "verification"],
+  "next": "Connect the follower to the grid route planner and evaluate a planned route against the admitted checkpoint.",
+  "changes": [
+    "src/navigation/waypoint.py",
+    "src/navigation/tests/test_producer.py",
+    "src/navigation/README.md",
+    "site/updates/20261105T000515_bank_waypoint_follower.json"
+  ],
+  "evidence": [
+    "src/navigation/tests/test_producer.py",
+    "src/locomotion/omniwalk/mdp/commands.py"
+  ],
+  "no_project_impact": true,
+  "reason": "The change is CPU navigation code and tests. Runtime locomotion sources, checkpoint bytes, the approved robot, acceptance gates and roadmap markers remain unchanged."
+}

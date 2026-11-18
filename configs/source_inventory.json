@@ -45,6 +45,13 @@
       "purpose": "Locomotion on the approved direct-drive hexapod."
     },
     {
+      "path": "src/locomotion/randomization.py",
+      "previous_path": "locomotion/randomization.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Liu et al. Table II domain randomization: the frozen table2_v1 declaration with its hash, per-replica uniform draws, the training push schedule, the payload helpers and the randomized motor law over rs05."
+    },
+    {
       "path": "src/locomotion/evaluation/__init__.py",
       "previous_path": "locomotion/tools/__init__.py",
       "classification": "current",
@@ -112,14 +119,19 @@
       "previous_path": "locomotion/tools/runner.py",
       "classification": "current",
       "owner": "Platform lead",
-      "purpose": "Orchestrate native policy evaluation over the frozen case manifest and the learning probes."
+      "purpose": "Record each walking requirement case natively, one uninterrupted trial per case, and write the judgement."
     },
     {
-      "path": "src/locomotion/evaluation/scoring.py",
-      "previous_path": "locomotion/tools/scoring.py",
+      "path": "src/locomotion/evaluation/requirement_cases.py",
       "classification": "current",
-      "owner": "Platform lead",
-      "purpose": "CPU evaluation of the new robot against explicitly named, unchanged screens."
+      "owner": "Program lead",
+      "purpose": "Enumerate the walking requirement cases for evaluation and publication."
+    },
+    {
+      "path": "src/locomotion/evaluation/requirements.py",
+      "classification": "current",
+      "owner": "Program lead",
+      "purpose": "Judge each recorded trace against the walking requirements."
     },
     {
       "path": "src/locomotion/evaluation/task_metrics.py",
@@ -490,7 +502,14 @@
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Evaluate a checkpoint's no-noise policy on the learning probes, on the surrogate."
+      "purpose": "Evaluate a checkpoint's no-noise policy on the walking requirement cases, on the surrogate."
+    },
+    {
+      "path": "src/locomotion/surrogate/sweep.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Screen a checkpoint over the Step 7 fixed-condition grid: one surrogate evaluation per cell and a per-cell verdict summary."
     },
     {
       "path": "src/locomotion/surrogate/replay.py",
@@ -549,11 +568,67 @@
       "purpose": "Preserve Shaurya\u2019s implicit PD actuator and robot configuration."
     },
     {
+      "path": "src/locomotion/hexapod/terrain/__init__.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Register the terrain v2.2 rough task beside the original hexapod tasks."
+    },
+    {
+      "path": "src/locomotion/hexapod/terrain/agents.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Configure PPO fine-tuning for the terrain v2.2 task."
+    },
+    {
+      "path": "src/locomotion/hexapod/terrain/curriculum.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Compute episode success, terrain and command-speed curricula and swing clearance without the simulator."
+    },
+    {
+      "path": "src/locomotion/hexapod/terrain/geometry.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Check spawn platforms, origins and the course border against the robot's toe footprint without the simulator."
+    },
+    {
+      "path": "src/locomotion/hexapod/terrain/env.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Add the terrain curriculum, swing-clearance reward and success metric to the original environment."
+    },
+    {
+      "path": "src/locomotion/hexapod/terrain/env_cfg.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Set the terrain v2.2 task's terrain, commands, rewards and curricula."
+    },
+    {
+      "path": "src/locomotion/hexapod/terrain/terrains_cfg.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Generate the scaled rough, slope, stairs, pit and box course."
+    },
+    {
       "path": "src/locomotion/hexapod/tools/bc_clone.py",
       "previous_path": "locomotion/behavior_cloning/tools/bc_clone.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Run Shaurya\u2019s original teacher, BC, DAgger and checkpoint splice."
+    },
+    {
+      "path": "src/locomotion/hexapod/tools/make_simple_collision.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Generate the simplified one-primitive-per-link collision variant of the approved USD for throughput studies."
     },
     {
       "path": "src/locomotion/hexapod/tools/diag_policy_rollout.py",
@@ -598,11 +673,39 @@
       "purpose": "Command producers: where path planning plugs into the locomotion stack."
     },
     {
+      "path": "src/navigation/graph.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "A searchable cost graph and its eight-connected grid implementation."
+    },
+    {
+      "path": "src/navigation/grid.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "A pass/block occupancy grid over an approved survey region."
+    },
+    {
+      "path": "src/navigation/planner.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Shortest-route search between two cells of a cost graph."
+    },
+    {
       "path": "src/navigation/producer.py",
       "previous_path": null,
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "A non-blocking pose-to-command protocol."
+    },
+    {
+      "path": "src/navigation/region.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Survey boundary, exclusions and the clearance margin a route must respect."
     },
     {
       "path": "src/navigation/waypoint.py",
@@ -659,6 +762,20 @@
       "classification": "current",
       "owner": "Platform lead",
       "purpose": "List owned tools and check the maintained-source boundary without scanning evidence."
+    },
+    {
+      "path": "tools/controller_evidence.py",
+      "previous_path": null,
+      "classification": "current",
+      "owner": "Platform lead",
+      "purpose": "Validate accepted-controller values, limits and verdicts against pinned source evidence."
+    },
+    {
+      "path": "src/locomotion/surrogate/capture.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Adapt MuJoCo contact sensors and reset motor parameters to shared exact evaluation capture."
     }
   ],
   "archived_documents": [],
@@ -1531,6 +1648,42 @@
       "source_commit": "b92f14ec39a933a83615dd65e08e1479161b989d",
       "sha256": "3a8f25c96e69946c5d35ca49ef1bf1a38253fd81a41dc719a2f007afe13946be"
     },
+    "navigation/README.md": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "6591aa160d36ea9545708f2bb7ce6abf78330d345a2418a7c77fdc41f184dbbf"
+    },
+    "navigation/__init__.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "0da20fd7f0653cad24b5924e8f08186565932f9d9916603a2140d9742f64a6e8"
+    },
+    "navigation/graph.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "a84856a72b1a3fbe5acb260d7dc1f76d1cdacde7cedde15c4b802c5278b07b55"
+    },
+    "navigation/grid.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "60521f108311a3131201cbed92384bcead8e7376e2c20cae0c5d6049ffbee159"
+    },
+    "navigation/planner.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "ae307a838a46f2a89bc9b4905520bb9478d9582f1d5bb781132a2aafd4d36cd7"
+    },
+    "navigation/region.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "ba76a5ea2e51e1536673533cc7c33f155fcb062efc120fc5fd65603ffcb24e67"
+    },
+    "navigation/tests/test_grid.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "f0b7260b79f036529700580e397049ee7109a838006ab2575428d9ab5adf4d1b"
+    },
+    "navigation/tests/test_planner.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "50ffe282898abe7be14c27dc464e896bde947fb04b2ece6e4554e636ff7e9740"
+    },
+    "navigation/tests/test_region.py": {
+      "source_commit": "5a349f809e849e89e020ccaa519fba07e6c49fb3",
+      "sha256": "7949cfd9a4942dd197794ad8f5258024a84e80b76082472c5193a0ba1490ae21"
+    },
     "robot/tests/test_prepared_usd.py": {
       "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
       "sha256": "cfa29e147fac1b9444f72286450befa42e46df9498fe7b5dc0c6c52c9f98a41e"
@@ -2047,6 +2200,38 @@
       "source_commit": "e16a5975c3c981595fba8274ec4a7ef1e391fdbd",
       "sha256": "bf39dc5919b7563003cda9d4024c1414599126098b775ab45749011e38ec6686"
     },
+    "locomotion/randomization.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "ab69d56ac49d2f10b8302b4aafc76f0766410f744c5d051a8688dd2bba231e0e"
+    },
+    "locomotion/surrogate/provenance.json": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "14e5ecc823fc63ccb7c3993eddac0c1ec215dc9143834f97e3bf3a76b2f629bd"
+    },
+    "locomotion/surrogate/records/self_check_step7_20261017_001.json": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "20b6ceed57974f407c0530536a88e1db7e0836505f65209aaae1839dbb7118b4"
+    },
+    "locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.json": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "90b5c45223d19ad4ab26aafd00db450d15601442f813361b150fe0b5e239a4ed"
+    },
+    "locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.npz": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "3d136b16c6bfe831d95d56b345b5b8344290225712e545899d9dbb684b740e8d"
+    },
+    "locomotion/surrogate/tests/test_randomization.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "63ff2d0c8bb9c148b450ec7ee90d88cd3525cd3855fcaa296e50eb1c8c1fd6f7"
+    },
+    "locomotion/surrogate/tests/test_step7_oracle.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "c80eb86c05a3716306859852641180182d7b5334c5e6f0adbf5b67f936a93fd0"
+    },
+    "locomotion/tests/test_randomization.py": {
+      "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
+      "sha256": "1d750ebba59dc1d857f0ca609cb55f6f4ce71802bbf3a2613d258b82424bb0c6"
+    },
     "src/locomotion/surrogate/tests/test_manager_memory.py": {
       "source_commit": "0c071dc5402973a450bf3f9709929e88b644250a",
       "sha256": "66a5eb9fd88c4d14d7278dced200187fb9f004ad6b7f61e249ea160ee8f4cea1"
@@ -2054,6 +2239,50 @@
     "src/locomotion/tests/test_manager_based.py": {
       "source_commit": "0c071dc5402973a450bf3f9709929e88b644250a",
       "sha256": "d02d810f9dc213f105a13b5b1bae481426e2a6c24bc41ab02905e005f926dc7c"
+    },
+    "src/locomotion/evaluation/requirements.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "9b00891ab917811e5312ad6c8c645615aa440fc3a19d61090b8cc2d089d9e738"
+    },
+    "src/locomotion/omniwalk/destination_task.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "b8514ed9cae17f08261d02cf58b3580c3a76579c7201be515a62a1d5be20f50c"
+    },
+    "src/locomotion/rl/destination_wrapper.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "77ce2a21a501a10e04a9ce8cc622f14bef10c443f6598cae58faab75477f3bf8"
+    },
+    "src/locomotion/tests/test_requirements_judge.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "4c8b1d97bb4d8098e833cf0a61fb84f0b62fcc83c4f73ba0d1e3d2458ff35af4"
+    },
+    "src/navigation/tests/test_requirements.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "53a90c080a56e72eb04b0acd03645b3d36fd6d660b4e7f035d48d9cd12ae4e7c"
+    },
+    "tests/test_accepted_controller.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "ad6e119ae88e5d6849c561a77679b9dc8c4a9fabbf2db360a6bfb91b91de69fe"
+    },
+    "tests/test_run_view.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "c9eea705dc40c2795cc3d1f167ae3e5c95e4be86af16bbe3b162e502066825e5"
+    },
+    "viewer/run_view.py": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "ce035103a056be71069a36e3c56186b8f7dc6a13bd85e25f37b28b0bbde91a13"
+    },
+    "viewer/src/runs/RunViewer.jsx": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "ba52f85cc4c75aa5e7cd45318ab2109332e66bfb363f59bf9c6e6a54672bb8d4"
+    },
+    "viewer/src/runs/runFile.js": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "dc165dbab400474224a74ef95102724f9e2a40304835d9d7811b4ee472d9960c"
+    },
+    "viewer/test/runFile.test.mjs": {
+      "source_commit": "b5187bbdf7605b9cfded3a206084fc99b0578399",
+      "sha256": "d0bcac296e7dae90627db187289b89b6ed23df5c6ac434b644456c508f2835bb"
     }
   }
 }

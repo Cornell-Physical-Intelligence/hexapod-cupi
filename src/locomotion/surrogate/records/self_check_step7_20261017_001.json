@@ -1,0 +1,346 @@
+{
+  "schema": "hexapod_surrogate_self_check_v3",
+  "surrogate": true,
+  "complete": true,
+  "pass": true,
+  "failures": [],
+  "backend": "mujoco 3.14.0",
+  "repository": {
+    "revision": "232e19f003a60a64f9d8d351303e9d245c84dbde",
+    "branch": "qx235/step7-randomization",
+    "dirty": false,
+    "uncommitted_paths": []
+  },
+  "surrogate_files": {
+    "__init__.py": "f13b1f6af122568c5327a70ffe2c2713568a9757b82e1a6e39f846229d2b66af",
+    "calibrate.py": "caa72f54b1321d0436254b616cfc512534cc3336f26ead2afe00b9a597583686",
+    "env.py": "0c62ebad0bf0c175318afe96ede517e562ce985354fa26be8ecd48305a755c94",
+    "evaluate.py": "833705832c95427c4859ed173029fc7ed080bf36b277bee5531f1eeaafe45c8d",
+    "replay.py": "3188d7b630b54958060236606342113e102c7a6ed298af3a8b540e9522685b8b",
+    "self_check.py": "49662d93b4a5824ef9f5226789ad1319d0ca6c41039efe1c992bfad06db848d5",
+    "train.py": "5eeb7e5df6db68de8c6920525e445a62d56785e6bfd6781c9b5461f6975cd111"
+  },
+  "model_sha256": "7126935b35398d2a7f03271335a8a1b8f2059354af2b19d9474f22b8e73e4881",
+  "stance_sha256": "830cb07c0fdb3d80af82476d8e6e88f25440cfd2e9255ac1e16327ac826d259c",
+  "geometry_sha256": "b2adbfb4310c9aeea4f52bf7854c97b5304fd99a28452ad41c80b98e495d5d31",
+  "contact_model": {
+    "solref": [
+      0.005,
+      1.0
+    ],
+    "solimp": [
+      0.9,
+      0.95,
+      0.001,
+      0.5,
+      2.0
+    ],
+    "friction": [
+      1.0,
+      0.005,
+      0.0001
+    ],
+    "condim": 3,
+    "cone": "elliptic",
+    "impratio": 1.0,
+    "noslip_iterations": 4,
+    "noslip_tolerance": 1e-06,
+    "refsafe": true,
+    "position_blend": 0.515625,
+    "impact_euler": true,
+    "solver": "Newton",
+    "iterations": 100,
+    "tolerance": 1e-08,
+    "integrator": "Euler",
+    "limit_margin": 0.0,
+    "limit_solref": [
+      0.005,
+      1.0
+    ],
+    "limit_solimp": [
+      0.99,
+      0.999,
+      0.001,
+      0.5,
+      2.0
+    ],
+    "touchdown_overshoot": true,
+    "overshoot_phase": [
+      0.75,
+      0.9
+    ],
+    "overshoot_gain": 15.0,
+    "joint_speed_clamp": true
+  },
+  "total_mass_kg": 7.466088235225789,
+  "native_total_mass_kg": 7.466088235225788,
+  "bodies": 19,
+  "joints": 18,
+  "observation_widths": [
+    231,
+    234
+  ],
+  "shaft_contact_classification": {
+    "pass": true,
+    "leg_pose_femur_tibia_rad": [
+      -1.4,
+      3.0
+    ],
+    "patch_categories_with_force": [
+      "femur",
+      "shaft"
+    ],
+    "shaft_force_n": 51.08864905016347,
+    "nonfoot_contact": true,
+    "toe_cap_force_n": 0.0
+  },
+  "training_smoke_v2": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 5.110239403000378,
+    "collection_seconds_per_update": 1.1644278764724731,
+    "learning_seconds_per_update": 0.18672549724578857,
+    "task_reward_mean_last": -0.1987541059056639,
+    "reward_version": "paper_table1_command_scaled_v2",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "collection_controls_per_second": 2638.2054758997533
+  },
+  "training_smoke_v3": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 3.8784971039985976,
+    "collection_seconds_per_update": 1.023303747177124,
+    "learning_seconds_per_update": 0.186942458152771,
+    "task_reward_mean_last": -0.5528878070514717,
+    "reward_version": "paper_table1_immediate_v3",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "collection_controls_per_second": 3002.041191068038
+  },
+  "training_smoke_v4": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 4.011048565000237,
+    "collection_seconds_per_update": 1.0873808860778809,
+    "learning_seconds_per_update": 0.19301676750183105,
+    "task_reward_mean_last": -1.348711165035316,
+    "reward_version": "noise_sized_tripod_schedule_v4",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "collection_controls_per_second": 2825.1370235874974
+  },
+  "training_smoke_v4_without_clock": {
+    "status": "failed",
+    "expected_status": "failed",
+    "errors": [
+      "ValueError('The contact-schedule reward needs a gait clock of the same period: pass --gait-clock 60 or set schedule_weight=0 in the task')"
+    ],
+    "updates": 0,
+    "returncode": 1,
+    "wall_seconds": 0.2198272959994938,
+    "collection_seconds_per_update": null,
+    "learning_seconds_per_update": null,
+    "task_reward_mean_last": null,
+    "reward_version": null,
+    "metrics_row_keys": null,
+    "files": [
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ]
+  },
+  "training_smoke_learner_options": {
+    "status": "completed",
+    "expected_status": "completed",
+    "errors": [],
+    "updates": 3,
+    "returncode": 0,
+    "wall_seconds": 3.3486422799996944,
+    "collection_seconds_per_update": 0.8261905908584595,
+    "learning_seconds_per_update": 0.18899118900299072,
+    "task_reward_mean_last": -0.3376929373369535,
+    "reward_version": "noise_sized_tripod_schedule_v4",
+    "metrics_row_keys": [
+      "actions",
+      "collection_seconds",
+      "learning_rate",
+      "learning_seconds",
+      "loss",
+      "mean_action_std",
+      "policy_update",
+      "task",
+      "transitions",
+      "update"
+    ],
+    "files": [
+      "checkpoint_update000003.json",
+      "checkpoint_update000003.pt",
+      "force_metrics.json",
+      "metrics.jsonl",
+      "native",
+      "ppo_config.json",
+      "state.json",
+      "task"
+    ],
+    "ppo_config": {
+      "actor": {
+        "class_name": "MLPModel",
+        "hidden_dims": [
+          256,
+          256,
+          128
+        ],
+        "activation": "elu",
+        "obs_normalization": false,
+        "distribution_cfg": {
+          "class_name": "locomotion.action_distribution:CorrelatedBoundedMeanGaussian",
+          "init_std": 0.1,
+          "std_type": "log",
+          "noise_correlation": 0.5
+        }
+      },
+      "algorithm": {
+        "class_name": "locomotion.rate_schedule:CappedRatePPO",
+        "value_loss_coef": 1.0,
+        "use_clipped_value_loss": true,
+        "clip_param": 0.2,
+        "entropy_coef": 0.01,
+        "num_learning_epochs": 5,
+        "num_mini_batches": 4,
+        "learning_rate": 0.0003,
+        "schedule": "adaptive",
+        "gamma": 0.99,
+        "lam": 0.95,
+        "desired_kl": 0.01,
+        "max_grad_norm": 1.0,
+        "rnd_cfg": null,
+        "symmetry_cfg": null,
+        "learning_rate_max": 0.0003
+      },
+      "exploration": {
+        "action_std_final": 0.05
+      },
+      "environment_wrapper": {
+        "observation_scaling": "fixed",
+        "command_segments": "bootstrap",
+        "gait_clock": 60,
+        "action_smoothing": "mean2",
+        "velocity_noise": 0.5
+      }
+    },
+    "action_std_by_update": [
+      0.10000035166740417,
+      0.083333320915699,
+      0.06666712462902069
+    ],
+    "collection_controls_per_second": 3718.27037730848
+  },
+  "evaluation_smoke_learner_options": {
+    "returncode": 0,
+    "wall_seconds": 96.86897771300028,
+    "observation_scaling": "fixed",
+    "task": "locomotion.task_v4:variant(schedule_weight=2.0)",
+    "policy_path": {
+      "source": "evaluation branch of locomotion/train.py",
+      "velocity_input_gain": 1.0,
+      "action_mean2_forced": false,
+      "action_smoothing_applied": "mean2",
+      "velocity_noise_recorded": 0.5,
+      "velocity_noise_applied": 0.0,
+      "scope": "Scales, gait clock, actor mean and two-control mean as the evaluation branch of locomotion/train.py; the gain and the forced mean are stress options."
+    },
+    "cases": {
+      "learning:translate_0.05_0deg": {
+        "pass": false,
+        "failed_bounds": [
+          "planar_error_mps"
+        ],
+        "consensus": null,
+        "planar_error_mps": 0.05000815801078723
+      },
+      "learning:quiet_20s": {
+        "pass": true,
+        "failed_bounds": [],
+        "consensus": "pass",
+        "planar_error_mps": 9.725810677923419e-08
+      },
+      "learning:forward_0.05_to_stop": {
+        "pass": true,
+        "failed_bounds": [],
+        "consensus": "pass",
+        "planar_error_mps": 0.050000035719262016
+      }
+    }
+  }
+}

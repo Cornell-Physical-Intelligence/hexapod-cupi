@@ -66,12 +66,8 @@ def replay():
             raise ValueError("One explicit parity argument required: " + name)
         return args[args.index(name) + 1]
 
-    if (
-        option("--eval-scope") != "probes"
-        or option("--num-envs") != "1"
-        or option("--seed") != "20260917"
-    ):
-        raise ValueError("Parity requires all 13 c48_long probes with the retained seed")
+    if option("--num-envs") != "1" or option("--seed") != "20260917":
+        raise ValueError("Parity requires every c48_long requirement case with the retained seed")
     checkpoint = Path(option("--checkpoint"))
     verify_weights(checkpoint)
     proof()

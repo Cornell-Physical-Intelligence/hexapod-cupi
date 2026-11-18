@@ -1,0 +1,19 @@
+{
+  "id": "20261108T000000_accepted_controller",
+  "date": "2026-11-08T00:00:00Z",
+  "title": "Record c48_long as the accepted walking controller in one file",
+  "summary": "configs/accepted_controller.json names the one checkpoint the project calls its walking controller, c48_long, with its hashes, the requirement set it is judged against and the evidence for each judged row: 13 of 13 native probes, a 9.7 mm stopping distance, 298 mm of open-loop drift over the limit, and a 66 mm worst stop under the follower in the surrogate. The file records what is not yet judged. A test binds its hashes to the loader pins, its requirements hash to the file on disk, and every judged value to its evidence file, so the file cannot say pass where the evidence says fail. A candidate becomes the controller only by replacing this file.",
+  "areas": ["locomotion", "evaluation", "architecture"],
+  "next": "Fold the compatibility receipt pointer into one approved-code-version file, then add the owner-file check to the site checker.",
+  "changes": [
+    "configs/accepted_controller.json",
+    "tests/test_accepted_controller.py",
+    "site/updates/20261108T000000_accepted_controller.json"
+  ],
+  "evidence": [
+    "configs/accepted_controller.json",
+    "tests/test_accepted_controller.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A declaration file and its test are added. The checkpoint, runtime sources, the approved robot, acceptance gates and roadmap markers remain unchanged."
+}

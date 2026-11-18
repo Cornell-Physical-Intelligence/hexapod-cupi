@@ -1,0 +1,29 @@
+{
+  "id": "20261108T010000_approved_code_version",
+  "date": "2026-11-08T01:00:00Z",
+  "title": "Name the approved code version in one file and report native approval as a status",
+  "summary": "configs/approved_code_version.json names the receipt that proves the current runtime reproduces the accepted controller's native measurements: the 2 November renewal on commit dc9f5be7, binding 56 runtime files. Tests hold the file to its receipt bytes, to the accepted controller's checkpoint hash and to the branch history. Whether the tree still matches the receipt is reported, not gated: the site checker prints one line and the generated STATUS page carries it, currently approved with all 56 bound files matching. A runtime edit lapses approval until a new campaign writes a new receipt; the loader already refuses a runtime the receipt does not bind, so the gate stays at native run time. The accepted controller now points at the renewed receipt.",
+  "areas": [
+    "locomotion",
+    "evaluation",
+    "tooling"
+  ],
+  "next": "Add the owner-file check to the site checker so the five owner files must exist and parse, then rewrite ARCHITECTURE to cite them.",
+  "changes": [
+    "configs/approved_code_version.json",
+    "configs/source_inventory.json",
+    "configs/accepted_controller.json",
+    "tests/test_approved_code_version.py",
+    "tests/test_project_progress.py",
+    "tests/test_project_site.py",
+    "tools/project_site.py",
+    "site/updates/20261108T010000_approved_code_version.json"
+  ],
+  "evidence": [
+    "configs/approved_code_version.json",
+    "tests/test_approved_code_version.py",
+    "site/assets/c48_receipt_renewal_20261102_001/compatibility/receipt.json"
+  ],
+  "no_project_impact": true,
+  "reason": "A declaration file, its tests and a status line in the site tool are added. The checkpoint, runtime sources, the approved robot, acceptance gates and roadmap markers remain unchanged."
+}

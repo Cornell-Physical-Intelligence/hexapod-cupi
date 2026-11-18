@@ -1,0 +1,18 @@
+{
+  "id": "20261105T001251_follower_overshoot_assertion",
+  "date": "2026-11-05T00:12:51Z",
+  "title": "Assert the follower heading correction converges without overshoot",
+  "summary": "The staircase turn test in the navigation suite now checks that the heading error shrinks on every pure-yaw tick and that yaw commands stop once the heading is inside the gate. This restates the no-overshoot property of the replaced forward-only test under bank commands.",
+  "areas": ["navigation", "verification"],
+  "next": "Review and merge the bank-conforming follower after green CI.",
+  "changes": [
+    "src/navigation/tests/test_producer.py",
+    "site/updates/20261105T001251_follower_overshoot_assertion.json"
+  ],
+  "evidence": [
+    "src/navigation/tests/test_producer.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/97"
+  ],
+  "no_project_impact": true,
+  "reason": "The change adds one CPU test assertion. Runtime sources, checkpoint bytes, the approved robot, acceptance gates and roadmap markers remain unchanged."
+}

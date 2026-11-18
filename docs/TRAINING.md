@@ -14,7 +14,11 @@ tracking and loads.
 
 You then extend the demonstrated operating envelope to disturbances and terrain
 while retaining accepted flat-ground behavior. Define the conditions and pass
-criteria before training. Keep the policy's inputs compatible with the sensors
+criteria before training. Issue
+[#67](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67)
+declares the Table II randomization `table2_v1`, SHA-256
+`730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c`, in the
+[implementation guide](../src/locomotion/README.md#step-7-domain-randomization-declaration). Keep the policy's inputs compatible with the sensors
 you intend to use on the robot; privileged simulation inputs belong in the critic.
 
 Hardware transfer requires measured motor behavior and verified joint mapping.
@@ -59,9 +63,11 @@ settings when comparing PPO with AMP. Use `amp/` for that workflow.
 
 ## Acceptance
 
-You qualify Stage 2 against the full 96-case manifest and the unchanged gates
-in [the scorer](../src/locomotion/evaluation/scoring.py). The 13 learning probes
-provide intermediate diagnostics; they do not replace full qualification.
+You qualify Stage 2 against [the walking requirements](../configs/walking_requirements.json).
+[The judge](../src/locomotion/evaluation/requirements.py) enumerates the set's
+cases, records one native trial per case and measures drift, stopping distance,
+tilt and motor torque against the file's limits. The historical 96-case scorer
+is retired; its bytes remain archived in `configs/source_inventory.json`.
 The program lead must also accept the gait's appearance.
 
 Each native evaluation must capture ground contact and requested/applied motor

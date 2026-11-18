@@ -1,0 +1,34 @@
+{
+  "id": "20261028T210952_route_planner_astar",
+  "date": "2026-10-28T21:09:52Z",
+  "title": "Search a cell-to-cell route through the drawn survey area",
+  "summary": "a_star in src/navigation/planner.py now returns the cheapest eight-connected route between two grid cells, or None when the goal cannot be reached, and reports how many cells it expanded. Ties between equal-cost routes resolve on cell coordinates, so the same request always gives the same route; reversing the order in which neighbors are offered changes no route. The route-planning seam follows main to src/navigation/, and its 73 navigation tests pass. The occupancy grid now marks each cell passable or blocked instead of pricing clearance, and Shapely replaces the hand-written polygon checks, so the scaffold's cost and geometry tests were replaced by tests of the drawn region and its margin.",
+  "areas": [
+    "mission",
+    "source ownership"
+  ],
+  "next": "Place the stop points in back-and-forth rows and chain a_star from the start pose through each stop, marking unreachable stops. Freeze #20's footprint radius, stop tolerance, cell size and GPS error bound; a several-metre bound still leaves no feasible region inside the 6 x 4 m area.",
+  "changes": [
+    "ARCHITECTURE.md",
+    "configs/source_inventory.json",
+    "pyproject.toml",
+    "uv.lock",
+    "src/navigation/README.md",
+    "src/navigation/__init__.py",
+    "src/navigation/graph.py",
+    "src/navigation/grid.py",
+    "src/navigation/planner.py",
+    "src/navigation/region.py",
+    "src/navigation/tests/test_grid.py",
+    "src/navigation/tests/test_planner.py",
+    "src/navigation/tests/test_region.py",
+    "site/updates/20261028T210952_route_planner_astar.json"
+  ],
+  "evidence": [
+    "src/navigation/planner.py",
+    "src/navigation/tests/test_planner.py",
+    "src/navigation/README.md",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/20"
+  ],
+  "no_project_impact": false
+}

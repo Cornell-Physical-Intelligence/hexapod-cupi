@@ -8,7 +8,8 @@ the native experiment. You use native Isaac runs for acceptance.
 | --- | --- |
 | `env.py` | Implement `OmniEnv` on the approved robot: apply the limiter and motor curve, and record contacts and telemetry. |
 | `train.py` | Train through stock RSL-RL, save source-bound checkpoints and resume matching runs. |
-| `evaluate.py` | Run learning probes, render video and compare static results across contact settings. |
+| `evaluate.py` | Run the walking requirement cases, render video and compare results across contact settings. |
+| `capture.py` | Supply sensor contacts and a reset motor snapshot to the shared evidence checks. |
 | `replay.py` | Replay action traces or noise and score stored telemetry through the current task. |
 
 ```sh
@@ -29,6 +30,45 @@ checkpoint, pass its recipe values as flags and `--ppo-config-overrides`.
 `--resume` checks checkpoint bytes, the paired record and source/configuration
 identity. The update count and deviation schedule continue; simulator state and
 random generators restart from the recorded seed.
+
+`--randomization table2_v1` trains under the Step 7 declaration in
+`src/locomotion/randomization.py`; the default `none` keeps the nominal robot
+and reproduces the pre-change trajectory bit for bit. Each reset redraws that
+replica's masses, payload, friction, gains, motor strength and reset pose, and
+schedules its pushes. The identity records the declaration, its ranges and its
+SHA-256, so resume refuses a different declaration. Training runs log no drawn values.
+The evaluator's `--randomization` sets the probe conditions apart from the
+checkpoint's training; it needs `--no-contact-consensus`, because the draw sets
+the friction that the consensus varies.
+
+`sweep --checkpoint ... --output ... --grid table2_v1_grid --jobs N` screens a
+checkpoint over the 27 fixed-condition cells, one
+`evaluate --grid table2_v1_grid --cell <id>` process per cell under
+`<output>/cells/`; `sweep --list` prints the cell ids. A cell holds its friction,
+payload and motor strength across resets and applies no push; its friction also
+reaches the touchdown correction. Quiet and stop probes then use the
+relative-friction consensus: elliptic μ, pyramidal μ and elliptic 0.9 μ of the
+cell's own coefficient. The evaluator without `--grid` keeps the historical
+consensus. `grid_summary.json` lists each probe's pass, fail or unresolved
+verdict per cell with its failed bounds. `--continue` finishes an interrupted
+sweep. It reuses a finished cell only when its summary matches the request:
+checkpoint bytes, source and model hashes, grid declaration, cell, selected
+probes and seed. Any mismatch stops the sweep before it renames or runs a cell;
+use a new `--output` for another request. Incomplete cells and cells with an
+acquisition failure move to `<id>.attempt_<n>` and run again.
+
+The evaluator snapshots motor gains and strength after each case reset. It
+records those coefficients in `native400hz/source.json`, bound by the capture's
+file hashes. An independent NumPy motor oracle checks each substep against that
+snapshot, including the unchanged 1.6 Nm cap. Changed coefficients or a mismatched
+physics input stop acquisition and preserve the failed prefix. The same capture
+checks cover nominal runs, fixed cells and randomized evaluation.
+
+The capture source reads MuJoCo's per-geom floor-force and contact-point sensors.
+It records their scope in `source.json`; these summaries provide no native patch
+completeness claim. The common capture retains its array keys, dtypes, contact
+classification and continuity checks. Native capture continues to validate its
+actual patch buffers and fixed motor law.
 
 The evaluator reconstructs the recorded actor inputs with no observation noise.
 You can test joint-velocity input gains or force a two-control action mean. Static
@@ -53,5 +93,13 @@ captures. Native source packs exclude this package and its MuJoCo dependency.
 and results. Those records used their recorded reward versions and sources.
 Git revision `077b98b1` retains the calibration and machine self-check commands;
 they depend on retired reward implementations and native extract formats.
+`records/self_check_step7_20261017_001.json` is the self check of 2026-10-17 at
+revision `232e19f0`, after the Step 7 code entered this package; it adds no
+parity measurement. `tests/fixtures/step7_baseline_*` hold the pre-change
+trajectory of main `7478fca8` that `--randomization none` reproduces bit for bit.
+NumPy's OpenBLAS kernels round differently by CPU, so each fixture names its
+kernel and the test replays it in a subprocess pinned to that kernel:
+`step7_baseline_haswell_20261027_001` (AVX2) runs on any x86-64 host and
+`step7_baseline_20261013_001` (AVX-512 SkylakeX) runs where the CPU has AVX-512.
 Current tests retain control gates, exercise stock PPO updates/resume and
 compare live versus replay reward values.

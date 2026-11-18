@@ -1,0 +1,42 @@
+{
+  "id": "20261026T183302_step7_port_to_src_layout",
+  "date": "2026-10-26T18:33:02Z",
+  "title": "Port the Step 7 randomization onto the src package layout",
+  "summary": "Merging main moves the Step 7 work from locomotion/ to src/locomotion/. The surrogate keeps --randomization none|table2_v1 in training and evaluation, and the AMP adapter in amp/amp.py fills the critic's friction and push slots from the environment. The randomized motor law moves to randomization.motor_force over the unchanged robots/rs05.py, so the native runtime sources keep their identity. The table2_v1 declaration hash stays 533c9a4161a67867ffd5ab32a5dc480d2f73d78dc1b27fcdde95ea219f7d71c0. On main's rewritten surrogate, none still reproduces the pre-change trajectory step7_baseline_20261013_001 bit for bit, including the selected reset and the event counters. The declaration section moves from docs/TRAINING.md to the implementation guide, and TRAINING.md names the hash. The source archive binds the pre-move Step 7 paths to 36107dc1.",
+  "areas": [
+    "training",
+    "verification"
+  ],
+  "changes": [
+    "configs/source_inventory.json",
+    "docs/TRAINING.md",
+    "src/locomotion/README.md",
+    "src/locomotion/amp/README.md",
+    "src/locomotion/amp/amp.py",
+    "src/locomotion/randomization.py",
+    "src/locomotion/surrogate/README.md",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/surrogate/provenance.json",
+    "src/locomotion/surrogate/records/self_check_step7_20261017_001.json",
+    "src/locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.json",
+    "src/locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.npz",
+    "src/locomotion/surrogate/tests/test_randomization.py",
+    "src/locomotion/surrogate/tests/test_resume.py",
+    "src/locomotion/surrogate/tests/test_step7_oracle.py",
+    "src/locomotion/surrogate/train.py",
+    "src/locomotion/tests/test_amp_ppo.py",
+    "src/locomotion/tests/test_paper_networks.py",
+    "src/locomotion/tests/test_randomization.py",
+    "site/updates/20261026T183302_step7_port_to_src_layout.json"
+  ],
+  "evidence": [
+    "src/locomotion/surrogate/tests/test_step7_oracle.py",
+    "src/locomotion/surrogate/tests/fixtures/step7_baseline_20261013_001.json",
+    "src/locomotion/randomization.py",
+    "src/locomotion/README.md"
+  ],
+  "next": "Train two surrogate runs from seed 20260917, none against table2_v1 for 2000 updates, add the 27-cell fixed-condition sweep and bring both to the first #67 review, which freezes the ranges and push schedule before any native code.",
+  "no_project_impact": true,
+  "reason": "A layout port of CPU design code: no native run, admission or accepted capability changes."
+}

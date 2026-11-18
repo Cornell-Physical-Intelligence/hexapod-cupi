@@ -1,0 +1,22 @@
+{
+  "id": "20261107T213000_c48_long_requirements_judgement",
+  "date": "2026-11-07T21:30:00Z",
+  "title": "Judge c48_long against the controller rows of the walking requirements",
+  "summary": "The walking requirements gain two controller limits the program lead set: a 0.05 m stopping distance after the stand command and 0.10 m of drift from the commanded path over a 20 s hold at 0.05 m/s. A new judge reads the same control traces the frozen scorer reads and reports both against the requirements file and its hash, leaving the scorer's bytes and gates untouched. On c48_long's 13 native learning-probe traces the stopping distance is 9.7 mm (pass) and the drift over the eight 0.05 m/s walks is 65 to 298 mm, median 152 mm (seven of eight fail). The frozen scorer passes all eight walks because it bounds the mean velocity error, 25 percent of the command, and after a stop it bounds only the excursion while standing, 10 mm; neither gate measures where the body ends up. The judge reproduces the 152 mm and 299 mm figures the destination lineage reported for this checkpoint.",
+  "areas": ["locomotion", "evaluation"],
+  "next": "Record c48_long as the accepted controller with this judgement as its evidence, then measure the stop tolerance under the waypoint follower in the surrogate.",
+  "changes": [
+    "configs/walking_requirements.json",
+    "src/locomotion/evaluation/requirements.py",
+    "src/locomotion/tests/test_requirements_judge.py",
+    "site/assets/c48_requirements_20261107_001/*",
+    "site/updates/20261107T213000_c48_long_requirements_judgement.json"
+  ],
+  "evidence": [
+    "site/assets/c48_requirements_20261107_001/judgement.json",
+    "site/assets/c48_requirements_20261107_001/files.json",
+    "src/locomotion/tests/test_requirements_judge.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A requirements judge, its test and one judgement record are added. The frozen scorer, its gates, checkpoints, the approved robot and roadmap markers remain unchanged."
+}

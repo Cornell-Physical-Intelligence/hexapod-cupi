@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { describeFailure, readRun } from './runFile.js';
+import { caseVerdict, describeFailure, readRun } from './runFile.js';
 import { VIEWS, drawRobot, drawSeries } from './draw.js';
 import './runs.css';
 
@@ -156,6 +156,7 @@ export default function RunViewer() {
             {runs.map((run, r) => (
               <div key={r} className="run-chip" style={{ borderColor: `var(${RUN_COLOURS[r % 4]})` }}>
                 <b>{run.name}</b> · {run.source} · {run.cases.filter((c) => c.pass).length} of {run.cases.length} cases passed
+                {run.cases.some((c) => c.pass === null) && ` · ${run.cases.filter((c) => c.pass === null).length} not judged`}
                 {run.cases_without_trace.length > 0 && ` · ${run.cases_without_trace.length} more without a trace`}
               </div>
             ))}
@@ -172,12 +173,13 @@ export default function RunViewer() {
               {runs.flatMap((run, r) =>
                 run.cases.map((c, j) => {
                   const key = `${r}:${j}`;
+                  const verdict = caseVerdict(c);
                   return (
                     <tr key={key} className={selected.includes(key) ? 'on' : ''} onClick={() => toggle(key)}>
                       <td><input type="checkbox" readOnly checked={selected.includes(key)} /></td>
                       <td>{run.name}</td>
                       <td>{c.case_id}</td>
-                      <td className={c.pass ? 'pass' : 'fail'}>{c.pass ? 'passed' : c.fell ? 'failed, fell' : 'failed'}</td>
+                      <td className={verdict.className}>{verdict.label}</td>
                       <td>{c.seconds.toFixed(1)}</td>
                       <td>{c.ghost_distance_end_mm.toFixed(1)} mm</td>
                       <td>{c.failed.map(describeFailure).join('; ')}</td>
@@ -228,7 +230,7 @@ export default function RunViewer() {
               <h2>{s.item.case_id}</h2>
               <p className="meta">
                 {s.run.name} · {s.run.source} ·{' '}
-                <span className={s.item.pass ? 'pass' : 'fail'}>{s.item.pass ? '✓ passed' : '✗ failed'}</span>
+                <span className={caseVerdict(s.item).className}>{caseVerdict(s.item).label}</span>
                 {s.item.failed.length > 0 && ` — ${s.item.failed.map(describeFailure).join(', ')}`}
               </p>
               <canvas className="view" ref={register(s.key, 'view')} onPointerDown={rotate} />

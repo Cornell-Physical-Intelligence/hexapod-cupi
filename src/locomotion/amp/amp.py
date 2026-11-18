@@ -24,9 +24,18 @@ OBSERVATION_WIDTH = nets.HISTORY_WIDTH + nets.COMMAND_WIDTH + nets.ACTION_WIDTH
 PRIVILEGED_LAYOUT = (
     ("base_linear_velocity_body", 3, "telemetry linear_velocity_body, m/s"),
     ("base_height", 1, "telemetry root_pose_xyzw z, m above the flat floor"),
-    ("ground_friction", 1, "declared constant 1.0 until Table II randomization (Step 7)"),
+    (
+        "ground_friction",
+        1,
+        "environment ground_friction, the drawn Table II coefficient; 1.0 without randomization",
+    ),
     ("foot_contact_force", 18, "telemetry tibia_floor_force_world_n, six XYZ normal forces, N"),
-    ("external_perturbation", 6, "zeros until Table II perturbations (Step 7)"),
+    (
+        "external_perturbation",
+        6,
+        "environment external_wrench_body, mean body-frame push force N and torque N m over "
+        "the control; zeros without randomization and after a reset",
+    ),
     (
         "collision_state",
         13,
@@ -194,29 +203,41 @@ class AMPVecEnv(OmniVecEnv):
         velocity = output["critic"][:, OBSERVATION_WIDTH : OBSERVATION_WIDTH + 3]
         # The critic observation carries navigation-frame velocity; the body frame is forward=-Y, left=+X.
         body_velocity = torch.stack((velocity[:, 1], -velocity[:, 0], velocity[:, 2]), dim=-1)
-        height = torch.full((n, 1), float(env.reset_height), device=self.device)
+        # A randomized surrogate lifts each replica's reset pose by its own draw; others keep one height.
+        reset_height = getattr(env, "reset_heights", None)
+        reset_height = (
+            torch.full((n, 1), float(env.reset_height), device=self.device)
+            if reset_height is None
+            else reset_height.reshape(n, 1).to(self.device, torch.float32)
+        )
+        height = reset_height.clone()
         forces = torch.zeros(n, 18, device=self.device)
         collision = torch.zeros(n, 13, device=self.device)
+        # Read from the environment, not telemetry: telemetry still holds a reset row's old draw.
+        # A reset row already carries its new draw and a zero push.
+        friction = getattr(env, "ground_friction", None)
+        friction = (
+            torch.ones(n, 1, device=self.device)
+            if friction is None
+            else friction.reshape(n, 1).to(self.device, torch.float32)
+        )
+        wrench = getattr(env, "external_wrench_body", None)
+        wrench = (
+            torch.zeros(n, 6, device=self.device)
+            if wrench is None
+            else wrench.reshape(n, 6).to(self.device, torch.float32)
+        )
         if telemetry:
             height = telemetry["root_pose_xyzw"][:, 2:3].clone()
             forces = telemetry["tibia_floor_force_world_n"].reshape(n, 18).clone()
             if self.collision is not None:
                 collision = (self.collision.maximum > COLLISION_FORCE_N).float()
         fresh = self.reset_rows[:, None]
-        height = torch.where(fresh, torch.full_like(height, float(env.reset_height)), height)
+        height = torch.where(fresh, reset_height, height)
         forces = torch.where(fresh, torch.zeros_like(forces), forces)
         collision = torch.where(fresh, torch.zeros_like(collision), collision)
-        state = torch.cat(
-            (
-                body_velocity,
-                height,
-                torch.ones(n, 1, device=self.device),
-                forces,
-                torch.zeros(n, 6, device=self.device),
-                collision,
-            ),
-            dim=-1,
-        )
+        wrench = torch.where(fresh, torch.zeros_like(wrench), wrench)
+        state = torch.cat((body_velocity, height, friction, forces, wrench, collision), dim=-1)
         if state.shape != (n, PRIVILEGED_WIDTH) or not bool(torch.isfinite(state).all()):
             raise ValueError("Privileged state shape/finite check failed")
         return state

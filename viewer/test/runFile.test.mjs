@@ -2,7 +2,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 import test from 'node:test';
-import { center, describeFailure, point, readRun, touching } from '../src/runs/runFile.js';
+import { caseVerdict, center, describeFailure, point, readRun, touching } from '../src/runs/runFile.js';
 
 const fixture = await readFile(new URL('./fixtures/sample_run.json', import.meta.url), 'utf8');
 
@@ -31,4 +31,16 @@ test('a file of another schema is refused and failures read in plain words', asy
     describeFailure({ check: 'planar_error_mps', value: 0.098859, bound: 0.025 }),
     'planar speed error, m/s 0.0989 (limit 0.025)',
   );
+});
+
+test('historical unjudged cases stay distinct from passed and failed cases', async () => {
+  const value = JSON.parse(fixture);
+  value.cases[0].pass = null;
+  value.cases[0].fell = true;
+  const run = await readRun(value);
+  assert.equal(run.cases[0].pass, null);
+  assert.deepEqual(caseVerdict(run.cases[0]), { label: 'not judged', className: '' });
+  assert.deepEqual(caseVerdict({ pass: true }), { label: 'passed', className: 'pass' });
+  assert.deepEqual(caseVerdict({ pass: false }), { label: 'failed', className: 'fail' });
+  assert.deepEqual(caseVerdict({ pass: false, fell: true }), { label: 'failed, fell', className: 'fail' });
 });

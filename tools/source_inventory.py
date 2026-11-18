@@ -9,11 +9,83 @@ import hashlib
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+from tools.code_map import imported_modules, module_name  # noqa: E402
+
 INVENTORY = "configs/source_inventory.json"
 SCOPES = ("tools", "src/contracts", "src/navigation", "src/mission", "src/locomotion")
+
+# Cross-package dependencies. Same-package imports need no entry.
+IMPORT_BOUNDARIES = {
+    "contracts": set(),
+    "navigation": {"contracts"},
+    "mission": {"contracts"},
+    "locomotion.robots": set(),
+    "locomotion.omniwalk": {"contracts", "locomotion.robots"},
+    "locomotion.evaluation": {
+        "contracts",
+        "navigation",
+        "locomotion.omniwalk",
+        "locomotion.robots",
+    },
+    "locomotion.spark": {"contracts", "locomotion.omniwalk", "locomotion.robots"},
+    "locomotion.rl": set(),
+    "locomotion.amp": {
+        "locomotion.evaluation",
+        "locomotion.omniwalk",
+        "locomotion.rl",
+        "locomotion.robots",
+        "locomotion.spark",
+    },
+    "locomotion.scripts": {
+        "locomotion.amp",
+        "locomotion.evaluation",
+        "locomotion.omniwalk",
+        "locomotion.rl",
+        "locomotion.robots",
+        "locomotion.spark",
+    },
+    "locomotion.surrogate": {
+        "contracts",
+        "locomotion.amp",
+        "locomotion.evaluation",
+        "locomotion.omniwalk",
+        "locomotion.rl",
+        "locomotion.robots",
+        "locomotion.spark",
+        "locomotion.randomization",
+    },
+    "locomotion.randomization": {"locomotion.robots"},
+}
+
+
+def boundary(module):
+    parts = module.split(".")
+    return ".".join(parts[:2]) if parts[0] == "locomotion" else parts[0]
+
+
+def check_imports(path, text):
+    source = boundary(module_name(path))
+    # The retained experiment is evidence, not part of the maintained runtime.
+    if source == "locomotion.hexapod":
+        return
+    for name in imported_modules(ast.parse(text), path):
+        target = boundary(name)
+        if target == "artifacts":
+            raise ValueError(f"Production package imports evidence: {path}")
+        if target == "locomotion.hexapod":
+            raise ValueError(f"Production package imports retained experiment: {path}")
+        if target == source or (target == "locomotion" and source.startswith("locomotion.")):
+            continue
+        owned = target in {"contracts", "navigation", "mission", "locomotion"} or target.startswith(
+            "locomotion."
+        )
+        if owned and target not in IMPORT_BOUNDARIES.get(source, set()):
+            raise ValueError(f"Forbidden import boundary: {source} -> {target} in {path}")
 
 
 def read_inventory(root=ROOT):
@@ -82,17 +154,7 @@ def check(root=ROOT):
     ]:
         if "__pycache__" in path.parts or "tests" in path.parts:
             continue
-        tree = ast.parse(path.read_text())
-        for node in ast.walk(tree):
-            names = (
-                [node.module or ""]
-                if isinstance(node, ast.ImportFrom)
-                else [a.name for a in node.names]
-                if isinstance(node, ast.Import)
-                else []
-            )
-            if any(name == "artifacts" or name.startswith("artifacts.") for name in names):
-                raise ValueError(f"Production package imports evidence: {path.relative_to(root)}")
+        check_imports(path.relative_to(root).as_posix(), path.read_text())
     return rows
 
 
@@ -104,7 +166,7 @@ def main():
     rows = check()
     if args.command == "check":
         print(
-            f"Ownership and paths verified for {len(rows)} tools; production imports exclude artifact modules"
+            f"Ownership and paths verified for {len(rows)} tools; production import boundaries verified"
         )
     else:
         for kind in ["current", "prototype", "historical"]:

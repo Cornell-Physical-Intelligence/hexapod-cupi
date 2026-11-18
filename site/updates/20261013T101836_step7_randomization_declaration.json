@@ -1,0 +1,24 @@
+{
+  "id": "20261013T101836_step7_randomization_declaration",
+  "date": "2026-10-13T10:18:36Z",
+  "title": "Draft the Table II domain randomization declaration for Step 7",
+  "summary": "locomotion/randomization.py declares table2_v1 for issue #67: one field per Liu et al. Table II row with its status (kept or adapted), the project range for the 7.466 kg direct-drive robot and the explicit motor law, the draw granularity and the reason, plus a force-based training push schedule. declaration() gives canonical JSON and a SHA-256 that run identities will bind; none declares the nominal properties. The Step 7 section of docs/TRAINING.md explains each row and the motor-cap effect. Unit tests check the hash, draw bounds against the named joint limits, generator determinism and isolation, the payload parallel-axis helper and the capped strength ceiling. No environment applies the draws yet, and nothing is trained.",
+  "areas": [
+    "training",
+    "documentation"
+  ],
+  "next": "Apply the declaration in the CPU surrogate with --randomization none|table2_v1, fill the privileged friction and push telemetry, and bring the none against table2_v1 surrogate comparison to the first #67 review, which freezes the ranges and push schedule.",
+  "changes": [
+    "locomotion/randomization.py",
+    "locomotion/tests/test_randomization.py",
+    "docs/TRAINING.md",
+    "configs/source_inventory.json",
+    "site/updates/20261013T101836_step7_randomization_declaration.json"
+  ],
+  "evidence": [
+    "locomotion/randomization.py",
+    "docs/TRAINING.md"
+  ],
+  "no_project_impact": true,
+  "reason": "A declaration and its CPU tests establish no native result, admission or accepted capability."
+}

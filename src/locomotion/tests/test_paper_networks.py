@@ -112,6 +112,24 @@ class IsolationTests(unittest.TestCase):
         self.assertNotIn("velocity_label", actor.obs_groups)
         self.assertNotIn("critic", actor.obs_groups)
 
+    def test_actor_ignores_the_friction_and_push_slots_that_the_critic_reads(self):
+        from locomotion.amp.amp import PRIVILEGED_LAYOUT
+
+        offsets, start = {}, 0
+        for name, width, _ in PRIVILEGED_LAYOUT:
+            offsets[name] = slice(start, start + width)
+            start += width
+        self.assertEqual(start, nets.PRIVILEGED_WIDTH)
+        obs, actor, critic = models()
+        actor.eval()
+        with torch.no_grad():
+            action, value = actor(obs).clone(), critic(obs).clone()
+            changed = obs.clone()
+            changed["privileged"][:, offsets["ground_friction"]] += 1.5
+            changed["privileged"][:, offsets["external_perturbation"]] += 10.0
+            torch.testing.assert_close(actor(changed), action, rtol=0, atol=0)
+            self.assertGreater(float((critic(changed) - value).abs().max()), 0.0)
+
     def test_policy_gradient_does_not_reach_the_estimator(self):
         obs, actor, _ = models()
         actor(obs).sum().backward()
