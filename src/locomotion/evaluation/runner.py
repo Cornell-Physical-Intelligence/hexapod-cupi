@@ -25,6 +25,7 @@ from locomotion.evaluation.capture import (
 )
 from locomotion.evaluation.force_metrics import write_summary
 from locomotion.robots.hexapod import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
+from locomotion.robots.randomization import strength_ceiling
 from locomotion.robots.rs05 import STIFFNESS_NM_PER_RAD
 
 
@@ -59,17 +60,46 @@ def _deadline(seconds):
     return time.monotonic() + seconds
 
 
+def expected_motor_law(q, dq, target, law=None):
+    """The exact float32 torque recurrence each substep must reproduce.
+
+    ``law`` is None for the nominal RS05 law. A Step 7 draw gives float32 ``kp``, ``kd`` and
+    ``strength`` arrays; the ceiling then follows ``randomization.strength_ceiling``, so the
+    1.6 N·m cap still holds and the comparison stays bit-exact.
+    """
+    if law is None:
+        return diagnostic_servo(
+            q, dq, target, np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32)
+        )
+    requested, _, ceiling = diagnostic_servo(q, dq, target, law["kp"], law["kd"])
+    ceiling = np.asarray(strength_ceiling(ceiling, law["strength"]), np.float32)
+    return requested, np.clip(requested, -ceiling, ceiling).astype(np.float32), ceiling
+
+
 class NativeCaptureSource:
-    """Read native counters and patches, and independently recompute its fixed motor law."""
+    """Read native counters and patches, and independently recompute the reset's motor law.
+
+    Construct it after the case reset: a Step 7 draw's gain, damping and strength are
+    snapshotted here, so a redraw during the case fails the exact torque check.
+    """
 
     def __init__(self, env):
         self.env = env
+        law = getattr(env, "motor_law", None)
+        self.law = None if law is None else {k: np.array(v, copy=True) for k, v in law.items()}
         self.metadata = {
             "backend": "isaac",
             "contacts": "native contact patches",
             "contact_classification": "exact_distal_points",
             "motor_law": "canonical_rs05",
         }
+        if self.law is not None:
+            self.metadata["motor_law"] = "canonical_rs05_with_reset_gains_and_strength"
+            self.metadata["motor_snapshot"] = {
+                "kp_nm_per_rad": self.law["kp"].tolist(),
+                "kd_nm_s_per_rad": self.law["kd"].tolist(),
+                "strength": self.law["strength"].tolist(),
+            }
 
     def counter(self):
         return self.env.sim.get_physics_step_count()
@@ -81,9 +111,7 @@ class NativeCaptureSource:
         return classify_patches(buffers, self.env.sensor_map, poses, geometry, self.env.num_envs)
 
     def servo(self, q, dq, target):
-        return diagnostic_servo(
-            q, dq, target, np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32)
-        )
+        return expected_motor_law(q, dq, target, self.law)
 
 
 class ExactEvaluationCapture:

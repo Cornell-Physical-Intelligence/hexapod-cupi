@@ -4,6 +4,7 @@ import json
 import math
 from pathlib import Path
 
+import numpy as np
 import omni.physx
 import torch
 import warp as wp
@@ -17,11 +18,22 @@ from pxr import PhysxSchema, UsdPhysics
 
 from locomotion.omniwalk.env_cfg import make_config
 from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
+from locomotion.omniwalk.mdp.frames import inverse_rotate
 from locomotion.omniwalk.mdp.loads import SubstepLoads, control_telemetry
 from locomotion.omniwalk.mdp.observations import observations, proprio
 from locomotion.omniwalk.mdp.state import measured_state, toe_points
 from locomotion.omniwalk.mdp.terminations import episode_timeout, physical_termination
-from locomotion.robots.hexapod import BODY_NAMES, JOINT_NAMES, LEGS, USD_SHA256, verify_assets
+from locomotion.robots import randomization as rnd
+from locomotion.robots.hexapod import (
+    BODY_NAMES,
+    JOINT_NAMES,
+    LEGS,
+    USD_SHA256,
+    sha,
+    verify_assets,
+)
+
+NEVER = np.iinfo(np.int64).max
 
 
 class CaptureArticulation(Articulation):
@@ -48,8 +60,17 @@ class IsaacEnv(DirectRLEnv):
     """
 
     def __init__(
-        self, config, asset, model_path, geometry_path, output, *, reference_metadata=None
+        self,
+        config,
+        asset,
+        model_path,
+        geometry_path,
+        output,
+        *,
+        reference_metadata=None,
+        randomization="none",
     ):
+        self.randomization = rnd.identity(randomization)["name"]
         self.config = config
         self.output = Path(output)
         self.output.mkdir(parents=True, exist_ok=True)
@@ -81,6 +102,9 @@ class IsaacEnv(DirectRLEnv):
         if self._physics_handles_decimation:
             raise RuntimeError("Direct candidate requires eight separate PhysX steps")
         self.motor = self.robot.actuators["motor"]
+        self.motor_order = torch.tensor(
+            [list(self.motor.joint_names).index(name) for name in JOINT_NAMES], device=self.device
+        )
         self.scene_prim_path = direct_cfg.sim.physics_prim_path
         self.origins = self.scene.env_origins.clone()
         self.roots = [path + "/Robot" for path in self.scene.env_prim_paths]
@@ -137,6 +161,8 @@ class IsaacEnv(DirectRLEnv):
         self.total_controls = 0
         self.telemetry = {}
         self.capture = None
+        if self.randomization != "none":
+            self._init_randomization()
 
     def _setup_scene(self):
         self.robot = CaptureArticulation(self.robot_cfg)
@@ -248,10 +274,14 @@ class IsaacEnv(DirectRLEnv):
 
     def _apply_action(self):
         self.robot.set_joint_position_target_index(target=self.target[:, self.inverse_joint_index])
+        if getattr(self, "pushes", False):
+            self.push_window(self.substep)
         self.substep += 1
 
     def record_submitted_force(self):
         """Read the force that the stock write submitted, before PhysX steps."""
+        if getattr(self, "pushes", False):
+            self.verify_push(self.substep - 1)
         self.native_pre = (
             self.get("get_dof_actuation_forces")[:, self.joint_index]
             if self.capture is not None
@@ -291,6 +321,8 @@ class IsaacEnv(DirectRLEnv):
         if self.native_errors:
             raise RuntimeError("Native physics error during stepping")
         self.requested, self.applied, self.forces = requested, applied, forces
+        if getattr(self, "pushes", False):
+            self.advance_pushes()
 
     def _get_dones(self):
         if self.sim.get_physics_step_count() != self.before_counter + 8 or self.substep != 8:
@@ -346,8 +378,251 @@ class IsaacEnv(DirectRLEnv):
         self.current = self.read_state()
         return self.current
 
+    # ----- Step 7 randomization ------------------------------------------------------------
+    def _init_randomization(self):
+        """Per-row generators, and the motor and friction draws that each reset replaces."""
+        n = self.config.num_envs
+        self.generators = [
+            rnd.replica_generator(self.config.seed, i, self.randomization) for i in range(n)
+        ]
+        self.nominal_kd = self.motor.damping.clone()
+        self.motor.draw = {
+            "kp": torch.full_like(self.nominal_kd, rnd.KP),
+            "kd": self.nominal_kd.clone(),
+            "strength": torch.ones_like(self.nominal_kd),
+        }
+        # Friction: the native tibia is one collision shape for the fork and the foot, so the draw
+        # covers every shape of the six tibia links. The floor material stays 1.0 with the multiply
+        # combine mode, which outranks the default average mode of the per-shape materials that
+        # PhysX creates here; each contact's coefficient is therefore the drawn value.
+        counts = [
+            self.sim.physics_sim_view.create_rigid_body_view(path).max_shapes
+            for path in self.view.link_paths[0]
+        ]
+        links = [str(path).rsplit("/", 1)[1] for path in self.view.link_paths[0]]
+        self.materials = wp.to_torch(self.view.get_material_properties()).cpu().clone()
+        if links != self.native_body_names or sum(counts) != self.materials.shape[1]:
+            raise ValueError("Native shape layout differs from the link order")
+        starts = [sum(counts[:i]) for i in range(len(counts))]
+        self.tibia_shapes = torch.tensor(
+            [
+                start + k
+                for name, start, count in zip(links, starts, counts)
+                if name.endswith("_tibia")
+                for k in range(count)
+            ]
+        )
+        if len(self.tibia_shapes) < 6:
+            raise ValueError("Native tibia shapes are missing")
+        self.ground_friction = torch.ones(n, device=self.device)
+        self._init_inertial()
+        self._init_reset_pose()
+        # Pushes run on the surrogate's timeline in 400 Hz physics steps from each row's reset, and
+        # each row's generator draws the next push when one ends, so both engines consume a row's
+        # stream in the same order: the reset draw, the first push, then one push per push end.
+        self.pushes = True
+        self.since_reset = np.zeros(n, dtype=np.int64)
+        self.push_start = np.zeros(n, dtype=np.int64)
+        self.push_end = np.zeros(n, dtype=np.int64)
+        self.push_force = np.zeros((n, 3))
+        self.push_body = np.zeros((n, self.config.decimation, 3))
+        self.external_wrench_body = torch.zeros((n, 6), device=self.device)
+        if list(self.robot.body_names) != self.native_body_names:
+            raise ValueError("Isaac Lab body order differs from the native view")
+        self.push_rows = torch.arange(n, dtype=torch.int32, device=self.device)
+        self.push_link = torch.tensor([self.body_index], dtype=torch.int32, device=self.device)
+
+    def _init_inertial(self):
+        """Hold the nominal link masses, centres of mass and tensors that each reset scales.
+
+        The payload combination needs each tensor about the centre of mass in link axes, the
+        ledger's convention, so the nominal readback must match the ledger in that convention.
+        """
+        self.nominal_inertial = {
+            key: wp.to_torch(getattr(self.view, "get_" + key)()).cpu().clone()
+            for key in ("masses", "coms", "inertias")
+        }
+        named = {link["name"]: link for link in self.model["links"]}
+        ledger = torch.tensor(
+            [named[name]["inertia"] for name in self.native_body_names], dtype=torch.float64
+        ).reshape(1, -1, 9)
+        centres = torch.tensor(
+            [named[name]["com"] for name in self.native_body_names], dtype=torch.float64
+        )
+        inertias = self.nominal_inertial["inertias"].double()
+        scale = ledger.abs().amax(-1, keepdim=True)
+        if not torch.all((inertias - ledger).abs() <= 1e-4 * scale) or not torch.allclose(
+            self.nominal_inertial["coms"][..., :3].double(),
+            centres.expand(len(inertias), -1, -1),
+            atol=1e-6,
+            rtol=0,
+        ):
+            raise ValueError("Native nominal inertia differs from the ledger's link-axis tensor")
+        self.link_order = torch.tensor([BODY_NAMES.index(name) for name in self.native_body_names])
+        self.inertial = {key: value.clone() for key, value in self.nominal_inertial.items()}
+
+    def _init_reset_pose(self):
+        """Each row's drawn reset pose and root height, and the toe-cap points that set the height.
+
+        The points are the surrogate's toe-cap cloud in each tibia frame, so both engines lift the
+        root by the same kinematic rule: the lowest drawn toe at the nominal pose's lowest toe.
+        """
+        path = self.geometry_path.with_name("geometry_extrema.npz")
+        if sha(path) != self.geometry_meta.get("extrema_sha256"):
+            raise ValueError("Toe-cap points belong to another geometry")
+        lower = {x["body"]: x["cap_lower_x_m"] for x in self.geometry_meta["shapes"]}
+        with np.load(path, allow_pickle=False) as clouds:
+            caps = []
+            for leg in LEGS:
+                points = np.asarray(clouds["all__" + leg + "_tibia"], dtype=np.float64)
+                caps.append(points[points[:, 0] >= lower[leg + "_tibia"] - 1e-9])
+        self.toe_caps = [self.torch(points) for points in caps]
+        n = self.config.num_envs
+        self.joint_offset = torch.zeros((n, 18), device=self.device)
+        self.reset_q = self.neutral.expand(n, -1).clone()
+        self.reset_heights = torch.full((n,), self.reset_height, device=self.device)
+        self.nominal_toe_low = None
+
+    def lowest_toe(self, rows):
+        """Each row's lowest toe-cap point below its root, from the pose last written."""
+        self.sim.physics_sim_view.update_articulations_kinematic()
+        links = self.get("get_link_transforms")[rows]
+        root = self.get("get_root_transforms")[rows]
+        low = torch.full((len(rows),), math.inf, device=self.device)
+        for points, index in zip(self.toe_caps, self.toe_index.tolist()):
+            # The height of a link-frame point p is z + r . p, with r the third row of the rotation.
+            up = inverse_rotate(
+                links[:, index, 3:], self.torch([0.0, 0.0, 1.0]).expand(len(rows), -1)
+            )
+            heights = links[:, index, 2:3] + up @ points.T
+            low = torch.minimum(low, heights.amin(-1))
+        return low - root[:, 2]
+
+    def redraw(self, rows):
+        """Draw each selected row's conditions from that row's generator and apply them to PhysX."""
+        draw = self.motor.draw
+        for row in rows.tolist():
+            sample = rnd.draw(self.randomization, self.generators[row])
+            draw["kp"][row] = rnd.KP * sample.kp_scale
+            draw["kd"][row] = self.nominal_kd[row] * sample.kd_scale
+            draw["strength"][row, self.motor_order] = self.torch(sample.motor_strength)
+            self.materials[row, self.tibia_shapes, :2] = sample.foot_friction
+            self.ground_friction[row] = sample.foot_friction
+            self.joint_offset[row] = self.torch(sample.joint_offset_rad)
+            self.draw_inertial(row, sample)
+            self.since_reset[row] = 0
+            self.schedule_push(row, 0, first=True)
+            self.external_wrench_body[row] = 0.0
+        indices = wp.array(rows.cpu().numpy().astype("uint32"), dtype=wp.uint32, device="cpu")
+        self.view.set_material_properties(wp.from_torch(self.materials), indices)
+        # The tensor goes last: PhysX keeps a diagonal tensor and turns the centre-of-mass frame
+        # to its principal axes, so a later centre-of-mass write would undo that turn.
+        for key in ("masses", "coms", "inertias"):
+            getattr(self.view, "set_" + key)(wp.from_torch(self.inertial[key]), indices)
+        self.verify_inertial(rows)
+
+    def draw_inertial(self, row, sample):
+        """Row ``row``'s link masses and tensors scaled by the draw, and the payload on the base."""
+        nominal, inertial = self.nominal_inertial, self.inertial
+        scale = torch.as_tensor(sample.link_mass_scale, dtype=torch.float64)[self.link_order]
+        masses = nominal["masses"][row].double() * scale
+        inertias = nominal["inertias"][row].double() * scale[:, None]
+        centres = nominal["coms"][row].double()
+        base = self.body_index
+        if sample.payload_mass_kg > 0:
+            mass, centre, tensor = rnd.combined_base_inertial(
+                masses[base].item(),
+                centres[base, :3].numpy(),
+                inertias[base].reshape(3, 3).numpy(),
+                sample.payload_mass_kg,
+                sample.payload_position_m,
+            )
+            masses[base] = mass
+            centres[base, :3] = torch.as_tensor(centre)
+            inertias[base] = torch.as_tensor(tensor).reshape(9)
+        inertial["masses"][row] = masses.float()
+        inertial["coms"][row] = centres.float()
+        inertial["inertias"][row] = inertias.float()
+        self.root_com_local[row] = centres[base, :3].float().to(self.device)
+
+    def verify_inertial(self, rows):
+        """Read the selected rows' masses, centres of mass and link-axis tensors back from PhysX."""
+        rows = rows.cpu().long()
+        for key, columns in (("masses", ...), ("coms", slice(0, 3)), ("inertias", ...)):
+            actual = wp.to_torch(getattr(self.view, "get_" + key)()).cpu()[rows][..., columns]
+            wanted = self.inertial[key][rows][..., columns]
+            scale = wanted.abs().amax(-1, keepdim=True) if key == "inertias" else 1.0
+            if not torch.all((actual - wanted).abs() <= 1e-5 * scale + 1e-7):
+                raise ValueError("Native readback differs from the drawn " + key)
+
+    def schedule_push(self, row, after, first):
+        """Draw ``row``'s next push from its generator, timed in physics steps from its reset."""
+        push = rnd.next_push(self.randomization, self.generators[row], first)
+        if push is None:
+            self.push_start[row] = self.push_end[row] = NEVER
+            self.push_force[row] = 0.0
+            return
+        self.push_start[row] = after + round(push.delay_s / self.config.physics_dt)
+        self.push_end[row] = self.push_start[row] + round(push.duration_s / self.config.physics_dt)
+        self.push_force[row] = push.force_body_n
+
+    def push_window(self, substep):
+        """Record each row's body-frame push force for this physics step; zero outside its window."""
+        active = (self.since_reset >= self.push_start) & (self.since_reset < self.push_end)
+        self.push_body[:, substep] = np.where(active[:, None], self.push_force, 0.0)
+        # The stock write applies this force in the base link frame at its centre of mass, as the
+        # surrogate's rotated force at the centre of mass, so the push adds no torque.
+        force = self.torch(self.push_body[:, substep])[:, None]
+        self.robot.permanent_wrench_composer.set_forces_and_torques_index(
+            forces=force,
+            torques=torch.zeros_like(force),
+            body_ids=self.push_link,
+            env_ids=self.push_rows,
+        )
+        if substep == self.config.decimation - 1:
+            # Privileged value, as the surrogate gives it: the mean push over the control, no torque.
+            mean = torch.as_tensor(self.push_body.mean(1), dtype=torch.float32)
+            self.external_wrench_body = torch.cat((mean, torch.zeros_like(mean)), dim=-1).to(
+                self.device
+            )
+
+    def verify_push(self, substep):
+        """Check the wrench that the stock write submitted: this substep's push on the base alone."""
+        composer = self.robot.permanent_wrench_composer
+        force = wp.to_torch(composer.out_force_b.warp)
+        torque = wp.to_torch(composer.out_torque_b.warp)
+        wanted = torch.zeros_like(force)
+        wanted[:, self.body_index] = self.torch(self.push_body[:, substep])
+        if not torch.allclose(force, wanted, atol=1e-6, rtol=0) or torch.any(torque != 0):
+            raise RuntimeError("Submitted push wrench differs from the schedule")
+
+    def advance_pushes(self):
+        """Count one physics step for each row and draw the next push where one ended."""
+        self.since_reset += 1
+        for row in np.flatnonzero(self.since_reset == self.push_end):
+            self.schedule_push(int(row), int(self.push_end[row]), first=False)
+
+    @property
+    def expected_materials(self):
+        """Each shape's static friction, dynamic friction and restitution as written, or None when nominal."""
+        return getattr(self, "materials", None)
+
+    @property
+    def motor_law(self):
+        """The applied draw's gain, damping and strength in JOINT_NAMES order, or None when nominal."""
+        if getattr(self.motor, "draw", None) is None:
+            return None
+        return {
+            name: value[:, self.motor_order].cpu().numpy().copy()
+            for name, value in self.motor.draw.items()
+        }
+
     def write_reset(self, rows):
         rows = rows.to(torch.long)
+        # The stock constructor binds the motor after any SDK reset; draws start with the task's.
+        randomized = getattr(getattr(self, "motor", None), "draw", None) is not None
+        if randomized:
+            self.redraw(rows)
         q = self.neutral[self.inverse_joint_index].expand(len(rows), -1).clone()
         zero = torch.zeros_like(q)
         pose = self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(len(rows), -1).clone()
@@ -359,7 +634,11 @@ class IsaacEnv(DirectRLEnv):
             root_velocity=torch.zeros((len(rows), 6), device=self.device), env_ids=ids
         )
         self.robot.write_joint_position_to_sim_index(position=q, env_ids=ids)
+        if randomized:
+            pose[:, 2] = self.reset_height + self.drawn_pose_lift(rows, ids)
+            self.robot.write_root_link_pose_to_sim_index(root_pose=pose, env_ids=ids)
         self.robot.write_joint_velocity_to_sim_index(velocity=zero, env_ids=ids)
+        # The held target keeps the nominal pose; only the reset position takes the drawn offsets.
         self.robot.set_joint_position_target_index(target=q, env_ids=ids)
         self.robot.set_joint_velocity_target_index(target=zero, env_ids=ids)
         self.robot.set_joint_effort_target_index(target=zero, env_ids=ids)
@@ -372,6 +651,28 @@ class IsaacEnv(DirectRLEnv):
         )
         self.held[rows] = self.neutral
         self.previous_action[rows] = 0
+
+    def drawn_pose_lift(self, rows, ids):
+        """Write the rows' drawn joint offsets and return the root lift that keeps the nominal toe clearance.
+
+        The caller has written the nominal pose with the root at the reset height. The lift is the
+        nominal pose's lowest toe minus the drawn pose's lowest toe, as the surrogate computes it.
+        """
+        if self.nominal_toe_low is None:
+            low = self.lowest_toe(rows)
+            if float(low.max() - low.min()) > 1e-6:
+                raise ValueError("Nominal toe clearance differs between rows")
+            self.nominal_toe_low = float(low.mean())
+        drawn = self.neutral + self.joint_offset[rows]
+        if torch.any(drawn < self.lower) or torch.any(drawn > self.upper):
+            raise ValueError("Drawn reset pose leaves the named joint limits")
+        self.robot.write_joint_position_to_sim_index(
+            position=drawn[:, self.inverse_joint_index], env_ids=ids
+        )
+        lift = self.nominal_toe_low - self.lowest_toe(rows)
+        self.reset_q[rows] = drawn
+        self.reset_heights[rows] = self.reset_height + lift
+        return lift
 
     def save(self, name, value):
         (self.output / name).write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")

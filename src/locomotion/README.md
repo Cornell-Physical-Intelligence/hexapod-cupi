@@ -8,7 +8,7 @@ shows definitions and imports.
 
 | Package | Purpose | Start here |
 | --- | --- | --- |
-| `robots/` | Robot identity, RS05 motor model and Isaac actuator. | `hexapod.py` |
+| `robots/` | Robot identity, RS05 motor model, Isaac actuator and the Step 7 randomization declaration. | `hexapod.py` |
 | `omniwalk/` | Omnidirectional walking task, Direct environment and learner recipe. | `env.py`, `task.py` |
 | `rl/` | RSL-RL wrapper, PPO subclasses and action distributions. | `wrapper.py` |
 | `scripts/` | Container entry points: train, play and diagnose. | `train.py` |
@@ -18,7 +18,6 @@ shows definitions and imports.
 | `surrogate/` | CPU MuJoCo training and trace replay. | [README](surrogate/README.md) |
 | `hexapod/` | Original tripod task with BC and PPO fine-tuning. | `hexapod_env.py` |
 | `tests/` | CPU, parity and native replay tests. | [Verification](#verification) |
-| `randomization.py` | Step 7 Table II declaration and per-replica draws; the surrogate applies them. | [TRAINING](../../docs/TRAINING.md) |
 
 ## Omniwalk files
 
@@ -113,14 +112,17 @@ task alone. It has no standing admission. Read the
 
 ## Step 7: domain randomization declaration
 
-[`randomization.py`](randomization.py) declares `table2_v1` for
+[`robots/randomization.py`](robots/randomization.py) declares `table2_v1` for
 [issue #67](https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67):
 one field per Table II row with its status, this project's range, the draw
 granularity and the reason. `declaration("table2_v1")` returns the canonical
 JSON and its SHA-256, `730cad982ddac064cdd36090fd3d770a1b38a6f81aa03bba0ce792bba84b6a5c`.
 Run identities, packs and admission bind that hash; `none` declares the nominal
-properties and draws nothing. The first milestone-1 review freezes these ranges
-with the push schedule. No row is excluded.
+properties and draws nothing. No row is excluded. The ranges, the push schedule
+and the declaration text are frozen as of 2026-11-08, after the five-seed
+surrogate comparison under #67; `test_randomization.py` pins this hash and the
+grid hash below. A range change takes a new declaration name. Where an engine
+departs from the declaration text, the notes below record it.
 
 | Table II row | Paper | Project range | Draw | Status |
 | --- | --- | --- | --- | --- |
@@ -153,9 +155,12 @@ with the push schedule. No row is excluded.
   strength to the unchanged `robots/rs05.py` law.
 - **Foot friction.** MuJoCo takes the larger of the two geom coefficients, so
   the surrogate sets a randomized replica's floor coefficient to zero and its
-  toe caps carry the draw; tibia shafts and hulls keep 1.0. PhysX multiplies
-  the toe material by the floor material 1.0. Each gives the drawn value at the
-  toes and 1.0 elsewhere.
+  toe caps carry the draw; tibia shafts and hulls keep 1.0. The native tibia is
+  one SDF collision shape for the fork and the foot, so native writes the draw
+  to every shape of the six tibia links. PhysX multiplies that material by the
+  floor material 1.0. Toe contacts get the drawn value in both engines; a
+  native shaft contact also gets it, and evaluation already counts a shaft
+  contact as a non-toe floor contact.
 - **Gains.** Both factors act through the explicit motor law. The implicit
   PhysX drive and the MuJoCo joint damping stay at zero.
 - **Pushes, adapted.** Section V-B applies velocity perturbations at
@@ -174,9 +179,24 @@ with the push schedule. No row is excluded.
   20 ms limiter, the 0.35 rad action scale and the 1.6 N·m cap stay fixed.
 
 The surrogate applies these draws under `--randomization table2_v1`
-([surrogate guide](surrogate/README.md)). The native implementation and the
-`none` against `table2_v1` comparison follow under #67. This declaration admits
+([surrogate guide](surrogate/README.md)). The native environment applies
+every draw and runs the push schedule on the surrogate's timeline, so each
+replica's generator yields the same draws in both engines across resets and
+pushes. It reads each written value back: the tibia materials, the link
+masses, centres of mass and link-axis tensors, the reset pose and root height,
+and the push wrench before each physics step. The reset root height comes from
+the surrogate's toe-cap points, so both engines lift the root by the same rule.
+No Isaac run has exercised these writes yet (#67). This declaration admits
 nothing.
+
+A native training pack selects the declaration with `--randomization
+table2_v1` on `locomotion.spark.prepare`; the pack passes it to
+`scripts/train.py`. The run identity and `PACK.json` record the name, hash and
+canonical declaration under `randomization`. A nominal run records no
+`randomization` key, so its identity is unchanged. Evaluation, probes and
+diagnostics refuse a declaration and run the nominal robot; an evaluation
+records the checkpoint's declaration as `checkpoint_randomization`. The
+physics identity and the standing admission stay those of the nominal robot.
 
 `grid_declaration("table2_v1_grid")` declares the fixed-condition screen of
 issue #67, SHA-256

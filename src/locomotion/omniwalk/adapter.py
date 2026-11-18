@@ -41,14 +41,32 @@ class OmniEnv:
     amp_width = 61
 
     def __init__(
-        self, cfg, asset, model_path, geometry_path, output, *, reference_metadata=None, verify=None
+        self,
+        cfg,
+        asset,
+        model_path,
+        geometry_path,
+        output,
+        *,
+        reference_metadata=None,
+        verify=None,
+        randomization="none",
     ):
         from locomotion.omniwalk.env import IsaacEnv
 
         self.cfg, self.device, self.num_envs = cfg, cfg.device, cfg.num_envs
+        # The nominal environment is constructed exactly as before Step 7.
+        extra = {} if randomization == "none" else {"randomization": randomization}
         self.isaac = isaac = IsaacEnv(
-            cfg, asset, model_path, geometry_path, output, reference_metadata=reference_metadata
+            cfg,
+            asset,
+            model_path,
+            geometry_path,
+            output,
+            reference_metadata=reference_metadata,
+            **extra,
         )
+        self.randomization = getattr(isaac, "randomization", "none")
         self.commands, self.history = isaac.commands, isaac.history
         self.held, self.previous_action = isaac.held, isaac.previous_action
         self.episode_steps = isaac.episode_length_buf
@@ -87,6 +105,31 @@ class OmniEnv:
             verify(self)
         self.reset()
 
+    @property
+    def ground_friction(self):
+        """Each row's drawn friction coefficient, or None without randomization."""
+        return getattr(self.isaac, "ground_friction", None)
+
+    @property
+    def external_wrench_body(self):
+        """Each row's mean body-frame push force and zero torque over the last control, or None."""
+        return getattr(self.isaac, "external_wrench_body", None)
+
+    @property
+    def expected_materials(self):
+        """Shape materials as the environment wrote them, or None when nominal."""
+        return getattr(self.isaac, "expected_materials", None)
+
+    @property
+    def motor_law(self):
+        """The applied Step 7 motor draw in JOINT_NAMES order, or None under the nominal law."""
+        return getattr(self.isaac, "motor_law", None)
+
+    @property
+    def reset_heights(self):
+        """Each row's root height at its last reset under a draw, or None at the one nominal height."""
+        return getattr(self.isaac, "reset_heights", None)
+
     def reset(self, indices=None):
         rows = reset_rows(indices, self.num_envs, self.device)
         if self.native_errors:
@@ -96,14 +139,17 @@ class OmniEnv:
         if self.sim.get_physics_step_count() != before:
             raise RuntimeError("Reset unexpectedly advanced physics")
         if len(rows):
-            expected = self.neutral.expand(len(rows), -1)
+            # A randomized row resets to its drawn offsets with the root lifted to the nominal clearance.
+            drawn = getattr(self.isaac, "reset_q", None)
+            expected = self.neutral.expand(len(rows), -1) if drawn is None else drawn[rows]
             if not torch.allclose(self.current["q"][rows], expected, atol=2e-6, rtol=0):
                 raise RuntimeError("Selected joint reset readback differs")
             expected_root = (
                 self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(len(rows), -1).clone()
             )
             expected_root[:, :3] = self.origins[rows]
-            expected_root[:, 2] = self.reset_height
+            heights = self.reset_heights
+            expected_root[:, 2] = self.reset_height if heights is None else heights[rows]
             if not torch.allclose(self.current["root"][rows], expected_root, atol=2e-6, rtol=0):
                 raise RuntimeError("Selected root reset readback differs")
             self.history[rows] = proprio(self.current, self.neutral)[rows, None].expand(-1, 5, -1)

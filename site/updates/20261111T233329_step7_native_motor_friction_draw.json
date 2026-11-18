@@ -1,0 +1,29 @@
+{
+  "id": "20261111T233329_step7_native_motor_friction_draw",
+  "date": "2026-11-11T23:33:29Z",
+  "title": "Apply the Step 7 motor and friction draws in the native environment",
+  "summary": "IsaacEnv and OmniEnv take a randomization name. Under table2_v1 each replica has its own generator, seeded as in the surrogate, and each reset draws that row's gain, damping, motor strength and foot friction. The Motor actuator applies the draw through randomization.motor_force; with no draw it keeps the nominal rs05 law. The native tibia is one SDF collision shape for the fork and the foot, so the friction draw covers every shape of the six tibia links, not the toe cap alone as in the surrogate; the locomotion guide records this as an implementation note. Admission reads back the written materials instead of nominal ones when the environment exposes them. Under none, OmniEnv constructs IsaacEnv exactly as before. Native physics source identity changes: the closure now includes robots/randomization.py. Joint offsets, mass, inertia and pushes are not applied natively yet, and the native draw does not yet consume the push draws, so its generator stream matches the surrogate's only on the first reset. CPU tests use stub views; no Isaac run has exercised this code.",
+  "areas": [
+    "training",
+    "simulation"
+  ],
+  "changes": [
+    "src/locomotion/README.md",
+    "src/locomotion/evaluation/admission.py",
+    "src/locomotion/omniwalk/adapter.py",
+    "src/locomotion/omniwalk/env.py",
+    "src/locomotion/robots/actuator.py",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/tests/test_admission.py",
+    "src/locomotion/tests/test_randomization.py",
+    "site/updates/20261111T233329_step7_native_motor_friction_draw.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_randomization.py",
+    "src/locomotion/tests/test_admission.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Apply the remaining draws and pushes natively in the surrogate's generator order, then validate the draws and readback in Isaac with fresh one-robot and 128-robot admission.",
+  "no_project_impact": true,
+  "reason": "Native code path behind a non-default option with CPU stub tests only: no native run, admission result, gate threshold or accepted capability changes."
+}

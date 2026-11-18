@@ -1,0 +1,24 @@
+{
+  "id": "20261112T062956_step7_native_inertia_pose_push",
+  "date": "2026-11-12T06:29:56Z",
+  "title": "Write the remaining Step 7 draws to PhysX and read each one back",
+  "summary": "The native environment now applies every table2_v1 draw. Each reset scales the 19 link masses and tensors, adds the payload to the base as the surrogate does, and writes masses, centres of mass and link-axis tensors to PhysX, then reads them back. A tensor that does not read back stops the run. The nominal readback must match the ledger's link-axis tensor, which the payload combination needs. The reset pose takes the drawn joint offsets, and the root rises so the lowest toe-cap point keeps the nominal clearance. The points are the surrogate's toe-cap cloud, bound by the geometry hash, so both engines lift by the same rule. The held target stays at the nominal pose. Each push goes through the articulation's permanent wrench composer as a base-frame force at the centre of mass, and the submitted wrench is checked before each physics step. OmniEnv checks the drawn reset pose and height, and exposes reset_heights to the privileged critic. CPU tests use MuJoCo kinematics of the surrogate model in place of PhysX and find the native masses, centres of mass, tensors, reset pose and root height equal to the surrogate's draw on three rows. The refusal of randomization is lifted. Native physics source identity changes. No Isaac run has exercised this code.",
+  "areas": [
+    "training",
+    "simulation"
+  ],
+  "changes": [
+    "src/locomotion/omniwalk/env.py",
+    "src/locomotion/omniwalk/adapter.py",
+    "src/locomotion/README.md",
+    "src/locomotion/tests/test_randomization.py",
+    "site/updates/20261112T062956_step7_native_inertia_pose_push.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_randomization.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Bind robots/randomization.py into the native physics source identity at every entry point, then open the PR.",
+  "no_project_impact": true,
+  "reason": "Native code with CPU stub tests only: no native run, admission result, gate threshold or accepted capability changes."
+}

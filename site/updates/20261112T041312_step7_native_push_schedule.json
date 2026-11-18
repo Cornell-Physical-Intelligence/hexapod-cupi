@@ -1,0 +1,24 @@
+{
+  "id": "20261112T041312_step7_native_push_schedule",
+  "date": "2026-11-12T04:13:12Z",
+  "title": "Keep each native replica's Step 7 draws in step with the surrogate",
+  "summary": "The surrogate draws a replica's next push from that replica's generator each time a push ends, so matching the native draws after the first reset needs the same push timeline, not one extra draw per reset. The native environment now keeps each row's clock in 400 Hz physics steps from its reset, draws the first push at reset and the next one at each push end, and reports the mean body-frame push over each control as external_wrench_body, as the surrogate does; OmniEnv exposes it to the privileged critic. A test drives both engines for 1500 controls (30 s) with four mid-run resets, 11 push ends and 880 row-steps under push, and finds equal push windows, forces, privileged wrenches, motor draws, friction and generator states on every row. The push force is not yet written to PhysX, and joint offsets, link mass and payload are not applied natively, so IsaacEnv now refuses any randomization but none; a test checks the refusal. Under none nothing changes. Native physics source identity changes. No Isaac run has exercised this code.",
+  "areas": [
+    "training",
+    "simulation"
+  ],
+  "changes": [
+    "src/locomotion/omniwalk/env.py",
+    "src/locomotion/omniwalk/adapter.py",
+    "src/locomotion/README.md",
+    "src/locomotion/tests/test_randomization.py",
+    "site/updates/20261112T041312_step7_native_push_schedule.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_randomization.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Write joint offsets, link mass, payload and the push force to PhysX with readback checks, then lift the refusal.",
+  "no_project_impact": true,
+  "reason": "A native code path that refuses to run until complete, with CPU stub tests only: no native run, admission result, gate threshold or accepted capability changes."
+}
