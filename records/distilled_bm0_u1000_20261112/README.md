@@ -8,6 +8,8 @@ nylon plus 0.75 kg, giving a robot of 7.280 kg (nominal model 7.466 kg). Source 
 **Status: diagnostic only.** It fails the 96-case gate and is not in the lineage. It has not been run
 on the normal (no-delay) simulator, where its teacher's recipe (distill1) scored 18/96 and failed both gates.
 
+To run, judge, view, fine-tune or export it, see [GUIDE.md](GUIDE.md).
+
 ## Files
 
 | file | sha256[:16] | what |
