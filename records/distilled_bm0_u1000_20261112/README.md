@@ -62,6 +62,15 @@ uv run python records/distilled_bm0_u1000_20261112/scripts/body_mass.py run reco
 Add `--match stand` for a 30-second smoke test (expect 3/3). Without the `body_mass.py run` prefix, the
 same command judges the policy on the nominal 7.466 kg body.
 
-Reproducing the training needs the teacher (pfit1 u2000) and predictor B, which are not in this folder.
-They are on the original laptop under `hexapod-surrogate/runs/curriculum/` (`pfit1/`,
-`predictor2_20261110/merged4/`).
+## Rerunning the whole chain from the v70 odometry policy
+
+`pipeline/run_chain.sh` reruns everything from od1 u1200 (`records/curriculum_20261109/od1`) to
+bm0, then judges the result: predictor B, then pfit1, then bm0, then the judge. It takes about 2 h on
+CPU. `pipeline/record_run.sh` files the finished run under `records/` for a commit. Steps, recorded
+results and push rules are in [pipeline/PUSHING_A_RUN.md](pipeline/PUSHING_A_RUN.md).
+
+`lineage/` holds the two intermediate models as recorded, so the chain can start partway through:
+`lineage/predictor_B/` (predictor.pt 1dff0e80c45da086, its data record and held-out report) and
+`lineage/pfit1_u2000/` (checkpoint e2ec2f0c433d21d8, declaration, predictor_in_loop.json, train
+log). `scripts/predictor_train.py` (f7c892af13edef8d) trained pfit1; `scripts/fitted_report.py`
+(cf6cad06c08dfdc8) is imported by `delay_predictor.py`.

@@ -193,9 +193,12 @@ surrogate are design evidence, and acceptance needs a native run on Spark.
 
 ### 5.2 Re-run the distillation
 
-`scripts/distill_train.py` (DAgger) and `scripts/bmass1.sh` reproduce bm0 itself, but they need the
-teacher (pfit1 u2000) and predictor B, which are not in this branch; the paths in `bmass1.sh` are the
-training laptop's.
+`pipeline/run_chain.sh` reruns the whole lineage from the v70 odometry policy od1 u1200: predictor B,
+then pfit1, then bm0, then the judge. It takes about 2 h on CPU, and `--from distill` reruns only the
+distillation from the bundled teacher (`lineage/pfit1_u2000/`) and predictor (`lineage/predictor_B/`).
+`pipeline/record_run.sh` files the result under `records/` for a commit. See
+[pipeline/PUSHING_A_RUN.md](pipeline/PUSHING_A_RUN.md). `scripts/bmass1.sh` is the original command
+record; its paths are the training laptop's.
 
 ## 6. Run it outside the simulator (the robot runtime)
 

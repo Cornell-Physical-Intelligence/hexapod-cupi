@@ -1,0 +1,1132 @@
+--------------------------------------------------------------------------------
+Resolved observation sets: 
+	 actor :  ['policy']
+	 critic :  ['critic']
+--------------------------------------------------------------------------------
+Actor Model: MLPModel(
+  (obs_normalizer): Identity()
+  (distribution): BoundedMeanGaussian()
+  (mlp): MLP(
+    (0): Linear(in_features=278, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=18, bias=True)
+  )
+)
+Critic Model: MLPModel(
+  (obs_normalizer): Identity()
+  (mlp): MLP(
+    (0): Linear(in_features=281, out_features=256, bias=True)
+    (1): ELU(alpha=1.0)
+    (2): Linear(in_features=256, out_features=256, bias=True)
+    (3): ELU(alpha=1.0)
+    (4): Linear(in_features=256, out_features=128, bias=True)
+    (5): ELU(alpha=1.0)
+    (6): Linear(in_features=128, out_features=1, bias=True)
+  )
+)
+DISTILL update 0 beta 0.500 mse 0.02146 -> 0.00429
+DISTILL update 1 beta 0.497 mse 0.00601 -> 0.00260
+DISTILL update 2 beta 0.495 mse 0.00258 -> 0.00183
+DISTILL update 3 beta 0.492 mse 0.00207 -> 0.00162
+DISTILL update 4 beta 0.490 mse 0.00184 -> 0.00148
+DISTILL update 5 beta 0.487 mse 0.00165 -> 0.00136
+DISTILL update 6 beta 0.485 mse 0.00150 -> 0.00125
+DISTILL update 7 beta 0.482 mse 0.00142 -> 0.00119
+DISTILL update 8 beta 0.480 mse 0.00138 -> 0.00115
+DISTILL update 9 beta 0.477 mse 0.00133 -> 0.00111
+{"update": 10, "reward": -2.6129284803327106, "command_speed": 0.1128051421967476, "std": 0.05000005662441254, "collect_s": 1.8, "learn_s": 0.222, "wall_s": 20.3}
+DISTILL update 10 beta 0.475 mse 0.00114 -> 0.00096
+DISTILL update 11 beta 0.472 mse 0.00109 -> 0.00092
+DISTILL update 12 beta 0.470 mse 0.00104 -> 0.00089
+DISTILL update 13 beta 0.468 mse 0.00107 -> 0.00089
+DISTILL update 14 beta 0.465 mse 0.00100 -> 0.00082
+DISTILL update 15 beta 0.463 mse 0.00093 -> 0.00080
+DISTILL update 16 beta 0.460 mse 0.00091 -> 0.00077
+DISTILL update 17 beta 0.458 mse 0.00084 -> 0.00072
+DISTILL update 18 beta 0.455 mse 0.00091 -> 0.00076
+DISTILL update 19 beta 0.453 mse 0.00093 -> 0.00076
+{"update": 20, "reward": -11.566227643822154, "command_speed": 0.10754645266510865, "std": 0.05000005662441254, "collect_s": 1.821, "learn_s": 0.226, "wall_s": 40.7}
+DISTILL update 20 beta 0.450 mse 0.00095 -> 0.00074
+DISTILL update 21 beta 0.448 mse 0.00098 -> 0.00077
+DISTILL update 22 beta 0.445 mse 0.00093 -> 0.00075
+DISTILL update 23 beta 0.443 mse 0.00107 -> 0.00080
+DISTILL update 24 beta 0.440 mse 0.00113 -> 0.00088
+DISTILL update 25 beta 0.438 mse 0.00141 -> 0.00097
+DISTILL update 26 beta 0.435 mse 0.00138 -> 0.00105
+DISTILL update 27 beta 0.432 mse 0.00230 -> 0.00138
+DISTILL update 28 beta 0.430 mse 0.00168 -> 0.00095
+DISTILL update 29 beta 0.427 mse 0.00132 -> 0.00091
+{"update": 30, "reward": 0.3395412600455327, "command_speed": 0.12385002384994903, "std": 0.05000005662441254, "collect_s": 1.767, "learn_s": 0.234, "wall_s": 60.9}
+DISTILL update 30 beta 0.425 mse 0.00111 -> 0.00086
+DISTILL update 31 beta 0.422 mse 0.00102 -> 0.00087
+DISTILL update 32 beta 0.420 mse 0.00096 -> 0.00080
+DISTILL update 33 beta 0.417 mse 0.00094 -> 0.00078
+DISTILL update 34 beta 0.415 mse 0.00097 -> 0.00082
+DISTILL update 35 beta 0.412 mse 0.00097 -> 0.00080
+DISTILL update 36 beta 0.410 mse 0.00093 -> 0.00081
+DISTILL update 37 beta 0.407 mse 0.00090 -> 0.00073
+DISTILL update 38 beta 0.405 mse 0.00085 -> 0.00074
+DISTILL update 39 beta 0.402 mse 0.00084 -> 0.00071
+{"update": 40, "reward": -11.767463730949304, "command_speed": 0.11953056368573173, "std": 0.05000005662441254, "collect_s": 1.796, "learn_s": 0.231, "wall_s": 80.9}
+DISTILL update 40 beta 0.400 mse 0.00085 -> 0.00070
+DISTILL update 41 beta 0.398 mse 0.00084 -> 0.00071
+DISTILL update 42 beta 0.395 mse 0.00076 -> 0.00063
+DISTILL update 43 beta 0.393 mse 0.00076 -> 0.00064
+DISTILL update 44 beta 0.390 mse 0.00078 -> 0.00066
+DISTILL update 45 beta 0.388 mse 0.00077 -> 0.00062
+DISTILL update 46 beta 0.385 mse 0.00077 -> 0.00065
+DISTILL update 47 beta 0.383 mse 0.00077 -> 0.00063
+DISTILL update 48 beta 0.380 mse 0.00075 -> 0.00059
+DISTILL update 49 beta 0.378 mse 0.00079 -> 0.00060
+{"update": 50, "reward": -19.569002046379964, "command_speed": 0.11215663613789646, "std": 0.05000005662441254, "collect_s": 1.814, "learn_s": 0.243, "wall_s": 101.6}
+DISTILL update 50 beta 0.375 mse 0.00075 -> 0.00062
+DISTILL update 51 beta 0.372 mse 0.00083 -> 0.00067
+DISTILL update 52 beta 0.370 mse 0.00083 -> 0.00066
+DISTILL update 53 beta 0.367 mse 0.00084 -> 0.00067
+DISTILL update 54 beta 0.365 mse 0.00116 -> 0.00072
+DISTILL update 55 beta 0.362 mse 0.00172 -> 0.00107
+DISTILL update 56 beta 0.360 mse 0.00123 -> 0.00078
+DISTILL update 57 beta 0.358 mse 0.00103 -> 0.00073
+DISTILL update 58 beta 0.355 mse 0.00083 -> 0.00068
+DISTILL update 59 beta 0.353 mse 0.00079 -> 0.00066
+{"update": 60, "reward": -5.751860216963299, "command_speed": 0.11287947004850263, "std": 0.05000005662441254, "collect_s": 1.654, "learn_s": 0.243, "wall_s": 121.7}
+DISTILL update 60 beta 0.350 mse 0.00078 -> 0.00067
+DISTILL update 61 beta 0.348 mse 0.00083 -> 0.00069
+DISTILL update 62 beta 0.345 mse 0.00086 -> 0.00072
+DISTILL update 63 beta 0.343 mse 0.00082 -> 0.00065
+DISTILL update 64 beta 0.340 mse 0.00072 -> 0.00061
+DISTILL update 65 beta 0.338 mse 0.00072 -> 0.00060
+DISTILL update 66 beta 0.335 mse 0.00074 -> 0.00062
+DISTILL update 67 beta 0.333 mse 0.00079 -> 0.00066
+DISTILL update 68 beta 0.330 mse 0.00079 -> 0.00063
+DISTILL update 69 beta 0.328 mse 0.00076 -> 0.00060
+{"update": 70, "reward": -15.709970210506274, "command_speed": 0.1044162476899147, "std": 0.05000005662441254, "collect_s": 1.812, "learn_s": 0.227, "wall_s": 141.8}
+DISTILL update 70 beta 0.325 mse 0.00076 -> 0.00061
+DISTILL update 71 beta 0.323 mse 0.00076 -> 0.00055
+DISTILL update 72 beta 0.320 mse 0.00079 -> 0.00066
+DISTILL update 73 beta 0.318 mse 0.00069 -> 0.00055
+DISTILL update 74 beta 0.315 mse 0.00063 -> 0.00052
+DISTILL update 75 beta 0.312 mse 0.00065 -> 0.00055
+DISTILL update 76 beta 0.310 mse 0.00064 -> 0.00051
+DISTILL update 77 beta 0.307 mse 0.00068 -> 0.00055
+DISTILL update 78 beta 0.305 mse 0.00064 -> 0.00051
+DISTILL update 79 beta 0.302 mse 0.00072 -> 0.00054
+{"update": 80, "reward": -10.517506799574525, "command_speed": 0.1075025317563126, "std": 0.05000005662441254, "collect_s": 1.777, "learn_s": 0.228, "wall_s": 162.4}
+DISTILL update 80 beta 0.300 mse 0.00068 -> 0.00055
+DISTILL update 81 beta 0.297 mse 0.00073 -> 0.00055
+DISTILL update 82 beta 0.295 mse 0.00082 -> 0.00061
+DISTILL update 83 beta 0.292 mse 0.00147 -> 0.00092
+DISTILL update 84 beta 0.290 mse 0.00091 -> 0.00067
+DISTILL update 85 beta 0.287 mse 0.00077 -> 0.00061
+DISTILL update 86 beta 0.285 mse 0.00070 -> 0.00059
+DISTILL update 87 beta 0.282 mse 0.00069 -> 0.00061
+DISTILL update 88 beta 0.280 mse 0.00074 -> 0.00060
+DISTILL update 89 beta 0.277 mse 0.00072 -> 0.00061
+{"update": 90, "reward": -0.6733409547737715, "command_speed": 0.11227675149821449, "std": 0.05000005662441254, "collect_s": 1.779, "learn_s": 0.221, "wall_s": 182.2}
+DISTILL update 90 beta 0.275 mse 0.00070 -> 0.00056
+DISTILL update 91 beta 0.272 mse 0.00063 -> 0.00055
+DISTILL update 92 beta 0.270 mse 0.00069 -> 0.00059
+DISTILL update 93 beta 0.267 mse 0.00069 -> 0.00055
+DISTILL update 94 beta 0.265 mse 0.00066 -> 0.00056
+DISTILL update 95 beta 0.263 mse 0.00068 -> 0.00054
+DISTILL update 96 beta 0.260 mse 0.00067 -> 0.00053
+DISTILL update 97 beta 0.258 mse 0.00061 -> 0.00048
+DISTILL update 98 beta 0.255 mse 0.00058 -> 0.00049
+DISTILL update 99 beta 0.253 mse 0.00059 -> 0.00049
+{"update": 100, "reward": -10.56337775716626, "command_speed": 0.11056177829399981, "std": 0.05000005662441254, "collect_s": 1.838, "learn_s": 0.233, "wall_s": 202.4}
+DISTILL update 100 beta 0.250 mse 0.00071 -> 0.00056
+DISTILL update 101 beta 0.247 mse 0.00063 -> 0.00049
+DISTILL update 102 beta 0.245 mse 0.00061 -> 0.00048
+DISTILL update 103 beta 0.242 mse 0.00071 -> 0.00054
+DISTILL update 104 beta 0.240 mse 0.00071 -> 0.00053
+DISTILL update 105 beta 0.237 mse 0.00072 -> 0.00052
+DISTILL update 106 beta 0.235 mse 0.00081 -> 0.00055
+DISTILL update 107 beta 0.232 mse 0.00067 -> 0.00052
+DISTILL update 108 beta 0.230 mse 0.00090 -> 0.00068
+DISTILL update 109 beta 0.227 mse 0.00077 -> 0.00060
+{"update": 110, "reward": -11.413700543782195, "command_speed": 0.11634215566370373, "std": 0.05000005662441254, "collect_s": 1.808, "learn_s": 0.234, "wall_s": 222.8}
+DISTILL update 110 beta 0.225 mse 0.00087 -> 0.00057
+DISTILL update 111 beta 0.222 mse 0.00139 -> 0.00089
+DISTILL update 112 beta 0.220 mse 0.00092 -> 0.00061
+DISTILL update 113 beta 0.218 mse 0.00073 -> 0.00061
+DISTILL update 114 beta 0.215 mse 0.00071 -> 0.00060
+DISTILL update 115 beta 0.213 mse 0.00070 -> 0.00058
+DISTILL update 116 beta 0.210 mse 0.00069 -> 0.00057
+DISTILL update 117 beta 0.208 mse 0.00065 -> 0.00057
+DISTILL update 118 beta 0.205 mse 0.00067 -> 0.00056
+DISTILL update 119 beta 0.203 mse 0.00065 -> 0.00053
+{"update": 120, "reward": -3.4677538254044418, "command_speed": 0.11436589400661473, "std": 0.05000005662441254, "collect_s": 1.752, "learn_s": 0.228, "wall_s": 242.4}
+DISTILL update 120 beta 0.200 mse 0.00062 -> 0.00055
+DISTILL update 121 beta 0.198 mse 0.00065 -> 0.00058
+DISTILL update 122 beta 0.195 mse 0.00065 -> 0.00051
+DISTILL update 123 beta 0.193 mse 0.00060 -> 0.00051
+DISTILL update 124 beta 0.190 mse 0.00060 -> 0.00051
+DISTILL update 125 beta 0.188 mse 0.00061 -> 0.00052
+DISTILL update 126 beta 0.185 mse 0.00064 -> 0.00052
+DISTILL update 127 beta 0.182 mse 0.00067 -> 0.00053
+DISTILL update 128 beta 0.180 mse 0.00063 -> 0.00049
+DISTILL update 129 beta 0.177 mse 0.00064 -> 0.00049
+{"update": 130, "reward": -6.104915348308471, "command_speed": 0.12051785800897954, "std": 0.05000005662441254, "collect_s": 1.81, "learn_s": 0.236, "wall_s": 262.8}
+DISTILL update 130 beta 0.175 mse 0.00061 -> 0.00050
+DISTILL update 131 beta 0.172 mse 0.00068 -> 0.00053
+DISTILL update 132 beta 0.170 mse 0.00066 -> 0.00050
+DISTILL update 133 beta 0.167 mse 0.00059 -> 0.00046
+DISTILL update 134 beta 0.165 mse 0.00075 -> 0.00052
+DISTILL update 135 beta 0.162 mse 0.00066 -> 0.00050
+DISTILL update 136 beta 0.160 mse 0.00068 -> 0.00051
+DISTILL update 137 beta 0.157 mse 0.00068 -> 0.00053
+DISTILL update 138 beta 0.155 mse 0.00112 -> 0.00070
+DISTILL update 139 beta 0.153 mse 0.00113 -> 0.00072
+{"update": 140, "reward": 1.785552679488319, "command_speed": 0.11684545281991746, "std": 0.05000005662441254, "collect_s": 1.719, "learn_s": 0.236, "wall_s": 283.1}
+DISTILL update 140 beta 0.150 mse 0.00079 -> 0.00058
+DISTILL update 141 beta 0.148 mse 0.00070 -> 0.00058
+DISTILL update 142 beta 0.145 mse 0.00072 -> 0.00059
+DISTILL update 143 beta 0.143 mse 0.00066 -> 0.00054
+DISTILL update 144 beta 0.140 mse 0.00067 -> 0.00056
+DISTILL update 145 beta 0.138 mse 0.00064 -> 0.00054
+DISTILL update 146 beta 0.135 mse 0.00066 -> 0.00054
+DISTILL update 147 beta 0.133 mse 0.00068 -> 0.00056
+DISTILL update 148 beta 0.130 mse 0.00058 -> 0.00047
+DISTILL update 149 beta 0.128 mse 0.00053 -> 0.00046
+{"update": 150, "reward": -10.243155898311265, "command_speed": 0.1259739549164105, "std": 0.05000005662441254, "collect_s": 1.765, "learn_s": 0.24, "wall_s": 303.1}
+DISTILL update 150 beta 0.125 mse 0.00054 -> 0.00047
+DISTILL update 151 beta 0.122 mse 0.00058 -> 0.00048
+DISTILL update 152 beta 0.120 mse 0.00055 -> 0.00046
+DISTILL update 153 beta 0.117 mse 0.00051 -> 0.00041
+DISTILL update 154 beta 0.115 mse 0.00048 -> 0.00041
+DISTILL update 155 beta 0.112 mse 0.00057 -> 0.00047
+DISTILL update 156 beta 0.110 mse 0.00060 -> 0.00046
+DISTILL update 157 beta 0.107 mse 0.00060 -> 0.00045
+DISTILL update 158 beta 0.105 mse 0.00055 -> 0.00045
+DISTILL update 159 beta 0.102 mse 0.00055 -> 0.00044
+{"update": 160, "reward": -17.078228664973317, "command_speed": 0.11887445366875998, "std": 0.05000005662441254, "collect_s": 1.84, "learn_s": 0.229, "wall_s": 323.5}
+DISTILL update 160 beta 0.100 mse 0.00054 -> 0.00045
+DISTILL update 161 beta 0.097 mse 0.00060 -> 0.00046
+DISTILL update 162 beta 0.095 mse 0.00058 -> 0.00047
+DISTILL update 163 beta 0.093 mse 0.00055 -> 0.00044
+DISTILL update 164 beta 0.090 mse 0.00058 -> 0.00046
+DISTILL update 165 beta 0.088 mse 0.00054 -> 0.00043
+DISTILL update 166 beta 0.085 mse 0.00101 -> 0.00074
+DISTILL update 167 beta 0.083 mse 0.00083 -> 0.00059
+DISTILL update 168 beta 0.080 mse 0.00073 -> 0.00056
+DISTILL update 169 beta 0.078 mse 0.00064 -> 0.00052
+{"update": 170, "reward": -8.468146469072154, "command_speed": 0.11844945143827014, "std": 0.05000005662441254, "collect_s": 1.743, "learn_s": 0.232, "wall_s": 343.7}
+DISTILL update 170 beta 0.075 mse 0.00064 -> 0.00053
+DISTILL update 171 beta 0.073 mse 0.00063 -> 0.00053
+DISTILL update 172 beta 0.070 mse 0.00064 -> 0.00054
+DISTILL update 173 beta 0.068 mse 0.00061 -> 0.00051
+DISTILL update 174 beta 0.065 mse 0.00063 -> 0.00053
+DISTILL update 175 beta 0.062 mse 0.00060 -> 0.00048
+DISTILL update 176 beta 0.060 mse 0.00061 -> 0.00051
+DISTILL update 177 beta 0.057 mse 0.00060 -> 0.00047
+DISTILL update 178 beta 0.055 mse 0.00055 -> 0.00044
+DISTILL update 179 beta 0.052 mse 0.00059 -> 0.00045
+{"update": 180, "reward": -22.498950457164028, "command_speed": 0.11807190648663922, "std": 0.05000005662441254, "collect_s": 1.86, "learn_s": 0.245, "wall_s": 364.0}
+DISTILL update 180 beta 0.050 mse 0.00054 -> 0.00042
+DISTILL update 181 beta 0.047 mse 0.00052 -> 0.00042
+DISTILL update 182 beta 0.045 mse 0.00058 -> 0.00046
+DISTILL update 183 beta 0.042 mse 0.00063 -> 0.00049
+DISTILL update 184 beta 0.040 mse 0.00050 -> 0.00040
+DISTILL update 185 beta 0.037 mse 0.00048 -> 0.00041
+DISTILL update 186 beta 0.035 mse 0.00049 -> 0.00040
+DISTILL update 187 beta 0.032 mse 0.00047 -> 0.00040
+DISTILL update 188 beta 0.030 mse 0.00049 -> 0.00040
+DISTILL update 189 beta 0.028 mse 0.00049 -> 0.00042
+{"update": 190, "reward": -25.699752179178176, "command_speed": 0.11823775460017012, "std": 0.05000005662441254, "collect_s": 1.818, "learn_s": 0.226, "wall_s": 384.7}
+DISTILL update 190 beta 0.025 mse 0.00048 -> 0.00039
+DISTILL update 191 beta 0.023 mse 0.00048 -> 0.00038
+DISTILL update 192 beta 0.020 mse 0.00049 -> 0.00039
+DISTILL update 193 beta 0.018 mse 0.00051 -> 0.00039
+DISTILL update 194 beta 0.015 mse 0.00095 -> 0.00067
+DISTILL update 195 beta 0.013 mse 0.00071 -> 0.00053
+DISTILL update 196 beta 0.010 mse 0.00063 -> 0.00051
+DISTILL update 197 beta 0.008 mse 0.00059 -> 0.00052
+DISTILL update 198 beta 0.005 mse 0.00059 -> 0.00046
+DISTILL update 199 beta 0.003 mse 0.00054 -> 0.00046
+{"update": 200, "reward": -4.562684152478242, "command_speed": 0.11547512280654973, "std": 0.05000005662441254, "collect_s": 1.732, "learn_s": 0.229, "wall_s": 404.5}
+DISTILL update 200 beta 0.000 mse 0.00061 -> 0.00052
+DISTILL update 201 beta 0.000 mse 0.00060 -> 0.00051
+DISTILL update 202 beta 0.000 mse 0.00055 -> 0.00046
+DISTILL update 203 beta 0.000 mse 0.00054 -> 0.00046
+DISTILL update 204 beta 0.000 mse 0.00053 -> 0.00041
+DISTILL update 205 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 206 beta 0.000 mse 0.00048 -> 0.00040
+DISTILL update 207 beta 0.000 mse 0.00045 -> 0.00038
+DISTILL update 208 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 209 beta 0.000 mse 0.00043 -> 0.00035
+{"update": 210, "reward": -8.537141847788007, "command_speed": 0.11591218647498187, "std": 0.05000005662441254, "collect_s": 1.823, "learn_s": 0.229, "wall_s": 424.4}
+DISTILL update 210 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 211 beta 0.000 mse 0.00057 -> 0.00047
+DISTILL update 212 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 213 beta 0.000 mse 0.00046 -> 0.00039
+DISTILL update 214 beta 0.000 mse 0.00046 -> 0.00039
+DISTILL update 215 beta 0.000 mse 0.00048 -> 0.00038
+DISTILL update 216 beta 0.000 mse 0.00046 -> 0.00039
+DISTILL update 217 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 218 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 219 beta 0.000 mse 0.00045 -> 0.00038
+{"update": 220, "reward": -22.710791586179564, "command_speed": 0.11451415837299059, "std": 0.05000005662441254, "collect_s": 1.795, "learn_s": 0.239, "wall_s": 444.7}
+DISTILL update 220 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 221 beta 0.000 mse 0.00045 -> 0.00038
+DISTILL update 222 beta 0.000 mse 0.00090 -> 0.00064
+DISTILL update 223 beta 0.000 mse 0.00061 -> 0.00045
+DISTILL update 224 beta 0.000 mse 0.00053 -> 0.00042
+DISTILL update 225 beta 0.000 mse 0.00053 -> 0.00043
+DISTILL update 226 beta 0.000 mse 0.00053 -> 0.00046
+DISTILL update 227 beta 0.000 mse 0.00058 -> 0.00048
+DISTILL update 228 beta 0.000 mse 0.00057 -> 0.00045
+DISTILL update 229 beta 0.000 mse 0.00052 -> 0.00042
+{"update": 230, "reward": -5.823520610030958, "command_speed": 0.11295282587110494, "std": 0.05000005662441254, "collect_s": 1.71, "learn_s": 0.233, "wall_s": 464.5}
+DISTILL update 230 beta 0.000 mse 0.00053 -> 0.00042
+DISTILL update 231 beta 0.000 mse 0.00052 -> 0.00044
+DISTILL update 232 beta 0.000 mse 0.00052 -> 0.00042
+DISTILL update 233 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 234 beta 0.000 mse 0.00048 -> 0.00039
+DISTILL update 235 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 236 beta 0.000 mse 0.00047 -> 0.00038
+DISTILL update 237 beta 0.000 mse 0.00049 -> 0.00037
+DISTILL update 238 beta 0.000 mse 0.00053 -> 0.00043
+DISTILL update 239 beta 0.000 mse 0.00055 -> 0.00045
+{"update": 240, "reward": -1.825613301632984, "command_speed": 0.11555009585604745, "std": 0.05000005662441254, "collect_s": 1.671, "learn_s": 0.237, "wall_s": 484.3}
+DISTILL update 240 beta 0.000 mse 0.00050 -> 0.00040
+DISTILL update 241 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 242 beta 0.000 mse 0.00054 -> 0.00044
+DISTILL update 243 beta 0.000 mse 0.00051 -> 0.00041
+DISTILL update 244 beta 0.000 mse 0.00052 -> 0.00043
+DISTILL update 245 beta 0.000 mse 0.00054 -> 0.00041
+DISTILL update 246 beta 0.000 mse 0.00051 -> 0.00039
+DISTILL update 247 beta 0.000 mse 0.00059 -> 0.00044
+DISTILL update 248 beta 0.000 mse 0.00056 -> 0.00041
+DISTILL update 249 beta 0.000 mse 0.00059 -> 0.00041
+{"update": 250, "reward": -14.937770957777198, "command_speed": 0.11671045820173913, "std": 0.05000005662441254, "collect_s": 1.765, "learn_s": 0.236, "wall_s": 504.1}
+DISTILL update 250 beta 0.000 mse 0.00091 -> 0.00066
+DISTILL update 251 beta 0.000 mse 0.00067 -> 0.00050
+DISTILL update 252 beta 0.000 mse 0.00064 -> 0.00047
+DISTILL update 253 beta 0.000 mse 0.00057 -> 0.00045
+DISTILL update 254 beta 0.000 mse 0.00051 -> 0.00041
+DISTILL update 255 beta 0.000 mse 0.00050 -> 0.00045
+DISTILL update 256 beta 0.000 mse 0.00050 -> 0.00040
+DISTILL update 257 beta 0.000 mse 0.00048 -> 0.00040
+DISTILL update 258 beta 0.000 mse 0.00050 -> 0.00042
+DISTILL update 259 beta 0.000 mse 0.00050 -> 0.00041
+{"update": 260, "reward": -4.8157146915319675, "command_speed": 0.11708926126509163, "std": 0.05000005662441254, "collect_s": 1.725, "learn_s": 0.232, "wall_s": 523.6}
+DISTILL update 260 beta 0.000 mse 0.00050 -> 0.00041
+DISTILL update 261 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 262 beta 0.000 mse 0.00047 -> 0.00037
+DISTILL update 263 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 264 beta 0.000 mse 0.00048 -> 0.00037
+DISTILL update 265 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 266 beta 0.000 mse 0.00059 -> 0.00045
+DISTILL update 267 beta 0.000 mse 0.00052 -> 0.00042
+DISTILL update 268 beta 0.000 mse 0.00051 -> 0.00038
+DISTILL update 269 beta 0.000 mse 0.00049 -> 0.00039
+{"update": 270, "reward": -11.311886653974296, "command_speed": 0.11233691486361994, "std": 0.05000005662441254, "collect_s": 1.77, "learn_s": 0.235, "wall_s": 543.5}
+DISTILL update 270 beta 0.000 mse 0.00051 -> 0.00037
+DISTILL update 271 beta 0.000 mse 0.00051 -> 0.00036
+DISTILL update 272 beta 0.000 mse 0.00051 -> 0.00041
+DISTILL update 273 beta 0.000 mse 0.00056 -> 0.00039
+DISTILL update 274 beta 0.000 mse 0.00054 -> 0.00039
+DISTILL update 275 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 276 beta 0.000 mse 0.00056 -> 0.00042
+DISTILL update 277 beta 0.000 mse 0.00079 -> 0.00056
+DISTILL update 278 beta 0.000 mse 0.00075 -> 0.00051
+DISTILL update 279 beta 0.000 mse 0.00058 -> 0.00046
+{"update": 280, "reward": 1.4863556464099221, "command_speed": 0.1243372824935906, "std": 0.05000005662441254, "collect_s": 1.709, "learn_s": 0.255, "wall_s": 563.0}
+DISTILL update 280 beta 0.000 mse 0.00056 -> 0.00046
+DISTILL update 281 beta 0.000 mse 0.00057 -> 0.00046
+DISTILL update 282 beta 0.000 mse 0.00057 -> 0.00046
+DISTILL update 283 beta 0.000 mse 0.00053 -> 0.00045
+DISTILL update 284 beta 0.000 mse 0.00054 -> 0.00043
+DISTILL update 285 beta 0.000 mse 0.00049 -> 0.00041
+DISTILL update 286 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 287 beta 0.000 mse 0.00045 -> 0.00038
+DISTILL update 288 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 289 beta 0.000 mse 0.00045 -> 0.00037
+{"update": 290, "reward": -10.169595489773606, "command_speed": 0.12315471429056266, "std": 0.05000005662441254, "collect_s": 1.794, "learn_s": 0.244, "wall_s": 582.8}
+DISTILL update 290 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 291 beta 0.000 mse 0.00043 -> 0.00036
+DISTILL update 292 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 293 beta 0.000 mse 0.00039 -> 0.00033
+DISTILL update 294 beta 0.000 mse 0.00055 -> 0.00042
+DISTILL update 295 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 296 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 297 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 298 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 299 beta 0.000 mse 0.00041 -> 0.00037
+{"update": 300, "reward": -14.390455217720753, "command_speed": 0.12224436736916103, "std": 0.05000005662441254, "collect_s": 1.727, "learn_s": 0.26, "wall_s": 602.9}
+DISTILL update 300 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 301 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 302 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 303 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 304 beta 0.000 mse 0.00041 -> 0.00033
+DISTILL update 305 beta 0.000 mse 0.00070 -> 0.00057
+DISTILL update 306 beta 0.000 mse 0.00064 -> 0.00047
+DISTILL update 307 beta 0.000 mse 0.00057 -> 0.00047
+DISTILL update 308 beta 0.000 mse 0.00054 -> 0.00045
+DISTILL update 309 beta 0.000 mse 0.00055 -> 0.00045
+{"update": 310, "reward": -13.689753844719235, "command_speed": 0.11412432046107511, "std": 0.05000005662441254, "collect_s": 1.69, "learn_s": 0.232, "wall_s": 622.4}
+DISTILL update 310 beta 0.000 mse 0.00054 -> 0.00044
+DISTILL update 311 beta 0.000 mse 0.00058 -> 0.00044
+DISTILL update 312 beta 0.000 mse 0.00055 -> 0.00048
+DISTILL update 313 beta 0.000 mse 0.00055 -> 0.00042
+DISTILL update 314 beta 0.000 mse 0.00050 -> 0.00041
+DISTILL update 315 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 316 beta 0.000 mse 0.00054 -> 0.00042
+DISTILL update 317 beta 0.000 mse 0.00056 -> 0.00043
+DISTILL update 318 beta 0.000 mse 0.00058 -> 0.00040
+DISTILL update 319 beta 0.000 mse 0.00048 -> 0.00037
+{"update": 320, "reward": -22.225778096642898, "command_speed": 0.1239141968920223, "std": 0.05000005662441254, "collect_s": 1.788, "learn_s": 0.234, "wall_s": 642.1}
+DISTILL update 320 beta 0.000 mse 0.00048 -> 0.00039
+DISTILL update 321 beta 0.000 mse 0.00053 -> 0.00039
+DISTILL update 322 beta 0.000 mse 0.00068 -> 0.00053
+DISTILL update 323 beta 0.000 mse 0.00053 -> 0.00042
+DISTILL update 324 beta 0.000 mse 0.00049 -> 0.00042
+DISTILL update 325 beta 0.000 mse 0.00050 -> 0.00041
+DISTILL update 326 beta 0.000 mse 0.00052 -> 0.00042
+DISTILL update 327 beta 0.000 mse 0.00053 -> 0.00043
+DISTILL update 328 beta 0.000 mse 0.00052 -> 0.00045
+DISTILL update 329 beta 0.000 mse 0.00054 -> 0.00042
+{"update": 330, "reward": -10.824752629761255, "command_speed": 0.1127321214933475, "std": 0.05000005662441254, "collect_s": 1.73, "learn_s": 0.236, "wall_s": 661.9}
+DISTILL update 330 beta 0.000 mse 0.00053 -> 0.00042
+DISTILL update 331 beta 0.000 mse 0.00056 -> 0.00045
+DISTILL update 332 beta 0.000 mse 0.00059 -> 0.00045
+DISTILL update 333 beta 0.000 mse 0.00079 -> 0.00061
+DISTILL update 334 beta 0.000 mse 0.00058 -> 0.00047
+DISTILL update 335 beta 0.000 mse 0.00054 -> 0.00042
+DISTILL update 336 beta 0.000 mse 0.00050 -> 0.00041
+DISTILL update 337 beta 0.000 mse 0.00052 -> 0.00043
+DISTILL update 338 beta 0.000 mse 0.00051 -> 0.00044
+DISTILL update 339 beta 0.000 mse 0.00052 -> 0.00045
+{"update": 340, "reward": -2.242968799896415, "command_speed": 0.1113665299664765, "std": 0.05000005662441254, "collect_s": 1.669, "learn_s": 0.228, "wall_s": 681.4}
+DISTILL update 340 beta 0.000 mse 0.00052 -> 0.00046
+DISTILL update 341 beta 0.000 mse 0.00054 -> 0.00039
+DISTILL update 342 beta 0.000 mse 0.00047 -> 0.00040
+DISTILL update 343 beta 0.000 mse 0.00051 -> 0.00042
+DISTILL update 344 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 345 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 346 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 347 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 348 beta 0.000 mse 0.00048 -> 0.00039
+DISTILL update 349 beta 0.000 mse 0.00046 -> 0.00037
+{"update": 350, "reward": -11.381503394435843, "command_speed": 0.1111462849797283, "std": 0.05000005662441254, "collect_s": 1.804, "learn_s": 0.247, "wall_s": 701.1}
+DISTILL update 350 beta 0.000 mse 0.00062 -> 0.00047
+DISTILL update 351 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 352 beta 0.000 mse 0.00048 -> 0.00038
+DISTILL update 353 beta 0.000 mse 0.00051 -> 0.00041
+DISTILL update 354 beta 0.000 mse 0.00050 -> 0.00038
+DISTILL update 355 beta 0.000 mse 0.00058 -> 0.00044
+DISTILL update 356 beta 0.000 mse 0.00056 -> 0.00040
+DISTILL update 357 beta 0.000 mse 0.00061 -> 0.00042
+DISTILL update 358 beta 0.000 mse 0.00057 -> 0.00044
+DISTILL update 359 beta 0.000 mse 0.00061 -> 0.00038
+{"update": 360, "reward": -21.46827233762815, "command_speed": 0.10917599234030068, "std": 0.05000005662441254, "collect_s": 1.731, "learn_s": 0.255, "wall_s": 720.9}
+DISTILL update 360 beta 0.000 mse 0.00056 -> 0.00037
+DISTILL update 361 beta 0.000 mse 0.00075 -> 0.00055
+DISTILL update 362 beta 0.000 mse 0.00054 -> 0.00043
+DISTILL update 363 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 364 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 365 beta 0.000 mse 0.00048 -> 0.00040
+DISTILL update 366 beta 0.000 mse 0.00050 -> 0.00042
+DISTILL update 367 beta 0.000 mse 0.00050 -> 0.00041
+DISTILL update 368 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 369 beta 0.000 mse 0.00047 -> 0.00038
+{"update": 370, "reward": -6.756444775761338, "command_speed": 0.11322306284577034, "std": 0.05000005662441254, "collect_s": 1.71, "learn_s": 0.251, "wall_s": 740.3}
+DISTILL update 370 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 371 beta 0.000 mse 0.00047 -> 0.00037
+DISTILL update 372 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 373 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 374 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 375 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 376 beta 0.000 mse 0.00046 -> 0.00034
+DISTILL update 377 beta 0.000 mse 0.00054 -> 0.00042
+DISTILL update 378 beta 0.000 mse 0.00053 -> 0.00040
+DISTILL update 379 beta 0.000 mse 0.00048 -> 0.00039
+{"update": 380, "reward": -6.563869842944162, "command_speed": 0.11911774505208111, "std": 0.05000005662441254, "collect_s": 1.722, "learn_s": 0.241, "wall_s": 760.1}
+DISTILL update 380 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 381 beta 0.000 mse 0.00052 -> 0.00045
+DISTILL update 382 beta 0.000 mse 0.00055 -> 0.00039
+DISTILL update 383 beta 0.000 mse 0.00051 -> 0.00038
+DISTILL update 384 beta 0.000 mse 0.00056 -> 0.00039
+DISTILL update 385 beta 0.000 mse 0.00054 -> 0.00039
+DISTILL update 386 beta 0.000 mse 0.00053 -> 0.00039
+DISTILL update 387 beta 0.000 mse 0.00048 -> 0.00037
+DISTILL update 388 beta 0.000 mse 0.00062 -> 0.00045
+DISTILL update 389 beta 0.000 mse 0.00062 -> 0.00045
+{"update": 390, "reward": -9.619548741135077, "command_speed": 0.10711899021652399, "std": 0.05000005662441254, "collect_s": 1.658, "learn_s": 0.231, "wall_s": 779.7}
+DISTILL update 390 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 391 beta 0.000 mse 0.00052 -> 0.00041
+DISTILL update 392 beta 0.000 mse 0.00049 -> 0.00041
+DISTILL update 393 beta 0.000 mse 0.00047 -> 0.00038
+DISTILL update 394 beta 0.000 mse 0.00048 -> 0.00040
+DISTILL update 395 beta 0.000 mse 0.00049 -> 0.00041
+DISTILL update 396 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 397 beta 0.000 mse 0.00050 -> 0.00041
+DISTILL update 398 beta 0.000 mse 0.00047 -> 0.00037
+DISTILL update 399 beta 0.000 mse 0.00043 -> 0.00037
+{"update": 400, "reward": -7.278660175957258, "command_speed": 0.11259224284542224, "std": 0.05000005662441254, "collect_s": 1.686, "learn_s": 0.232, "wall_s": 799.2}
+DISTILL update 400 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 401 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 402 beta 0.000 mse 0.00048 -> 0.00036
+DISTILL update 403 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 404 beta 0.000 mse 0.00049 -> 0.00037
+DISTILL update 405 beta 0.000 mse 0.00063 -> 0.00045
+DISTILL update 406 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 407 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 408 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 409 beta 0.000 mse 0.00043 -> 0.00036
+{"update": 410, "reward": -4.752192013934998, "command_speed": 0.11474552090816738, "std": 0.05000005662441254, "collect_s": 1.746, "learn_s": 0.228, "wall_s": 819.0}
+DISTILL update 410 beta 0.000 mse 0.00045 -> 0.00039
+DISTILL update 411 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 412 beta 0.000 mse 0.00048 -> 0.00038
+DISTILL update 413 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 414 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 415 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 416 beta 0.000 mse 0.00064 -> 0.00050
+DISTILL update 417 beta 0.000 mse 0.00059 -> 0.00047
+DISTILL update 418 beta 0.000 mse 0.00053 -> 0.00040
+DISTILL update 419 beta 0.000 mse 0.00048 -> 0.00039
+{"update": 420, "reward": -9.631195885833424, "command_speed": 0.11772232589913732, "std": 0.05000005662441254, "collect_s": 1.716, "learn_s": 0.227, "wall_s": 838.7}
+DISTILL update 420 beta 0.000 mse 0.00047 -> 0.00041
+DISTILL update 421 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 422 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 423 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 424 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 425 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 426 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 427 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 428 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 429 beta 0.000 mse 0.00041 -> 0.00034
+{"update": 430, "reward": -18.63923041633138, "command_speed": 0.11529918419674871, "std": 0.05000005662441254, "collect_s": 1.732, "learn_s": 0.237, "wall_s": 858.2}
+DISTILL update 430 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 431 beta 0.000 mse 0.00040 -> 0.00034
+DISTILL update 432 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 433 beta 0.000 mse 0.00061 -> 0.00048
+DISTILL update 434 beta 0.000 mse 0.00050 -> 0.00042
+DISTILL update 435 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 436 beta 0.000 mse 0.00050 -> 0.00040
+DISTILL update 437 beta 0.000 mse 0.00049 -> 0.00039
+DISTILL update 438 beta 0.000 mse 0.00052 -> 0.00041
+DISTILL update 439 beta 0.000 mse 0.00055 -> 0.00043
+{"update": 440, "reward": -10.30538739062629, "command_speed": 0.1192732844634024, "std": 0.05000005662441254, "collect_s": 1.752, "learn_s": 0.236, "wall_s": 878.1}
+DISTILL update 440 beta 0.000 mse 0.00054 -> 0.00042
+DISTILL update 441 beta 0.000 mse 0.00061 -> 0.00042
+DISTILL update 442 beta 0.000 mse 0.00053 -> 0.00044
+DISTILL update 443 beta 0.000 mse 0.00067 -> 0.00042
+DISTILL update 444 beta 0.000 mse 0.00075 -> 0.00055
+DISTILL update 445 beta 0.000 mse 0.00056 -> 0.00044
+DISTILL update 446 beta 0.000 mse 0.00057 -> 0.00040
+DISTILL update 447 beta 0.000 mse 0.00052 -> 0.00040
+DISTILL update 448 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 449 beta 0.000 mse 0.00049 -> 0.00039
+{"update": 450, "reward": -15.912023722424541, "command_speed": 0.11868528253777128, "std": 0.05000005662441254, "collect_s": 1.771, "learn_s": 0.232, "wall_s": 897.9}
+DISTILL update 450 beta 0.000 mse 0.00054 -> 0.00044
+DISTILL update 451 beta 0.000 mse 0.00052 -> 0.00041
+DISTILL update 452 beta 0.000 mse 0.00048 -> 0.00037
+DISTILL update 453 beta 0.000 mse 0.00047 -> 0.00037
+DISTILL update 454 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 455 beta 0.000 mse 0.00051 -> 0.00035
+DISTILL update 456 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 457 beta 0.000 mse 0.00045 -> 0.00034
+DISTILL update 458 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 459 beta 0.000 mse 0.00040 -> 0.00033
+{"update": 460, "reward": -30.91898079502951, "command_speed": 0.12002302482542379, "std": 0.05000005662441254, "collect_s": 1.787, "learn_s": 0.245, "wall_s": 917.9}
+DISTILL update 460 beta 0.000 mse 0.00043 -> 0.00031
+DISTILL update 461 beta 0.000 mse 0.00058 -> 0.00049
+DISTILL update 462 beta 0.000 mse 0.00049 -> 0.00034
+DISTILL update 463 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 464 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 465 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 466 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 467 beta 0.000 mse 0.00048 -> 0.00035
+DISTILL update 468 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 469 beta 0.000 mse 0.00046 -> 0.00036
+{"update": 470, "reward": -16.417631948557553, "command_speed": 0.11442936572635796, "std": 0.05000005662441254, "collect_s": 1.757, "learn_s": 0.237, "wall_s": 937.8}
+DISTILL update 470 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 471 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 472 beta 0.000 mse 0.00061 -> 0.00049
+DISTILL update 473 beta 0.000 mse 0.00050 -> 0.00038
+DISTILL update 474 beta 0.000 mse 0.00048 -> 0.00037
+DISTILL update 475 beta 0.000 mse 0.00052 -> 0.00038
+DISTILL update 476 beta 0.000 mse 0.00051 -> 0.00039
+DISTILL update 477 beta 0.000 mse 0.00055 -> 0.00041
+DISTILL update 478 beta 0.000 mse 0.00047 -> 0.00037
+DISTILL update 479 beta 0.000 mse 0.00044 -> 0.00036
+{"update": 480, "reward": -8.786920852031066, "command_speed": 0.1096498054707172, "std": 0.05000005662441254, "collect_s": 1.703, "learn_s": 0.262, "wall_s": 957.5}
+DISTILL update 480 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 481 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 482 beta 0.000 mse 0.00041 -> 0.00033
+DISTILL update 483 beta 0.000 mse 0.00039 -> 0.00033
+DISTILL update 484 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 485 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 486 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 487 beta 0.000 mse 0.00038 -> 0.00030
+DISTILL update 488 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 489 beta 0.000 mse 0.00051 -> 0.00041
+{"update": 490, "reward": -9.214423332227954, "command_speed": 0.11094079385955383, "std": 0.05000005662441254, "collect_s": 1.726, "learn_s": 0.256, "wall_s": 977.4}
+DISTILL update 490 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 491 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 492 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 493 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 494 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 495 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 496 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 497 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 498 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 499 beta 0.000 mse 0.00040 -> 0.00032
+{"update": 500, "reward": -19.204135164453973, "command_speed": 0.11265479426807835, "std": 0.05000005662441254, "collect_s": 1.785, "learn_s": 0.236, "wall_s": 997.6}
+DISTILL update 500 beta 0.000 mse 0.00062 -> 0.00048
+DISTILL update 501 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 502 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 503 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 504 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 505 beta 0.000 mse 0.00050 -> 0.00041
+DISTILL update 506 beta 0.000 mse 0.00048 -> 0.00040
+DISTILL update 507 beta 0.000 mse 0.00051 -> 0.00039
+DISTILL update 508 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 509 beta 0.000 mse 0.00047 -> 0.00040
+{"update": 510, "reward": -9.66158406327021, "command_speed": 0.1179393519559417, "std": 0.05000005662441254, "collect_s": 1.788, "learn_s": 0.224, "wall_s": 1017.4}
+DISTILL update 510 beta 0.000 mse 0.00049 -> 0.00037
+DISTILL update 511 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 512 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 513 beta 0.000 mse 0.00045 -> 0.00038
+DISTILL update 514 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 515 beta 0.000 mse 0.00050 -> 0.00038
+DISTILL update 516 beta 0.000 mse 0.00058 -> 0.00045
+DISTILL update 517 beta 0.000 mse 0.00052 -> 0.00040
+DISTILL update 518 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 519 beta 0.000 mse 0.00047 -> 0.00037
+{"update": 520, "reward": -13.569782478997999, "command_speed": 0.1169741235694986, "std": 0.05000005662441254, "collect_s": 1.762, "learn_s": 0.235, "wall_s": 1037.8}
+DISTILL update 520 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 521 beta 0.000 mse 0.00042 -> 0.00036
+DISTILL update 522 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 523 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 524 beta 0.000 mse 0.00042 -> 0.00036
+DISTILL update 525 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 526 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 527 beta 0.000 mse 0.00055 -> 0.00043
+DISTILL update 528 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 529 beta 0.000 mse 0.00048 -> 0.00037
+{"update": 530, "reward": -5.775455279705461, "command_speed": 0.12006478748285461, "std": 0.05000005662441254, "collect_s": 1.751, "learn_s": 0.238, "wall_s": 1057.5}
+DISTILL update 530 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 531 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 532 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 533 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 534 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 535 beta 0.000 mse 0.00043 -> 0.00036
+DISTILL update 536 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 537 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 538 beta 0.000 mse 0.00043 -> 0.00036
+DISTILL update 539 beta 0.000 mse 0.00044 -> 0.00036
+{"update": 540, "reward": -9.413246674127246, "command_speed": 0.12019771797645702, "std": 0.05000005662441254, "collect_s": 1.754, "learn_s": 0.23, "wall_s": 1077.3}
+DISTILL update 540 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 541 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 542 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 543 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 544 beta 0.000 mse 0.00056 -> 0.00044
+DISTILL update 545 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 546 beta 0.000 mse 0.00045 -> 0.00038
+DISTILL update 547 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 548 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 549 beta 0.000 mse 0.00044 -> 0.00036
+{"update": 550, "reward": -7.127125079200293, "command_speed": 0.11274711619858287, "std": 0.05000005662441254, "collect_s": 1.748, "learn_s": 0.23, "wall_s": 1097.2}
+DISTILL update 550 beta 0.000 mse 0.00053 -> 0.00040
+DISTILL update 551 beta 0.000 mse 0.00053 -> 0.00041
+DISTILL update 552 beta 0.000 mse 0.00051 -> 0.00037
+DISTILL update 553 beta 0.000 mse 0.00044 -> 0.00033
+DISTILL update 554 beta 0.000 mse 0.00052 -> 0.00033
+DISTILL update 555 beta 0.000 mse 0.00056 -> 0.00042
+DISTILL update 556 beta 0.000 mse 0.00049 -> 0.00039
+DISTILL update 557 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 558 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 559 beta 0.000 mse 0.00041 -> 0.00033
+{"update": 560, "reward": -3.579479370793706, "command_speed": 0.10804394199108495, "std": 0.05000005662441254, "collect_s": 1.717, "learn_s": 0.239, "wall_s": 1116.9}
+DISTILL update 560 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 561 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 562 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 563 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 564 beta 0.000 mse 0.00047 -> 0.00035
+DISTILL update 565 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 566 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 567 beta 0.000 mse 0.00051 -> 0.00036
+DISTILL update 568 beta 0.000 mse 0.00045 -> 0.00034
+DISTILL update 569 beta 0.000 mse 0.00045 -> 0.00035
+{"update": 570, "reward": -17.338162577497215, "command_speed": 0.1057692035651634, "std": 0.05000005662441254, "collect_s": 1.769, "learn_s": 0.241, "wall_s": 1136.7}
+DISTILL update 570 beta 0.000 mse 0.00048 -> 0.00034
+DISTILL update 571 beta 0.000 mse 0.00051 -> 0.00035
+DISTILL update 572 beta 0.000 mse 0.00062 -> 0.00048
+DISTILL update 573 beta 0.000 mse 0.00050 -> 0.00038
+DISTILL update 574 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 575 beta 0.000 mse 0.00048 -> 0.00039
+DISTILL update 576 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 577 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 578 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 579 beta 0.000 mse 0.00048 -> 0.00039
+{"update": 580, "reward": -16.025704190320134, "command_speed": 0.11399552184845876, "std": 0.05000005662441254, "collect_s": 1.737, "learn_s": 0.227, "wall_s": 1156.4}
+DISTILL update 580 beta 0.000 mse 0.00047 -> 0.00038
+DISTILL update 581 beta 0.000 mse 0.00048 -> 0.00036
+DISTILL update 582 beta 0.000 mse 0.00049 -> 0.00035
+DISTILL update 583 beta 0.000 mse 0.00059 -> 0.00045
+DISTILL update 584 beta 0.000 mse 0.00050 -> 0.00038
+DISTILL update 585 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 586 beta 0.000 mse 0.00052 -> 0.00037
+DISTILL update 587 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 588 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 589 beta 0.000 mse 0.00051 -> 0.00042
+{"update": 590, "reward": -12.581923489640758, "command_speed": 0.1138519936395844, "std": 0.05000005662441254, "collect_s": 1.801, "learn_s": 0.236, "wall_s": 1176.3}
+DISTILL update 590 beta 0.000 mse 0.00048 -> 0.00037
+DISTILL update 591 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 592 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 593 beta 0.000 mse 0.00045 -> 0.00038
+DISTILL update 594 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 595 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 596 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 597 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 598 beta 0.000 mse 0.00046 -> 0.00034
+DISTILL update 599 beta 0.000 mse 0.00042 -> 0.00033
+{"update": 600, "reward": -29.502923170191124, "command_speed": 0.10547231042560237, "std": 0.05000005662441254, "collect_s": 1.793, "learn_s": 0.233, "wall_s": 1196.6}
+DISTILL update 600 beta 0.000 mse 0.00063 -> 0.00052
+DISTILL update 601 beta 0.000 mse 0.00057 -> 0.00041
+DISTILL update 602 beta 0.000 mse 0.00048 -> 0.00039
+DISTILL update 603 beta 0.000 mse 0.00052 -> 0.00043
+DISTILL update 604 beta 0.000 mse 0.00052 -> 0.00040
+DISTILL update 605 beta 0.000 mse 0.00052 -> 0.00042
+DISTILL update 606 beta 0.000 mse 0.00053 -> 0.00039
+DISTILL update 607 beta 0.000 mse 0.00048 -> 0.00038
+DISTILL update 608 beta 0.000 mse 0.00053 -> 0.00041
+DISTILL update 609 beta 0.000 mse 0.00051 -> 0.00039
+{"update": 610, "reward": -15.20854700169932, "command_speed": 0.11601027579400189, "std": 0.05000005662441254, "collect_s": 1.778, "learn_s": 0.231, "wall_s": 1216.2}
+DISTILL update 610 beta 0.000 mse 0.00048 -> 0.00038
+DISTILL update 611 beta 0.000 mse 0.00065 -> 0.00048
+DISTILL update 612 beta 0.000 mse 0.00052 -> 0.00038
+DISTILL update 613 beta 0.000 mse 0.00047 -> 0.00038
+DISTILL update 614 beta 0.000 mse 0.00055 -> 0.00037
+DISTILL update 615 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 616 beta 0.000 mse 0.00052 -> 0.00043
+DISTILL update 617 beta 0.000 mse 0.00049 -> 0.00038
+DISTILL update 618 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 619 beta 0.000 mse 0.00044 -> 0.00035
+{"update": 620, "reward": -5.405372738037032, "command_speed": 0.12091069820750673, "std": 0.05000005662441254, "collect_s": 1.725, "learn_s": 0.234, "wall_s": 1235.7}
+DISTILL update 620 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 621 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 622 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 623 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 624 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 625 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 626 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 627 beta 0.000 mse 0.00054 -> 0.00041
+DISTILL update 628 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 629 beta 0.000 mse 0.00046 -> 0.00035
+{"update": 630, "reward": -10.349707925242305, "command_speed": 0.12243741998283528, "std": 0.05000005662441254, "collect_s": 1.72, "learn_s": 0.234, "wall_s": 1255.6}
+DISTILL update 630 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 631 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 632 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 633 beta 0.000 mse 0.00046 -> 0.00038
+DISTILL update 634 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 635 beta 0.000 mse 0.00047 -> 0.00036
+DISTILL update 636 beta 0.000 mse 0.00048 -> 0.00037
+DISTILL update 637 beta 0.000 mse 0.00045 -> 0.00033
+DISTILL update 638 beta 0.000 mse 0.00048 -> 0.00039
+DISTILL update 639 beta 0.000 mse 0.00053 -> 0.00039
+{"update": 640, "reward": -8.013474264309885, "command_speed": 0.11201829583646146, "std": 0.05000005662441254, "collect_s": 1.694, "learn_s": 0.242, "wall_s": 1275.4}
+DISTILL update 640 beta 0.000 mse 0.00048 -> 0.00036
+DISTILL update 641 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 642 beta 0.000 mse 0.00051 -> 0.00038
+DISTILL update 643 beta 0.000 mse 0.00050 -> 0.00037
+DISTILL update 644 beta 0.000 mse 0.00051 -> 0.00038
+DISTILL update 645 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 646 beta 0.000 mse 0.00044 -> 0.00038
+DISTILL update 647 beta 0.000 mse 0.00047 -> 0.00036
+DISTILL update 648 beta 0.000 mse 0.00048 -> 0.00035
+DISTILL update 649 beta 0.000 mse 0.00055 -> 0.00038
+{"update": 650, "reward": -15.216756176148314, "command_speed": 0.11636400430555004, "std": 0.05000005662441254, "collect_s": 1.697, "learn_s": 0.236, "wall_s": 1294.9}
+DISTILL update 650 beta 0.000 mse 0.00053 -> 0.00036
+DISTILL update 651 beta 0.000 mse 0.00083 -> 0.00040
+DISTILL update 652 beta 0.000 mse 0.00065 -> 0.00037
+DISTILL update 653 beta 0.000 mse 0.00045 -> 0.00033
+DISTILL update 654 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 655 beta 0.000 mse 0.00054 -> 0.00041
+DISTILL update 656 beta 0.000 mse 0.00047 -> 0.00036
+DISTILL update 657 beta 0.000 mse 0.00045 -> 0.00037
+DISTILL update 658 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 659 beta 0.000 mse 0.00042 -> 0.00033
+{"update": 660, "reward": -11.54922206754337, "command_speed": 0.11607672762079474, "std": 0.05000005662441254, "collect_s": 1.736, "learn_s": 0.242, "wall_s": 1314.7}
+DISTILL update 660 beta 0.000 mse 0.00044 -> 0.00033
+DISTILL update 661 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 662 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 663 beta 0.000 mse 0.00044 -> 0.00031
+DISTILL update 664 beta 0.000 mse 0.00039 -> 0.00030
+DISTILL update 665 beta 0.000 mse 0.00038 -> 0.00030
+DISTILL update 666 beta 0.000 mse 0.00047 -> 0.00038
+DISTILL update 667 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 668 beta 0.000 mse 0.00042 -> 0.00030
+DISTILL update 669 beta 0.000 mse 0.00036 -> 0.00029
+{"update": 670, "reward": -20.685256907628272, "command_speed": 0.11262644712606786, "std": 0.05000005662441254, "collect_s": 1.727, "learn_s": 0.253, "wall_s": 1334.7}
+DISTILL update 670 beta 0.000 mse 0.00037 -> 0.00029
+DISTILL update 671 beta 0.000 mse 0.00035 -> 0.00029
+DISTILL update 672 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 673 beta 0.000 mse 0.00040 -> 0.00031
+DISTILL update 674 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 675 beta 0.000 mse 0.00040 -> 0.00034
+DISTILL update 676 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 677 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 678 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 679 beta 0.000 mse 0.00041 -> 0.00030
+{"update": 680, "reward": -21.541337590313358, "command_speed": 0.11656991748450334, "std": 0.05000005662441254, "collect_s": 1.754, "learn_s": 0.237, "wall_s": 1354.6}
+DISTILL update 680 beta 0.000 mse 0.00046 -> 0.00032
+DISTILL update 681 beta 0.000 mse 0.00044 -> 0.00031
+DISTILL update 682 beta 0.000 mse 0.00040 -> 0.00030
+DISTILL update 683 beta 0.000 mse 0.00058 -> 0.00044
+DISTILL update 684 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 685 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 686 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 687 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 688 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 689 beta 0.000 mse 0.00044 -> 0.00034
+{"update": 690, "reward": -5.591067116255646, "command_speed": 0.12001090040079732, "std": 0.05000005662441254, "collect_s": 1.759, "learn_s": 0.248, "wall_s": 1374.5}
+DISTILL update 690 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 691 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 692 beta 0.000 mse 0.00047 -> 0.00033
+DISTILL update 693 beta 0.000 mse 0.00043 -> 0.00031
+DISTILL update 694 beta 0.000 mse 0.00052 -> 0.00039
+DISTILL update 695 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 696 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 697 beta 0.000 mse 0.00044 -> 0.00032
+DISTILL update 698 beta 0.000 mse 0.00041 -> 0.00030
+DISTILL update 699 beta 0.000 mse 0.00038 -> 0.00030
+{"update": 700, "reward": -9.285370263293267, "command_speed": 0.11445042517240157, "std": 0.05000005662441254, "collect_s": 1.763, "learn_s": 0.233, "wall_s": 1394.5}
+DISTILL update 700 beta 0.000 mse 0.00047 -> 0.00039
+DISTILL update 701 beta 0.000 mse 0.00043 -> 0.00031
+DISTILL update 702 beta 0.000 mse 0.00038 -> 0.00032
+DISTILL update 703 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 704 beta 0.000 mse 0.00038 -> 0.00029
+DISTILL update 705 beta 0.000 mse 0.00037 -> 0.00029
+DISTILL update 706 beta 0.000 mse 0.00036 -> 0.00030
+DISTILL update 707 beta 0.000 mse 0.00037 -> 0.00029
+DISTILL update 708 beta 0.000 mse 0.00037 -> 0.00030
+DISTILL update 709 beta 0.000 mse 0.00037 -> 0.00030
+{"update": 710, "reward": -11.63808234030148, "command_speed": 0.1077431859483729, "std": 0.05000005662441254, "collect_s": 1.762, "learn_s": 0.239, "wall_s": 1414.2}
+DISTILL update 710 beta 0.000 mse 0.00036 -> 0.00028
+DISTILL update 711 beta 0.000 mse 0.00054 -> 0.00043
+DISTILL update 712 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 713 beta 0.000 mse 0.00041 -> 0.00033
+DISTILL update 714 beta 0.000 mse 0.00039 -> 0.00031
+DISTILL update 715 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 716 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 717 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 718 beta 0.000 mse 0.00040 -> 0.00035
+DISTILL update 719 beta 0.000 mse 0.00041 -> 0.00033
+{"update": 720, "reward": -6.813540867669265, "command_speed": 0.10534833433383543, "std": 0.05000005662441254, "collect_s": 1.719, "learn_s": 0.249, "wall_s": 1433.7}
+DISTILL update 720 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 721 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 722 beta 0.000 mse 0.00049 -> 0.00040
+DISTILL update 723 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 724 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 725 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 726 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 727 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 728 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 729 beta 0.000 mse 0.00040 -> 0.00032
+{"update": 730, "reward": -17.754265247991295, "command_speed": 0.10583896630404761, "std": 0.05000005662441254, "collect_s": 1.675, "learn_s": 0.237, "wall_s": 1453.2}
+DISTILL update 730 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 731 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 732 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 733 beta 0.000 mse 0.00039 -> 0.00031
+DISTILL update 734 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 735 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 736 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 737 beta 0.000 mse 0.00038 -> 0.00030
+DISTILL update 738 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 739 beta 0.000 mse 0.00051 -> 0.00040
+{"update": 740, "reward": -7.236901535161855, "command_speed": 0.107046876422126, "std": 0.05000005662441254, "collect_s": 1.674, "learn_s": 0.238, "wall_s": 1472.6}
+DISTILL update 740 beta 0.000 mse 0.00046 -> 0.00034
+DISTILL update 741 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 742 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 743 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 744 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 745 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 746 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 747 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 748 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 749 beta 0.000 mse 0.00041 -> 0.00032
+{"update": 750, "reward": -21.935947448472387, "command_speed": 0.11638168870264869, "std": 0.05000005662441254, "collect_s": 1.735, "learn_s": 0.228, "wall_s": 1492.4}
+DISTILL update 750 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 751 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 752 beta 0.000 mse 0.00044 -> 0.00033
+DISTILL update 753 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 754 beta 0.000 mse 0.00042 -> 0.00031
+DISTILL update 755 beta 0.000 mse 0.00048 -> 0.00037
+DISTILL update 756 beta 0.000 mse 0.00046 -> 0.00041
+DISTILL update 757 beta 0.000 mse 0.00048 -> 0.00036
+DISTILL update 758 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 759 beta 0.000 mse 0.00041 -> 0.00035
+{"update": 760, "reward": -12.046555143265222, "command_speed": 0.11539320527127876, "std": 0.05000005662441254, "collect_s": 1.701, "learn_s": 0.237, "wall_s": 1511.8}
+DISTILL update 760 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 761 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 762 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 763 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 764 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 765 beta 0.000 mse 0.00041 -> 0.00033
+DISTILL update 766 beta 0.000 mse 0.00049 -> 0.00039
+DISTILL update 767 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 768 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 769 beta 0.000 mse 0.00042 -> 0.00034
+{"update": 770, "reward": -15.215031032966685, "command_speed": 0.1202716446850085, "std": 0.05000005662441254, "collect_s": 1.72, "learn_s": 0.238, "wall_s": 1531.5}
+DISTILL update 770 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 771 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 772 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 773 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 774 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 775 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 776 beta 0.000 mse 0.00036 -> 0.00030
+DISTILL update 777 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 778 beta 0.000 mse 0.00044 -> 0.00033
+DISTILL update 779 beta 0.000 mse 0.00040 -> 0.00032
+{"update": 780, "reward": -9.624724191689085, "command_speed": 0.11689756926808106, "std": 0.05000005662441254, "collect_s": 1.765, "learn_s": 0.239, "wall_s": 1551.3}
+DISTILL update 780 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 781 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 782 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 783 beta 0.000 mse 0.00050 -> 0.00040
+DISTILL update 784 beta 0.000 mse 0.00043 -> 0.00032
+DISTILL update 785 beta 0.000 mse 0.00039 -> 0.00031
+DISTILL update 786 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 787 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 788 beta 0.000 mse 0.00038 -> 0.00032
+DISTILL update 789 beta 0.000 mse 0.00041 -> 0.00032
+{"update": 790, "reward": -13.513025696414438, "command_speed": 0.11306929071826856, "std": 0.05000005662441254, "collect_s": 1.74, "learn_s": 0.232, "wall_s": 1571.1}
+DISTILL update 790 beta 0.000 mse 0.00038 -> 0.00030
+DISTILL update 791 beta 0.000 mse 0.00039 -> 0.00031
+DISTILL update 792 beta 0.000 mse 0.00039 -> 0.00031
+DISTILL update 793 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 794 beta 0.000 mse 0.00050 -> 0.00038
+DISTILL update 795 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 796 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 797 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 798 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 799 beta 0.000 mse 0.00042 -> 0.00034
+{"update": 800, "reward": -7.977041680694431, "command_speed": 0.11306778716055374, "std": 0.05000005662441254, "collect_s": 1.715, "learn_s": 0.25, "wall_s": 1590.7}
+DISTILL update 800 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 801 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 802 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 803 beta 0.000 mse 0.00039 -> 0.00030
+DISTILL update 804 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 805 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 806 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 807 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 808 beta 0.000 mse 0.00045 -> 0.00034
+DISTILL update 809 beta 0.000 mse 0.00046 -> 0.00033
+{"update": 810, "reward": -7.5981104437192295, "command_speed": 0.11482540432499555, "std": 0.05000005662441254, "collect_s": 1.716, "learn_s": 0.248, "wall_s": 1610.2}
+DISTILL update 810 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 811 beta 0.000 mse 0.00047 -> 0.00038
+DISTILL update 812 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 813 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 814 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 815 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 816 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 817 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 818 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 819 beta 0.000 mse 0.00050 -> 0.00036
+{"update": 820, "reward": -8.802722837225803, "command_speed": 0.11838189226897833, "std": 0.05000005662441254, "collect_s": 1.759, "learn_s": 0.24, "wall_s": 1629.8}
+DISTILL update 820 beta 0.000 mse 0.00048 -> 0.00038
+DISTILL update 821 beta 0.000 mse 0.00056 -> 0.00037
+DISTILL update 822 beta 0.000 mse 0.00061 -> 0.00047
+DISTILL update 823 beta 0.000 mse 0.00052 -> 0.00036
+DISTILL update 824 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 825 beta 0.000 mse 0.00047 -> 0.00036
+DISTILL update 826 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 827 beta 0.000 mse 0.00046 -> 0.00037
+DISTILL update 828 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 829 beta 0.000 mse 0.00042 -> 0.00034
+{"update": 830, "reward": -9.234685526315944, "command_speed": 0.12269565231876652, "std": 0.05000005662441254, "collect_s": 1.721, "learn_s": 0.227, "wall_s": 1649.6}
+DISTILL update 830 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 831 beta 0.000 mse 0.00045 -> 0.00034
+DISTILL update 832 beta 0.000 mse 0.00044 -> 0.00036
+DISTILL update 833 beta 0.000 mse 0.00050 -> 0.00039
+DISTILL update 834 beta 0.000 mse 0.00042 -> 0.00035
+DISTILL update 835 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 836 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 837 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 838 beta 0.000 mse 0.00041 -> 0.00033
+DISTILL update 839 beta 0.000 mse 0.00045 -> 0.00035
+{"update": 840, "reward": -10.231461104683047, "command_speed": 0.10734574573584219, "std": 0.05000005662441254, "collect_s": 1.716, "learn_s": 0.227, "wall_s": 1669.4}
+DISTILL update 840 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 841 beta 0.000 mse 0.00043 -> 0.00032
+DISTILL update 842 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 843 beta 0.000 mse 0.00043 -> 0.00032
+DISTILL update 844 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 845 beta 0.000 mse 0.00044 -> 0.00033
+DISTILL update 846 beta 0.000 mse 0.00044 -> 0.00034
+DISTILL update 847 beta 0.000 mse 0.00046 -> 0.00033
+DISTILL update 848 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 849 beta 0.000 mse 0.00042 -> 0.00032
+{"update": 850, "reward": -17.683690383609953, "command_speed": 0.1078318122560127, "std": 0.05000005662441254, "collect_s": 1.742, "learn_s": 0.239, "wall_s": 1688.9}
+DISTILL update 850 beta 0.000 mse 0.00054 -> 0.00041
+DISTILL update 851 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 852 beta 0.000 mse 0.00045 -> 0.00034
+DISTILL update 853 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 854 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 855 beta 0.000 mse 0.00047 -> 0.00037
+DISTILL update 856 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 857 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 858 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 859 beta 0.000 mse 0.00042 -> 0.00034
+{"update": 860, "reward": -6.993460311457359, "command_speed": 0.11256259336608034, "std": 0.05000005662441254, "collect_s": 1.715, "learn_s": 0.244, "wall_s": 1708.5}
+DISTILL update 860 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 861 beta 0.000 mse 0.00050 -> 0.00040
+DISTILL update 862 beta 0.000 mse 0.00047 -> 0.00036
+DISTILL update 863 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 864 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 865 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 866 beta 0.000 mse 0.00045 -> 0.00036
+DISTILL update 867 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 868 beta 0.000 mse 0.00039 -> 0.00033
+DISTILL update 869 beta 0.000 mse 0.00041 -> 0.00032
+{"update": 870, "reward": -7.698486674182884, "command_speed": 0.11171134404508133, "std": 0.05000005662441254, "collect_s": 1.696, "learn_s": 0.265, "wall_s": 1728.1}
+DISTILL update 870 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 871 beta 0.000 mse 0.00042 -> 0.00034
+DISTILL update 872 beta 0.000 mse 0.00045 -> 0.00033
+DISTILL update 873 beta 0.000 mse 0.00046 -> 0.00033
+DISTILL update 874 beta 0.000 mse 0.00046 -> 0.00032
+DISTILL update 875 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 876 beta 0.000 mse 0.00042 -> 0.00030
+DISTILL update 877 beta 0.000 mse 0.00052 -> 0.00040
+DISTILL update 878 beta 0.000 mse 0.00050 -> 0.00038
+DISTILL update 879 beta 0.000 mse 0.00044 -> 0.00033
+{"update": 880, "reward": -11.85240443689852, "command_speed": 0.11222907054560097, "std": 0.05000005662441254, "collect_s": 1.704, "learn_s": 0.251, "wall_s": 1747.8}
+DISTILL update 880 beta 0.000 mse 0.00043 -> 0.00035
+DISTILL update 881 beta 0.000 mse 0.00043 -> 0.00036
+DISTILL update 882 beta 0.000 mse 0.00045 -> 0.00033
+DISTILL update 883 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 884 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 885 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 886 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 887 beta 0.000 mse 0.00037 -> 0.00030
+DISTILL update 888 beta 0.000 mse 0.00042 -> 0.00031
+DISTILL update 889 beta 0.000 mse 0.00041 -> 0.00031
+{"update": 890, "reward": -17.00461932287524, "command_speed": 0.10937248252688343, "std": 0.05000005662441254, "collect_s": 1.741, "learn_s": 0.232, "wall_s": 1767.4}
+DISTILL update 890 beta 0.000 mse 0.00036 -> 0.00029
+DISTILL update 891 beta 0.000 mse 0.00037 -> 0.00029
+DISTILL update 892 beta 0.000 mse 0.00036 -> 0.00028
+DISTILL update 893 beta 0.000 mse 0.00035 -> 0.00028
+DISTILL update 894 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 895 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 896 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 897 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 898 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 899 beta 0.000 mse 0.00038 -> 0.00031
+{"update": 900, "reward": -18.655503181164224, "command_speed": 0.11514082755487119, "std": 0.05000005662441254, "collect_s": 1.798, "learn_s": 0.24, "wall_s": 1787.4}
+DISTILL update 900 beta 0.000 mse 0.00038 -> 0.00029
+DISTILL update 901 beta 0.000 mse 0.00035 -> 0.00028
+DISTILL update 902 beta 0.000 mse 0.00033 -> 0.00027
+DISTILL update 903 beta 0.000 mse 0.00034 -> 0.00027
+DISTILL update 904 beta 0.000 mse 0.00035 -> 0.00028
+DISTILL update 905 beta 0.000 mse 0.00046 -> 0.00036
+DISTILL update 906 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 907 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 908 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 909 beta 0.000 mse 0.00041 -> 0.00033
+{"update": 910, "reward": -17.89392039201185, "command_speed": 0.11209045988035142, "std": 0.05000005662441254, "collect_s": 1.701, "learn_s": 0.237, "wall_s": 1807.0}
+DISTILL update 910 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 911 beta 0.000 mse 0.00047 -> 0.00036
+DISTILL update 912 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 913 beta 0.000 mse 0.00041 -> 0.00033
+DISTILL update 914 beta 0.000 mse 0.00039 -> 0.00033
+DISTILL update 915 beta 0.000 mse 0.00042 -> 0.00031
+DISTILL update 916 beta 0.000 mse 0.00044 -> 0.00035
+DISTILL update 917 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 918 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 919 beta 0.000 mse 0.00041 -> 0.00031
+{"update": 920, "reward": -18.32780383585891, "command_speed": 0.10337151442199684, "std": 0.05000005662441254, "collect_s": 1.738, "learn_s": 0.246, "wall_s": 1826.9}
+DISTILL update 920 beta 0.000 mse 0.00039 -> 0.00030
+DISTILL update 921 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 922 beta 0.000 mse 0.00049 -> 0.00036
+DISTILL update 923 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 924 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 925 beta 0.000 mse 0.00040 -> 0.00031
+DISTILL update 926 beta 0.000 mse 0.00041 -> 0.00030
+DISTILL update 927 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 928 beta 0.000 mse 0.00040 -> 0.00031
+DISTILL update 929 beta 0.000 mse 0.00043 -> 0.00032
+{"update": 930, "reward": -23.239479265094513, "command_speed": 0.1103132064313838, "std": 0.05000005662441254, "collect_s": 1.793, "learn_s": 0.243, "wall_s": 1846.8}
+DISTILL update 930 beta 0.000 mse 0.00042 -> 0.00031
+DISTILL update 931 beta 0.000 mse 0.00040 -> 0.00030
+DISTILL update 932 beta 0.000 mse 0.00040 -> 0.00029
+DISTILL update 933 beta 0.000 mse 0.00051 -> 0.00038
+DISTILL update 934 beta 0.000 mse 0.00042 -> 0.00031
+DISTILL update 935 beta 0.000 mse 0.00037 -> 0.00031
+DISTILL update 936 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 937 beta 0.000 mse 0.00038 -> 0.00030
+DISTILL update 938 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 939 beta 0.000 mse 0.00042 -> 0.00033
+{"update": 940, "reward": -15.49099206235567, "command_speed": 0.11094126063700042, "std": 0.05000005662441254, "collect_s": 1.77, "learn_s": 0.233, "wall_s": 1866.8}
+DISTILL update 940 beta 0.000 mse 0.00039 -> 0.00032
+DISTILL update 941 beta 0.000 mse 0.00040 -> 0.00030
+DISTILL update 942 beta 0.000 mse 0.00040 -> 0.00029
+DISTILL update 943 beta 0.000 mse 0.00040 -> 0.00030
+DISTILL update 944 beta 0.000 mse 0.00044 -> 0.00032
+DISTILL update 945 beta 0.000 mse 0.00041 -> 0.00030
+DISTILL update 946 beta 0.000 mse 0.00041 -> 0.00030
+DISTILL update 947 beta 0.000 mse 0.00038 -> 0.00029
+DISTILL update 948 beta 0.000 mse 0.00040 -> 0.00030
+DISTILL update 949 beta 0.000 mse 0.00037 -> 0.00029
+{"update": 950, "reward": -20.24376866383439, "command_speed": 0.105377588616826, "std": 0.05000005662441254, "collect_s": 1.765, "learn_s": 0.237, "wall_s": 1886.7}
+DISTILL update 950 beta 0.000 mse 0.00047 -> 0.00038
+DISTILL update 951 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 952 beta 0.000 mse 0.00039 -> 0.00030
+DISTILL update 953 beta 0.000 mse 0.00037 -> 0.00030
+DISTILL update 954 beta 0.000 mse 0.00037 -> 0.00030
+DISTILL update 955 beta 0.000 mse 0.00041 -> 0.00034
+DISTILL update 956 beta 0.000 mse 0.00040 -> 0.00031
+DISTILL update 957 beta 0.000 mse 0.00038 -> 0.00030
+DISTILL update 958 beta 0.000 mse 0.00038 -> 0.00031
+DISTILL update 959 beta 0.000 mse 0.00038 -> 0.00030
+{"update": 960, "reward": -13.258894243997121, "command_speed": 0.11232883710454189, "std": 0.05000005662441254, "collect_s": 1.73, "learn_s": 0.233, "wall_s": 1906.4}
+DISTILL update 960 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 961 beta 0.000 mse 0.00051 -> 0.00040
+DISTILL update 962 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 963 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 964 beta 0.000 mse 0.00041 -> 0.00036
+DISTILL update 965 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 966 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 967 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 968 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 969 beta 0.000 mse 0.00040 -> 0.00031
+{"update": 970, "reward": -5.619893362573849, "command_speed": 0.10558534595972181, "std": 0.05000005662441254, "collect_s": 1.712, "learn_s": 0.254, "wall_s": 1926.0}
+DISTILL update 970 beta 0.000 mse 0.00039 -> 0.00031
+DISTILL update 971 beta 0.000 mse 0.00040 -> 0.00033
+DISTILL update 972 beta 0.000 mse 0.00046 -> 0.00035
+DISTILL update 973 beta 0.000 mse 0.00042 -> 0.00033
+DISTILL update 974 beta 0.000 mse 0.00043 -> 0.00033
+DISTILL update 975 beta 0.000 mse 0.00045 -> 0.00034
+DISTILL update 976 beta 0.000 mse 0.00043 -> 0.00032
+DISTILL update 977 beta 0.000 mse 0.00045 -> 0.00035
+DISTILL update 978 beta 0.000 mse 0.00044 -> 0.00032
+DISTILL update 979 beta 0.000 mse 0.00039 -> 0.00031
+{"update": 980, "reward": -9.50810177009771, "command_speed": 0.11385381405100369, "std": 0.05000005662441254, "collect_s": 1.73, "learn_s": 0.227, "wall_s": 1945.7}
+DISTILL update 980 beta 0.000 mse 0.00040 -> 0.00032
+DISTILL update 981 beta 0.000 mse 0.00041 -> 0.00033
+DISTILL update 982 beta 0.000 mse 0.00040 -> 0.00031
+DISTILL update 983 beta 0.000 mse 0.00041 -> 0.00031
+DISTILL update 984 beta 0.000 mse 0.00041 -> 0.00030
+DISTILL update 985 beta 0.000 mse 0.00039 -> 0.00030
+DISTILL update 986 beta 0.000 mse 0.00039 -> 0.00030
+DISTILL update 987 beta 0.000 mse 0.00042 -> 0.00031
+DISTILL update 988 beta 0.000 mse 0.00042 -> 0.00031
+DISTILL update 989 beta 0.000 mse 0.00049 -> 0.00035
+{"update": 990, "reward": -6.905836045370153, "command_speed": 0.11041699352009751, "std": 0.05000005662441254, "collect_s": 1.668, "learn_s": 0.241, "wall_s": 1965.5}
+DISTILL update 990 beta 0.000 mse 0.00046 -> 0.00033
+DISTILL update 991 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 992 beta 0.000 mse 0.00044 -> 0.00032
+DISTILL update 993 beta 0.000 mse 0.00041 -> 0.00032
+DISTILL update 994 beta 0.000 mse 0.00044 -> 0.00037
+DISTILL update 995 beta 0.000 mse 0.00044 -> 0.00032
+DISTILL update 996 beta 0.000 mse 0.00042 -> 0.00032
+DISTILL update 997 beta 0.000 mse 0.00043 -> 0.00034
+DISTILL update 998 beta 0.000 mse 0.00041 -> 0.00031
+DISTILL update 999 beta 0.000 mse 0.00047 -> 0.00032
+{"update": 1000, "reward": -12.041711333336329, "command_speed": 0.11216296538142795, "std": 0.05000005662441254, "collect_s": 1.722, "learn_s": 0.228, "wall_s": 1985.0}
+DISTILLATION DONE: installed 1, last {"update": 999, "beta": 0.0, "teacher_driven_robots": 0, "mse_before": 0.00046701286919414997, "mse_after": 0.00031711842166259885, "label_abs_mean": 0.40262189507484436}
+BODY MASS: {"label": "hexagonal centre piece in nylon + added point mass; surrogate diagnostic arm", "nylon_kg_m3": 1140.0, "added_kg": 0.75, "parts_file_sha256": "b42fe28f86a00265bf81c1cfa48ef8582b133baf859551b19b17cb40dc6dad76", "script_sha256": "074b57d6a0bfe9222e4fe3aed73640d357c2e5dbdac214c581abfc44671fea5a", "environments": 1, "models": 129, "old_mass_kg": 1.908769948166834, "old_com_m": [-2.8658317076464076e-05, 6.187055940040584e-05, 0.0253998766595915], "mass_kg": 1.7222281600361884, "com_m": [-4.2900466388243915e-05, 8.914414381412252e-05, 0.026208938844698857], "robot_mass_kg": 7.279546447095144}
