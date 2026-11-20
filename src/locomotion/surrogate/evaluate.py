@@ -59,17 +59,29 @@ class DeterministicPolicy:
     """The no-noise policy path of ``locomotion/scripts/play.py``: fixed scales, gait clock, actor mean, two-control mean."""
 
     def __init__(
-        self, actor, env, options, *, velocity_input_gain=1.0, action_mean2=False, adapter=None
+        self,
+        actor,
+        env,
+        options,
+        *,
+        velocity_input_gain=1.0,
+        action_mean2=False,
+        action_delay=0,
+        adapter=None,
     ):
         self.actor, self.env, self.adapter = actor, env, adapter
         self.scaling = options.get("observation_scaling", "none")
         self.period = options.get("gait_clock", 0)
         self.gain = float(velocity_input_gain)
-        if adapter is not None and (self.gain != 1.0 or action_mean2):
+        self.delay = int(action_delay)
+        if self.delay < 0:
+            raise ValueError("--action-delay counts whole controls from zero")
+        if adapter is not None and (self.gain != 1.0 or action_mean2 or self.delay):
             raise ValueError(
                 "The wrapper's policy_for_evaluation replaces the standard policy path; "
-                "--velocity-input-gain and --action-mean2 do not reach it"
+                "--velocity-input-gain, --action-mean2 and --action-delay do not reach it"
             )
+        self.late = []
         self.forced = bool(action_mean2)
         self.mean2 = adapter is None and (
             self.forced or options.get("action_smoothing", "none") == "mean2"
@@ -90,6 +102,7 @@ class DeterministicPolicy:
                 "velocity_input_gain": 1.0,
                 "action_mean2_forced": False,
                 "action_smoothing_applied": None,
+                "action_delay_controls": 0,
                 "velocity_noise_recorded": options.get("velocity_noise", 0.0),
                 "velocity_noise_applied": None,
                 "scope": "The wrapper builds the policy input and the action; this module applies no option to them.",
@@ -99,6 +112,7 @@ class DeterministicPolicy:
             "velocity_input_gain": self.gain,
             "action_mean2_forced": self.forced,
             "action_smoothing_applied": "mean2" if self.mean2 else "none",
+            "action_delay_controls": self.delay,
             "velocity_noise_recorded": options.get("velocity_noise", 0.0),
             "velocity_noise_applied": 0.0,
             "scope": "Scales, gait clock, actor mean and two-control mean as the policy path of "
@@ -142,6 +156,13 @@ class DeterministicPolicy:
                 last = torch.zeros_like(action) if self.previous is None else self.previous
                 self.previous = action.clone()
                 action = omni_wrapper.smoothed_action(action, last, self.env.episode_steps)
+            if self.delay:
+                # The motor receives each action `delay` controls late; a new episode starts neutral.
+                fresh = (self.env.episode_steps == 0)[:, None].to(action.device)
+                neutral = torch.zeros_like(action)
+                late = self.late or [neutral] * self.delay
+                self.late = [torch.where(fresh, neutral, old) for old in late] + [action]
+                action = self.late.pop(0)
             return action
 
 
@@ -325,6 +346,31 @@ def consensus(results, scope=CONSENSUS_SCOPE):
     }
 
 
+STRESS_FIELDS = ("kp_scale", "kd_scale", "foot_friction", "motor_strength", "payload_mass_kg")
+
+
+def stress_condition(items, nominal):
+    """``nominal`` with ``FIELD=VALUE`` overrides held across resets; ``(None, {})`` without one."""
+    values = {}
+    for item in items:
+        name, _, text = item.partition("=")
+        if name not in STRESS_FIELDS or name in values:
+            raise ValueError("--condition takes each of " + ", ".join(STRESS_FIELDS) + " once")
+        values[name] = float(text)
+        if (
+            not np.isfinite(values[name])
+            or values[name] < 0
+            or (name != "payload_mass_kg" and values[name] == 0)
+        ):
+            raise ValueError("--condition needs a positive finite value: " + item)
+    if not values:
+        return None, {}
+    fields = dict(values)
+    if "motor_strength" in fields:
+        fields["motor_strength"] = np.full(18, fields["motor_strength"])
+    return replace(nominal, **fields), values
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -367,6 +413,22 @@ def build_parser():
         "--action-mean2",
         action="store_true",
         help="Stress option: send the mean of each action and the previous one, as --action-smoothing mean2 trains.",
+    )
+    parser.add_argument(
+        "--action-delay",
+        type=int,
+        default=0,
+        help="Stress option: the motor receives each action this many controls late (20 ms each); "
+        "an episode's first controls send the neutral action.",
+    )
+    parser.add_argument(
+        "--condition",
+        action="append",
+        default=[],
+        metavar="FIELD=VALUE",
+        help="Stress option: hold one nominal property at a value across resets, with no push: "
+        + ", ".join(STRESS_FIELDS)
+        + ". Strength applies to all 18 joints. The consensus becomes the relative-friction consensus.",
     )
     parser.add_argument(
         "--foot-load",
@@ -497,7 +559,11 @@ def evaluate_checkpoint(args):
         raise ValueError("--grid and --cell go together")
     if grid is not None and args.randomization != "none":
         raise ValueError("A grid cell fixes the conditions; leave --randomization at none")
-    condition = rnd.cell_draw(grid, cell) if grid is not None else None
+    condition, stress = stress_condition(getattr(args, "condition", []), rnd.nominal_draw())
+    if stress and (grid is not None or args.randomization != "none"):
+        raise ValueError("--condition fixes the conditions; leave --grid and --randomization out")
+    if grid is not None:
+        condition = rnd.cell_draw(grid, cell)
     if args.randomization != "none" and not args.no_contact_consensus:
         # The draw sets the toe and floor friction, so the friction variant would not change the toe contact.
         raise ValueError(
@@ -579,6 +645,7 @@ def evaluate_checkpoint(args):
             options,
             velocity_input_gain=args.velocity_input_gain,
             action_mean2=args.action_mean2,
+            action_delay=getattr(args, "action_delay", 0),
             adapter=getattr(wrapped, "policy_for_evaluation", None),
         )
         renderer = Renderer(env, view=args.view) if videos else None
@@ -735,8 +802,9 @@ def evaluate_checkpoint(args):
         if condition is None
         else {
             "grid": grid,
-            "grid_sha256": rnd.grid_declaration(grid)["sha256"],
+            "grid_sha256": None if grid is None else rnd.grid_declaration(grid)["sha256"],
             "cell": cell,
+            "stress": stress,
             "draw": condition.as_json(),
             "consensus": "relative_friction",
         },
