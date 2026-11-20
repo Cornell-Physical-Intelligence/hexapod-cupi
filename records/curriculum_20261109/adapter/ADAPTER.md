@@ -70,8 +70,9 @@ matched draws vs the core's recorded 31/48 and its hill-7 walked half vs 30/36.
   native run.
 - Loop on the robot: walk -> identify (trusted axes only) -> write back into the sim ->
   fine-tune/validate in the calibrated sim -> redeploy. Combine with the v70 odometry input
-  stack (see ../../HANDOFF.md "Connecting a trained checkpoint to a real hexapod") — the
-  adapter calibrates the simulator; v70 makes the policy's own inputs robot-obtainable.
+  stack (see ../../../src/locomotion/runtime, which builds the 278 actor inputs from the
+  robot's own sensors) — the adapter calibrates the simulator; v70 makes the policy's own
+  inputs robot-obtainable.
 - Note: these arms wrap the u600_002-era core. To use the instrument with the current od1/v70
   lineage, retrain the compensator around the new frozen core (same recipe, 200 updates,
   c architecture); the machinery is lineage-agnostic.
