@@ -24,7 +24,7 @@ To run, judge, view, fine-tune or export it, see [GUIDE.md](GUIDE.md).
 | `scripts/distill_train.py` | fd9b35e3497c4d15 | the DAgger distillation trainer (reproduction only) |
 | `scripts/delay_predictor.py` | 55d8c8151c21221e | predictor model code that `distill_train.py` imports (reproduction only) |
 | `scripts/bmass1.sh` | f0eefa70ded1b49f | the exact training and judging commands (laptop paths hard-coded) |
-| `judge_results/*.log` | | the two recorded fitted-check runs, case by case |
+| (on Spark) | | the two recorded fitted-check logs, reduced case by case into `site/assets/curriculum_bm0_20261119_001/results.json` (`bm0_fitted_checks`); the raw logs are on Spark under `/srv/cupi/hexapod/runs/julian/pr108_raw_results_20261119/` |
 
 ## Training (2026-11-12, about 22:21-22:54 EST, laptop CPU MuJoCo surrogate)
 

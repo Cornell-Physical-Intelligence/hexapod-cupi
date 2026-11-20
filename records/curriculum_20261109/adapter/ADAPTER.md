@@ -3,8 +3,9 @@
 Everything here is from the 2026-11-03 entries of `../decisions.md` (the hash-bound record);
 code is on this branch in `src/locomotion/rl/sim2real.py` (commits b0f9f311, 37b26937,
 84943803, b813c7f3, d32f5d84). Checkpoints in this folder are each arm's 200-update leg with
-its declaration; `judges/` holds the three evaluation scripts; `readouts/` the identification
-(R2) and matched-draw robustness summaries; `rehearsal_001/` a full deployment-loop record.
+its declaration; `judges/` holds the three evaluation scripts; the identification (R2) and
+matched-draw robustness readouts are reduced into `site/assets/curriculum_bm0_20261119_001/results.json`
+(`adapter_readouts`; raw files on Spark under `/srv/cupi/hexapod/runs/julian/pr108_raw_results_20261119/`); `rehearsal_001/` a full deployment-loop record.
 
 ## Mechanism
 `CompensatedActor` wraps a FROZEN core policy (u600_002, e29be0bc..., bytes sha-verified at
