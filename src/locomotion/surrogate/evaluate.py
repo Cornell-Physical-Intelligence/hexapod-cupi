@@ -835,7 +835,7 @@ def evaluate_checkpoint(args):
                     "pass": row["pass"],
                     "failed": row["failed_checks"],
                     "consensus": row.get("contact_consensus", {}).get("verdict"),
-                    "planar_error": row["metrics"].get("planar_error_mps"),
+                    "planar_error": row.get("metrics", {}).get("planar_error_mps"),
                     "mean_velocity": gait.get("mean_velocity_nav_mps"),
                     "root_height": gait.get("root_height_mean_m"),
                     "joint_limit_margin_rad": row.get("joint_limit_margin", {}).get("minimum_rad"),
