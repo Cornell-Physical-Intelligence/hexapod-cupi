@@ -9,8 +9,11 @@
 # The recipe is the one recorded for predictor2_20261110/merged4, pfit1 and bm0 (bmass1) on 2026-11-10..12.
 #
 # Usage, from anywhere inside a hexapod-cupi checkout of this branch (after `uv sync`):
-#   bash records/distilled_bm0_u1000_20261112/pipeline/run_chain.sh OUT [--from STAGE] [--smoke]
+#   bash records/distilled_bm0_u1000_20261112/pipeline/run_chain.sh OUT [--from STAGE] [--start CKPT] [--smoke]
 #     OUT       a new folder for every output (refused if a stage's output already exists)
+#     --start   another destination_v70 checkpoint to start from in place of od1 u1200, e.g. the native
+#               Spark run's u1200. Its .json declaration must sit beside it, name destination_v70 and
+#               declare this file's sha256. Only stages 1 and 2 read it (not with --from distill/judge).
 #     --from    predictor (default) | pfit1 | distill | judge. A later start uses the bundled
 #               lineage/ files for the earlier stages (predictor B and pfit1 u2000 as recorded).
 #     --smoke   wiring check in minutes: 1-epoch predictor, 2 PPO and 2 distill updates, stand cases.
@@ -27,10 +30,11 @@ set -euo pipefail
 usage() { sed -n '2,24p' "$0"; exit 2; }
 [[ $# -ge 1 ]] || usage
 OUT_ARG=$1; shift
-FROM=predictor; SMOKE=0
+FROM=predictor; SMOKE=0; START=
 while [[ $# -gt 0 ]]; do
   case $1 in
     --from) FROM=${2:?}; shift 2 ;;
+    --start) START=${2:?}; shift 2 ;;
     --smoke) SMOKE=1; shift ;;
     *) usage ;;
   esac
@@ -43,6 +47,7 @@ REPO=$(git -C "$BUNDLE" rev-parse --show-toplevel)
 mkdir -p "$OUT_ARG"; OUT=$(cd "$OUT_ARG" && pwd)
 LOG=$OUT/chain.log
 OD1=$REPO/records/curriculum_20261109/od1/checkpoint_update001200.pt
+[[ -z $START ]] || START=$(cd "$(dirname "$START")" && pwd)/$(basename "$START")
 cd "$REPO"
 
 if command -v sha256sum >/dev/null; then sha() { sha256sum "$1" | cut -d' ' -f1; }
@@ -56,7 +61,20 @@ expect() {  # FILE SHA256_PREFIX
   local got; got=$(sha "$1")
   [[ $got == "$2"* ]] || die "$1 is $got, expected $2…: the bundle or the start checkpoint changed"
 }
-expect "$OD1" 3bdfb00559840787
+if [[ -z $START ]]; then
+  expect "$OD1" 3bdfb00559840787
+  START=$OD1; START_NAME=od1_u1200
+else
+  [[ $FROM == predictor || $FROM == pfit1 ]] || die "--start only applies from the predictor or pfit1 stage"
+  [[ -f $START && -f ${START%.pt}.json ]] || die "--start needs $START and its .json declaration"
+  python3 - "$START" "$(sha "$START")" <<'CHECK' || die "$START: its declaration does not bind it as a destination_v70 checkpoint"
+import json, sys
+d = json.load(open(sys.argv[1][:-3] + ".json"))
+assert d["checkpoint_sha256"] == sys.argv[2], "declared sha256 differs"
+assert d["identity"]["experiment"] == "destination_v70", d["identity"].get("experiment")
+CHECK
+  START_NAME=start_u$(( 10#$(basename "$START" .pt | grep -o '[0-9]*$') ))
+fi
 expect "$S/delay_predictor.py" 55d8c8151c21221e
 expect "$S/predictor_train.py" f7c892af13edef8d
 expect "$S/distill_train.py" fd9b35e3497c4d15
@@ -66,7 +84,7 @@ expect "$S/fitted_eval.py" 3c6f4b0314a54d41
 expect "$BUNDLE/full96_suite.py" a4f5949ee1c039ab
 [[ -n $(command -v uv) ]] || die "uv not found (install uv, then run 'uv sync' in $REPO)"
 
-say "chain start: from $FROM, smoke $SMOKE, repo $(git rev-parse HEAD), out $OUT"
+say "chain start: from $FROM, smoke $SMOKE, start $START ($(sha "$START")), repo $(git rev-parse HEAD), out $OUT"
 [[ -z $(git status --porcelain -- src) ]] || say "NOTE: src/ has uncommitted changes; the record names HEAD only"
 
 # Recipe shared by pfit1 and bm0 (fit1_v70.sh / pfit1.sh / bmass1.sh)
@@ -98,9 +116,9 @@ if [[ $FROM == predictor ]]; then
   P=$OUT/predictor; fresh "$P"; mkdir -p "$P"
   COLLECT_SEEDS=(20261011 20261012 20261013 20261014)
   [[ $SMOKE == 1 ]] && COLLECT_SEEDS=(20261011 20261012)
-  say "1. predictor: collecting od1 u1200 inputs on the fitted simulator, seeds ${COLLECT_SEEDS[*]}"
+  say "1. predictor: collecting $START_NAME inputs on the fitted simulator, seeds ${COLLECT_SEEDS[*]}"
   collect() {
-    uv run python "$S/delay_predictor.py" collect "$P/s$1" "od1_u1200=$OD1" --seed "$1" \
+    uv run python "$S/delay_predictor.py" collect "$P/s$1" "$START_NAME=$START" --seed "$1" \
       --axes kd,toe_friction,joint_friction,armature --motor-check drawn > "$P/collect_s$1.log" 2>&1
   }
   pids=()
@@ -125,8 +143,8 @@ fi
 TEACHER=$BUNDLE/lineage/pfit1_u2000/checkpoint_update002000.pt
 if [[ $FROM == predictor || $FROM == pfit1 ]]; then
   fresh "$OUT/pfit1"
-  say "2. pfit1: $PFIT_UPDATES PPO updates from od1 u1200, predictor 2 controls ahead, anchor 0.006, seed 20261110"
-  uv run python "$S/predictor_train.py" "$PRED" 2 --output "$OUT/pfit1" --initialize-from "$OD1" \
+  say "2. pfit1: $PFIT_UPDATES PPO updates from $START_NAME, predictor 2 controls ahead, anchor 0.006, seed 20261110"
+  uv run python "$S/predictor_train.py" "$PRED" 2 --output "$OUT/pfit1" --initialize-from "$START" \
     "${TRAIN_ARGS[@]}" --updates "$PFIT_UPDATES" --seed 20261110 --threads "${PFIT_THREADS:-6}" --anchor-weight 0.006 \
     > "$OUT/pfit1_train.log" 2>&1 || die "pfit1 training failed (see $OUT/pfit1_train.log)"
   TEACHER=$(ckpt "$OUT/pfit1" "$PFIT_UPDATES")
@@ -174,7 +192,7 @@ REC=$OUT/chain_record.txt
   echo "repo commit: $(git rev-parse HEAD)"
   echo "from: $FROM  smoke: $SMOKE"
   echo "sha256:"
-  echo "  od1 u1200        $(sha "$OD1")"
+  echo "  start            $(sha "$START")  $START"
   echo "  predictor        $(sha "$PRED")  $PRED"
   echo "  teacher (pfit1)  $(sha "$TEACHER")  $TEACHER"
   for u in "${JUDGE_AT[@]}"; do echo "  bm0 u$u          $(sha "$(ckpt "$STUDENT_DIR" "$u")")"; done
