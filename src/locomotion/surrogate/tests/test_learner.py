@@ -13,6 +13,7 @@ from types import SimpleNamespace
 import torch
 
 import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
+import locomotion.randomization as rnd
 import locomotion.rl.wrapper as wrapper
 from locomotion.omniwalk.mdp.rewards import (
     REWARD_CONFIG as REWARD_V2_CONFIG,
@@ -370,6 +371,40 @@ class PolicyTests(unittest.TestCase):
         self.assertTrue(torch.equal(plain(self.observation), a))
         self.assertTrue(torch.equal(plain(self.observation), -a))
 
+    def test_action_delay_sends_each_action_late_and_restarts_neutral(self):
+        a = torch.full((2, 18), 0.4)
+        policy = self.policy({}, [a, 2 * a, 3 * a], action_delay=1)
+        self.env.episode_steps = torch.tensor([0, 0])
+        self.assertEqual(float(policy(self.observation).abs().max()), 0.0)
+        self.env.episode_steps = torch.tensor([1, 1])
+        self.assertTrue(torch.equal(policy(self.observation), a))
+        # Replica 1 starts a new episode, so its queued action never reaches the motor.
+        self.env.episode_steps = torch.tensor([2, 0])
+        late = policy(self.observation)
+        self.assertTrue(torch.equal(late[0], 2 * a[0]))
+        self.assertEqual(float(late[1].abs().max()), 0.0)
+        self.assertEqual(policy.record({})["action_delay_controls"], 1)
+        with self.assertRaisesRegex(ValueError, "whole controls"):
+            self.policy({}, action_delay=-1)
+
+    def test_stress_condition_overrides_named_nominal_fields(self):
+        nominal = rnd.nominal_draw()
+        self.assertEqual(evaluate.stress_condition([], nominal), (None, {}))
+        draw, values = evaluate.stress_condition(["kp_scale=0.8", "motor_strength=0.6"], nominal)
+        self.assertEqual(values, {"kp_scale": 0.8, "motor_strength": 0.6})
+        self.assertEqual(
+            (draw.kp_scale, draw.kd_scale, draw.foot_friction, draw.motor_strength.tolist()),
+            (0.8, 1.0, 1.0, [0.6] * 18),
+        )
+        for bad in (
+            ["link_mass_scale=1"],
+            ["kp_scale=0"],
+            ["kd_scale=nan"],
+            ["kp_scale=1", "kp_scale=1"],
+        ):
+            with self.assertRaisesRegex(ValueError, "--condition"):
+                evaluate.stress_condition(bad, nominal)
+
     def test_wrapper_adapter_replaces_the_path(self):
         def adapter(actor, observation):
             return observation[:, :18] * 2
@@ -389,7 +424,11 @@ class PolicyTests(unittest.TestCase):
             ),
             ("wrapper policy_for_evaluation", None, None),
         )
-        for keywords in ({"velocity_input_gain": 1.25}, {"action_mean2": True}):
+        for keywords in (
+            {"velocity_input_gain": 1.25},
+            {"action_mean2": True},
+            {"action_delay": 1},
+        ):
             with self.assertRaisesRegex(ValueError, "policy_for_evaluation"):
                 self.policy({}, adapter=adapter, **keywords)
 

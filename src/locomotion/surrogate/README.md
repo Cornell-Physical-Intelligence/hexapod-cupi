@@ -71,7 +71,10 @@ classification and continuity checks. Native capture continues to validate its
 actual patch buffers and fixed motor law.
 
 The evaluator reconstructs the recorded actor inputs with no observation noise.
-You can test joint-velocity input gains or force a two-control action mean. Static
+You can test joint-velocity input gains or force a two-control action mean.
+`--action-delay N` sends each action N controls late, 20 ms each.
+`--condition FIELD=VALUE` holds one nominal property at a value across resets:
+`kp_scale`, `kd_scale`, `foot_friction`, `motor_strength` or `payload_mass_kg`. Static
 probe consensus compares the default contact model with two sensitivity models;
 agreement grants no native acceptance.
 
