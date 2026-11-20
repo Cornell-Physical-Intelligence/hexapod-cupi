@@ -4,6 +4,7 @@ import json
 import math
 from pathlib import Path
 
+import numpy as np
 import omni.physx
 import torch
 import warp as wp
@@ -13,7 +14,7 @@ from isaaclab.sim.schemas import define_collision_properties
 from isaaclab.sim.utils import bind_physics_material, get_first_matching_child_prim
 from isaaclab_physx.assets.articulation import Articulation
 from isaaclab_physx.sim.spawners.materials import RigidBodyMaterialCfg
-from pxr import PhysxSchema, UsdPhysics
+from pxr import PhysxSchema, UsdGeom, UsdPhysics, Vt
 
 from locomotion.omniwalk.env_cfg import make_config
 from locomotion.omniwalk.mdp.actions import emitted_target, executed_action_feature
@@ -45,7 +46,15 @@ class IsaacEnv(DirectRLEnv):
     ``history``, ``held`` and ``previous_action`` and updates them in place. ``capture`` is None or a
     per-substep hook that OmniEnv binds before each step. State and property reads use raw PhysX
     views until native parity admits ``robot.data`` in their place.
+
+    ``terrain`` and ``last_reset_pose`` default to None at the class so partial doubles in tests
+    reach ``write_reset`` without the scene setup that fills them; ``ground_collision_paths``
+    defaults to the one flat floor, so a double's ``collect_substep`` expects one floor column.
     """
+
+    terrain = None
+    last_reset_pose = None
+    ground_collision_paths = ("/World/ground",)
 
     def __init__(
         self, config, asset, model_path, geometry_path, output, *, reference_metadata=None
@@ -110,11 +119,13 @@ class IsaacEnv(DirectRLEnv):
         self.root_com_local = self.get("get_coms")[:, self.body_index, :3]
         self.contact = self.sim.physics_sim_view.create_rigid_contact_view(
             "/World/envs/env_*/Robot/*",
-            [self.ground_collision_path],
+            list(self.ground_collision_paths),
             max_contact_data_count=1024 * config.num_envs,
         )
         paths = list(self.contact.sensor_paths)
-        if len(paths) != 19 * config.num_envs or self.contact.filter_count != 1:
+        if len(paths) != 19 * config.num_envs or self.contact.filter_count != len(
+            self.ground_collision_paths
+        ):
             raise ValueError("Native contact matrix layout differs")
         self.contact_index = torch.tensor(
             [paths.index(r + "/" + b) for r in self.roots for b in self.native_body_names],
@@ -136,9 +147,19 @@ class IsaacEnv(DirectRLEnv):
         )
         self.total_controls = 0
         self.telemetry = {}
+        self.spawn_rng = np.random.default_rng(config.seed)
+        # The pose each row's last reset wrote, for the adapter's exact readback check: on a
+        # terrain the reset pose carries the local ground height and a drawn heading, so the
+        # expectation must be what was written, not the flat-world constant.
+        self.last_reset_pose = (
+            self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(config.num_envs, -1).clone()
+        )
+        self.last_reset_pose[:, :3] = self.origins
+        self.last_reset_pose[:, 2] = self.reset_height
         self.capture = None
 
     def _setup_scene(self):
+        self.terrain = None
         self.robot = CaptureArticulation(self.robot_cfg)
         self.robot.env = self
         self.scene.articulations["robot"] = self.robot
@@ -151,7 +172,63 @@ class IsaacEnv(DirectRLEnv):
             friction_combine_mode="multiply",
             restitution_combine_mode="multiply",
         )
-        if self.config.floor == "isaaclab_ground_plane":
+        if self.config.terrain_spec_path is not None:
+            # The terrain height field replaces the flat mesh floor: one shared, world-aligned
+            # surface tiled from the spec to cover every environment origin, so the raw world
+            # coordinates the state reads stay consistent with the ``terrain`` grid the policy
+            # inputs sample (omniwalk/mdp/footfall.py reads it duck-typed off this attribute).
+            # Isaac's ``create_prim_from_mesh`` helper aborts this container on meshes past a
+            # few thousand faces (terrain_isaac_probe_001..005), so the height field is authored
+            # directly as USD quad meshes and PhysX cooks the exact triangles ("none"). It is
+            # authored as one collider per ~TERRAIN_CHUNK_M square, not one world-sized mesh:
+            # this image's PhysX scans every triangle of a paired mesh each substep (cost ~
+            # faces x robots; one mesh multiplied sim.step ~50x at 128 replicas), and broadphase
+            # culls per-chunk AABBs so each body pairs only with the chunks under it
+            # (terrain_isaac_probe_014..016). Chunks slice one grid and share seam vertices; a
+            # contact at a seam reports against both chunks and collect_substep sums them. The
+            # explicit collider offsets replace PhysX's auto contact margin; the stock-floor
+            # offsets stay None so flat runs and the 96-case evaluation declare unchanged
+            # physics. The offsets and chunk side live in locomotion.terrain, where the
+            # admission readback checks every chunk against them.
+            from locomotion.terrain import (
+                TERRAIN_CHUNK_M,
+                TERRAIN_CONTACT_OFFSET_M,
+                TERRAIN_REST_OFFSET_M,
+                Terrain,
+                chunk_grid,
+            )
+            from locomotion.terrain import validate as validate_terrain
+
+            spec = json.loads(Path(self.config.terrain_spec_path).read_text())
+            validate_terrain(spec)
+            origins = self.scene.env_origins
+            extent = float(origins[:, :2].abs().max().item()) + 10.0
+            self.terrain = Terrain.tiled(spec, extent)
+            step = max(1, round(self.config.terrain_mesh_resolution_m / self.terrain.resolution))
+            xs, ys = self.terrain.xs[::step], self.terrain.ys[::step]
+            heights = self.terrain.heights[::step, ::step]
+            cells = max(1, round(TERRAIN_CHUNK_M / self.config.terrain_mesh_resolution_m))
+            UsdGeom.Xform.Define(stage, "/Ground")
+            self.ground_collision_paths = []
+            for points, quads in chunk_grid(xs, ys, heights, cells):
+                path = f"/Ground/chunk_{len(self.ground_collision_paths)}"
+                mesh = UsdGeom.Mesh.Define(stage, path)
+                mesh.CreatePointsAttr(Vt.Vec3fArray.FromNumpy(points))
+                mesh.CreateFaceVertexIndicesAttr(Vt.IntArray.FromNumpy(quads.reshape(-1)))
+                mesh.CreateFaceVertexCountsAttr(
+                    Vt.IntArray.FromNumpy(np.full(len(quads), 4, np.int32))
+                )
+                mesh.CreateSubdivisionSchemeAttr("none")
+                UsdPhysics.CollisionAPI.Apply(mesh.GetPrim())
+                UsdPhysics.MeshCollisionAPI.Apply(mesh.GetPrim()).CreateApproximationAttr("none")
+                collision = PhysxSchema.PhysxCollisionAPI.Apply(mesh.GetPrim())
+                collision.CreateContactOffsetAttr(TERRAIN_CONTACT_OFFSET_M)
+                collision.CreateRestOffsetAttr(TERRAIN_REST_OFFSET_M)
+                self.ground_collision_paths.append(path)
+            material.func("/Ground/physicsMaterial", material)
+            for path in self.ground_collision_paths:
+                bind_physics_material(path, "/Ground/physicsMaterial", stage=stage)
+        elif self.config.floor == "isaaclab_ground_plane":
             floor = GroundPlaneCfg(size=(80.0, 80.0), physics_material=material)
             floor.func("/Ground", floor)
         elif self.config.floor == "isaaclab_cuboid":
@@ -203,6 +280,8 @@ class IsaacEnv(DirectRLEnv):
                 stage=stage,
             )
         self.ground_collision_path = str(collider.GetPath())
+        if self.terrain is None:
+            self.ground_collision_paths = [self.ground_collision_path]
         self.scene.filter_collisions(global_prim_paths=["/Ground"])
         for prim in stage.Traverse():
             if prim.HasAPI(UsdPhysics.CollisionAPI) and "/Robot/" in str(prim.GetPath()):
@@ -271,9 +350,11 @@ class IsaacEnv(DirectRLEnv):
         )
         ceiling = self.motor.ceiling[:, order]
         forces = wp.to_torch(self.contact.get_contact_force_matrix(self.config.physics_dt)).clone()
-        if forces.shape != (19 * self.num_envs, 1, 3) or not bool(torch.isfinite(forces).all()):
+        expected = (19 * self.num_envs, len(self.ground_collision_paths), 3)
+        if forces.shape != expected or not bool(torch.isfinite(forces).all()):
             raise FloatingPointError("Native floor-force shape/finite check failed")
-        forces = forces[self.contact_index, 0].reshape(self.num_envs, 19, 3)
+        # A contact at a chunk seam reports against both chunks; the floor total is their sum.
+        forces = forces.sum(1)[self.contact_index].reshape(self.num_envs, 19, 3)
         self.loads.add(requested, applied, forces)
         if self.capture is not None:
             self.capture(
@@ -352,7 +433,26 @@ class IsaacEnv(DirectRLEnv):
         zero = torch.zeros_like(q)
         pose = self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(len(rows), -1).clone()
         pose[:, :3] = self.origins[rows]
-        pose[:, 2] = self.reset_height
+        if self.terrain is not None and self.config.terrain_spawn:
+            # Scatter each reset inside its environment's cell with a random heading, as the
+            # surrogate's terrain spawner does; the margin keeps robots off neighbouring cells.
+            span = max(0.0, self.config.spacing_m / 2 - 0.5)
+            offsets = self.spawn_rng.uniform(-span, span, size=(len(rows), 2))
+            yaws = self.spawn_rng.uniform(-math.pi, math.pi, size=len(rows))
+            pose[:, 0] += self.torch(offsets[:, 0])
+            pose[:, 1] += self.torch(offsets[:, 1])
+            pose[:, 5] = self.torch(np.sin(yaws / 2))
+            pose[:, 6] = self.torch(np.cos(yaws / 2))
+        if self.terrain is not None:
+            # Navigation (forward, left) is world (-y, x); start above the highest nearby ground.
+            ground = [
+                self.terrain.highest_under(-float(row[1]), float(row[0]), 0.25) for row in pose
+            ]
+            pose[:, 2] = self.torch(ground) + self.reset_height
+        else:
+            pose[:, 2] = self.reset_height
+        if self.last_reset_pose is not None:
+            self.last_reset_pose[rows] = pose
         ids = rows.to(torch.int32)
         self.robot.write_root_link_pose_to_sim_index(root_pose=pose, env_ids=ids)
         self.robot.write_root_com_velocity_to_sim_index(

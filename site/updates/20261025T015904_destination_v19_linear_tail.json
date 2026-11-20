@@ -1,0 +1,21 @@
+{
+  "id": "20261025T015904_destination_v19_linear_tail",
+  "date": "2026-10-25T01:59:04.000000Z",
+  "title": "Add destination_v19: a destination pay that turns into a penalty past 20 mm, and a doubled planar bound in the walking checks",
+  "summary": "destination_v19 is destination_v18 whose destination pay follows the rational kernel up to 20 mm (0.431 there) and then its tangent, falling 0.0147 per millimetre to zero near 49 mm and to a penalty capped at -1 from 117 mm; the cap keeps a lagging robot from paying more per control than a fall costs once. Its walking checks allow twice the evaluator's planar error, max(0.05 m/s, half the commanded speed); the evaluator's own bound is unchanged. From update 1450 to 4400 of destination_v18 at 0.15 m/s the destination pay fell from 0.76 to 0.34 per control while the speed held: the robots let the gap to the ghost grow into the kernel's flat tail. Update 1450 passed all eight 0.15 m/s directions within 0.3-17 mm of the ghost; update 2800 passed six, 8-56 mm behind.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v19 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T015904_destination_v19_linear_tail.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and evaluator bounds are unchanged."
+}

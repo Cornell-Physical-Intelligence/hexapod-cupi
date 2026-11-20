@@ -9,6 +9,7 @@ from pathlib import Path
 SCHEMA = "hexapod_runtime_sources_v2"
 MANIFEST = "RUNTIME_SOURCES.json"
 REQUIREMENTS_INPUT = "configs/walking_requirements.json"
+TRITON_SHIM = "triton/__init__.py"
 
 
 def digest(path):
@@ -73,6 +74,9 @@ def allocation_files(root, *, learner="ppo", mode="evaluate"):
         )
     return {
         **{p.relative_to(source).as_posix(): p for p in sorted(paths)},
+        # Shadows the image's bundled triton, whose native library faults on import: torch then
+        # takes its no-triton path (terrain_isaac_smoke_20261031_007/_008, probe_002).
+        TRITON_SHIM: source / "locomotion/spark/triton_shim.txt",
         REQUIREMENTS_INPUT: root / REQUIREMENTS_INPUT,
     }
 

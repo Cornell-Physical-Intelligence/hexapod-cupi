@@ -80,6 +80,9 @@ class OmniEnv:
         )
         self.root_com_local = isaac.root_com_local
         self.native_errors = isaac.native_errors
+        # The task and its wrapper read the terrain duck-typed off this adapter (footfall.py);
+        # the stock flat floor keeps None, which pins the terrain inputs to zero.
+        self.terrain = isaac.terrain
         self.get, self.native_array, self.save = isaac.get, isaac.native_array, isaac.save
         self.telemetry, self.total_controls = isaac.telemetry, isaac.total_controls
         self.capture = None
@@ -99,11 +102,17 @@ class OmniEnv:
             expected = self.neutral.expand(len(rows), -1)
             if not torch.allclose(self.current["q"][rows], expected, atol=2e-6, rtol=0):
                 raise RuntimeError("Selected joint reset readback differs")
-            expected_root = (
-                self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(len(rows), -1).clone()
-            )
-            expected_root[:, :3] = self.origins[rows]
-            expected_root[:, 2] = self.reset_height
+            written = getattr(self.isaac, "last_reset_pose", None)
+            if written is not None:
+                # The pose the reset wrote: on a terrain it carries the local ground height and
+                # a drawn heading, so the readback must match what was written, exactly as before.
+                expected_root = written[rows]
+            else:
+                expected_root = (
+                    self.torch([0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]).expand(len(rows), -1).clone()
+                )
+                expected_root[:, :3] = self.origins[rows]
+                expected_root[:, 2] = self.reset_height
             if not torch.allclose(self.current["root"][rows], expected_root, atol=2e-6, rtol=0):
                 raise RuntimeError("Selected root reset readback differs")
             self.history[rows] = proprio(self.current, self.neutral)[rows, None].expand(-1, 5, -1)

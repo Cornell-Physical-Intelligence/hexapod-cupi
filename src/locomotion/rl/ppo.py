@@ -25,10 +25,16 @@ class CommandBootstrapPPO(PPO):
 
 
 class CappedRatePPO(CommandBootstrapPPO):
-    """Stock PPO whose learning rate never exceeds ``learning_rate_max``."""
+    """Stock PPO whose learning rate never exceeds ``learning_rate_max`` and, when ``learning_rate_min``
+    is given, never falls below it (the stock adaptive schedule's own floor is 1e-5)."""
 
-    def __init__(self, *args, learning_rate_max, **kwargs):
+    def __init__(self, *args, learning_rate_max, learning_rate_min=None, **kwargs):
         self.learning_rate_max = float(learning_rate_max)
+        self.learning_rate_min = None if learning_rate_min is None else float(learning_rate_min)
+        if self.learning_rate_min is not None and not (
+            0 < self.learning_rate_min <= self.learning_rate_max
+        ):
+            raise ValueError("The learning-rate floor lies above zero and at most the ceiling")
         super().__init__(*args, **kwargs)
         for group in self.optimizer.param_groups:
             group["lr"] = self.learning_rate
@@ -39,7 +45,10 @@ class CappedRatePPO(CommandBootstrapPPO):
 
     @learning_rate.setter
     def learning_rate(self, value):
-        self._learning_rate = min(float(value), self.learning_rate_max)
+        value = min(float(value), self.learning_rate_max)
+        if self.learning_rate_min is not None:
+            value = max(value, self.learning_rate_min)
+        self._learning_rate = value
 
 
 # The environment clips sampled actions before its physical target limits. PPO stores those raw
@@ -123,6 +132,39 @@ class DeviationSchedule:
         losses = self.inner_update()
         self.completed += 1
         self.apply()
+        return losses
+
+
+class ActorAnchor:
+    """Pull the actor toward its initialization after each update (decoupled from the optimizer).
+
+    Long surrogate continuations drift away from a native init's precision — the recorded
+    quiet/formal/omni tax — while the levers that matter ride strong reward gradients. The
+    anchor removes a fraction of each parameter's displacement from its post-initialization
+    value after every update, so weak-gradient directions decay back to the init while strong
+    gradients hold their ground at a displacement of roughly step/weight. Distribution
+    parameters are excluded: the deviation schedule owns them.
+    """
+
+    def __init__(self, algorithm, weight):
+        weight = float(weight)
+        if not 0 < weight < 1:
+            raise ValueError("The anchor weight is a fraction in (0, 1)")
+        self.weight = weight
+        self.anchored = [
+            (parameter, parameter.detach().clone())
+            for name, parameter in algorithm.actor.named_parameters()
+            if "distribution" not in name and parameter.requires_grad
+        ]
+        if not self.anchored:
+            raise ValueError("The actor anchor found no trainable non-distribution parameters")
+        self.inner_update = algorithm.update
+
+    def update(self):
+        losses = self.inner_update()
+        with torch.no_grad():
+            for parameter, init in self.anchored:
+                parameter.add_(init - parameter, alpha=self.weight)
         return losses
 
 

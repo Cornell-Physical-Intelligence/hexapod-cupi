@@ -1,0 +1,25 @@
+{
+  "id": "20261025T032526_destination_v20_ghost_v10",
+  "date": "2026-10-25T03:25:26.000000Z",
+  "title": "Add destination_v20 and the ghost_v10 inputs: the sideways distance to the ghost and the velocity relative to it",
+  "summary": "destination_v20 trains the v10 model: destination_v19's reward and speed curriculum with the evaluator's own planar bound in the walking checks, and seven ghost_v10 inputs in place of the five ghost inputs. The first two are the planar gap with its part along the ghost's path removed (the whole gap under a zero command), the next three are unchanged (heading gap sine and cosine, controls since the command began), and the last two are the body's planar velocity over the last control less the ghost's, over 0.1 m/s. Starting from v9, the first five fill the columns of v9's five inputs and the two velocity inputs start at zero weight. Surrogate evaluation rebuilds the inputs with GhostV10Tracker; native evaluation refuses these checkpoints until it does. In attempts 10 and 11 the robots fell behind the ghost in the first seconds at 0.15 m/s and, at their top speed, could not close the gap again.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v20 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/omniwalk/mdp/destination.py",
+    "src/locomotion/rl/destination_wrapper.py",
+    "src/locomotion/scripts/play.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T032526_destination_v20_ghost_v10.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment and input option that no gate or registry entry uses yet; the canonical task, inputs and evaluator are unchanged."
+}

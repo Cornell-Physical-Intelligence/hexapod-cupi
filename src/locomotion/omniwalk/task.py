@@ -51,6 +51,7 @@ class TrainingTask:
         self.air_time = torch.zeros(n, 6, device=device)
         self.in_contact = torch.ones(n, 6, dtype=torch.bool, device=device)
         self.command_age = torch.zeros(n, dtype=torch.long, device=device)
+        self.quiet_anchor = torch.zeros(n, 18, device=device)
 
         self.env = env
         self.config = task_config
@@ -116,6 +117,9 @@ class TrainingTask:
         expired = ((self.remaining_controls == 0) & ~done).nonzero(as_tuple=False).squeeze(-1)
         self._resample(expired)
         self.controls_completed += 1
+        # Subclass truncations (the run-mix timeout) join here, before the observer reads the
+        # flags, so the observer and the returned transition see the same final flags.
+        output = self._final_flags(output)
         if self.observer is not None:
             self.observer.step(
                 command, output, reward, components, metric_previous_target, telemetry
@@ -123,6 +127,10 @@ class TrainingTask:
         result = self._next_command_observation(output)
         result["reward"] = reward
         return result
+
+    def _final_flags(self, output):
+        """The transition's final termination flags; subclasses add their own truncations here."""
+        return output
 
     def reward_telemetry(self, command):
         velocity = displacement_velocity(
@@ -196,6 +204,23 @@ class TrainingTask:
             / self.env.cfg.action_scale_rad,
             "command_age_controls": self.command_age.clone(),
         }
+        if self.reward_config.quiet_hold_weight:
+            # The pose each quiet hold is priced against: the pose the robot has SETTLED into,
+            # captured on a quiet row's first still control (one past the grace window), so the
+            # hold starts at zero deviation and prices only the wander that follows. Anchoring
+            # at quiet onset instead fights the settle itself (tw_q, round 21: formal 0/4).
+            settled = (command == 0).all(-1).to(self.command_age.device) & (
+                self.command_age
+                == max(
+                    self.reward_config.quiet_grace_controls,
+                    self.reward_config.quiet_hold_grace_controls,
+                )
+                + 1
+            )
+            self.quiet_anchor = torch.where(
+                settled.to(q.device)[:, None], q, self.quiet_anchor.to(q)
+            )
+            base["quiet_anchor_joint_rad"] = self.quiet_anchor.clone()
         return {
             **base,
             "gate_yaw_rate_rad_s": stride_yaw,

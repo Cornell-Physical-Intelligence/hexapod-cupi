@@ -1,0 +1,23 @@
+{
+  "id": "20261120T140027_bm0_requirements_judge",
+  "date": "2026-11-20T14:00:27.000000Z",
+  "title": "bm0 under main's walking-requirements judge: 26 of 26 on the surrogate, with and without the fitted axes",
+  "summary": "bm0 u1000 was judged by main's walking-requirements judge (stage2_flat, 26 cases: stand, two speeds on eight bearings, two turns, two arcs, five routes) on the CPU MuJoCo surrogate with the merged code. It passes all 26 cases in six runs: the standard body and its nylon + 0.75 kg training body without fitted dynamics (each also 26 under the pyramidal-cone and friction-0.9 contact models), and both bodies with the five leg-stand fitted axes drawn per case (action delay 1-2 controls, kd scale 0.13-0.37, toe friction, joint friction, rotor inertia) on test seeds 20261110 and 20261111. Worst drift over a 20 s hold is 0.048-0.074 m against 0.10 m, worst tilt 0.71-0.95 deg against 1.7, stopping distance at most 0.014 m against 0.05, and every route ends 0.064-0.066 m from its goal against 0.12. The applied torque equals the 1.6 N m bound in every case, because the surrogate's rated motor cap is that bound, so the torque check cannot fail on the surrogate. Under the former 96-case scorer the same fitted runs passed 19 and 20 of 96, failing mostly on speed and turn-rate tracking in short windows. scripts/requirements_fitted_judge.py ports the fitted-axes draws to the merged surrogate. The raw summaries and judgements are on Spark, reduced into results.json; the 400 Hz captures were not kept. Surrogate results only.",
+  "areas": [
+    "locomotion",
+    "sim2real",
+    "verification"
+  ],
+  "next": "Judge bm0 or its successor natively with the walking-requirements judge; fix the KeyError('metrics') in the closing printout of src/locomotion/surrogate/evaluate.py on main; ask the requirements owners whether the 1.6 N m torque bound, equal to the surrogate's rated motor cap, is meant to be reachable.",
+  "changes": [
+    "records/distilled_bm0_u1000_20261112/*",
+    "site/assets/bm0_requirements_judge_20261120_001/*"
+  ],
+  "evidence": [
+    "site/assets/bm0_requirements_judge_20261120_001/results.json",
+    "site/assets/bm0_requirements_judge_20261120_001/build_results.py",
+    "records/distilled_bm0_u1000_20261112/README.md",
+    "records/distilled_bm0_u1000_20261112/scripts/requirements_fitted_judge.py"
+  ],
+  "no_project_impact": false
+}

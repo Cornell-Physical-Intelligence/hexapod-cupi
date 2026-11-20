@@ -1,0 +1,29 @@
+{
+  "id": "20261024T232737_destination_v16_speed_clock",
+  "date": "2026-10-24T23:27:37.000000Z",
+  "title": "Add destination_v16: a gait clock that follows the walking speed and a back-off at 5 cm from the ghost",
+  "summary": "destination_v16 is destination_v15 with the speed_v1 gait clock and a 5 cm back-off. On the fixed 1.2 s clock, 0.125 m/s needs 90 mm strides, beyond the 66-80 mm that the +-0.35 rad action range reaches. speed_v1 keeps 60 controls up to 0.075 m/s and shortens the cycle to 52, 44 and 40 controls at 0.1, 0.125 and 0.15 m/s, each tripod swinging 0.4 to 0.5 of it. The policy clock, the contact schedule and the stride pay follow each robot's phase, and each stride pays in proportion to its cycle so that the stride pay per second is unchanged. Any standing robot more than 5 cm from its ghost during the 10 updates judged lowers the level one step, and holds the first level. Up to 0.075 m/s the clock and schedule equal the fixed clock. Surrogate evaluation follows the same phase; native evaluation refuses these checkpoints until it does.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v16 from the v9 checkpoint on the surrogate and test it against v9 at 0.05 to 0.15 m/s.",
+  "changes": [
+    "configs/source_inventory.json",
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/omniwalk/mdp/commands.py",
+    "src/locomotion/omniwalk/mdp/gait.py",
+    "src/locomotion/omniwalk/mdp/rewards.py",
+    "src/locomotion/rl/destination_wrapper.py",
+    "src/locomotion/rl/wrapper.py",
+    "src/locomotion/scripts/play.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261024T232737_destination_v16_speed_clock.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task, reward and fixed clock are unchanged."
+}

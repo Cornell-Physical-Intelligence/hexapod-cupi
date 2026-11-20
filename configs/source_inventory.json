@@ -45,6 +45,13 @@
       "purpose": "Locomotion on the approved direct-drive hexapod."
     },
     {
+      "path": "src/locomotion/terrain.py",
+      "previous_path": "src/locomotion/surrogate/terrain.py",
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Build, validate and tile scene height maps from terrain features, numpy-only, for the surrogate floor, the native terrain mesh and the footfall inputs."
+    },
+    {
       "path": "src/locomotion/randomization.py",
       "previous_path": "locomotion/randomization.py",
       "classification": "prototype",
@@ -229,14 +236,49 @@
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Follow each command's destination, the pose the command would have reached, and describe the gap to it for experiments destination_v1 to destination_v9."
+      "purpose": "Follow each command's destination, the pose the command would have reached, and describe the gap to it for experiments destination_v1 to destination_v10."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/gait.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Follow a speed-scaled gait phase per replica and read the tripod swing schedule from it, for experiment destination_v16."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/slope.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Estimate each replica's tilt along a slope from its front and rear toes and correct the policy's gravity or joint inputs for it, for experiment destination_v32 and surrogate scenes."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/footfall.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Predict each leg's next touchdown from the tripod schedule and sample the terrain grid there and along the command bearing, for the terrain_v1 and terrain_v2 policy inputs."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/destination_inputs.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "The destination inputs beyond the task's five (ghost_v10/v11, the terrain blocks, leg odometry) that the task builds for rl/destination_wrapper.py, which imports nothing from omniwalk."
+    },
+    {
+      "path": "src/locomotion/omniwalk/mdp/odometry.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Rebuild the nine ghost_v11 inputs from leg odometry (stance toes, contact, heading) for the terrain_v2_odom policy input."
     },
     {
       "path": "src/locomotion/omniwalk/destination_task.py",
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Experiments destination_v1 to destination_v9: the canonical task plus per-control pay for staying near each command's destination and fixed command lengths."
+      "purpose": "Experiments destination_v1 to destination_v10: the canonical task plus per-control pay for staying near each command's destination and fixed command lengths."
     },
     {
       "path": "src/locomotion/omniwalk/mdp/rewards.py",
@@ -355,7 +397,14 @@
       "previous_path": null,
       "classification": "prototype",
       "owner": "Platform lead",
-      "purpose": "Append the gap to each command's destination and the time since the command began to the actor and critic inputs for experiments destination_v1 to destination_v9."
+      "purpose": "Append the gap to each command's destination and the time since the command began to the actor and critic inputs for experiments destination_v1 to destination_v10."
+    },
+    {
+      "path": "src/locomotion/rl/sim2real.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Locomotion lead",
+      "purpose": "Compensated actor for sim2real design runs: a frozen walking core behind bounded, latent-conditioned input gains and action deltas, trained by PPO under the surrogate's per-episode dynamics randomization."
     },
     {
       "path": "src/locomotion/rl/wrapper.py",
@@ -519,6 +568,20 @@
       "purpose": "Replay actions open loop on the surrogate and score stored telemetry under any reward."
     },
     {
+      "path": "src/locomotion/surrogate/scene.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Run robots through a terrain scene on the surrogate (checkpoints, starts and command lists) for the viewer's Scene page."
+    },
+    {
+      "path": "src/locomotion/surrogate/terrain.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Re-export the neutral locomotion.terrain module so existing surrogate imports keep working."
+    },
+    {
       "path": "src/locomotion/surrogate/train.py",
       "previous_path": null,
       "classification": "prototype",
@@ -636,6 +699,97 @@
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Run Shaurya\u2019s original standing-start policy diagnostic."
+    },
+    {
+      "path": "src/locomotion/runtime/__init__.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Package namespace for the numpy-only robot runtime."
+    },
+    {
+      "path": "src/locomotion/runtime/bundle.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Load and verify a runtime bundle and evaluate its actor with numpy."
+    },
+    {
+      "path": "src/locomotion/runtime/controller.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Run the 50 Hz robot loop: stand-up, walking, command expiry and sensing checks with damping on fault."
+    },
+    {
+      "path": "src/locomotion/runtime/export.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Export a terrain_v2_odom checkpoint and the approved robot model to a runtime bundle."
+    },
+    {
+      "path": "src/locomotion/runtime/hardware.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Map calibrated motors and the IMU onto the canonical joints and body frame."
+    },
+    {
+      "path": "src/locomotion/runtime/inputs.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Rebuild the 278 actor inputs from real sensors with leg odometry and emit slew-limited joint targets."
+    },
+    {
+      "path": "src/locomotion/sysid/__init__.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Package namespace for leg-stand actuator calibration."
+    },
+    {
+      "path": "src/locomotion/sysid/leg_record.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Record a guarded MIT-mode excitation of the lf leg on the stand under the training motor law (runs on the stand computer)."
+    },
+    {
+      "path": "src/locomotion/sysid/leg_sim.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Replay stand recordings on a fixed-base one-leg MuJoCo model built from the approved model json."
+    },
+    {
+      "path": "src/locomotion/sysid/leg_fit.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Fit joint mapping, actuation delay and actuator parameters of the one-leg simulator to a stand recording."
+    },
+    {
+      "path": "src/locomotion/sysid/height_log.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Log the stand carriage height from the camera tracker event stream on wall-clock time."
+    },
+    {
+      "path": "src/locomotion/sysid/leg_video.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Render a stand recording on the hexapod model: the real leg beside the simulated one."
+    },
+    {
+      "path": "src/locomotion/sysid/stand_view.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Write viewer run files for a stand recording, the real leg and the simulated one."
     },
     {
       "path": "src/mission/__init__.py",

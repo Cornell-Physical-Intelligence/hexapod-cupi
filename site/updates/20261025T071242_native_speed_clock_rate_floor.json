@@ -1,0 +1,26 @@
+{
+  "id": "20261025T071242_native_speed_clock_rate_floor",
+  "date": "2026-10-25T07:12:42.000000Z",
+  "title": "Train the speed-clock experiments natively: the learning-rate floor option and each experiment's gait clock reach native training and Spark packs",
+  "summary": "Native training and Spark packs now carry two settings the surrogate attempts used. A learning_rate_min learner option (CLI --learning-rate-min) gives CappedRatePPO a floor above the stock schedule's 1e-5; ppo_config records it in the algorithm block and needs the rate ceiling. EXPERIMENT_CLOCKS names the speed-scaled gait clock of destination_v16 to destination_v24, so native training builds the destination wrapper with it and ppo_config records it as the wrapper's gait_clock_scaling; a test checks it agrees with each experiment's reward. The c48_long recipe lists the new option at None, which leaves its configuration unchanged.",
+  "areas": [
+    "locomotion",
+    "spark"
+  ],
+  "next": "Queue destination_v23 on the Spark from the v9 ghost_v11 start with a 2e-5 learning-rate floor.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/scripts/cli.py",
+    "src/locomotion/scripts/train.py",
+    "src/locomotion/spark/prepare.py",
+    "src/locomotion/spark/validation.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T071242_native_speed_clock_rate_floor.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py",
+    "src/locomotion/tests/test_recipe.py"
+  ],
+  "no_project_impact": true,
+  "reason": "Optional learner settings and named-experiment plumbing; defaults, the canonical task and admitted recipes are unchanged."
+}

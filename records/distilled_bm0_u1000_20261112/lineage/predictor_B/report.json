@@ -1,0 +1,880 @@
+{
+ "label": "delay predictor; held-out prediction error, not a scorer result",
+ "simulator": "fitted (kd, toe_friction, joint_friction, armature drawn per episode; touchdown model off; motor check drawn)",
+ "checkpoint_sha256": "3bdfb00559840787c41cc46b2d1f932355ea3a72b4b4c9be51166284c2991fc7",
+ "inputs_sha256": "8b270903b36974ce9536cdbd32ad22fbdc981d7dbe3f66d91b7b71990c2cc281",
+ "rows": 254600,
+ "training_rows": 254112,
+ "cases": 61,
+ "episodes": 244,
+ "collection_seed": [
+  20261011,
+  20261012,
+  20261013,
+  20261014
+ ],
+ "structure": {
+  "newest_frame_offset": 168,
+  "shift_mismatch": 0.0,
+  "copied_inputs": 171,
+  "learned_inputs": 107
+ },
+ "recipe": {
+  "hidden": [
+   256,
+   256,
+   128
+  ],
+  "activation": "elu",
+  "epochs": 120,
+  "batch": 512,
+  "optimizer": "AdamW 1e-3 cosine to 1e-5, weight decay 1e-5",
+  "loss": "Huber on standardized one- and two-control errors of the learned inputs"
+ },
+ "folds": [
+  {
+   "fold": 0,
+   "held_out_cases": [
+    "learning:static__translate_0.10_67.5deg",
+    "learning:static__translate_0.10_180deg",
+    "learning:static__translate_0.10_270deg",
+    "learning:static__turn_-0.40",
+    "learning:static__combined_0deg_+0.20",
+    "learning:static__combined_270deg_-0.20",
+    "learning:static__gentle_arc_0deg_+0.05",
+    "learning:static__gentle_arc_90deg_-0.05",
+    "learning:static__gentle_arc_180deg_-0.05",
+    "learning:static__gentle_arc_315deg_+0.05",
+    "learning:transition__full_program",
+    "learning:stop__right",
+    "learning:stop__arc_right"
+   ],
+   "train_rows": 191816,
+   "held_out_rows": 62296,
+   "curve": [
+    {
+     "epoch": 10,
+     "train": 0.056348496026234,
+     "held_out": 0.15402136743068695
+    },
+    {
+     "epoch": 20,
+     "train": 0.04650145185350099,
+     "held_out": 0.1465398371219635
+    },
+    {
+     "epoch": 30,
+     "train": 0.04197056913746752,
+     "held_out": 0.14478228986263275
+    },
+    {
+     "epoch": 40,
+     "train": 0.039061846648684215,
+     "held_out": 0.14275547862052917
+    },
+    {
+     "epoch": 50,
+     "train": 0.036971931476076844,
+     "held_out": 0.1418285071849823
+    },
+    {
+     "epoch": 60,
+     "train": 0.03529713417684191,
+     "held_out": 0.14072170853614807
+    },
+    {
+     "epoch": 70,
+     "train": 0.03393577005456731,
+     "held_out": 0.14109747111797333
+    },
+    {
+     "epoch": 80,
+     "train": 0.03278540883056514,
+     "held_out": 0.13988161087036133
+    },
+    {
+     "epoch": 90,
+     "train": 0.03187823263633792,
+     "held_out": 0.1394551694393158
+    },
+    {
+     "epoch": 100,
+     "train": 0.031212714742441097,
+     "held_out": 0.13921751081943512
+    },
+    {
+     "epoch": 110,
+     "train": 0.030768909811232148,
+     "held_out": 0.13927000761032104
+    },
+    {
+     "epoch": 120,
+     "train": 0.030590078986007525,
+     "held_out": 0.13932481408119202
+    }
+   ],
+   "rmse": {
+    "1|body angular velocity|no prediction": 0.10159273248860297,
+    "1|body angular velocity|network": 0.03892701905028919,
+    "1|body angular velocity|linear": 0.048648586804592414,
+    "1|gravity direction|no prediction": 0.0011696542466849411,
+    "1|gravity direction|network": 0.0003759452918486011,
+    "1|gravity direction|linear": 0.0004342121152302144,
+    "1|joint position|no prediction": 0.019661378362733944,
+    "1|joint position|network": 0.00563540147566426,
+    "1|joint position|linear": 0.007309679128318142,
+    "1|joint velocity|no prediction": 0.8996091189000868,
+    "1|joint velocity|network": 0.427257089098706,
+    "1|joint velocity|linear": 0.49541408981332624,
+    "1|previous action|no prediction": 0.05600209347188988,
+    "1|previous action|network": 0.016002160510914767,
+    "1|previous action|linear": 0.022513643862743942,
+    "1|gait clock|no prediction": 0.08897797127272727,
+    "1|gait clock|network": 0.014770471172193699,
+    "1|gait clock|linear": 0.014753462515620033,
+    "1|odometry ghost|no prediction": 0.07904742700585339,
+    "1|odometry ghost|network": 0.048964330632491254,
+    "1|odometry ghost|linear": 0.0548510830921958,
+    "1|footfall values|no prediction": 0.0,
+    "1|footfall values|network": 0.0,
+    "1|footfall values|linear": 0.0,
+    "1|all 278 inputs|no prediction": 0.2630533058879135,
+    "1|all 278 inputs|network": 0.056237590686969346,
+    "1|all 278 inputs|linear": 0.06530573925596066,
+    "2|body angular velocity|no prediction": 0.1443128328629902,
+    "2|body angular velocity|network": 0.041194515283186614,
+    "2|body angular velocity|linear": 0.060643028439009886,
+    "2|gravity direction|no prediction": 0.0021355732711117468,
+    "2|gravity direction|network": 0.0007431281458753105,
+    "2|gravity direction|linear": 0.0011168053744823015,
+    "2|joint position|no prediction": 0.03674464719174885,
+    "2|joint position|network": 0.008557716299360625,
+    "2|joint position|linear": 0.013202231116986577,
+    "2|joint velocity|no prediction": 0.9452688684602718,
+    "2|joint velocity|network": 0.4707394748229236,
+    "2|joint velocity|linear": 0.5796832372408105,
+    "2|previous action|no prediction": 0.10695059160339705,
+    "2|previous action|network": 0.02429174111876105,
+    "2|previous action|linear": 0.04048252477081142,
+    "2|gait clock|no prediction": 0.17680090617213953,
+    "2|gait clock|network": 0.02308737294123278,
+    "2|gait clock|linear": 0.024915153373164623,
+    "2|odometry ghost|no prediction": 0.12056549953346443,
+    "2|odometry ghost|network": 0.0613518183470689,
+    "2|odometry ghost|linear": 0.07476908616677859,
+    "2|footfall values|no prediction": 0.0,
+    "2|footfall values|network": 0.0,
+    "2|footfall values|linear": 0.0,
+    "2|all 278 inputs|no prediction": 0.28607929719300174,
+    "2|all 278 inputs|network": 0.0834238774596761,
+    "2|all 278 inputs|linear": 0.10072077987941433
+   }
+  },
+  {
+   "fold": 1,
+   "held_out_cases": [
+    "learning:static__translate_0.10_0deg",
+    "learning:static__translate_0.10_90deg",
+    "learning:static__translate_0.10_202.5deg",
+    "learning:static__translate_0.10_292.5deg",
+    "learning:static__combined_0deg_-0.20",
+    "learning:static__combined_90deg_+0.20",
+    "learning:static__gentle_arc_0deg_-0.05",
+    "learning:static__gentle_arc_225deg_+0.05",
+    "learning:static__gentle_arc_315deg_-0.05",
+    "learning:quiet__stage2_long",
+    "learning:stop__stand",
+    "learning:stop__diagonal"
+   ],
+   "train_rows": 203408,
+   "held_out_rows": 50704,
+   "curve": [
+    {
+     "epoch": 10,
+     "train": 0.059610010531981415,
+     "held_out": 0.0795816108584404
+    },
+    {
+     "epoch": 20,
+     "train": 0.049619733458573144,
+     "held_out": 0.07148122042417526
+    },
+    {
+     "epoch": 30,
+     "train": 0.04509826090978308,
+     "held_out": 0.06775878369808197
+    },
+    {
+     "epoch": 40,
+     "train": 0.04207941671103898,
+     "held_out": 0.06563245505094528
+    },
+    {
+     "epoch": 50,
+     "train": 0.03994439306433707,
+     "held_out": 0.0633937418460846
+    },
+    {
+     "epoch": 60,
+     "train": 0.0382074275509919,
+     "held_out": 0.06273646652698517
+    },
+    {
+     "epoch": 70,
+     "train": 0.036782817890320944,
+     "held_out": 0.06091071292757988
+    },
+    {
+     "epoch": 80,
+     "train": 0.0356248772190968,
+     "held_out": 0.06041594594717026
+    },
+    {
+     "epoch": 90,
+     "train": 0.0346782046287354,
+     "held_out": 0.05978268012404442
+    },
+    {
+     "epoch": 100,
+     "train": 0.033988853350391895,
+     "held_out": 0.05927133560180664
+    },
+    {
+     "epoch": 110,
+     "train": 0.03354413339979979,
+     "held_out": 0.058959364891052246
+    },
+    {
+     "epoch": 120,
+     "train": 0.03335706078375829,
+     "held_out": 0.05891866236925125
+    }
+   ],
+   "rmse": {
+    "1|body angular velocity|no prediction": 0.06668174829617023,
+    "1|body angular velocity|network": 0.026570851015856028,
+    "1|body angular velocity|linear": 0.0421303091231247,
+    "1|gravity direction|no prediction": 0.0010192528031101246,
+    "1|gravity direction|network": 0.00026328172563169273,
+    "1|gravity direction|linear": 0.00040454834619905837,
+    "1|joint position|no prediction": 0.01767115549139685,
+    "1|joint position|network": 0.0037828008491101674,
+    "1|joint position|linear": 0.006496517967959285,
+    "1|joint velocity|no prediction": 0.7726290123701496,
+    "1|joint velocity|network": 0.34385628088495446,
+    "1|joint velocity|linear": 0.4467984823132577,
+    "1|previous action|no prediction": 0.050264806810148666,
+    "1|previous action|network": 0.010297996659035392,
+    "1|previous action|linear": 0.01895116293360035,
+    "1|gait clock|no prediction": 0.08137748474543305,
+    "1|gait clock|network": 0.008663769396975092,
+    "1|gait clock|linear": 0.00982781668129596,
+    "1|odometry ghost|no prediction": 0.06923482805098174,
+    "1|odometry ghost|network": 0.035712634161094006,
+    "1|odometry ghost|linear": 0.04794692051148036,
+    "1|footfall values|no prediction": 0.0,
+    "1|footfall values|network": 0.0,
+    "1|footfall values|linear": 0.0,
+    "1|all 278 inputs|no prediction": 0.224576685531261,
+    "1|all 278 inputs|network": 0.044741374086871795,
+    "1|all 278 inputs|linear": 0.05856490149285437,
+    "2|body angular velocity|no prediction": 0.0925696425806156,
+    "2|body angular velocity|network": 0.027808065331444535,
+    "2|body angular velocity|linear": 0.05105097604904741,
+    "2|gravity direction|no prediction": 0.0018613209892240985,
+    "2|gravity direction|network": 0.0004673940381595736,
+    "2|gravity direction|linear": 0.0010030775697358284,
+    "2|joint position|no prediction": 0.03319038890761647,
+    "2|joint position|network": 0.005277417378439262,
+    "2|joint position|linear": 0.011595960770189883,
+    "2|joint velocity|no prediction": 0.8227398946150213,
+    "2|joint velocity|network": 0.3786403003669743,
+    "2|joint velocity|linear": 0.5137708687722871,
+    "2|previous action|no prediction": 0.09649331015719097,
+    "2|previous action|network": 0.01404790644760566,
+    "2|previous action|linear": 0.033672467725132646,
+    "2|gait clock|no prediction": 0.16211964222442973,
+    "2|gait clock|network": 0.013200722638761417,
+    "2|gait clock|linear": 0.017629455342307702,
+    "2|odometry ghost|no prediction": 0.10493512396737432,
+    "2|odometry ghost|network": 0.04066393771853887,
+    "2|odometry ghost|linear": 0.06660367053460035,
+    "2|footfall values|no prediction": 0.0,
+    "2|footfall values|network": 0.0,
+    "2|footfall values|linear": 0.0,
+    "2|all 278 inputs|no prediction": 0.2464032387991996,
+    "2|all 278 inputs|network": 0.06626173772421892,
+    "2|all 278 inputs|linear": 0.08948857345551138
+   }
+  },
+  {
+   "fold": 2,
+   "held_out_cases": [
+    "learning:static__translate_0.10_22.5deg",
+    "learning:static__translate_0.10_112.5deg",
+    "learning:static__translate_0.10_315deg",
+    "learning:static__turn_+0.20",
+    "learning:static__combined_90deg_-0.20",
+    "learning:static__combined_180deg_+0.20",
+    "learning:static__gentle_arc_45deg_+0.05",
+    "learning:static__gentle_arc_135deg_+0.05",
+    "learning:static__gentle_arc_225deg_-0.05",
+    "learning:quiet__stand",
+    "learning:stop__forward",
+    "learning:stop__strafe_arc"
+   ],
+   "train_rows": 205808,
+   "held_out_rows": 48304,
+   "curve": [
+    {
+     "epoch": 10,
+     "train": 0.05862904434848015,
+     "held_out": 0.10081365704536438
+    },
+    {
+     "epoch": 20,
+     "train": 0.04897174534158296,
+     "held_out": 0.09405404329299927
+    },
+    {
+     "epoch": 30,
+     "train": 0.04433336861539914,
+     "held_out": 0.09083954989910126
+    },
+    {
+     "epoch": 40,
+     "train": 0.041436082922651454,
+     "held_out": 0.08888672292232513
+    },
+    {
+     "epoch": 50,
+     "train": 0.03925846978410364,
+     "held_out": 0.08808416873216629
+    },
+    {
+     "epoch": 60,
+     "train": 0.03754546827939522,
+     "held_out": 0.0874490737915039
+    },
+    {
+     "epoch": 70,
+     "train": 0.03615080105251003,
+     "held_out": 0.08681070804595947
+    },
+    {
+     "epoch": 80,
+     "train": 0.03504688797537001,
+     "held_out": 0.08558321744203568
+    },
+    {
+     "epoch": 90,
+     "train": 0.03412993761300948,
+     "held_out": 0.08521905541419983
+    },
+    {
+     "epoch": 100,
+     "train": 0.03343747501270004,
+     "held_out": 0.08564446866512299
+    },
+    {
+     "epoch": 110,
+     "train": 0.0329931615569085,
+     "held_out": 0.08530732244253159
+    },
+    {
+     "epoch": 120,
+     "train": 0.032814510708800336,
+     "held_out": 0.08539939671754837
+    }
+   ],
+   "rmse": {
+    "1|body angular velocity|no prediction": 0.06262454626777744,
+    "1|body angular velocity|network": 0.030903096936268075,
+    "1|body angular velocity|linear": 0.042026823426861724,
+    "1|gravity direction|no prediction": 0.0010485897399634691,
+    "1|gravity direction|network": 0.00029928498363386937,
+    "1|gravity direction|linear": 0.00040389711642453496,
+    "1|joint position|no prediction": 0.018151487802001206,
+    "1|joint position|network": 0.00430020075306937,
+    "1|joint position|linear": 0.006438405605857766,
+    "1|joint velocity|no prediction": 0.7253916807127461,
+    "1|joint velocity|network": 0.3665486717618495,
+    "1|joint velocity|linear": 0.440298017160775,
+    "1|previous action|no prediction": 0.0520874277548922,
+    "1|previous action|network": 0.012597477381561837,
+    "1|previous action|linear": 0.019811107508642355,
+    "1|gait clock|no prediction": 0.08415809404327611,
+    "1|gait clock|network": 0.011698622632060137,
+    "1|gait clock|linear": 0.012504524667560966,
+    "1|odometry ghost|no prediction": 0.07244524450852421,
+    "1|odometry ghost|network": 0.03821581010076622,
+    "1|odometry ghost|linear": 0.04813391609644619,
+    "1|footfall values|no prediction": 0.0,
+    "1|footfall values|network": 0.0,
+    "1|footfall values|linear": 0.0,
+    "1|all 278 inputs|no prediction": 0.21129720719041695,
+    "1|all 278 inputs|network": 0.047823404211625835,
+    "1|all 278 inputs|linear": 0.05779651907418307,
+    "2|body angular velocity|no prediction": 0.08933524949185173,
+    "2|body angular velocity|network": 0.03157722609770357,
+    "2|body angular velocity|linear": 0.05177967086794189,
+    "2|gravity direction|no prediction": 0.0019190754625406164,
+    "2|gravity direction|network": 0.0005424647971906917,
+    "2|gravity direction|linear": 0.0010448522711802323,
+    "2|joint position|no prediction": 0.034279429912606886,
+    "2|joint position|network": 0.006518439863884968,
+    "2|joint position|linear": 0.011676883852381787,
+    "2|joint velocity|no prediction": 0.8013085256774751,
+    "2|joint velocity|network": 0.3925334133185143,
+    "2|joint velocity|linear": 0.5048699374356046,
+    "2|previous action|no prediction": 0.10030903717860713,
+    "2|previous action|network": 0.018779738265237798,
+    "2|previous action|linear": 0.03576778063689914,
+    "2|gait clock|no prediction": 0.1674181245486995,
+    "2|gait clock|network": 0.01833399920570152,
+    "2|gait clock|linear": 0.021716812576544745,
+    "2|odometry ghost|no prediction": 0.1125635192756505,
+    "2|odometry ghost|network": 0.045306660769786705,
+    "2|odometry ghost|linear": 0.0657401678013684,
+    "2|footfall values|no prediction": 0.0,
+    "2|footfall values|network": 0.0,
+    "2|footfall values|linear": 0.0,
+    "2|all 278 inputs|no prediction": 0.24090845900824667,
+    "2|all 278 inputs|network": 0.0698753860166867,
+    "2|all 278 inputs|linear": 0.0882128366154981
+   }
+  },
+  {
+   "fold": 3,
+   "held_out_cases": [
+    "learning:static__stand",
+    "learning:static__translate_0.10_135deg",
+    "learning:static__translate_0.10_225deg",
+    "learning:static__translate_0.10_337.5deg",
+    "learning:static__turn_+0.40",
+    "learning:static__combined_180deg_-0.20",
+    "learning:static__gentle_arc_45deg_-0.05",
+    "learning:static__gentle_arc_135deg_-0.05",
+    "learning:static__gentle_arc_270deg_+0.05",
+    "learning:stop__left",
+    "learning:stop__turn_left",
+    "learning:formal__0.00"
+   ],
+   "train_rows": 207808,
+   "held_out_rows": 46304,
+   "curve": [
+    {
+     "epoch": 10,
+     "train": 0.0587554527776477,
+     "held_out": 0.1372605413198471
+    },
+    {
+     "epoch": 20,
+     "train": 0.04896490449790849,
+     "held_out": 0.13416902720928192
+    },
+    {
+     "epoch": 30,
+     "train": 0.04437739661460772,
+     "held_out": 0.13404011726379395
+    },
+    {
+     "epoch": 40,
+     "train": 0.04134829856815579,
+     "held_out": 0.13308362662792206
+    },
+    {
+     "epoch": 50,
+     "train": 0.039227810301962804,
+     "held_out": 0.13157488405704498
+    },
+    {
+     "epoch": 60,
+     "train": 0.037517084051434134,
+     "held_out": 0.13032323122024536
+    },
+    {
+     "epoch": 70,
+     "train": 0.03612112545319106,
+     "held_out": 0.12990406155586243
+    },
+    {
+     "epoch": 80,
+     "train": 0.03499813847677466,
+     "held_out": 0.12944546341896057
+    },
+    {
+     "epoch": 90,
+     "train": 0.034091534274869745,
+     "held_out": 0.12912572920322418
+    },
+    {
+     "epoch": 100,
+     "train": 0.033407888993331754,
+     "held_out": 0.12932166457176208
+    },
+    {
+     "epoch": 110,
+     "train": 0.032961472837942214,
+     "held_out": 0.12916727364063263
+    },
+    {
+     "epoch": 120,
+     "train": 0.032780267813933936,
+     "held_out": 0.12904423475265503
+    }
+   ],
+   "rmse": {
+    "1|body angular velocity|no prediction": 0.1033312531426622,
+    "1|body angular velocity|network": 0.04040358285621563,
+    "1|body angular velocity|linear": 0.04724785505077297,
+    "1|gravity direction|no prediction": 0.0011565205303364042,
+    "1|gravity direction|network": 0.0003689605055094441,
+    "1|gravity direction|linear": 0.0004257368638064741,
+    "1|joint position|no prediction": 0.017872397948603333,
+    "1|joint position|network": 0.005467169772399171,
+    "1|joint position|linear": 0.006590074749260859,
+    "1|joint velocity|no prediction": 0.8410585426373828,
+    "1|joint velocity|network": 0.41098538276305213,
+    "1|joint velocity|linear": 0.4497986806444377,
+    "1|previous action|no prediction": 0.05159496274874347,
+    "1|previous action|network": 0.015320830561979134,
+    "1|previous action|linear": 0.020822677324711165,
+    "1|gait clock|no prediction": 0.08183777734243539,
+    "1|gait clock|network": 0.013004999347653999,
+    "1|gait clock|linear": 0.013820957903135377,
+    "1|odometry ghost|no prediction": 0.06928244222504845,
+    "1|odometry ghost|network": 0.044218787689397944,
+    "1|odometry ghost|linear": 0.04718332157364061,
+    "1|footfall values|no prediction": 0.0,
+    "1|footfall values|network": 0.0,
+    "1|footfall values|linear": 0.0,
+    "1|all 278 inputs|no prediction": 0.2463552891305124,
+    "1|all 278 inputs|network": 0.05386718367233904,
+    "1|all 278 inputs|linear": 0.059138296207085966,
+    "2|body angular velocity|no prediction": 0.14858345782058555,
+    "2|body angular velocity|network": 0.04397924331540412,
+    "2|body angular velocity|linear": 0.060513788508104974,
+    "2|gravity direction|no prediction": 0.0021246636767637238,
+    "2|gravity direction|network": 0.0007410884480799003,
+    "2|gravity direction|linear": 0.0011178143473313524,
+    "2|joint position|no prediction": 0.033343773211617585,
+    "2|joint position|network": 0.008585883641880798,
+    "2|joint position|linear": 0.011937459929130733,
+    "2|joint velocity|no prediction": 0.8620156084815135,
+    "2|joint velocity|network": 0.4355749074716838,
+    "2|joint velocity|linear": 0.5360897712075526,
+    "2|previous action|no prediction": 0.09836737592532942,
+    "2|previous action|network": 0.023641166737872688,
+    "2|previous action|linear": 0.03738252292659774,
+    "2|gait clock|no prediction": 0.16274685255116006,
+    "2|gait clock|network": 0.021041672683925546,
+    "2|gait clock|linear": 0.02456810250368366,
+    "2|odometry ghost|no prediction": 0.10803213921798976,
+    "2|odometry ghost|network": 0.05758949335429282,
+    "2|odometry ghost|linear": 0.06569326350717736,
+    "2|footfall values|no prediction": 0.0,
+    "2|footfall values|network": 0.0,
+    "2|footfall values|linear": 0.0,
+    "2|all 278 inputs|no prediction": 0.26262536081809296,
+    "2|all 278 inputs|network": 0.07850993725036709,
+    "2|all 278 inputs|linear": 0.0922894615309252
+   }
+  },
+  {
+   "fold": 4,
+   "held_out_cases": [
+    "learning:static__translate_0.10_45deg",
+    "learning:static__translate_0.10_157.5deg",
+    "learning:static__translate_0.10_247.5deg",
+    "learning:static__turn_-0.20",
+    "learning:static__combined_270deg_+0.20",
+    "learning:static__gentle_arc_90deg_+0.05",
+    "learning:static__gentle_arc_180deg_+0.05",
+    "learning:static__gentle_arc_270deg_-0.05",
+    "learning:stop__reverse",
+    "learning:stop__turn_right",
+    "learning:stop__arc_left",
+    "learning:formal__0.16"
+   ],
+   "train_rows": 207608,
+   "held_out_rows": 46504,
+   "curve": [
+    {
+     "epoch": 10,
+     "train": 0.05789288424848615,
+     "held_out": 0.11183980107307434
+    },
+    {
+     "epoch": 20,
+     "train": 0.048270013924078155,
+     "held_out": 0.1025148332118988
+    },
+    {
+     "epoch": 30,
+     "train": 0.04383808365849272,
+     "held_out": 0.09873427450656891
+    },
+    {
+     "epoch": 40,
+     "train": 0.04096834324229949,
+     "held_out": 0.0969037115573883
+    },
+    {
+     "epoch": 50,
+     "train": 0.038923444750847504,
+     "held_out": 0.09462341666221619
+    },
+    {
+     "epoch": 60,
+     "train": 0.03726697516558023,
+     "held_out": 0.0933128148317337
+    },
+    {
+     "epoch": 70,
+     "train": 0.03589455436060026,
+     "held_out": 0.09242874383926392
+    },
+    {
+     "epoch": 80,
+     "train": 0.03477956553550957,
+     "held_out": 0.09223520755767822
+    },
+    {
+     "epoch": 90,
+     "train": 0.033855019044170515,
+     "held_out": 0.09091677516698837
+    },
+    {
+     "epoch": 100,
+     "train": 0.033184935842192426,
+     "held_out": 0.09093382209539413
+    },
+    {
+     "epoch": 110,
+     "train": 0.03273829692624207,
+     "held_out": 0.09076878428459167
+    },
+    {
+     "epoch": 120,
+     "train": 0.0325610651739964,
+     "held_out": 0.09066346287727356
+    }
+   ],
+   "rmse": {
+    "1|body angular velocity|no prediction": 0.07265552024645512,
+    "1|body angular velocity|network": 0.030373391713220156,
+    "1|body angular velocity|linear": 0.04687726118791772,
+    "1|gravity direction|no prediction": 0.001156450583523401,
+    "1|gravity direction|network": 0.00030397749052552366,
+    "1|gravity direction|linear": 0.00044264170852135586,
+    "1|joint position|no prediction": 0.018723755329120746,
+    "1|joint position|network": 0.004592973060007358,
+    "1|joint position|linear": 0.006973591861338196,
+    "1|joint velocity|no prediction": 0.8296822003297761,
+    "1|joint velocity|network": 0.36717800516197296,
+    "1|joint velocity|linear": 0.46104528670987194,
+    "1|previous action|no prediction": 0.05322205463507614,
+    "1|previous action|network": 0.013163370144448005,
+    "1|previous action|linear": 0.02116759437177106,
+    "1|gait clock|no prediction": 0.08654030384909032,
+    "1|gait clock|network": 0.013824473266805175,
+    "1|gait clock|linear": 0.014038753517925308,
+    "1|odometry ghost|no prediction": 0.07517631725947532,
+    "1|odometry ghost|network": 0.03991486740761266,
+    "1|odometry ghost|linear": 0.04988616859096391,
+    "1|footfall values|no prediction": 0.0,
+    "1|footfall values|network": 0.0,
+    "1|footfall values|linear": 0.0,
+    "1|all 278 inputs|no prediction": 0.24111207760081543,
+    "1|all 278 inputs|network": 0.04796428524191153,
+    "1|all 278 inputs|linear": 0.06062521052459062,
+    "2|body angular velocity|no prediction": 0.10339935929024649,
+    "2|body angular velocity|network": 0.03269760769406163,
+    "2|body angular velocity|linear": 0.057856745468362496,
+    "2|gravity direction|no prediction": 0.002121476561475454,
+    "2|gravity direction|network": 0.0005692012271841812,
+    "2|gravity direction|linear": 0.001135147910221168,
+    "2|joint position|no prediction": 0.034902706656107556,
+    "2|joint position|network": 0.006672325432892,
+    "2|joint position|linear": 0.012500089138956408,
+    "2|joint velocity|no prediction": 0.8692095063617027,
+    "2|joint velocity|network": 0.40212673708944724,
+    "2|joint velocity|linear": 0.5425455009016149,
+    "2|previous action|no prediction": 0.10193617440645393,
+    "2|previous action|network": 0.018939280339795535,
+    "2|previous action|linear": 0.03766570643943788,
+    "2|gait clock|no prediction": 0.17190085316132298,
+    "2|gait clock|network": 0.02130505736205098,
+    "2|gait clock|linear": 0.023185419319123282,
+    "2|odometry ghost|no prediction": 0.11617876070621502,
+    "2|odometry ghost|network": 0.04709711359087859,
+    "2|odometry ghost|linear": 0.06802576811929112,
+    "2|footfall values|no prediction": 0.0,
+    "2|footfall values|network": 0.0,
+    "2|footfall values|linear": 0.0,
+    "2|all 278 inputs|no prediction": 0.26069180528136304,
+    "2|all 278 inputs|network": 0.07088738343331663,
+    "2|all 278 inputs|linear": 0.09383439913855082
+   }
+  }
+ ],
+ "pooled_held_out_rmse": {
+  "1|body angular velocity|no prediction": 0.08411076232014657,
+  "1|body angular velocity|network": 0.03406147692446056,
+  "1|body angular velocity|linear": 0.0455964709303923,
+  "1|gravity direction|no prediction": 0.0011136270289244842,
+  "1|gravity direction|network": 0.0003274480115057475,
+  "1|gravity direction|linear": 0.0004228126877886124,
+  "1|joint position|no prediction": 0.018495122718569432,
+  "1|joint position|network": 0.004843851096321363,
+  "1|joint position|linear": 0.006798031543570041,
+  "1|joint velocity|no prediction": 0.8200068956932892,
+  "1|joint velocity|network": 0.3864397410656981,
+  "1|joint velocity|linear": 0.46110665015516383,
+  "1|previous action|no prediction": 0.05284100721812604,
+  "1|previous action|network": 0.013732614844117492,
+  "1|previous action|linear": 0.02077337196886868,
+  "1|gait clock|no prediction": 0.0848501771340937,
+  "1|gait clock|network": 0.012659796355885714,
+  "1|gait clock|linear": 0.013161736091100499,
+  "1|odometry ghost|no prediction": 0.0734496576416758,
+  "1|odometry ghost|network": 0.04204414102014861,
+  "1|odometry ghost|linear": 0.049977982790882336,
+  "1|footfall values|no prediction": 0.0,
+  "1|footfall values|network": 0.0,
+  "1|footfall values|linear": 0.0,
+  "1|all 278 inputs|no prediction": 0.23919057187926393,
+  "1|all 278 inputs|network": 0.050589188578528975,
+  "1|all 278 inputs|linear": 0.06062004621603435,
+  "2|body angular velocity|no prediction": 0.11963245470852388,
+  "2|body angular velocity|network": 0.03616572819133676,
+  "2|body angular velocity|linear": 0.05666666519491507,
+  "2|gravity direction|no prediction": 0.002038537799883363,
+  "2|gravity direction|network": 0.0006279157989801517,
+  "2|gravity direction|linear": 0.001085151008773594,
+  "2|joint position|no prediction": 0.03463673499102161,
+  "2|joint position|network": 0.0072916279448839785,
+  "2|joint position|linear": 0.012249110813148724,
+  "2|joint velocity|no prediction": 0.8659322521938505,
+  "2|joint velocity|network": 0.4199828658846306,
+  "2|joint velocity|linear": 0.5382729761104084,
+  "2|previous action|no prediction": 0.10119017912569454,
+  "2|previous action|network": 0.020458862669710826,
+  "2|previous action|linear": 0.0372218161599578,
+  "2|gait clock|no prediction": 0.16872918449799504,
+  "2|gait clock|network": 0.019826346733816277,
+  "2|gait clock|linear": 0.022632043534080493,
+  "2|odometry ghost|no prediction": 0.11298675454607822,
+  "2|odometry ghost|network": 0.051508918532430684,
+  "2|odometry ghost|linear": 0.06863243584393841,
+  "2|footfall values|no prediction": 0.0,
+  "2|footfall values|network": 0.0,
+  "2|footfall values|linear": 0.0,
+  "2|all 278 inputs|no prediction": 0.26118098842636706,
+  "2|all 278 inputs|network": 0.07451924510391442,
+  "2|all 278 inputs|linear": 0.09342079434301415
+ },
+ "final_curve": [
+  {
+   "epoch": 10,
+   "train": 0.05806242445470434,
+   "held_out": null
+  },
+  {
+   "epoch": 20,
+   "train": 0.04863120374260284,
+   "held_out": null
+  },
+  {
+   "epoch": 30,
+   "train": 0.044321616334933776,
+   "held_out": null
+  },
+  {
+   "epoch": 40,
+   "train": 0.041508298774928086,
+   "held_out": null
+  },
+  {
+   "epoch": 50,
+   "train": 0.039463839996706974,
+   "held_out": null
+  },
+  {
+   "epoch": 60,
+   "train": 0.03782363901867808,
+   "held_out": null
+  },
+  {
+   "epoch": 70,
+   "train": 0.036457071336709404,
+   "held_out": null
+  },
+  {
+   "epoch": 80,
+   "train": 0.03533253067124627,
+   "held_out": null
+  },
+  {
+   "epoch": 90,
+   "train": 0.034408521590907556,
+   "held_out": null
+  },
+  {
+   "epoch": 100,
+   "train": 0.03373219731370893,
+   "held_out": null
+  },
+  {
+   "epoch": 110,
+   "train": 0.03328072740837693,
+   "held_out": null
+  },
+  {
+   "epoch": 120,
+   "train": 0.03309601929121798,
+   "held_out": null
+  }
+ ],
+ "final_in_sample_rmse": {
+  "1|body angular velocity|no prediction": 0.08411076232014657,
+  "1|body angular velocity|network": 0.016404583132591945,
+  "1|gravity direction|no prediction": 0.001113627028924484,
+  "1|gravity direction|network": 0.00017553979136230563,
+  "1|joint position|no prediction": 0.018495122718569432,
+  "1|joint position|network": 0.002783979245978087,
+  "1|joint velocity|no prediction": 0.8200068956932891,
+  "1|joint velocity|network": 0.276222310785472,
+  "1|previous action|no prediction": 0.05284100721812604,
+  "1|previous action|network": 0.0075720601523131485,
+  "1|gait clock|no prediction": 0.0848501771340937,
+  "1|gait clock|network": 0.010847930236031702,
+  "1|odometry ghost|no prediction": 0.0734496576416758,
+  "1|odometry ghost|network": 0.032930055954114135,
+  "1|footfall values|no prediction": 0.0,
+  "1|footfall values|network": 0.0,
+  "1|all 278 inputs|no prediction": 0.23919057187926393,
+  "1|all 278 inputs|network": 0.03604605561106747,
+  "2|body angular velocity|no prediction": 0.11963245470852385,
+  "2|body angular velocity|network": 0.018380814306547335,
+  "2|gravity direction|no prediction": 0.002038537799883363,
+  "2|gravity direction|network": 0.0002819142628351879,
+  "2|joint position|no prediction": 0.0346367349910216,
+  "2|joint position|network": 0.003502230534039677,
+  "2|joint velocity|no prediction": 0.8659322521938506,
+  "2|joint velocity|network": 0.29701212449219616,
+  "2|previous action|no prediction": 0.10119017912569454,
+  "2|previous action|network": 0.009547409651039002,
+  "2|gait clock|no prediction": 0.16872918449799504,
+  "2|gait clock|network": 0.01570738325822776,
+  "2|odometry ghost|no prediction": 0.11298675454607822,
+  "2|odometry ghost|network": 0.03582130065340725,
+  "2|footfall values|no prediction": 0.0,
+  "2|footfall values|network": 0.0,
+  "2|all 278 inputs|no prediction": 0.261180988426367,
+  "2|all 278 inputs|network": 0.0526002977751588
+ },
+ "parameters": 183915,
+ "predictor_sha256": "1dff0e80c45da0860db229edefa566e665c7e07f8d81db739eca7f3cfec9d0ed"
+}

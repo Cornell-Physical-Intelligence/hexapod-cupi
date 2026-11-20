@@ -5,6 +5,12 @@ command would have reached, in the body's navigation axes over 0.1 m, the sine a
 gap, and the controls since the command began over 250 (``omniwalk/mdp/destination.py``). A command that
 has not run a control reads the destination at the body. It needs a ``DestinationTrainingTask``;
 ``ppo_config`` records ``destination_input="ghost"``, so evaluation rebuilds the same inputs.
+``terrain_v1`` appends the 30 footfall-lookahead values of ``omniwalk/mdp/footfall.py`` after the
+nine ``ghost_v11`` values (zeros without a terrain, so flat suites and the native robot stay valid);
+``terrain_v2`` appends its 6-point forward height profile after those, and ``terrain_v2_critic``
+gives both terrain blocks to the critic alone while the actor keeps the nine ghost_v11 values.
+The task builds the inputs (``omniwalk/mdp/destination_inputs.py``); locomotion.rl imports nothing
+from locomotion.omniwalk, so this wrapper only joins their tensors to the base observations.
 """
 
 import torch
@@ -15,31 +21,59 @@ from locomotion.rl.wrapper import OmniVecEnv
 class DestinationVecEnv(OmniVecEnv):
     """``OmniVecEnv`` with the five destination inputs appended to the actor and critic inputs."""
 
-    def __init__(self, task, tensor_dict=None, *, destination_input="ghost", **options):
-        if destination_input != "ghost":
-            raise ValueError("DestinationVecEnv applies the ghost destination input")
+    def __init__(
+        self,
+        task,
+        tensor_dict=None,
+        *,
+        destination_input="ghost",
+        gait_clock_scaling=None,
+        **options,
+    ):
         if not hasattr(task, "destination"):
             raise ValueError("The destination inputs need a DestinationTrainingTask")
+        # A task's speed-scaled clock must be recorded so that evaluation rebuilds the same phase.
+        # Evaluation rebuilds that phase itself, so a recorded scaling may meet a task without one.
+        kept = getattr(task.reward_config, "gait_clock_scaling", None)
+        if (kept is not None and kept != gait_clock_scaling) or (
+            gait_clock_scaling is not None and not options.get("gait_clock")
+        ):
+            raise ValueError(
+                "The gait_clock_scaling option must record the task's and needs the gait clock"
+            )
+        self.destination_input = destination_input
+        self.inputs = task.destination_input_source(destination_input, gait_clock_scaling or kept)
         super().__init__(task, tensor_dict, **options)
 
-    def destination_inputs(self, pending):
-        """The task's five inputs; rows in ``pending`` read the neutral values."""
-        return self.task.destination_inputs(pending)
+    def destination_inputs(self, pending, command=None):
+        """The critic's destination inputs (``DestinationInputs.features``)."""
+        return self.inputs.features(pending, command)
 
     def observations(self, output):
         base = super().observations(output)
-        extra = self.destination_inputs(self.task.command_started)
-        policy = torch.cat((base["policy"], extra.to(base["policy"])), -1)
+        # A task that trains varying rows on the evaluator's pinned ghost publishes the wider
+        # mask; the evaluation trackers restart at the body on every command change, so those
+        # rows must read the destination at the body with age zero here too.
+        pending = getattr(self.task, "ghost_pending", None)
+        extra = self.destination_inputs(self.task.command_started if pending is None else pending)
+        shown = self.inputs.actor_view(extra)
+        policy = torch.cat((base["policy"], shown.to(base["policy"])), -1)
         critic = torch.cat((base["critic"], extra.to(base["critic"])), -1)
         return self.tensor_dict({"policy": policy, "critic": critic}, batch_size=[self.num_envs])
 
     def step(self, action):
+        held_command = self.task.commands.clone()
+        pre_started = self.task.command_started.clone()
         observation, rewards, done, extras = super().step(action)
+        if self.inputs.advance(held_command, pre_started, done):
+            observation = self.get_observations()
         bootstrap = extras.get("command_bootstrap_observation")
         if bootstrap is not None:
             # A switched row has not reset: its pose is post-action and the task moves its destination
             # and time to the new command only at the next control, so these are the held command's.
-            held = self.destination_inputs(torch.zeros_like(self.task.command_started))
+            held = self.destination_inputs(
+                torch.zeros_like(self.task.command_started), held_command
+            )
             critic = torch.cat((bootstrap["critic"], held.to(bootstrap["critic"])), -1)
             extras["command_bootstrap_observation"] = self.tensor_dict(
                 {"critic": critic}, batch_size=[self.num_envs]
