@@ -1,22 +1,21 @@
-"""Native policy evaluation orchestration; physics and acceptance gates unchanged.
+"""Native policy evaluation: record each case of the walking requirements and judge the traces.
 
-The full manifest is frozen independently of any pilot subset. Every trial has
-one initial reset and uninterrupted physics. The additional startup diagnostic
-explicitly labels its scripted neutral prefix before policy control. Failed prefixes,
-400Hz state/motor/contact records and any actual video remain in their trial.
+``run_cases`` runs the cases of one requirement set, one native trial each, through ``run_batch``,
+which records every 400 Hz sample and every 50 Hz control into a batch directory. The judge in
+``requirements.py`` then reads the traces and writes ``judgement.json``. Every trial has one
+initial reset and uninterrupted physics; a fall preserves its prefix and the next case still runs.
 """
 
 import hashlib
 import json
 import math
 import time
-from dataclasses import asdict, dataclass
 from pathlib import Path
 
 import numpy as np
 import torch
 
-import locomotion.evaluation.scoring as scoring
+import locomotion.evaluation.requirements as requirements
 from locomotion.evaluation.admission import verify_native_recipe
 from locomotion.evaluation.capture import (
     DiagnosticGeometry,
@@ -25,157 +24,12 @@ from locomotion.evaluation.capture import (
     diagnostic_servo,
 )
 from locomotion.evaluation.force_metrics import write_summary
-from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.robots.hexapod import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
 from locomotion.robots.rs05 import STIFFNESS_NM_PER_RAD
 
 
-@dataclass(frozen=True)
-class EvaluationEnvConfig(EnvConfig):
-    """Longer evaluation timeout only; validate every inherited physical field."""
-
-    episode_seconds: float = 90.0
-
-    def __post_init__(self):
-        if self.episode_seconds != 90.0:
-            raise ValueError("Evaluation timeout is explicitly fixed at 90 seconds")
-        EnvConfig(**{**asdict(self), "episode_seconds": 60.0})
-
-
-@dataclass(frozen=True)
-class EvaluationConfig:
-    static_indices: tuple | None = None
-    include_transitions: bool = True
-    include_quiet: bool = True
-    include_stops: bool = True
-    include_formal: bool = True
-    record_video: bool = True
-    video_case_id: str = "static:translate_0.10_22.5deg"
-    seed: int = 27057
-    allow_unisolated_batch_pilot: bool = False
-
-
 class _NativeTrialTermination(RuntimeError):
     """The recorded native endpoint terminated this trial without resetting it."""
-
-
-def stop_scenarios():
-    return [
-        {"name": name, "command": list(command)}
-        for name, command in (
-            ("stand", (0.0, 0.0, 0.0)),
-            ("forward", (0.10, 0.0, 0.0)),
-            ("reverse", (-0.10, 0.0, 0.0)),
-            ("left", (0.0, 0.10, 0.0)),
-            ("right", (0.0, -0.10, 0.0)),
-            ("forward_fast", (0.20, 0.0, 0.0)),
-            ("turn_left", (0.0, 0.0, 0.20)),
-            ("turn_right", (0.0, 0.0, -0.20)),
-            ("arc_left", (0.10, 0.0, 0.20)),
-            ("arc_right", (0.10, 0.0, -0.20)),
-            ("strafe_arc", (0.0, 0.10, 0.20)),
-            ("diagonal", (0.071, 0.071, 0.0)),
-        )
-    ]
-
-
-def case_manifest():
-    cases = [
-        {
-            "case_id": "static:" + r["name"],
-            "profile": "omni_static",
-            "command": r["command"],
-            "controls": 1000,
-        }
-        for r in scoring.evaluation_scenarios()
-    ]
-    cases += [
-        {
-            "case_id": "transition:full_program",
-            "profile": "transition",
-            "command": [0.0, 0.0, 0.0],
-            "controls": round(sum(x[1] for x in scoring.transition_sequence()) / 0.02),
-        }
-    ]
-    cases += [
-        {
-            "case_id": "quiet:stand",
-            "profile": "quiet_stand",
-            "command": [0.0, 0.0, 0.0],
-            "controls": 1000,
-        }
-    ]
-    cases += [
-        {
-            "case_id": "quiet:stage2_long",
-            "profile": "stage2_long_quiet",
-            "command": [0.0, 0.0, 0.0],
-            "controls": 1600,
-        }
-    ]
-    cases += [
-        {
-            "case_id": "stop:" + r["name"],
-            "profile": "stop_to_stand",
-            "command": r["command"],
-            "controls": 1050,
-        }
-        for r in stop_scenarios()
-    ]
-    cases += [
-        {
-            "case_id": f"formal:{speed:.2f}",
-            "profile": "stage2c_formal",
-            "command": [speed, 0.0, 0.0],
-            "controls": 500,
-            "seed": 60,
-        }
-        for speed in (0.0, 0.16, 0.20, 0.30)
-    ]
-    return cases
-
-
-def selected_cases(config):
-    full = case_manifest()
-    indices = tuple(range(77)) if config.static_indices is None else tuple(config.static_indices)
-    if len(set(indices)) != len(indices) or any(
-        type(i) is not int or not 0 <= i < 77 for i in indices
-    ):
-        raise ValueError(
-            "Static subset must contain unique valid indices from the frozen77-case matrix"
-        )
-    selected = [full[i] for i in indices]
-    enabled = {
-        "transition": config.include_transitions,
-        "quiet_stand": config.include_quiet,
-        "stage2_long_quiet": config.include_quiet,
-        "stop_to_stand": config.include_stops,
-        "stage2c_formal": config.include_formal,
-    }
-    selected += [c for c in full[77:] if enabled[c["profile"]]]
-    if not selected:
-        raise ValueError("Empty evaluation allocation")
-    if config.record_video and config.video_case_id not in {x["case_id"] for x in selected}:
-        raise ValueError("Requested actual video case is not in this evaluation allocation")
-    return selected
-
-
-def command_at(case, control):
-    if not 0 <= control < case["controls"]:
-        raise ValueError("Control lies outside declared case")
-    if case["profile"] == "transition":
-        offset = 0
-        for name, duration, command in scoring.transition_sequence():
-            count = round(duration / 0.02)
-            if control < offset + count:
-                return scoring.trajectory_command(
-                    name, (control - offset) * 0.02, duration, command
-                )
-            offset += count
-        raise AssertionError("Incomplete transition schedule")
-    if case["profile"] == "stop_to_stand" and control >= 400:
-        return [0.0, 0.0, 0.0]
-    return list(case["command"])
 
 
 def _sha(path):
@@ -205,19 +59,47 @@ def _deadline(seconds):
     return time.monotonic() + seconds
 
 
-class ExactEvaluationCapture:
-    """Capture all eight native samples, including full unedited patch packets."""
+class NativeCaptureSource:
+    """Read native counters and patches, and independently recompute its fixed motor law."""
 
-    def __init__(self, env, output, geometry_extrema):
+    def __init__(self, env):
+        self.env = env
+        self.metadata = {
+            "backend": "isaac",
+            "contacts": "native contact patches",
+            "contact_classification": "exact_distal_points",
+            "motor_law": "canonical_rs05",
+        }
+
+    def counter(self):
+        return self.env.sim.get_physics_step_count()
+
+    def contacts(self, poses, geometry):
+        buffers = [
+            np.array(x.numpy(), copy=True) for x in self.env.contact.get_contact_data(0.0025)
+        ]
+        return classify_patches(buffers, self.env.sensor_map, poses, geometry, self.env.num_envs)
+
+    def servo(self, q, dq, target):
+        return diagnostic_servo(
+            q, dq, target, np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32)
+        )
+
+
+class ExactEvaluationCapture:
+    """Capture all eight samples and enforce the shared evidence invariants."""
+
+    def __init__(self, env, output, geometry_extrema, *, source=None):
         if env.capture is not None:
             raise ValueError("Another owner already occupies the native capture hook")
         self.env, self.output = env, Path(output)
+        self.source = NativeCaptureSource(env) if source is None else source
         self.output.mkdir(parents=True, exist_ok=False)
         with np.load(geometry_extrema, allow_pickle=False) as data:
             self.geometry = DiagnosticGeometry(
                 env.geometry_meta, {k: data[k] for k in data.files}, env.native_body_names
             )
-        self.counter = env.sim.get_physics_step_count()
+        self.counter = self.source.counter()
         self.initial_counter = self.counter
         self.count = 0
         self.rows, self.last_control, self.files = [], [], []
@@ -233,6 +115,7 @@ class ExactEvaluationCapture:
         self.previous_q = _cpu(env.current["q"]).astype(float)
         self.native_limits = np.asarray(env.native_readback["limits"])
         self.native_speed = np.asarray(env.native_readback["native_max_velocity"])
+        _save(self.output / "source.json", self.source.metadata)
         _save(
             self.output / "initial_state.json",
             {k: _cpu(v).tolist() for k, v in env.current.items()},
@@ -249,7 +132,7 @@ class ExactEvaluationCapture:
             "control_index": np.array(self.count // 8),
             "substep_index": np.array(substep),
             "time_s": np.array((self.count + 1) * 0.0025),
-            "explicit_counter": np.array(env.sim.get_physics_step_count()),
+            "explicit_counter": np.array(self.source.counter()),
             "pre_joint_position_rad": _cpu(q),
             "pre_joint_velocity_rad_s": _cpu(dq),
             "joint_position_rad": _cpu(state["q"]),
@@ -267,10 +150,7 @@ class ExactEvaluationCapture:
             "toe_xyz_body_m": _cpu(state["toe_body"]),
         }
         try:
-            buffers = [np.array(x.numpy(), copy=True) for x in env.contact.get_contact_data(0.0025)]
-            contacts = classify_patches(
-                buffers, env.sensor_map, row["link_pose_xyzw"], self.geometry, env.num_envs
-            )
+            contacts = self.source.contacts(row["link_pose_xyzw"], self.geometry)
             minimum, non_toe = self.geometry.clearance(row["link_pose_xyzw"])
             row.update(
                 distal_contact=contacts["distal_contact"],
@@ -305,12 +185,10 @@ class ExactEvaluationCapture:
                 raise FloatingPointError("Nonfinite native evaluation evidence")
             if not np.array_equal(row["native_input_pre_nm"], row["applied_torque_nm"]):
                 raise RuntimeError("Actual native motor input differs")
-            wanted = diagnostic_servo(
+            wanted = self.source.servo(
                 row["pre_joint_position_rad"],
                 row["pre_joint_velocity_rad_s"],
                 row["joint_target_rad"],
-                np.full(18, STIFFNESS_NM_PER_RAD, np.float32),
-                np.asarray(KD, np.float32),
             )
             for name, expected in zip(
                 ("computed_torque_nm", "applied_torque_nm", "effort_ceiling_nm"), wanted
@@ -418,8 +296,7 @@ class ExactEvaluationCapture:
             "body_names": self.env.native_body_names,
             "joint_names": list(JOINT_NAMES),
             "files": {p.name: _sha(p) for p in sorted(self.output.iterdir()) if p.is_file()},
-            "contact_classification": "exact_distal_points",
-            "stage2_complete": False,
+            "contact_classification": self.source.metadata["contact_classification"],
         }
         _save(self.output / "capture.json", receipt)
         return receipt
@@ -430,82 +307,6 @@ def _set_command(env, commands):
     # History contains proprio only; update command-bearing observations before
     # the actor, without inserting a history sample or native physics step.
     return env.observations(env.current)
-
-
-def _native_contact_screen(receipt, index, case):
-    """Common canonical400Hz screen, separate from historical sampled metrics."""
-    quiet = case["profile"] in {"quiet_stand", "stage2_long_quiet", "stop_to_stand"}
-    quiet = quiet or (case["profile"] != "transition" and not np.any(case["command"]))
-    bound = 0.0 if quiet else 0.001
-    count = None
-    fraction = None
-    values = receipt.get("nonfoot_contact_steps_400hz")
-    steps = receipt.get("steps", 0)
-    if isinstance(values, list) and index < len(values) and type(steps) is int and steps > 0:
-        value = values[index]
-        if type(value) is int and 0 <= value <= steps:
-            count = value
-            fraction = count / steps
-    return {
-        "schema": "canonical_native_contact_screen_v1",
-        "frequency_hz": 400,
-        "window": "complete trial, including initial settling and every native substep",
-        "recorded_substeps": steps,
-        "nonfoot_substeps": count,
-        "nonfoot_fraction": fraction,
-        "maximum_nonfoot_fraction": bound,
-        "pass": fraction is not None and fraction <= bound,
-        "scope": "Common canonical native contact evidence; historical sampled metrics remain separate.",
-    }
-
-
-@torch.inference_mode()
-def score_case(data, metadata, case):
-    """Apply the unchanged scorer to declared windows of an extended trial."""
-    windows = case.get("score_control_windows")
-    if windows is None:
-        return (
-            scoring.score_transitions(data, metadata)
-            if case["profile"] == "transition"
-            else scoring.score_recording(data, metadata)
-        )
-    if case["profile"] != "omni_static" or not windows:
-        raise ValueError("Extended windows require the static scorer")
-    previous_end = 0
-    for index, window in enumerate(windows):
-        if (
-            len(window) != 2
-            or any(type(x) is not int for x in window)
-            or window[0] < 0
-            or window[1] - window[0] != 1000
-            or window[1] > case["controls"]
-            or (index == 0 and window[0] != 0)
-            or (index > 0 and (window[0] > previous_end - 100 or window[1] <= previous_end))
-        ):
-            raise ValueError("Windows must cover the trial with no additional settling gaps")
-        previous_end = window[1]
-    if previous_end != case["controls"]:
-        raise ValueError("Windows must include the declared trial endpoint")
-    reports = [
-        scoring.score_recording({key: value[start:end] for key, value in data.items()}, metadata)
-        for start, end in windows
-    ]
-    return {
-        "pass": all(row["pass"] for row in reports),
-        "score_control_windows": windows,
-        "window_reports": reports,
-        "checks": {
-            f"window_{i}:{key}": value
-            for i, row in enumerate(reports)
-            for key, value in row["checks"].items()
-        },
-        "failed_bounds": [
-            f"window_{i}:{key}" for i, row in enumerate(reports) for key in row["failed_bounds"]
-        ],
-        "missing_evidence": [
-            f"window_{i}:{key}" for i, row in enumerate(reports) for key in row["missing_evidence"]
-        ],
-    }
 
 
 @torch.inference_mode()
@@ -523,14 +324,25 @@ def run_batch(
     progress=None,
     max_wall_seconds=None,
     motion_features=None,
+    rules=None,
+    capture_source=None,
 ):
     """One initial reset, full fixed-duration trials; a failure preserves prefixes.
 
-    ``motion_features`` maps the environment state to the motion features that the trace records
-    before and after each control. Without it, the trace holds no motion features.
+    Each case holds its command until its ``stop_control`` and commands zero after it; a case
+    without a stop control holds its command throughout, and a route case asks the waypoint
+    follower for its command from the body's true pose. ``motion_features`` maps the environment
+    state to the motion features that the trace records before and after each control. The report
+    holds recording facts only; the judge decides pass or fail from the trace. ``capture_source``
+    constructs a backend source after reset; the default reads native counters and patches.
     """
     if not cases or len(cases) > env.num_envs or len({x["controls"] for x in cases}) != 1:
         raise ValueError("Batch cases must fit the environment and have one fixed duration")
+    cases = [{"stop_control": case["controls"], **case} for case in cases]
+    producers = [
+        requirements.producer(case, rules)
+        for case in cases + [cases[-1]] * (env.num_envs - len(cases))
+    ]
     duration = cases[0]["controls"] * 0.02
     if env.cfg.episode_seconds <= duration:
         raise ValueError("Declared episode timeout would truncate the requested evaluation")
@@ -542,7 +354,9 @@ def run_batch(
     np.random.seed(seed)
     env.commands.zero_()
     env.reset()
-    capture = ExactEvaluationCapture(env, out / "native400hz", geometry_extrema)
+    # Construct the source after reset so per-replica motor coefficients belong to this trial.
+    source = {} if capture_source is None else {"source": capture_source(env)}
+    capture = ExactEvaluationCapture(env, out / "native400hz", geometry_extrema, **source)
     rows = []
     failure = None
     failure_kind = None
@@ -551,7 +365,7 @@ def run_batch(
     allocation_limit_reached = False
     video_index = next((i for i, c in enumerate(cases) if c["case_id"] == video_case_id), None)
     declaration = {
-        "schema": "canonical_stage2_native_batch_v1",
+        "schema": "hexapod_native_batch_v1",
         "cases": cases,
         "assigned_case_ids": [c["case_id"] for c in assignments],
         "padding_replicas": env.num_envs - len(cases),
@@ -564,12 +378,13 @@ def run_batch(
         "urdf_sha256": URDF_SHA256,
         "usd_sha256": USD_SHA256,
         "geometry_extrema_sha256": _sha(geometry_extrema),
-        "contact_classification": "exact_distal_points",
+        "contact_classification": source["source"].metadata["contact_classification"]
+        if source
+        else "exact_distal_points",
         "velocity_measurement_point": "native root center_of_mass; actual world velocity rotated into body/navigation",
         "initial_resets": 1,
         "resets_during_trial": 0,
         "pose_forcing": False,
-        "stage2_complete": False,
     }
     _save(out / "declaration.json", declaration)
     try:
@@ -588,7 +403,8 @@ def run_batch(
             if control % 100 == 0 and time.monotonic() >= deadline:
                 allocation_limit_reached = True
                 raise RuntimeError("Evaluation wall-clock allocation exhausted; preserved prefix")
-            requested = [command_at(c, control) for c in assignments]
+            root = _cpu(env.current["root"])
+            requested = [produce(control, root[i]) for i, produce in enumerate(producers)]
             observation = _set_command(env, requested)
             before = None if motion_features is None else motion_features(env.current)
             action = (
@@ -632,7 +448,7 @@ def run_batch(
                 raise _NativeTrialTermination(
                     "Native terminal/timeout: preserved failed prefix; no automatic reset"
                 )
-        verify_native_recipe(env, "after_stage2_evaluation")
+        verify_native_recipe(env, "after_evaluation")
     except BaseException as error:
         failure = repr(error)
         failure_kind = (
@@ -653,71 +469,22 @@ def run_batch(
         data = {k: np.stack([r[k] for r in rows]) for k in rows[0]} if rows else {}
         if data:
             np.savez_compressed(out / "control_trace.npz", **data)
-    results = []
-    for index, case in enumerate(cases):
-        metadata = {
-            **declaration,
-            "profile": case["profile"],
-            "env_index": index,
-            "command": case["command"],
-            "target_slew_rad": 0.04,
-            "control_dt_s": 0.02,
-            "seed": case.get("seed", seed),
+    complete = failure is None and receipt["steps"] == 8 * len(rows) and receipt["failure"] is None
+    results = [
+        {
+            "case_id": case["case_id"],
+            "controls": len(rows),
+            "native_capture_complete": complete and len(rows) == case["controls"],
+            "joint_bound_violation_steps": receipt["joint_bound_violation_steps"][index],
+            "speed_bound_violation_steps": receipt["speed_bound_violation_steps"][index],
+            "maximum_applied_nm": receipt["maximum_applied_nm"][index],
+            "nonfoot_contact_steps_400hz": receipt["nonfoot_contact_steps_400hz"][index],
+            "minimum_non_toe_floor_m": receipt["minimum_non_toe_floor_m"][index],
+            "minimum_plate_height_m": receipt["minimum_plate_height_m"][index],
+            "batch_failure": failure,
         }
-        try:
-            scored = data
-            if len(scored.get("time_s", [])) >= 2:
-                result = score_case(scored, metadata, case)
-            else:
-                result = {
-                    "pass": False,
-                    "checks": {},
-                    "failed_bounds": ["incomplete_native_prefix"],
-                    "missing_evidence": [],
-                }
-        except Exception as error:
-            result = {
-                "pass": False,
-                "checks": {},
-                "failed_bounds": ["invalid_recorded_evidence"],
-                "missing_evidence": [],
-                "scoring_error": repr(error),
-            }
-        complete = (
-            failure is None
-            and len(rows) == case["controls"]
-            and receipt["steps"] == 8 * len(rows)
-            and receipt["failure"] is None
-        )
-        contact_screen = _native_contact_screen(receipt, index, case)
-        native_ok = (
-            complete
-            and receipt["joint_bound_violation_steps"][index] == 0
-            and receipt["speed_bound_violation_steps"][index] == 0
-            and receipt["maximum_applied_nm"][index] <= 1.60001
-            and receipt["minimum_non_toe_floor_m"][index] >= -0.001
-            and receipt["minimum_plate_height_m"][index] >= 0.055
-            and contact_screen["pass"]
-        )
-        result.update(
-            case_id=case["case_id"],
-            native_capture_complete=complete,
-            native_motor_and_joint_checks_pass=native_ok,
-            native_contact_screen=contact_screen,
-            batch_failure=failure,
-            passed_numeric_screen=result["pass"],
-            stage2_complete=False,
-        )
-        result["pass"] = bool(result["pass"] and native_ok)
-        if not native_ok:
-            result.setdefault("failed_bounds", []).append(
-                "native_capture_or_original_physical_bounds"
-            )
-        if not contact_screen["pass"]:
-            result.setdefault("failed_bounds", []).append(
-                "canonical_full_trial_400hz_nonfoot_fraction"
-            )
-        results.append(result)
+        for index, case in enumerate(cases)
+    ]
     report = {
         **declaration,
         "acquisition_complete": failure is None,
@@ -740,398 +507,73 @@ def run_batch(
     return report
 
 
-def evaluate_suite(
+def run_cases(
     env,
     policy,
     output,
     geometry_extrema,
     checkpoint,
     *,
-    config=None,
-    evidence=None,
-    progress=None,
-    max_wall_seconds=None,
-    motion_features=None,
-):
-    """Run selected cases while always reporting against the complete96-case manifest.
-
-    Default is one robot to avoid inter-replica collision contamination. A
-    multi-robot pilot is allowed only when explicitly labeled unisolated; it can
-    never qualify Stage2. A future isolated batch needs separately bound physics.
-    """
-    deadline = _deadline(max_wall_seconds)
-    config = EvaluationConfig() if config is None else config
-    chosen = selected_cases(config)
-    full = case_manifest()
-    if env.cfg.episode_seconds != 90.0:
-        raise ValueError("Construct EvaluationEnvConfig with its declared90-second timeout")
-    if env.num_envs != 1 and not config.allow_unisolated_batch_pilot:
-        raise ValueError(
-            "Current scene has no verified inter-replica collision isolation; "
-            "use one robot for formal evaluation"
-        )
-    if config.record_video and not env.cfg.render:
-        raise ValueError("Actual held-out video requires native cameras before startup")
-    out = Path(output)
-    out.mkdir(parents=True, exist_ok=False)
-    checkpoint_sha = _sha(checkpoint)
-    source_sha = _sha(__file__)
-    declaration = {
-        "schema": "canonical_stage2_evaluation_allocation_v1",
-        "config": asdict(config),
-        "full_required_cases": full,
-        "selected_case_ids": [x["case_id"] for x in chosen],
-        "checkpoint_sha256": checkpoint_sha,
-        "orchestrator_sha256": source_sha,
-        "evaluator_sha256": _sha(Path(scoring.__file__)),
-        "num_envs": env.num_envs,
-        "cross_replica_interference_excluded": env.num_envs == 1,
-        "episode_timeout_seconds": 90.0,
-        "max_wall_seconds": max_wall_seconds,
-        "held_out_video_scope": "22.5-degree command between training bearings; "
-        "actual deterministic policy, no prescribed pose.",
-        "stage2_complete": False,
-    }
-    _save(out / "allocation.json", declaration)
-    reports = []
-    results = []
-    started = time.monotonic()
-    allocation_limit_reached = False
-    # Group equal-duration/profile phases only; each transition remains one
-    # contiguous70-second episode, never14 independent starts.
-    for profile in (
-        "omni_static",
-        "transition",
-        "quiet_stand",
-        "stage2_long_quiet",
-        "stop_to_stand",
-        "stage2c_formal",
-    ):
-        group = [x for x in chosen if x["profile"] == profile]
-        for offset in range(0, len(group), env.num_envs):
-            remaining = deadline - time.monotonic()
-            if remaining <= 0:
-                allocation_limit_reached = True
-                break
-            batch = group[offset : offset + env.num_envs]
-            report = run_batch(
-                env,
-                policy,
-                batch,
-                out / f"batch_{len(reports):03d}",
-                geometry_extrema,
-                checkpoint_sha256=checkpoint_sha,
-                source_sha256=source_sha,
-                seed=60 if profile == "stage2c_formal" else config.seed,
-                video_case_id=config.video_case_id if config.record_video else None,
-                progress=progress,
-                max_wall_seconds=None if not math.isfinite(remaining) else remaining,
-                motion_features=motion_features,
-            )
-            reports.append(report)
-            results.extend(report["results"])
-            _save(
-                out / "progress.json",
-                {
-                    "completed_batches": len(reports),
-                    "completed_case_ids": [x["case_id"] for x in results],
-                    "failed_case_ids": [x["case_id"] for x in results if not x["pass"]],
-                    "stage2_complete": False,
-                },
-            )
-            allocation_limit_reached = (
-                report.get("allocation_limit_reached", False) or time.monotonic() >= deadline
-            )
-            if env.native_errors or report["native_capture_failure"] or allocation_limit_reached:
-                break
-        if (
-            env.native_errors
-            or (reports and reports[-1]["native_capture_failure"])
-            or allocation_limit_reached
-        ):
-            break
-    if _sha(checkpoint) != checkpoint_sha or _sha(__file__) != source_sha:
-        raise RuntimeError("Evaluation input changed during collection")
-    ids = {x["case_id"] for x in results}
-    facts = dict(evidence or {})
-    facts.update(
-        exact_model_bound=True,
-        full_direction_matrix=all(
-            x["case_id"] in ids for x in full if x["profile"] == "omni_static"
-        ),
-        full_transition_matrix=(
-            "transition:full_program" in ids
-            and next(x for x in results if x["case_id"] == "transition:full_program").get(
-                "native_capture_complete", False
-            )
-        ),
-        all_stop_cases=all(x["case_id"] in ids for x in full if x["profile"] == "stop_to_stand"),
-        exact_contact_and_motor_evidence=(
-            env.num_envs == 1
-            and bool(results)
-            and all(
-                x.get("native_capture_complete") and x.get("native_motor_and_joint_checks_pass")
-                for x in results
-            )
-        ),
-    )
-    summary = scoring.summarize_suite(
-        results, required_cases=[x["case_id"] for x in full], evidence=facts
-    )
-    summary.update(
-        allocation=declaration,
-        results=results,
-        wall_seconds=time.monotonic() - started,
-        allocation_limit_reached=allocation_limit_reached,
-        video_files=[
-            str(Path(f"batch_{i:03d}") / "rollout.mp4")
-            for i, r in enumerate(reports)
-            if r["video_frames"]
-        ],
-        numerical_pass_is_not_visual_acceptance=True,
-    )
-    _save(out / "summary.json", summary)
-    return summary
-
-
-def run_diagnostic_trial(
-    env,
-    policy,
-    output,
-    geometry_extrema,
-    checkpoint,
-    *,
-    command=(0.05, 0.0, 0.0),
-    record_video=True,
+    requirements_path=requirements.REQUIREMENTS,
+    requirements_set="stage2_flat",
+    case_ids=None,
     seed=27057,
-    progress=None,
-    max_wall_seconds=None,
-    motion_features=None,
-):
-    """An explicitly additional20-second command screen; never substitutes a case.
-
-    This supports early learning inspection at a training command such as.05m/s.
-    The existing static scorer still owns its numerical bounds. Every one of the
-    frozen96 required cases remains missing from this diagnostic-only result.
-    """
-    command = np.asarray(command, float)
-    if command.shape != (3,) or not np.isfinite(command).all():
-        raise ValueError("Diagnostic command must be a finite navigation vector3")
-    if env.num_envs != 1:
-        raise ValueError("Diagnostic policy inspection uses one robot")
-    if record_video and not env.cfg.render:
-        raise ValueError("Actual video requires native cameras before startup")
-    case = {
-        "case_id": "diagnostic:custom_command",
-        "profile": "omni_static",
-        "command": command.tolist(),
-        "controls": 1000,
-    }
-    report = run_batch(
-        env,
-        policy,
-        [case],
-        output,
-        geometry_extrema,
-        checkpoint_sha256=_sha(checkpoint),
-        source_sha256=_sha(__file__),
-        seed=seed,
-        video_case_id=case["case_id"] if record_video else None,
-        progress=progress,
-        max_wall_seconds=max_wall_seconds,
-        motion_features=motion_features,
-    )
-    report.update(
-        schema="canonical_policy_diagnostic_trial_v1",
-        stage2_complete=False,
-        scope="Additional command inspection only; no required Stage2 case is replaced or admitted.",
-        required_case_count=len(case_manifest()),
-        required_cases_not_evaluated=[x["case_id"] for x in case_manifest()],
-    )
-    _save(Path(output) / "diagnostic_result.json", report)
-    return report
-
-
-def learning_probe_cases():
-    """Additional low-speed learning screens; distinct from every required case."""
-    cases = []
-    for bearing in range(8):
-        angle = bearing * math.pi / 4
-        cases.append(
-            {
-                "case_id": f"learning:translate_0.05_{45 * bearing}deg",
-                "profile": "omni_static",
-                "command": [0.05 * math.cos(angle), 0.05 * math.sin(angle), 0.0],
-                "controls": 1000,
-            }
-        )
-    cases += [
-        {
-            "case_id": f"learning:yaw_{sign:+d}",
-            "profile": "omni_static",
-            "command": [0.0, 0.0, sign * 0.2],
-            "controls": 1000,
-        }
-        for sign in (-1, 1)
-    ]
-    cases += [
-        {
-            "case_id": "learning:quiet_20s",
-            "profile": "quiet_stand",
-            "command": [0.0, 0.0, 0.0],
-            "controls": 1000,
-        },
-        {
-            "case_id": "learning:quiet_32s",
-            "profile": "stage2_long_quiet",
-            "command": [0.0, 0.0, 0.0],
-            "controls": 1600,
-        },
-        {
-            "case_id": "learning:forward_0.05_to_stop",
-            "profile": "stop_to_stand",
-            "command": [0.05, 0.0, 0.0],
-            "controls": 1050,
-        },
-    ]
-    return cases
-
-
-def run_learning_probe_suite(
-    env,
-    policy,
-    output,
-    geometry_extrema,
-    checkpoint,
-    *,
-    record_video=False,
     video_case_id=None,
-    seed=27057,
     progress=None,
     max_wall_seconds=None,
-    selected_case_ids=None,
     motion_features=None,
+    capture_source=None,
 ):
-    """Run all 13 probes, or an ordered subset, without admitting Stage2.
+    """Run the cases of one requirement set, one native trial each, then judge the traces.
 
-    Each trial uses run_batch's one initial reset and unchanged numeric scorer.
-    Falls preserve their trial prefixes; subsequent independent trials may run.
-    Native acquisition corruption or the wall deadline stops further trials.
-    Unselected probes remain missing; only all 13 can pass the diagnostic suite.
+    ``case_ids`` selects an ordered subset; the judgement then covers that subset only and says so
+    in its allocation. A fall ends its case and the next case still runs. An acquisition error, a
+    native physics error or the wall-clock deadline stops the run; recorded cases stay judged.
     """
+    rules, requirements_sha = requirements.load_requirements(requirements_path, requirements_set)
+    by_id = {case["case_id"]: case for case in requirements.cases(rules)}
+    if case_ids is None:
+        case_ids = list(by_id)
+    if not case_ids or len(set(case_ids)) != len(case_ids) or set(case_ids) - set(by_id):
+        raise ValueError("Case selection must be a nonempty ordered subset of the requirement set")
+    selected = [by_id[case_id] for case_id in case_ids]
+    if env.num_envs != 1:
+        raise ValueError("Requirement cases run on one native robot")
+    if env.cfg.episode_seconds <= max(case["controls"] for case in selected) * 0.02:
+        raise ValueError("Episode timeout would truncate a requirement case")
+    if video_case_id is not None and (video_case_id not in case_ids or not env.cfg.render):
+        raise ValueError("A video case must be selected and needs native cameras")
     started = time.monotonic()
     deadline = _deadline(max_wall_seconds)
-    cases = learning_probe_cases()
-    full = case_manifest()
-    by_id = {c["case_id"]: c for c in cases}
-    if selected_case_ids is None:
-        selected_ids = list(by_id)
-    else:
-        if not isinstance(selected_case_ids, (list, tuple)) or not selected_case_ids:
-            raise ValueError("Selected probe cases must be a nonempty ordered list or tuple")
-        selected_ids = list(selected_case_ids)
-        if any(not isinstance(case_id, str) or case_id not in by_id for case_id in selected_ids):
-            raise ValueError("Unknown selected learning-probe case")
-        if len(set(selected_ids)) != len(selected_ids):
-            raise ValueError("Duplicate selected learning-probe case")
-    selected = [by_id[case_id] for case_id in selected_ids]
-    if env.num_envs != 1:
-        raise ValueError("Learning probes require one native robot")
-    if env.cfg.episode_seconds <= 32.0:
-        raise ValueError("Learning probes require an episode timeout greater than32 seconds")
-    if record_video and not env.cfg.render:
-        raise ValueError("Native cameras must be enabled before a video probe")
-    if video_case_id is not None and not record_video:
-        raise ValueError("A video case requires record_video=True")
-    video_case_id = (video_case_id or selected_ids[0]) if record_video else None
-    if video_case_id is not None and video_case_id not in selected_ids:
-        raise ValueError("Video case is outside the selected learning probes")
     out = Path(output)
     out.mkdir(parents=True, exist_ok=False)
     checkpoint_sha = _sha(checkpoint)
     source_sha = _sha(__file__)
-    scorer_sha = _sha(scoring.__file__)
-    declaration = {
-        "schema": "canonical_learning_probe_allocation_v1",
-        "probe_cases": cases,
-        "selected_case_ids": selected_ids,
-        "unselected_probe_case_ids": [case_id for case_id in by_id if case_id not in selected_ids],
-        "full_required_case_ids": [c["case_id"] for c in full],
+    judge_sha = _sha(requirements.__file__)
+    allocation = {
+        "schema": "hexapod_requirements_allocation_v1",
+        "requirements_set": requirements_set,
+        "requirements_sha256": requirements_sha,
+        "judge_sha256": judge_sha,
+        "orchestrator_sha256": source_sha,
+        "checkpoint_sha256": checkpoint_sha,
+        "cases": selected,
         "seed": seed,
-        "num_envs": 1,
         "episode_timeout_seconds": env.cfg.episode_seconds,
         "max_wall_seconds": max_wall_seconds,
-        "checkpoint_sha256": checkpoint_sha,
-        "orchestrator_sha256": source_sha,
-        "evaluator_sha256": scorer_sha,
-        "record_video": record_video,
         "video_case_id": video_case_id,
-        "requested_controls": sum(c["controls"] for c in selected),
-        "trial_initialization": "One canonical state reset per trial; no reset within a trial "
-        "and no solver-cache reset implied.",
-        "acceptance_scope": "Additional diagnostic screens only; none substitute for the full 96 required cases.",
-        "stage2_complete": False,
     }
-    _save(out / "allocation.json", declaration)
+    _save(out / "allocation.json", allocation)
+    failure = None
     reports = []
-    results = []
-    allocation_limit_reached = False
-    acquisition_failure = None
-
-    def summary():
-        ids = {r["case_id"] for r in results}
-        value = scoring.summarize_suite([], required_cases=declaration["full_required_case_ids"])
-        value.update(
-            schema="canonical_learning_probe_suite_v1",
-            allocation=declaration,
-            results=results,
-            missing_probe_cases=[c["case_id"] for c in cases if c["case_id"] not in ids],
-            missing_selected_probe_cases=[
-                case_id for case_id in selected_ids if case_id not in ids
-            ],
-            failed_probe_cases=[r["case_id"] for r in results if not r["pass"]],
-            diagnostic_screens_passed=(
-                not acquisition_failure
-                and not allocation_limit_reached
-                and len(results) == len(cases)
-                and ids == set(by_id)
-                and all(r["pass"] for r in results)
-            ),
-            allocation_limit_reached=allocation_limit_reached,
-            acquisition_failure=acquisition_failure,
-            wall_seconds=time.monotonic() - started,
-            video_files=[
-                str(Path(f"batch_{i:03d}") / "rollout.mp4")
-                for i, r in enumerate(reports)
-                if r.get("video_frames", 0)
-            ],
-            stage2_complete=False,
-            scope="Low-speed learning comparison only; all 96 required Stage2 cases remain unevaluated "
-            "by this allocation.",
-        )
-        return value
-
-    _save(out / "summary.json", summary())
     for index, case in enumerate(selected):
         remaining = deadline - time.monotonic()
         if remaining <= 0:
-            allocation_limit_reached = True
+            failure = "Wall-clock allocation exhausted before " + case["case_id"]
             break
         if env.native_errors:
-            acquisition_failure = "Native physics errors prevent another probe"
+            failure = "Native physics errors prevent another case"
             break
-
-        def trial_progress(update):
-            if progress is not None:
-                progress(
-                    {
-                        "probe_index": index,
-                        "probe_count": len(selected),
-                        "declared_probe_count": len(cases),
-                        **update,
-                    }
-                )
-
         try:
             report = run_batch(
                 env,
@@ -1143,52 +585,39 @@ def run_learning_probe_suite(
                 source_sha256=source_sha,
                 seed=seed,
                 video_case_id=video_case_id if case["case_id"] == video_case_id else None,
-                progress=trial_progress,
+                progress=progress,
                 max_wall_seconds=None if not math.isfinite(remaining) else remaining,
                 motion_features=motion_features,
+                rules=rules,
+                capture_source=capture_source,
             )
         except Exception as error:
-            acquisition_failure = repr(error)
-            _save(
-                out / "acquisition_exception.json",
-                {"case": case, "error": acquisition_failure, "stage2_complete": False},
-            )
-            results.append(
-                {
-                    "case_id": case["case_id"],
-                    "pass": False,
-                    "native_capture_complete": False,
-                    "acquisition_exception": acquisition_failure,
-                    "stage2_complete": False,
-                }
-            )
+            failure = repr(error)
+            _save(out / "acquisition_exception.json", {"case": case, "error": failure})
             break
         reports.append(report)
-        results.extend(report["results"])
-        allocation_limit_reached = (
-            report.get("allocation_limit_reached", False) or time.monotonic() >= deadline
-        )
-        acquisition_failure = report.get("native_capture_failure")
-        if report.get("failure") and report.get("failure_kind") != "native_terminal_prefix":
-            acquisition_failure = acquisition_failure or report["failure"]
-        elif not report.get("failure") and report.get("acquisition_complete") is not True:
-            acquisition_failure = acquisition_failure or "Batch acquisition did not complete"
-        if env.native_errors:
-            acquisition_failure = (
-                acquisition_failure or "Native physics errors prevent another probe"
-            )
-        _save(out / "summary.json", summary())
-        if acquisition_failure or allocation_limit_reached or env.native_errors:
+        if report["failure"] and report["failure_kind"] != "native_terminal_prefix":
+            failure = report["failure"]
             break
-    try:
-        if (
-            _sha(checkpoint) != checkpoint_sha
-            or _sha(__file__) != source_sha
-            or _sha(scoring.__file__) != scorer_sha
-        ):
-            acquisition_failure = "Learning probe input changed during collection"
-    except OSError as error:
-        acquisition_failure = "Learning probe input unavailable after collection: " + repr(error)
-    value = summary()
-    _save(out / "summary.json", value)
-    return value
+    if (
+        _sha(checkpoint) != checkpoint_sha
+        or _sha(__file__) != source_sha
+        or _sha(requirements.__file__) != judge_sha
+    ):
+        failure = "Evaluation input changed during collection"
+    judgement = requirements.judge(out, requirements_path, requirements_set)
+    judgement.update(
+        allocation=allocation,
+        failure=failure,
+        wall_seconds=time.monotonic() - started,
+        video_files=[
+            str(Path(f"batch_{i:03d}") / "rollout.mp4")
+            for i, r in enumerate(reports)
+            if r["video_frames"]
+        ],
+    )
+    judgement["pass"] = (
+        bool(judgement["pass"]) and failure is None and len(judgement["cases"]) == len(selected)
+    )
+    _save(out / "judgement.json", judgement)
+    return judgement

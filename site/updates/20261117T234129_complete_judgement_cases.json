@@ -1,0 +1,23 @@
+{
+  "id": "20261117T234129_complete_judgement_cases",
+  "date": "2026-11-17T23:41:29Z",
+  "title": "Check all walking cases before publishing a controller verdict",
+  "summary": "The controller evidence check compares the case IDs with the cases the walking judge generates. A partial judgement could previously report a passing tilt result when it omitted the two walks that exceeded the limit. The published result still fails at 1.805 degrees against the 1.7 degree limit.",
+  "areas": [
+    "evaluation",
+    "verification"
+  ],
+  "changes": [
+    "configs/source_inventory.json",
+    "src/locomotion/evaluation/requirement_cases.py",
+    "src/locomotion/evaluation/requirements.py",
+    "tools/controller_evidence.py",
+    "tests/test_accepted_controller.py"
+  ],
+  "evidence": [
+    "tests/test_accepted_controller.py",
+    "site/assets/c48_surrogate_requirements_20261108_001/judgement.json"
+  ],
+  "next": "Use the complete set for the native evaluation after runtime approval is renewed.",
+  "no_project_impact": false
+}

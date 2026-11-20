@@ -9,17 +9,12 @@ has not run a control reads the destination at the body. It needs a ``Destinatio
 nine ``ghost_v11`` values (zeros without a terrain, so flat suites and the native robot stay valid);
 ``terrain_v2`` appends its 6-point forward height profile after those, and ``terrain_v2_critic``
 gives both terrain blocks to the critic alone while the actor keeps the nine ghost_v11 values.
+The task builds the inputs (``omniwalk/mdp/destination_inputs.py``); locomotion.rl imports nothing
+from locomotion.omniwalk, so this wrapper only joins their tensors to the base observations.
 """
 
 import torch
 
-from locomotion.omniwalk.mdp.destination import (
-    GHOST_V11_FEATURES,
-    NEUTRAL_FEATURES,
-    destination_features,
-    ghost_v10_features,
-    planar_pose,
-)
 from locomotion.rl.wrapper import OmniVecEnv
 
 
@@ -35,20 +30,6 @@ class DestinationVecEnv(OmniVecEnv):
         gait_clock_scaling=None,
         **options,
     ):
-        if destination_input not in (
-            "ghost",
-            "ghost_v10",
-            "ghost_v11",
-            "terrain_v1",
-            "terrain_v2",
-            "terrain_v2_critic",
-            "terrain_v2_ghost_critic",
-            "terrain_v2_odom",
-        ):
-            raise ValueError(
-                "DestinationVecEnv applies the ghost, ghost_v10, ghost_v11, terrain_v1, "
-                "terrain_v2, terrain_v2_critic, terrain_v2_ghost_critic or terrain_v2_odom input"
-            )
         if not hasattr(task, "destination"):
             raise ValueError("The destination inputs need a DestinationTrainingTask")
         # A task's speed-scaled clock must be recorded so that evaluation rebuilds the same phase.
@@ -61,64 +42,12 @@ class DestinationVecEnv(OmniVecEnv):
                 "The gait_clock_scaling option must record the task's and needs the gait clock"
             )
         self.destination_input = destination_input
-        self.footfall = None
-        # terrain_v2_critic gives the terrain values to the critic alone: the actor keeps the nine
-        # ghost_v11 inputs it could run on the robot with, the ablation docs/TRAINING.md asks for.
-        self.critic_only = destination_input == "terrain_v2_critic"
-        # terrain_v2_ghost_critic is the inverse split: the nine ghost values come from the
-        # simulator's world pose, which the robot cannot supply, so the actor keeps only the
-        # terrain blocks and the ghost stays the critic's privileged signal.
-        self.ghost_critic = destination_input == "terrain_v2_ghost_critic"
-        # terrain_v2_odom replaces the actor's nine world-pose ghost values with the same nine
-        # features computed from leg odometry (mdp/odometry.py) — quantities the robot has — while
-        # the critic keeps the true privileged ghost. Same widths, so terrain_v2 policies warm-start.
-        self.odometry = None
-        self._odometry_fresh = True
-        if destination_input in (
-            "terrain_v1",
-            "terrain_v2",
-            "terrain_v2_critic",
-            "terrain_v2_ghost_critic",
-            "terrain_v2_odom",
-        ):
-            from locomotion.omniwalk.mdp.footfall import FootfallInputs
-
-            # The recorded option names the clock; a task may carry none (the flat suites
-            # evaluate every checkpoint under the v9 task, whose reward predates the clock).
-            self.footfall = FootfallInputs(
-                task, gait_clock_scaling or kept, profile=destination_input != "terrain_v1"
-            )
-        if destination_input == "terrain_v2_odom":
-            from locomotion.omniwalk.mdp.odometry import OdometryGhost
-
-            self.odometry = OdometryGhost(task.num_envs, task.device)
+        self.inputs = task.destination_input_source(destination_input, gait_clock_scaling or kept)
         super().__init__(task, tensor_dict, **options)
 
     def destination_inputs(self, pending, command=None):
-        """The task's inputs; rows in ``pending`` read a command that has not run a control yet: the neutral
-        values for ``ghost``, and a destination at the body for ``ghost_v10`` and ``ghost_v11``. ``command`` defaults to the
-        task's current commands."""
-        task = self.task
-        if self.destination_input != "ghost":
-            pending = pending[:, None].to(task.destination.device)
-            here = planar_pose(task.current["root"]).to(task.destination)
-            ghost = ghost_v10_features(
-                task.current["root"],
-                task.control_start_pose,
-                torch.where(pending, here, task.destination),
-                torch.where(
-                    pending[:, 0], torch.zeros_like(task.command_elapsed), task.command_elapsed
-                ),
-                task.commands if command is None else command,
-                along_track=self.destination_input != "ghost_v10",
-            )
-            if self.footfall is None:
-                return ghost
-            # terrain_v1: the nine ghost_v11 values, then the 30 footfall-lookahead values.
-            return torch.cat((ghost, self.footfall.features(command).to(ghost)), -1)
-        current = destination_features(task.current["root"], task.destination, task.command_elapsed)
-        neutral = torch.tensor(NEUTRAL_FEATURES, device=current.device).expand_as(current)
-        return torch.where(pending[:, None].to(current.device), neutral, current)
+        """The critic's destination inputs (``DestinationInputs.features``)."""
+        return self.inputs.features(pending, command)
 
     def observations(self, output):
         base = super().observations(output)
@@ -127,15 +56,7 @@ class DestinationVecEnv(OmniVecEnv):
         # rows must read the destination at the body with age zero here too.
         pending = getattr(self.task, "ghost_pending", None)
         extra = self.destination_inputs(self.task.command_started if pending is None else pending)
-        shown = extra
-        if self.critic_only:
-            shown = extra[..., :GHOST_V11_FEATURES]
-        elif self.ghost_critic:
-            shown = extra[..., GHOST_V11_FEATURES:]
-        elif self.odometry is not None:
-            pending = self.task.command_started
-            odom = self.odometry.features(pending, self.task.command_elapsed, self.task.commands)
-            shown = torch.cat((odom.to(extra), extra[..., GHOST_V11_FEATURES:]), -1)
+        shown = self.inputs.actor_view(extra)
         policy = torch.cat((base["policy"], shown.to(base["policy"])), -1)
         critic = torch.cat((base["critic"], extra.to(base["critic"])), -1)
         return self.tensor_dict({"policy": policy, "critic": critic}, batch_size=[self.num_envs])
@@ -144,21 +65,7 @@ class DestinationVecEnv(OmniVecEnv):
         held_command = self.task.commands.clone()
         pre_started = self.task.command_started.clone()
         observation, rewards, done, extras = super().step(action)
-        if self.odometry is not None:
-            from locomotion.omniwalk.mdp.odometry import observed
-
-            task = self.task
-            root, toes, contact = observed(task.env)
-            every = torch.arange(task.num_envs, device=task.device)
-            if self._odometry_fresh:
-                self.odometry.reset(every, root, toes, contact)
-                self._odometry_fresh = False
-            # The executed command and the pre-step start flags mirror _advance_destination's
-            # timing; rows the learner reset re-align their odometry frame with the fresh pose.
-            self.odometry.advance(root, toes, contact, held_command, pre_started)
-            reset_rows = every[done.bool().to(task.device)]
-            if len(reset_rows):
-                self.odometry.reset(reset_rows, root, toes, contact)
+        if self.inputs.advance(held_command, pre_started, done):
             observation = self.get_observations()
         bootstrap = extras.get("command_bootstrap_observation")
         if bootstrap is not None:

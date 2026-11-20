@@ -6,6 +6,14 @@ hexapod-cupi checkout of this branch. The judge, run-file, fine-tune, export and
 run on 2026-11-18 on a MacBook (CPU only) before this guide was written; the timings are from that
 machine.
 
+**After the merge with main.** Main replaced the 96-case scorer with the walking-requirements judge
+and the bm0 scripts pass the dynamics draws the pre-merge way, so sections 3 to 5 (judge, viewer run files,
+fine-tune) and `pipeline/run_chain.sh` need the pre-merge code, commit `41d3e243`:
+`git worktree add ../bm0-recorded 41d3e2432f4a70d14a7b637655caa11f447ec9a3`, then `uv sync` there and run the
+commands from that folder. `run_chain.sh` refuses any other source tree. On the merged code, a training
+passes these draws as `SurrogateEnv(dynamics=...)` (`--randomize` on `surrogate/train.py`), and the robot
+runtime (section 6) runs unchanged.
+
 ## 1. What bm0 is, in one paragraph
 
 A walking policy for the hexapod: a 278 -> 256 -> 256 -> 128 -> 18 MLP (ELU, tanh output; 172,434

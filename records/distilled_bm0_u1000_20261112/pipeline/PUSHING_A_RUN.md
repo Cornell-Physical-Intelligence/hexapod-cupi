@@ -18,10 +18,13 @@ od1 u1200 (records/curriculum_20261109/od1, the v70 odometry policy)
 ```bash
 git clone --branch jg2399/distilled-bm0 https://github.com/S0ulSyte/hexapod-cupi.git
 cd hexapod-cupi
+git checkout 41d3e2432f4a70d14a7b637655caa11f447ec9a3   # the pre-merge code the chain runs on
 uv sync --frozen
 ```
 
 Needs `git` and [uv](https://docs.astral.sh/uv/). `uv sync` builds `.venv` from `uv.lock`.
+After the merge with main, `run_chain.sh` refuses any source tree but that commit's, because main
+replaced the 96-case scorer its judge stage reads.
 
 ## 2. Check the wiring (about 15 minutes)
 

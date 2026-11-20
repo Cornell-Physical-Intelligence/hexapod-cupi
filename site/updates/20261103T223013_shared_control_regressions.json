@@ -1,0 +1,20 @@
+{
+  "id": "20261103T223013_shared_control_regressions",
+  "date": "2026-11-03T22:30:13Z",
+  "title": "Retain behavioral checks for the shared control arithmetic",
+  "summary": "We retained the Direct control checks as CPU tests against frozen source from before the refactor. The tests compare measured state, eight substeps of contact and torque capture, control telemetry, observations and episode boundaries. They reject swapped torque fields, a missing load sample, reversed center-of-mass correction, a late timeout, reversed force-body order and a relaxed fall boundary.",
+  "areas": ["locomotion", "verification"],
+  "next": "Use these tests in CI when reviewing changes to the shared control arithmetic.",
+  "changes": [
+    "src/locomotion/tests/test_shared_control_parity.py",
+    "src/locomotion/tests/fixtures/direct_control_929e035f.tar.gz",
+    "site/updates/20261103T223013_shared_control_regressions.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_shared_control_parity.py",
+    "src/locomotion/tests/fixtures/direct_control_929e035f.tar.gz",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/91"
+  ],
+  "no_project_impact": true,
+  "reason": "The change adds CPU regression coverage. Runtime sources, checkpoint bytes, the approved robot, acceptance gates and roadmap markers remain unchanged. CPU doubles do not establish native qualification."
+}

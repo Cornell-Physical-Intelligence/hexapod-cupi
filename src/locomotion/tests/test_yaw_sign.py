@@ -13,7 +13,7 @@ import torch
 import locomotion.omniwalk.mdp.rewards as walking
 import locomotion.rl.wrapper as wrapper
 from locomotion.evaluation.capture import diagnostic_rotation
-from locomotion.evaluation.runner import learning_probe_cases
+from locomotion.evaluation.requirements import cases, ghost_path, judge_case, load_requirements
 from locomotion.evaluation.task_metrics import TaskMetrics
 from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
 from locomotion.omniwalk.mdp.frames import inverse_rotate, navigation
@@ -21,7 +21,6 @@ from locomotion.omniwalk.mdp.observations import observations, proprio
 from locomotion.omniwalk.mdp.rewards import REWARD_CONFIG as CONFIG
 from locomotion.omniwalk.task import TrainingTask as TrainingTaskV4
 from locomotion.tests.task_double import GaitDouble
-from locomotion.tests.test_evaluation import fixture, score
 
 RATE = 0.2
 SIGNS = (-1.0, 1.0)
@@ -58,9 +57,11 @@ class YawSignTests(unittest.TestCase):
         bank = command_bank(TaskConfig())
         for sign in SIGNS:
             self.assertIn([0.0, 0.0, sign * TaskConfig().yaw_rate_rad_s], bank)
-        probes = {case["case_id"]: case["command"] for case in learning_probe_cases()}
-        self.assertEqual(probes["learning:yaw_-1"], [0.0, 0.0, -RATE])
-        self.assertEqual(probes["learning:yaw_+1"], [0.0, 0.0, RATE])
+        probes = {
+            c["case_id"]: c["command"] for c in cases(load_requirements()[0]) if "command" in c
+        }
+        self.assertEqual(probes["turn_-0.20"], [0.0, 0.0, -RATE])
+        self.assertEqual(probes["turn_+0.20"], [0.0, 0.0, RATE])
         # Navigation forward is native -Y and left is native +X; both frames share +Z, so yaw keeps its sign.
         torch.testing.assert_close(
             navigation(torch.tensor([0.0, -1.0, 0.0])), torch.tensor([1.0, 0.0, 0.0])
@@ -191,28 +192,39 @@ class YawSignTests(unittest.TestCase):
                 self.assertGreater(float(forward["swing_travel"]), 0.0)
                 self.assertLess(float(backward["swing_travel"]), 0.0)
 
-    def test_evaluation_scores_each_probe_against_its_signed_command(self):
+    def test_the_judge_reads_each_arc_against_its_signed_yaw_rate(self):
+        from locomotion.evaluation.requirements import load_requirements
+
+        rules, _ = load_requirements()
+
+        def trace(path, commands):
+            pose = np.zeros((len(commands), 1, 7))
+            pose[:, 0, :2] = path[: len(commands), :2]
+            pose[:, 0, 5] = np.sin(path[: len(commands), 2] / 2)
+            pose[:, 0, 6] = np.cos(path[: len(commands), 2] / 2)
+            return {
+                "root_pose_xyzw": pose,
+                "command": np.asarray(commands)[:, None, :],
+                "applied_torque_abs_max_400hz": np.zeros((len(commands), 1)),
+            }
+
         for sign in SIGNS:
-            command = (0.0, 0.0, sign * RATE)
+            commands = [[0.04, 0.0, sign * 0.15]] * 1000
+            mirrored = [[0.04, 0.0, -sign * 0.15]] * 1000
             with self.subTest(sign=sign):
                 # The evaluator's gyro is R^T times the world angular velocity, for any heading.
                 rotation = diagnostic_rotation(yawed(2.9 * sign).numpy().astype(float))
                 gyro = np.einsum("ji,j->i", rotation, np.array([0.0, 0.0, sign * RATE]))
                 self.assertAlmostEqual(gyro[2], sign * RATE, places=6)
-                matched = score(fixture(command=command), "omni_static", command=list(command))
-                self.assertTrue(matched["pass"], matched["failed_bounds"])
-                self.assertAlmostEqual(
-                    matched["metrics"]["mean_yaw_rate_rad_s"], sign * RATE, places=6
+                own = ghost_path((0.0, 0.0, 0.0), commands)
+                self.assertGreater(sign * own[-1, 2], 0.0)
+                matched = judge_case(trace(own, commands), rules, 1000)
+                self.assertTrue(matched["pass"], matched["failed_checks"])
+                opposite = judge_case(
+                    trace(ghost_path((0.0, 0.0, 0.0), mirrored), commands), rules, 1000
                 )
-                self.assertAlmostEqual(matched["metrics"]["yaw_error_rad_s"], 0.0, places=6)
-                opposite = fixture(command=command)
-                opposite["gyro_body_rad_s"][:, 2] = -sign * RATE
-                result = score(opposite, "omni_static", command=list(command))
-                self.assertIn("yaw_error_rad_s", result["failed_bounds"])
-                self.assertAlmostEqual(result["metrics"]["yaw_error_rad_s"], 2 * RATE, places=6)
-                self.assertAlmostEqual(
-                    result["metrics"]["mean_yaw_rate_rad_s"], -sign * RATE, places=6
-                )
+                self.assertEqual(opposite["failed_checks"], ["drift_per_hold_m"])
+                self.assertGreater(opposite["checks"]["drift_per_hold_m"]["value"], 0.3)
 
 
 def _telemetry(commands):

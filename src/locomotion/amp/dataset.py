@@ -10,7 +10,7 @@ from pathlib import Path
 import numpy as np
 
 from locomotion.amp.features import extract_features, feature_contract
-from locomotion.evaluation import score_recording
+from locomotion.evaluation.requirements import judge_case, load_requirements
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256
 from locomotion.spark.sources import source_files
 
@@ -33,6 +33,7 @@ def motion_cases():
     from locomotion.omniwalk.mdp.commands import TaskConfig, command_bank
 
     return [
+        # The retained dataset manifest records this coverage shape, profile label included.
         {
             "case_id": f"amp:command_{i:02d}",
             "profile": "omni_static",
@@ -301,18 +302,9 @@ def audit_replay(directory):
     with np.load(trace_path, allow_pickle=False) as archive:
         trace = {key: archive[key] for key in archive.files}
     parity = validate_trace(trace, identity["command"], identity["root_com_local_m"])
-    rescored = score_recording(
-        trace,
-        {
-            **report,
-            "profile": "omni_static",
-            "env_index": 0,
-            "command": identity["command"],
-            "control_dt_s": 0.02,
-        },
-    )
-    if not rescored["pass"]:
-        raise ValueError("Recomputed motion screen failed")
+    judged = judge_case(trace, load_requirements()[0], 1000)
+    if not judged["pass"]:
+        raise ValueError("Recomputed motion screen failed: " + ", ".join(judged["failed_checks"]))
     record = {
         "path": str(directory),
         "command_index": index,

@@ -7,13 +7,20 @@ node test reads it. The comparison decompresses the data block, since zlib versi
 
 import base64
 import gzip
+import hashlib
+import io
 import json
 import tempfile
 import unittest
+from contextlib import redirect_stdout
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
+import torch
 
+from locomotion.evaluation import runner
+from locomotion.tests.test_evaluate import FakeCapture, FakeNative, fixture_files
 from viewer import run_view
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -139,6 +146,216 @@ class RunViewTests(unittest.TestCase):
         (surrogate / "surrogate_summary.json").write_text("{}")
         value = run_view.build(surrogate)
         self.assertEqual((value["source"], value["name"]), ("surrogate", "surrogate_output"))
+
+    def recorded_judgement(self):
+        """Recorded verdicts differ from the old fixture reports and use a different order."""
+        return {
+            "schema": "hexapod_walking_requirements_judgement_v2",
+            "cases": [
+                {"case_id": "learning:stop", "pass": True, "checks": {}, "failed_checks": []},
+                {
+                    "case_id": "learning:forward",
+                    "pass": False,
+                    "checks": {"drift_per_hold_m": {"value": 0.2, "bound": 0.1, "pass": False}},
+                    "failed_checks": ["drift_per_hold_m"],
+                },
+            ],
+        }
+
+    def save_judgement(self, value):
+        path = self.attempt / "run/standing/evaluation/judgement.json"
+        path.write_text(json.dumps(value))
+        return path
+
+    def test_judgement_verdicts_match_by_case_id_and_preserve_recorded_checks(self):
+        for version in (1, 2):
+            with self.subTest(version=version):
+                judgement = self.recorded_judgement()
+                judgement["schema"] = f"hexapod_walking_requirements_judgement_v{version}"
+                if version == 1:
+                    for row in judgement["cases"]:
+                        del row["failed_checks"]
+                path = self.save_judgement(judgement)
+                before = path.read_bytes()
+                value = run_view.build(self.attempt)
+                self.assertEqual([row["pass"] for row in value["cases"]], [False, True])
+                self.assertEqual(
+                    value["cases"][0]["failed"],
+                    [{"check": "drift_per_hold_m", "value": 0.2, "bound": 0.1}],
+                )
+                self.assertEqual(value["cases"][1]["failed"], [])
+                self.assertEqual(value["judgement_sha256"], hashlib.sha256(before).hexdigest())
+                self.assertEqual(path.read_bytes(), before)
+
+    def test_a_present_judgement_cannot_fall_back_to_old_report_verdicts(self):
+        for kind in (
+            "missing",
+            "duplicate",
+            "nonboolean",
+            "no_verdict",
+            "checks",
+            "failed",
+            "schema",
+        ):
+            with self.subTest(kind=kind):
+                value = self.recorded_judgement()
+                if kind == "missing":
+                    value["cases"].pop()
+                elif kind == "duplicate":
+                    value["cases"].append(dict(value["cases"][0]))
+                elif kind == "nonboolean":
+                    value["cases"][0]["pass"] = "false"
+                elif kind == "no_verdict":
+                    del value["cases"][0]["pass"]
+                elif kind == "checks":
+                    value["cases"][0]["checks"] = []
+                elif kind == "failed":
+                    value["cases"][0]["failed_checks"] = ["unrecorded"]
+                else:
+                    value["schema"] = "unknown"
+                self.save_judgement(value)
+                with self.assertRaisesRegex(ValueError, "[Jj]udgement"):
+                    run_view.build(self.attempt)
+
+    def test_judgement_failure_list_must_match_the_recorded_check_flags(self):
+        for version in (1, 2):
+            for failed in ([], ["drift_per_hold_m", "tilt_deg"]):
+                with self.subTest(version=version, failed=failed):
+                    value = self.recorded_judgement()
+                    value["schema"] = f"hexapod_walking_requirements_judgement_v{version}"
+                    row = value["cases"][1]
+                    row["checks"]["tilt_deg"] = {"value": 0.0, "bound": 1.7, "pass": True}
+                    row["failed_checks"] = failed
+                    self.save_judgement(value)
+                    with self.assertRaisesRegex(ValueError, "Judgement.*disagree"):
+                        run_view.build(self.attempt)
+
+    def test_judgement_verdict_must_agree_with_whether_checks_failed(self):
+        for version in (1, 2):
+            for index in (0, 1):
+                with self.subTest(version=version, index=index):
+                    value = self.recorded_judgement()
+                    value["schema"] = f"hexapod_walking_requirements_judgement_v{version}"
+                    row = value["cases"][index]
+                    row["pass"] = not row["pass"]
+                    if version == 1:
+                        for case in value["cases"]:
+                            del case["failed_checks"]
+                    self.save_judgement(value)
+                    with self.assertRaisesRegex(ValueError, "Judgement.*disagree"):
+                        run_view.build(self.attempt)
+
+    def test_preserved_v1_judgement_keeps_its_four_unjudged_cases(self):
+        original = ROOT / "site/assets/c48_requirements_20261107_001/judgement.json"
+        raw = original.read_bytes()
+        judgement = json.loads(raw)
+        evaluation = Path(self.directory.name) / "historical/evaluation"
+        for index, row in enumerate(judgement["cases"]):
+            batch(
+                evaluation / f"batch_{index:03d}",
+                row["case_id"],
+                [row["command"]] * 2,
+                [(0.0, 0.0, 0.0)] * 2,
+                passed=True,
+            )
+        (evaluation / "judgement.json").write_bytes(raw)
+        output = Path(self.directory.name) / "historical.json"
+        with redirect_stdout(io.StringIO()) as printed:
+            run_view.main([str(evaluation), "--output", str(output)])
+        value = json.loads(output.read_text())
+        self.assertEqual(
+            [row["pass"] for row in value["cases"]],
+            [row["pass"] for row in judgement["cases"]],
+        )
+        unjudged = [row for row in value["cases"] if row["pass"] is None]
+        self.assertEqual(len(unjudged), 4)
+        self.assertTrue(all(row["failed"] == [] for row in unjudged))
+        self.assertIn("4 not judged", printed.getvalue())
+        self.assertEqual(value["judgement_sha256"], hashlib.sha256(raw).hexdigest())
+        self.assertEqual(original.read_bytes(), raw)
+
+    def test_null_verdict_requires_an_explicit_v1_verdict_without_checks_or_failures(self):
+        for kind in ("v2", "failed_check", "passed_check", "failed_list", "missing_verdict"):
+            with self.subTest(kind=kind):
+                value = self.recorded_judgement()
+                value["schema"] = "hexapod_walking_requirements_judgement_v1"
+                row = value["cases"][0]
+                row["pass"] = None
+                if kind == "v2":
+                    value["schema"] = "hexapod_walking_requirements_judgement_v2"
+                elif kind in ("failed_check", "passed_check"):
+                    passed = kind == "passed_check"
+                    row["checks"] = {"tilt_deg": {"pass": passed}}
+                    row["failed_checks"] = [] if passed else ["tilt_deg"]
+                elif kind == "failed_list":
+                    row["failed_checks"] = ["unrecorded"]
+                else:
+                    del row["pass"]
+                self.save_judgement(value)
+                with self.assertRaisesRegex(ValueError, "[Jj]udgement"):
+                    run_view.build(self.attempt)
+
+    def test_displayed_check_values_and_bounds_must_be_finite(self):
+        for version in (1, 2):
+            for field in ("value", "bound"):
+                for number in (float("nan"), float("inf"), -float("inf")):
+                    with self.subTest(version=version, field=field, number=number):
+                        value = self.recorded_judgement()
+                        value["schema"] = f"hexapod_walking_requirements_judgement_v{version}"
+                        value["cases"][1]["checks"]["drift_per_hold_m"][field] = number
+                        self.save_judgement(value)
+                        with self.assertRaisesRegex(ValueError, "Nonfinite displayed check"):
+                            run_view.build(self.attempt)
+
+    def test_export_refuses_nonfinite_legacy_metrics_without_writing_a_file(self):
+        report_path = self.attempt / "run/standing/evaluation/batch_000/report.json"
+        report = json.loads(report_path.read_text())
+        report["results"][0]["metrics"]["mean_yaw_rate_rad_s"] = float("inf")
+        report_path.write_text(json.dumps(report))
+        output = Path(self.directory.name) / "invalid.json"
+        with self.assertRaisesRegex(ValueError, "Out of range float"):
+            run_view.main([str(self.attempt), "--output", str(output)])
+        self.assertFalse(output.exists())
+
+    def test_current_evaluator_output_exports_its_recorded_failure(self):
+        root = Path(self.directory.name)
+        geometry, checkpoint = fixture_files(root)
+        evaluation = root / "current/evaluation"
+        with patch.object(runner, "ExactEvaluationCapture", FakeCapture):
+            judgement = runner.run_cases(
+                FakeNative(terminate_at=2),
+                lambda observation: torch.zeros(1, 18),
+                evaluation,
+                geometry,
+                checkpoint,
+                case_ids=["stand"],
+            )
+        recorded = judgement["cases"][0]
+        self.assertFalse(recorded["pass"])
+        self.assertTrue(recorded["failed_checks"])
+        report = json.loads((evaluation / "batch_000/report.json").read_text())
+        self.assertNotIn("pass", report["results"][0])
+        value = run_view.build(evaluation)
+        row = value["cases"][0]
+        self.assertEqual((row["case_id"], row["pass"]), (recorded["case_id"], recorded["pass"]))
+        self.assertEqual(
+            row["failed"],
+            [
+                {
+                    "check": name,
+                    "value": recorded["checks"][name]["value"],
+                    "bound": recorded["checks"][name]["bound"],
+                }
+                for name in recorded["failed_checks"]
+            ],
+        )
+        self.assertEqual(
+            value["judgement_sha256"],
+            hashlib.sha256((evaluation / "judgement.json").read_bytes()).hexdigest(),
+        )
+        (evaluation / "judgement.json").unlink()
+        with self.assertRaisesRegex(ValueError, "judgement.json is required"):
+            run_view.build(evaluation)
 
 
 if __name__ == "__main__":

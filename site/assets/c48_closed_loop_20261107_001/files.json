@@ -1,0 +1,69 @@
+{
+  "schema": "hexapod_evidence_files_v1",
+  "scope": "Surrogate (CPU MuJoCo) closed loop: the waypoint follower reads the surrogate's true pose each control and drives the unchanged c48_long checkpoint over five 1 m routes; one trial per route, no payload, no odometry error. before_follower_fix: retire radius 0.12 m and a heading gate without hysteresis. after_follower_fix: retire radius 0.06 m and hysteresis 0.05/0.01 rad.",
+  "checkpoint_sha256": "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9",
+  "script": "closed_loop.py (run from the repository with uv run python <path> <checkpoint.pt> <output>)",
+  "trace_columns": [
+    "t_s",
+    "x_m",
+    "y_m",
+    "heading_rad",
+    "vx_mps",
+    "vy_mps",
+    "wz_rad_s"
+  ],
+  "files": {
+    "after_follower_fix/L_1m_1m_trace.npy": {
+      "sha256": "777098db21f12ec5a36cba882c849c7fa01e71bd2bb802f58de2986c892bed13",
+      "bytes": 126800
+    },
+    "after_follower_fix/backward_1m_trace.npy": {
+      "sha256": "8a7bcec7c0779c44231c9fd9f4263f5287e5d1b593f2bbf5395166d48d184429",
+      "bytes": 61504
+    },
+    "after_follower_fix/closed_loop.json": {
+      "sha256": "917dfa82aaea6351fc7cfcea63f6f94f315eb71fe438890dba70a5e903aa7b47",
+      "bytes": 1733
+    },
+    "after_follower_fix/diagonal_1m_trace.npy": {
+      "sha256": "8f9456d6589ef29bc1d6a05487b5809dab4a86f852d294ce2f7f6a479ca824b9",
+      "bytes": 68280
+    },
+    "after_follower_fix/forward_1m_trace.npy": {
+      "sha256": "b41f2e69eb7fab05ede840e148694a8594df2481c9dc8ab63d37ad3a5b12e994",
+      "bytes": 60552
+    },
+    "after_follower_fix/left_1m_trace.npy": {
+      "sha256": "f033b95bf63143dba35ed4bd28975db62ae4432740785e10b19afbe55670a89c",
+      "bytes": 72704
+    },
+    "before_follower_fix/L_1m_1m_trace.npy": {
+      "sha256": "37787fcd3a04666382b75269c0e3b4978c278c273f04e1ad8d20ce5dc20d9c72",
+      "bytes": 113976
+    },
+    "before_follower_fix/backward_1m_trace.npy": {
+      "sha256": "d130aca711201379b3108499e486bcbbca4c9e77f65267d9c58793edd6cc94d0",
+      "bytes": 57136
+    },
+    "before_follower_fix/closed_loop.json": {
+      "sha256": "9dc5731e8f422225c192cf305729dd6cbaac0c0ab1d2f8e53758057e877ad031",
+      "bytes": 1734
+    },
+    "before_follower_fix/diagonal_1m_trace.npy": {
+      "sha256": "57c3060ac5e543af3c049c087eea59d10283baa94d18d258cc52cc57ec02bbde",
+      "bytes": 63408
+    },
+    "before_follower_fix/forward_1m_trace.npy": {
+      "sha256": "5f14707d056774a6ceec9e394ba71e3e218de8a27588479c5bfb94f5c0334e94",
+      "bytes": 55400
+    },
+    "before_follower_fix/left_1m_trace.npy": {
+      "sha256": "2d6b87147e51d1b27bbcaf173128393dbcc7ea23c252ba3ffce82daa0557be0f",
+      "bytes": 67664
+    },
+    "closed_loop.py": {
+      "sha256": "84bde3899866d5b27b56c967040eb5ba36df6af4b8d6d3d9442baeabc5ab6fa1",
+      "bytes": 4796
+    }
+  }
+}

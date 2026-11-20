@@ -244,7 +244,6 @@ def main(argv=None):
 
         case = {
             "case_id": "trajectory:" + ",".join(f"{value:g}" for value in command),
-            "profile": "omni_static",
             "command": command,
             "controls": 1000,
         }
@@ -281,7 +280,7 @@ def main(argv=None):
         state.update(
             status="completed" if report["acquisition_complete"] else "failed",
             replay=report,
-            eligible_for_motion_prior=bool(report["results"][0]["pass"]),
+            eligible_for_motion_prior=bool(report["results"][0]["native_capture_complete"]),
             recorded_transitions_sha256=sha(args.output / "recorded_transitions.npz"),
         )
         save(args.output / "state.json", state)

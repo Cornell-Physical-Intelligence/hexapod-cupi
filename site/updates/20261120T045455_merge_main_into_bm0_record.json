@@ -1,0 +1,41 @@
+{
+  "id": "20261120T045455_merge_main_into_bm0_record",
+  "date": "2026-11-20T04:54:55.000000Z",
+  "title": "Merge main into the bm0 record: two surrogate randomizations side by side",
+  "summary": "Main (105 commits, through PR 106) is merged into the bm0 branch. The surrogate now carries both randomizations: main's Step 7 declaration (randomization=\"none\" | \"table2_v1\", with fixed conditions and pushes) keeps its name and behaviour, and the branch's sim2real and leg-stand draws (friction, mass, motor strength, kd, action delay, sag, joint friction, rotor inertia) move to SurrogateEnv(dynamics=...) and the checkpoint identity key \"dynamics\"; one environment refuses both, and surrogate/train.py refuses --randomize with --randomization. Main's boundary keeps locomotion.rl free of locomotion.omniwalk imports, so the ghost_v10, ghost_v11, terrain and leg-odometry inputs move from rl/destination_wrapper.py into omniwalk/mdp/destination_inputs.py, which the task builds (destination_input_source) beside main's own destination_inputs; the wrapper only joins tensors and the inputs are unchanged. The import-boundary table gains this branch's packages (locomotion.terrain, locomotion.runtime, locomotion.sysid). The native environment sums the chunked terrain floor's forces before main's SubstepLoads; native packs take main's allocation_files, which now ship the triton shim (src/locomotion/spark/triton_shim.txt, the same bytes the packs wrote before) as triton/__init__.py so the pack and checkout runtime manifests agree. Main replaced the 96-case scorer with the walking-requirements judge, so the curriculum gate keeps the former scorer's moving bounds as recorded constants, and bm0's judge, chain and the sim2real adapter judges run only on the pre-merge code (commit 41d3e243): run_chain.sh refuses any other source tree. No model, checkpoint or recorded result changed. Ruff now skips records/ as immutable evidence, like site/assets/, because the hash-pinned record scripts cannot be reformatted.",
+  "areas": [
+    "locomotion",
+    "verification"
+  ],
+  "next": "Judge bm0 and the destination_v70 odometry checkpoints with main's walking-requirements judge on the merged code, if the lead wants that comparison; train a successor with table2_v1 on main's randomization path.",
+  "changes": [
+    "configs/source_inventory.json",
+    "pyproject.toml",
+    "records/curriculum_20261109/adapter/ADAPTER.md",
+    "records/distilled_bm0_u1000_20261112/*",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/omniwalk/env.py",
+    "src/locomotion/omniwalk/mdp/destination_inputs.py",
+    "src/locomotion/rl/destination_wrapper.py",
+    "src/locomotion/scripts/cli.py",
+    "src/locomotion/spark/prepare.py",
+    "src/locomotion/spark/sources.py",
+    "src/locomotion/spark/triton_shim.txt",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/scene.py",
+    "src/locomotion/surrogate/tests/test_dynamics_randomization.py",
+    "src/locomotion/surrogate/tests/test_supervision.py",
+    "src/locomotion/surrogate/train.py",
+    "src/locomotion/tests/test_destination.py",
+    "src/locomotion/tests/test_task.py",
+    "tools/source_inventory.py",
+    "viewer/README.md"
+  ],
+  "evidence": [
+    "src/locomotion/surrogate/tests/test_dynamics_randomization.py",
+    "src/locomotion/surrogate/tests/test_randomization.py",
+    "src/locomotion/tests/test_destination.py",
+    "records/distilled_bm0_u1000_20261112/pipeline/run_chain.sh"
+  ],
+  "no_project_impact": false
+}

@@ -9,7 +9,7 @@ assignees: ""
 ## Outcome and ownership
 
 Describe the observable capability. Name its lead and acceptance reviewer.
-Link the relevant R/Q requirements in `ARCHITECTURE.md` and roadmap marker.
+Link the owner file in `ARCHITECTURE.md` that decides it and its roadmap step.
 
 ## Starting point and dependencies
 

@@ -56,6 +56,16 @@ say() { echo "[$(date '+%Y-%m-%d %H:%M:%S')] $*" | tee -a "$LOG"; }
 die() { say "STOPPED: $*"; exit 1; }
 fresh() { [[ ! -e $1 ]] || die "$1 exists; not overwriting (use a new OUT)"; }
 
+# ---- the code is the code the chain was recorded on, or stop
+# Main's merge (jg2399/distilled-bm0-merge) replaced the 96-case scorer the judge stage reads and
+# moved the dynamics draws to SurrogateEnv(dynamics=...), so the chain runs only on the pre-merge
+# source tree (commit 41d3e243, whose src/ matches 252250d0 where the chain was rerun).
+RECORDED_CODE=41d3e2432f4a70d14a7b637655caa11f447ec9a3
+git cat-file -e "$RECORDED_CODE^{commit}" 2>/dev/null \
+  || die "commit $RECORDED_CODE is missing; fetch jg2399/distilled-bm0"
+git diff --quiet "$RECORDED_CODE" -- src configs pyproject.toml uv.lock \
+  || die "src/ differs from the recorded code; run from a checkout of it: git worktree add ../bm0-recorded $RECORDED_CODE"
+
 # ---- inputs are the recorded ones, or stop
 expect() {  # FILE SHA256_PREFIX
   local got; got=$(sha "$1")

@@ -53,6 +53,12 @@ a gait clock or velocity noise. AMP preserves terminal next states before reset,
 uses stock PPO updates and saves discriminator, optimizer and bank identities.
 The learning-rate cap and command-boundary bootstrap apply to AMP too.
 
+The critic's 42-value privileged state reads ground friction and the external
+wrench from the environment's `ground_friction` and `external_wrench_body`: the
+Step 7 draw and the mean push over the control, zero after a reset. An
+environment without them, such as native training before Step 7, gives 1.0 and
+zeros. Privileged inputs never enter the actor's observation groups.
+
 RSL-RL 5.0.1 provides PPO, storage and model interfaces. This package adds the
 AMP discriminator and style reward. Native runs
 remain the acceptance evidence. CPU regression and surrogate runs cannot admit

@@ -1,228 +1,351 @@
-"""Check the per-episode dynamics randomization and its bitwise-inert default path."""
+"""Check that the surrogate applies Table II draws per replica, isolates replicas and keeps ``none`` unchanged."""
 
+import contextlib
+import io
+import json
+import tempfile
 import unittest
+from pathlib import Path
 
+import mujoco
 import numpy as np
 import torch
 
-from locomotion.robots.hexapod import MASS_KG
-from locomotion.surrogate.env import (
-    ContactModel,
-    DynamicsRandomization,
-    SurrogateConfig,
-    SurrogateEnv,
-    randomization_overrides,
-)
-
-WIDE = DynamicsRandomization(
-    friction_scale=(0.6, 1.4),
-    mass_scale=(0.8, 1.2),
-    motor_scale=(0.8, 1.2),
-    kd_scale=(0.8, 1.2),
-    action_delay_controls=1,
-    sag_per_minute=(0.0, 0.3),
-    sag_floor=0.8,
-)
-SOFT_CONTACT = ContactModel(touchdown_overshoot=False)
+from locomotion import randomization as rnd
+from locomotion.amp.amp import AMPVecEnv
+from locomotion.omniwalk.mdp.commands import TaskConfig
+from locomotion.omniwalk.task import TrainingTask
+from locomotion.robots.hexapod import BODY_NAMES, KD, MASS_KG
+from locomotion.robots.rs05 import motor_force
+from locomotion.surrogate import evaluate, train
+from locomotion.surrogate.env import make_env
 
 
-def build(num_envs, randomization, threads=0, contact=None, seed=20260917):
-    return SurrogateEnv(
-        SurrogateConfig(num_envs=num_envs, seed=seed, episode_seconds=4.0),
-        threads=threads,
-        contact=contact,
-        randomization=randomization,
-    )
+def first_draws(env):
+    """The draw each replica's constructor reset took: a fresh generator repeats it."""
+    return [
+        rnd.draw(env.randomization, rnd.replica_generator(env.cfg.seed, i, env.randomization))
+        for i in range(env.num_envs)
+    ]
 
 
-def roll(env, controls=25, std=0.3, seed=7):
-    """Step seeded Gaussian actions and return the physics state after the last control."""
-    generator = torch.Generator().manual_seed(seed)
-    for _ in range(controls):
-        output = env.step(std * torch.randn(3, 18, generator=generator)[: env.num_envs])
-        done = output["terminated"] | output["truncated"]
-        if bool(done.any()):
-            env.reset(done.nonzero().flatten())
-    return env._state[:, 1:].copy()
+def body_tensor(quaternion, principal):
+    """A body's inertia tensor in its own frame from MuJoCo's principal values and axes."""
+    rotation = np.zeros(9)
+    mujoco.mju_quat2Mat(rotation, quaternion)
+    rotation = rotation.reshape(3, 3)
+    return rotation @ np.diag(principal) @ rotation.T
 
 
-class RandomizationTests(unittest.TestCase):
-    def test_validation_and_overrides(self):
-        model = randomization_overrides(["motor_scale=(0.9, 1.1)", "action_delay_controls=1"])
-        self.assertEqual((model.motor_scale, model.action_delay_controls), ((0.9, 1.1), 1))
-        self.assertEqual(randomization_overrides([]), DynamicsRandomization())
-        for bad in (["unknown_field=1"], ["motor_scale"]):
-            with self.assertRaises(ValueError):
-                randomization_overrides(bad)
-        for bad in (
-            dict(mass_scale=(0.4, 1.0)),
-            dict(motor_scale=(1.2, 0.8)),
-            dict(friction_scale=(0.1, 1.0)),
-            dict(action_delay_controls=3),
-            dict(action_delay_controls=1.0),
-            dict(action_delay_controls=(1, 0)),
-            dict(action_delay_controls=(0, 3)),
-            dict(action_delay_controls=(0.0, 1.0)),
-            dict(sag_per_minute=(0.0, 0.6)),
-            dict(sag_floor=0.4),
-        ):
-            with self.assertRaises(ValueError):
-                DynamicsRandomization(**bad)
-        self.assertEqual(DynamicsRandomization(action_delay_controls=1).delay_range(), (0, 1))
-        self.assertEqual(DynamicsRandomization(action_delay_controls=(1, 1)).delay_range(), (1, 1))
-        self.assertEqual(DynamicsRandomization().field_range("action_delay_controls"), (0.0, 0.0))
-        self.assertEqual(DynamicsRandomization().field_range("mass_scale"), (1.0, 1.0))
-        # The touchdown correction reads one shared friction, so randomizing it needs the model off.
-        with self.assertRaises(ValueError):
-            build(1, DynamicsRandomization(friction_scale=(0.8, 1.2)))
-        build(1, DynamicsRandomization(friction_scale=(0.8, 1.2)), contact=SOFT_CONTACT).close()
+class RandomizedEnvTests(unittest.TestCase):
+    @classmethod
+    def setUpClass(cls):
+        torch.set_num_threads(2)
+        cls.env = make_env(3, threads=0, randomization="table2_v1")
 
-    def test_inert_ranges_match_the_default_trajectory_bitwise(self):
-        plain = build(3, None)
-        inert = build(3, DynamicsRandomization())
+    @classmethod
+    def tearDownClass(cls):
+        cls.env.close()
+
+    def test_none_shares_the_compiled_model_and_adds_no_telemetry(self):
+        env = make_env(2, threads=0)
         try:
-            self.assertTrue(np.array_equal(roll(plain), roll(inert)))
-        finally:
-            plain.close()
-            inert.close()
-
-    def test_draws_are_reproducible_and_batch_independent(self):
-        first = build(3, WIDE, contact=SOFT_CONTACT)
-        second = build(3, WIDE, contact=SOFT_CONTACT)
-        alone = build(1, WIDE, contact=SOFT_CONTACT)
-        threaded = build(3, WIDE, contact=SOFT_CONTACT, threads=2)
-        try:
-            for name, values in first.randomization_draws.items():
-                self.assertTrue(np.array_equal(values, second.randomization_draws[name]), name)
-                self.assertEqual(values[0], alone.randomization_draws[name][0], name)
-            state = roll(first)
-            self.assertTrue(np.array_equal(state, roll(threaded)))
-            self.assertTrue(np.array_equal(state[:1], roll(alone)))
-            # The draws moved off their defaults at all (the ranges are wide).
-            self.assertNotEqual(float(first.randomization_draws["mass_scale"].sum()), 3.0)
-        finally:
-            for env in (first, second, alone, threaded):
-                env.close()
-
-    def test_mass_and_friction_reach_the_replica_models_per_reset(self):
-        env = build(3, WIDE, contact=SOFT_CONTACT)
-        try:
-            draws = env.randomization_draws
-            for row in range(3):
-                self.assertAlmostEqual(
-                    float(env._models[row].body_mass.sum()),
-                    draws["mass_scale"][row] * MASS_KG,
-                    delta=1e-9,
-                )
-                self.assertAlmostEqual(
-                    float(env._models[row].geom_friction[0, 0]),
-                    draws["friction_scale"][row] * env.contact_model.friction[0],
-                    delta=1e-12,
-                )
-            before = {row: env._models[row].body_mass.copy() for row in range(3)}
-            kept = draws["mass_scale"].copy()
-            env.reset([1])
-            self.assertTrue(np.array_equal(env._models[0].body_mass, before[0]))
-            self.assertTrue(np.array_equal(env._models[2].body_mass, before[2]))
-            self.assertNotEqual(draws["mass_scale"][1], kept[1])
-            self.assertEqual(draws["mass_scale"][0], kept[0])
+            self.assertTrue(all(model is env.mj_model for model in env._models))
+            env.step(torch.zeros(2, 18))
+            self.assertNotIn("ground_friction", env.telemetry)
+            self.assertNotIn("external_wrench_body", env.telemetry)
+            self.assertEqual(env.native_readback["randomization"], rnd.identity("none"))
         finally:
             env.close()
 
-    def test_joint_friction_and_armature_reach_each_joint_per_type(self):
-        fitted = DynamicsRandomization(
-            joint_friction_nm=((0.04, 0.06), (0.18, 0.22), (0.02, 0.03)),
-            armature_kg_m2=(1e-4, 3e-4),
-            kd_scale=(0.13, 0.37),
-        )
-        env = build(2, fitted)
+    def test_constructor_draws_apply_to_each_replica_model(self):
+        env = make_env(3, threads=0, randomization="table2_v1")
         try:
-            draws = env.randomization_draws
-            columns = env._qvel_columns
-            for row in range(2):
-                friction = env._models[row].dof_frictionloss[columns].reshape(6, 3)
-                armature = env._models[row].dof_armature[columns].reshape(6, 3)
-                for k, kind in enumerate(("coxa", "femur", "tibia")):
-                    self.assertTrue(
-                        np.all(friction[:, k] == draws[f"joint_friction_{kind}_nm"][row])
+            self.assertEqual(len({id(model) for model in env._models}), 3)
+            self.assertAlmostEqual(float(env.mj_model.body_mass.sum()), MASS_KG, places=9)
+            for i, draw in enumerate(first_draws(env)):
+                model = env._models[i]
+                ids = env._body_ids
+                expected = env._nominal["body_mass"][ids] * draw.link_mass_scale
+                expected[BODY_NAMES.index("body")] += draw.payload_mass_kg
+                self.assertTrue(np.allclose(model.body_mass[ids], expected))
+                self.assertTrue(
+                    np.all(model.geom_friction[env._friction_geoms, 0] == draw.foot_friction)
+                )
+                # Only the toe caps carry the draw: the floor is zero and other geoms keep 1.0.
+                friction = model.geom_friction[:, 0].copy()
+                friction[env._friction_geoms] = 1.0
+                self.assertEqual(float(friction[0]), 0.0)
+                self.assertTrue(np.all(friction[1:] == 1.0))
+                self.assertAlmostEqual(float(env.ground_friction[i]), draw.foot_friction, places=6)
+                self.assertAlmostEqual(float(env._kp[i]), rnd.KP * draw.kp_scale, places=5)
+                self.assertTrue(torch.allclose(env._kd[i], torch.tensor(KD) * draw.kd_scale))
+                self.assertTrue(
+                    np.allclose(env.root_com_local[i].numpy(), model.body_ipos[env._base_id])
+                )
+                pose = env._qpos0[i, env._qpos_columns]
+                self.assertTrue(np.allclose(pose, env._neutral64 + draw.joint_offset_rad))
+                self.assertAlmostEqual(
+                    env._lowest_toe(env._qpos0[i]), env._nominal_toe_low, places=12
+                )
+            self.assertEqual(env.native_readback["randomization"], rnd.identity("table2_v1"))
+            # Runs log no draws: the readback keeps the nominal ledger and says so.
+            self.assertEqual(
+                env.native_readback["mass_per_replica_kg"],
+                [float(env.mj_model.body_mass.sum())] * 3,
+            )
+            self.assertIn("log no draws", env.native_readback["mass_per_replica_kg_scope"])
+        finally:
+            env.close()
+
+    def test_payload_keeps_the_base_tensor_about_its_new_centre(self):
+        env = self.env
+        base, model, nominal = env._base_id, env._models[0], env._nominal
+        draw = first_draws(env)[0]
+        scale = draw.link_mass_scale[BODY_NAMES.index("body")]
+        tensor = body_tensor(nominal["body_iquat"][base], nominal["body_inertia"][base] * scale)
+        _, centre, expected = rnd.combined_base_inertial(
+            nominal["body_mass"][base] * scale,
+            nominal["body_ipos"][base],
+            tensor,
+            draw.payload_mass_kg,
+            draw.payload_position_m,
+        )
+        self.assertTrue(
+            np.allclose(body_tensor(model.body_iquat[base], model.body_inertia[base]), expected)
+        )
+        self.assertTrue(np.allclose(model.body_ipos[base], centre))
+
+    def test_selected_reset_redraws_only_that_replica(self):
+        env = self.env
+        env.reset()
+        for _ in range(3):
+            env.step(0.2 * torch.ones(3, 18))
+        models = [
+            (m.body_mass.copy(), m.body_inertia.copy(), m.geom_friction.copy()) for m in env._models
+        ]
+        state, kp = env._state.copy(), env._kp.clone()
+        env.reset([1])
+        for i in (0, 2):
+            self.assertTrue(
+                all(
+                    np.array_equal(a, b)
+                    for a, b in zip(
+                        models[i],
+                        (
+                            env._models[i].body_mass,
+                            env._models[i].body_inertia,
+                            env._models[i].geom_friction,
+                        ),
                     )
-                    self.assertTrue(np.all(armature[:, k] == draws[f"armature_{kind}_kg_m2"][row]))
-                low, high = fitted.joint_ranges("joint_friction_nm")[1]
-                self.assertTrue(low <= draws["joint_friction_femur_nm"][row] <= high)
-                self.assertTrue(0.13 <= draws["kd_scale"][row] <= 0.37)
-                # The free root joint keeps the canonical zero friction and armature.
-                others = np.setdiff1d(np.arange(env._models[row].nv), columns)
-                self.assertTrue(np.all(env._models[row].dof_frictionloss[others] == 0))
-                self.assertTrue(np.all(env._models[row].dof_armature[others] == 0))
-            roll(env, controls=5)
-        finally:
+                )
+            )
+            self.assertTrue(np.array_equal(state[i], env._state[i]))
+            self.assertEqual(float(kp[i]), float(env._kp[i]))
+        self.assertFalse(np.array_equal(models[1][0], env._models[1].body_mass))
+        self.assertTrue(np.array_equal(env._state[1, 1:26], env._qpos0[1]))
+        self.assertEqual(float(env.external_wrench_body[1].abs().sum()), 0.0)
+
+    def test_draws_and_steps_are_deterministic(self):
+        def run():
+            env = make_env(2, threads=0, randomization="table2_v1", seed=11)
+            generator = torch.Generator().manual_seed(3)
+            for _ in range(10):
+                env.step(0.3 * torch.randn(2, 18, generator=generator))
+            result = env._state.copy(), [m.body_mass.copy() for m in env._models]
             env.close()
-        for bad in (
-            dict(joint_friction_nm=(0.2, 0.1)),
-            dict(joint_friction_nm=(-0.1, 0.1)),
-            dict(joint_friction_nm=((0.0, 0.1), (0.0, 0.1))),
-            dict(armature_kg_m2=(0.0, 0.1)),
-            dict(kd_scale=(0.05, 1.0)),
-        ):
-            with self.assertRaises(ValueError):
-                DynamicsRandomization(**bad)
-        self.assertEqual(
-            DynamicsRandomization(joint_friction_nm=(0.0, 0.1)).joint_ranges("joint_friction_nm"),
-            ((0.0, 0.1),) * 3,
+            return result
+
+        (a, masses_a), (b, masses_b) = run(), run()
+        self.assertTrue(np.array_equal(a, b))
+        self.assertTrue(all(np.array_equal(x, y) for x, y in zip(masses_a, masses_b)))
+
+    def test_push_reports_the_body_force_and_no_torque(self):
+        env = self.env
+        env.reset()
+        # Schedule a push that covers the whole next control on replica 0 alone.
+        env._push_start[:] = 10**9
+        env._push_end[:] = 10**9 + 1
+        env._push_start[0], env._push_end[0] = env._since_reset[0], env._since_reset[0] + 80
+        env._push_force[0] = (6.0, -8.0, 0.0)
+        env.step(torch.zeros(3, 18))
+        wrench = env.telemetry["external_wrench_body"]
+        self.assertTrue(torch.allclose(wrench[0], torch.tensor([6.0, -8.0, 0.0, 0.0, 0.0, 0.0])))
+        self.assertEqual(float(wrench[1:].abs().sum()), 0.0)
+        column = env.mj_model.nu + 6 * env._base_id
+        self.assertAlmostEqual(
+            float(np.linalg.norm(env._control[0, 0, column : column + 3])), 10.0, places=9
         )
+        self.assertEqual(float(np.abs(env._control[0, 0, column + 3 : column + 6]).sum()), 0.0)
 
-    def test_motor_scale_caps_the_applied_torque_exactly(self):
-        env = build(1, DynamicsRandomization(motor_scale=(0.5, 0.5)))
+    def test_push_end_draws_the_next_push_from_the_interval(self):
+        env = self.env
+        env.reset()
+        end = int(env._push_end[2])
+        env._since_reset[2] = end - 1
+        env._advance_pushes()
+        low, high = (env._steps(x) for x in rnd.TABLE2_V1.push.interval_s)
+        self.assertTrue(end + low <= env._push_start[2] <= end + high)
+        self.assertEqual(env._push_end[2] - env._push_start[2], 80)
+
+
+class PrivilegedStateTests(unittest.TestCase):
+    """The AMP adapter's friction and perturbation slots on the surrogate, as the paper critic reads them."""
+
+    @staticmethod
+    def adapter(randomization):
+        env = make_env(3, threads=0, randomization=randomization, record_motion_features=True)
+        return env, AMPVecEnv(TrainingTask(env, TaskConfig(seed=3)))
+
+    def test_none_keeps_the_declared_constants(self):
+        env, adapter = self.adapter("none")
         try:
-            # A large position error at rest requests far over the scaled ceiling 0.5 * 1.6 N m.
-            env._state[:, 1 + env._qpos_columns] = (env.neutral - 0.2).numpy().astype(np.float64)
-            env.step(torch.ones(1, 18))
-            applied = env.telemetry["applied_torque_abs_max_400hz"]
-            requested = env.telemetry["requested_torque_abs_max_400hz"]
-            self.assertGreater(float(requested.max()), 1.6)
-            self.assertAlmostEqual(float(applied.max()), 0.5 * 1.6, places=6)
+            for _ in range(2):
+                privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+                self.assertTrue(bool((privileged[:, 4] == 1.0).all()))
+                self.assertEqual(float(privileged[:, 23:29].abs().sum()), 0.0)
         finally:
             env.close()
 
-    def test_sag_drains_the_ceiling_toward_its_floor(self):
-        env = build(1, DynamicsRandomization(sag_per_minute=(0.3, 0.3), sag_floor=0.9))
+    def test_slots_follow_the_draw_the_push_and_a_selected_reset(self):
+        env, adapter = self.adapter("table2_v1")
         try:
-            rate = 0.3 * env.cfg.control_dt / 60.0
-            self.assertAlmostEqual(float(env._sag_rate[0]), rate, places=9)
-            for _ in range(50):
-                env.step(torch.zeros(1, 18))
-            self.assertAlmostEqual(float(env._sag_scale[0]), 1.0 - 50 * rate, places=5)
-            env._sag_scale[:] = 0.9 + 0.5 * rate
-            env.step(torch.zeros(1, 18))
-            env.step(torch.zeros(1, 18))
-            self.assertAlmostEqual(float(env._sag_scale[0]), 0.9, places=6)
-            env.reset([0])
-            self.assertEqual(float(env._sag_scale[0]), 1.0)
+            privileged = adapter.get_observations()["privileged"]
+            torch.testing.assert_close(privileged[:, 4], env.ground_friction)
+            self.assertEqual(float(privileged[:, 23:29].abs().sum()), 0.0)
+            # A push on replica 0 alone that lasts beyond the next two controls.
+            env._push_start[:] = 10**9
+            env._push_end[:] = 10**9 + 1
+            env._push_start[0], env._push_end[0] = env._since_reset[0], env._since_reset[0] + 80
+            env._push_force[0] = (6.0, -8.0, 0.0)
+            privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+            torch.testing.assert_close(
+                privileged[0, 23:29], torch.tensor([6.0, -8.0, 0.0, 0.0, 0.0, 0.0])
+            )
+            self.assertEqual(float(privileged[1:, 23:29].abs().sum()), 0.0)
+            # Terminate replica 0 mid-push: its slots show the new draw and no push, not the telemetry before the reset.
+            task, step = adapter.task, adapter.task.step
+
+            def terminate_first(action):
+                output = step(action)
+                output["terminated"] = output["terminated"].clone()
+                output["terminated"][0] = True
+                return output
+
+            task.step = terminate_first
+            before = env.ground_friction.clone()
+            privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+            self.assertTrue(bool(adapter.reset_rows[0]) and not bool(adapter.reset_rows[1:].any()))
+            self.assertNotEqual(float(env.ground_friction[0]), float(before[0]))
+            self.assertEqual(float(env.telemetry["ground_friction"][0]), float(before[0]))
+            torch.testing.assert_close(privileged[:, 4], env.ground_friction)
+            torch.testing.assert_close(privileged[1:, 4], before[1:])
+            self.assertEqual(float(privileged[0, 23:29].abs().sum()), 0.0)
         finally:
             env.close()
 
-    def test_action_delay_holds_the_previous_action_one_control(self):
-        delayed = build(2, DynamicsRandomization(action_delay_controls=1))
-        plain = build(2, None)
+    def test_the_height_slot_reads_each_replicas_randomized_reset_height(self):
+        env, adapter = self.adapter("table2_v1")
         try:
-            delayed._delay_steps[:] = 1
-            first = 0.3 * torch.ones(2, 18)
-            second = -0.3 * torch.ones(2, 18)
-            # The first control of an episode is undelayed; afterwards the servo runs one behind.
-            delayed.step(first)
-            delayed.step(second)
-            plain.step(first)
-            plain.step(first)
-            self.assertTrue(np.array_equal(delayed._state, plain._state))
-            delayed.step(second)
-            plain.step(second)
-            self.assertTrue(np.array_equal(delayed._state, plain._state))
-            fixed = build(2, DynamicsRandomization(action_delay_controls=(1, 1)))
-            self.assertEqual(fixed._delay_steps.tolist(), [1, 1])
-            fixed.close()
+            # Full reset: each replica's own lifted root height, not the nominal scalar.
+            # The review reproduced these heights at seed 3; the nominal scalar is 0.1028 m.
+            privileged = adapter.get_observations()["privileged"]
+            torch.testing.assert_close(privileged[:, 3], env.current["root"][:, 2], rtol=0, atol=0)
+            torch.testing.assert_close(
+                privileged[:, 3], torch.tensor([0.106898308, 0.107334152, 0.111450374])
+            )
+            # Selected reset of replica 0: its new draw's height; the others keep their stepped height.
+            task, step = adapter.task, adapter.task.step
+
+            def terminate_first(action):
+                output = step(action)
+                output["terminated"] = output["terminated"].clone()
+                output["terminated"][0] = True
+                return output
+
+            task.step = terminate_first
+            before = float(env.reset_heights[0])
+            privileged = adapter.step(torch.zeros(3, 18))[0]["privileged"]
+            self.assertTrue(bool(adapter.reset_rows[0]) and not bool(adapter.reset_rows[1:].any()))
+            self.assertNotEqual(float(env.reset_heights[0]), before)
+            self.assertEqual(float(privileged[0, 3]), float(env.reset_heights[0]))
+            self.assertEqual(float(privileged[0, 3]), float(env.current["root"][0, 2]))
+            torch.testing.assert_close(privileged[1:, 3], env.telemetry["root_pose_xyzw"][1:, 2])
         finally:
-            delayed.close()
-            plain.close()
+            env.close()
+
+
+class CommandTests(unittest.TestCase):
+    def test_both_commands_offer_the_declared_names_and_default_to_none(self):
+        for parser in (train.build_parser(), evaluate.build_parser()):
+            action = next(a for a in parser._actions if a.dest == "randomization")
+            self.assertEqual((tuple(action.choices), action.default), (rnd.NAMES, "none"))
+
+    def test_training_identity_binds_the_declaration_and_its_ranges(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "run"
+            with contextlib.redirect_stdout(io.StringIO()):
+                code = train.main(
+                    [
+                        "--output",
+                        str(output),
+                        "--num-envs",
+                        "2",
+                        "--threads",
+                        "1",
+                        "--updates",
+                        "1",
+                        "--randomization",
+                        "table2_v1",
+                    ]
+                )
+            state = json.loads((output / "state.json").read_text())
+            self.assertEqual(code, 0, state.get("traceback"))
+            recorded = state["identity"]["randomization"]
+            declaration = rnd.declaration("table2_v1")
+            self.assertEqual(recorded["declaration_sha256"], declaration["sha256"])
+            self.assertEqual(rnd.canonical(recorded["declaration"]), declaration["json"])
+            self.assertEqual(recorded["declaration"]["table"]["foot_friction"]["high"], 2.5)
+            readback = json.loads((output / "native/native_readback.json").read_text())
+            self.assertEqual(readback["randomization"], rnd.identity("table2_v1"))
+            # The run records the declaration, never a replica's drawn values.
+            for path in output.rglob("*"):
+                if path.is_file() and path.suffix in (".json", ".jsonl"):
+                    self.assertNotIn("link_mass_scale", path.read_text(), path.name)
+
+    def test_randomized_evaluation_refuses_the_friction_consensus(self):
+        with tempfile.TemporaryDirectory() as directory:
+            checkpoint = Path(directory) / "checkpoint.pt"
+            checkpoint.with_suffix(".json").write_text(json.dumps({"identity": {"ppo_config": {}}}))
+            args = evaluate.build_parser().parse_args(
+                [
+                    "--checkpoint",
+                    str(checkpoint),
+                    "--output",
+                    str(Path(directory) / "out"),
+                    "--randomization",
+                    "table2_v1",
+                ]
+            )
+            with self.assertRaisesRegex(ValueError, "no-contact-consensus"):
+                evaluate.evaluate_checkpoint(args)
+            self.assertFalse((Path(directory) / "out").exists())
+
+
+class MotorDrawTests(unittest.TestCase):
+    def test_the_nominal_draw_is_the_nominal_motor_and_strength_never_lifts_the_cap(self):
+        generator = torch.Generator().manual_seed(5)
+        q, dq, target = (torch.randn(4, 18, generator=generator) for _ in range(3))
+        dq = dq * 40.0
+        kd = torch.tensor(KD)
+        nominal = motor_force(q, dq, target, kd)
+        explicit = rnd.motor_force(q, dq, target, kd, rnd.KP, torch.ones(4, 18))
+        self.assertTrue(all(torch.equal(a, b) for a, b in zip(nominal, explicit)))
+        _, applied, ceiling = rnd.motor_force(
+            q, dq, target, kd.expand(4, -1), torch.full((4, 1), 14.4), torch.full((4, 18), 1.2)
+        )
+        self.assertTrue(torch.all(ceiling <= rnd.TORQUE_CAP_NM))
+        self.assertTrue(torch.all(applied.abs() <= ceiling))
 
 
 if __name__ == "__main__":

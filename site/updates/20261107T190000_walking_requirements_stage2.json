@@ -1,0 +1,22 @@
+{
+  "id": "20261107T190000_walking_requirements_stage2",
+  "date": "2026-11-07T19:00:00Z",
+  "title": "Declare the stage 2 walking requirements in one file",
+  "summary": "configs/walking_requirements.json now owns everything the survey asks of the walking controller on flat ground: the two translation speeds at eight bearings, the turn rate, the arc, stand, the 2 s minimum hold, the 0.12 m stop tolerance, the tilt and torque limits and the GPS-only pose source. The payload is the Livox Mid-360 lidar, 0.265 kg sensor only; mount, cable and deck electronics are not yet decided. A navigation test binds the command bank and the follower defaults to the file, so neither side can change alone. The 0.10 and 0.20 m/s cases, the 0.4 rad/s turns and the stage 2C formal cases are not requirements; they stay in the evaluator as diagnostics.",
+  "areas": [
+    "navigation",
+    "mission"
+  ],
+  "next": "Bind the locomotion evaluator to the file by building the acceptance cases from it, then record which requirement set the accepted controller meets.",
+  "changes": [
+    "configs/walking_requirements.json",
+    "src/navigation/tests/test_requirements.py",
+    "site/updates/20261107T190000_walking_requirements_stage2.json"
+  ],
+  "evidence": [
+    "configs/walking_requirements.json",
+    "src/navigation/tests/test_requirements.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A requirements declaration and a CPU test are added. Runtime locomotion sources, checkpoints, the approved robot, acceptance gates and roadmap markers remain unchanged."
+}

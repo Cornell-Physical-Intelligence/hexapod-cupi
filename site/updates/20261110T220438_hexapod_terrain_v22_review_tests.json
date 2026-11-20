@@ -1,0 +1,22 @@
+{
+  "id": "20261110T220438_hexapod_terrain_v22_review_tests",
+  "date": "2026-11-10T22:04:38Z",
+  "title": "Test the shipped terrain v2.2 spawn-origin and off-course code",
+  "summary": "The CPU tests now call the shipped slope and rough-terrain origin functions of Hexapod-Rough-v22-Direct-v0, and the off-course termination is a function the environment's done check calls and a test exercises; removing either fix now fails a test. The v2.1 update record, renamed by mistake in an earlier push, is restored unchanged.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Record ground-contact force and motor torque under the common evaluator, as AGENTS.md requires before another PPO sequence; only then train Hexapod-Rough-v22-Direct-v0 natively on the Spark from a flat BC + PPO checkpoint.",
+  "changes": [
+    "src/locomotion/hexapod/terrain/curriculum.py",
+    "src/locomotion/hexapod/terrain/env.py",
+    "src/locomotion/tests/test_hexapod_terrain.py",
+    "site/updates/20261025T204142_hexapod_terrain_v21.json",
+    "site/updates/20261110T220438_hexapod_terrain_v22_review_tests.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_hexapod_terrain.py"
+  ],
+  "no_project_impact": true,
+  "reason": "Tests and a refactor of an opt-in training task's termination check; it changes no admitted model, gate, roadmap marker or the omniwalk runtime, and records no native result in this repository."
+}

@@ -1,0 +1,80 @@
+{
+  "schema": "hexapod_surrogate_fixed_action_trajectory_extract_v1",
+  "purpose": "Pre-change oracle for issue #67: surrogate --randomization none must reproduce this trajectory.",
+  "oracle": {
+    "name": "step7_baseline_haswell_20261027_001",
+    "trajectory_sha256": "21bab85747bbe2e10a030b97156caafd39bb14b59b0df6eed5ba9afe0a4fd4a1",
+    "record_sha256": "7ea4af73223e0f373f7bc1eb74f57ccafe6a1f7d3eda80a5584f9de02bd30e8a",
+    "kept_outside_the_checkout": "full trajectory.npz with telemetry, record.json, capture_baseline.py"
+  },
+  "openblas": {
+    "coretype": "Haswell",
+    "num_threads": 1,
+    "reason": "NumPy's bundled OpenBLAS picks its kernel by CPU, and kernels round differently. step7_baseline_20261013_001 used the AVX-512 SkylakeX kernel; a recapture at the same commit with OPENBLAS_CORETYPE=SkylakeX reproduces its trajectory.npz byte for byte. Haswell needs only AVX2, so the GitHub runners and other x86-64 hosts can replay it exactly."
+  },
+  "source_commit": "7478fca8cbf0294b04f61149786ff87ef8fafe32",
+  "source_dirty": false,
+  "source_files": {
+    "locomotion/env.py": "3f50d3d585ae58c005637f32c8a3054e56954787ccdec9d4dc5738d2722af454",
+    "locomotion/env_config.py": "bfad5368bce1895e8505899025c6ce60267c8aef12a0359e62f0a5e6635068fe",
+    "locomotion/surrogate/env.py": "88c56ef4ba3ae7d089fa07b44bffac1b4fba5eb6e01968bc27786f2cc255812c",
+    "robot/active_model.json": "bcc7ab1a3a51844f688f42e3b19d5135a8c1cae181262e91fb96ae932635796d",
+    "locomotion/surrogate/records/self_check.json": "a1c61726a52b8d756fae2b722c355de707aa57d6aa0d6772559f45392f2e7767",
+    "locomotion/surrogate/records/equivalence.json": "84ab7a490ada7818cac09dc2f6ce99b11373585c770b7b8ca15620d721c11e5e"
+  },
+  "mjcf_sha256": "b1afdcce5874bb1fe982c3e2401905c917d9a60fffd2650046df5c4f2e837e2b",
+  "backend": "mujoco 3.14.0",
+  "torch": "2.14.0+cpu",
+  "numpy": "2.5.2",
+  "protocol": {
+    "num_envs": 3,
+    "controls": 100,
+    "action_std": 0.3,
+    "action_seed": 7,
+    "env_seed": 20260914,
+    "threads": 0,
+    "torch_threads": 1,
+    "selected_reset": {
+      "row": 1,
+      "after_control": 40
+    },
+    "contact_model": "default",
+    "state_layout": "env._state rows; one row appended after each control and after each reset call"
+  },
+  "resets": [
+    {
+      "after_control": 40,
+      "rows": [
+        1
+      ]
+    }
+  ],
+  "counters": {
+    "physics_steps": 800,
+    "speed_clamp_events": 0,
+    "touchdown_events": 534,
+    "overshoot_events": 130,
+    "peak_joint_speed": 35.903965475108926
+  },
+  "arrays": {
+    "state_after_each_control_or_reset": {
+      "shape": [
+        102,
+        3,
+        50
+      ],
+      "dtype": "float64",
+      "sha256": "bbcef80123d1d064ce07c1aabae61ea1dd35f2c907d7e1f2a8603b5dcef16d1a"
+    },
+    "actions": {
+      "shape": [
+        100,
+        3,
+        18
+      ],
+      "dtype": "float32",
+      "sha256": "16f112177f0db0a2ffd19a5de604f1f193ecf8f79c10171e568f528280ef566f",
+      "note": "regenerated in the test from action_seed; not stored"
+    }
+  }
+}

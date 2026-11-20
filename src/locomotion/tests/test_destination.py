@@ -2326,40 +2326,31 @@ class TerrainCampaignTests(unittest.TestCase):
         self.assertEqual(EXPERIMENT_INPUTS["destination_v67"], "terrain_v2")
         v67.validate()
 
-    def test_nonfoot_contact_fails_the_gate_and_the_evaluator_alike(self):
-        from locomotion.omniwalk.destination_task import WALK_CHECKS, walk_failures
-        from locomotion.tests.test_evaluation import fixture, score
+    def test_nonfoot_contact_fails_the_gate(self):
+        """Continuous non-foot contact fails the curriculum gate on the 0.001 bound alone.
 
-        # One trace: perfect tracking, continuous non-foot contact. The evaluator rejects it.
-        data = fixture(1000, command=(0.05, 0.0, 0.0))
-        data["nonfoot_contact"][:] = 1
-        result = score(data, "omni_static")
-        self.assertFalse(result["pass"])
-        self.assertIn("nonfoot_fraction", result["failed_bounds"])
-        # The curriculum gate accumulates the same measurement against the same 0.001 bound.
-        sums = torch.zeros(1, 6, dtype=torch.float64)
-        sums[0, 5] = float(data["nonfoot_contact"][100:].sum())
-        failed = walk_failures(
-            sums,
-            torch.tensor([900.0]),
-            torch.tensor([0.05]),
-            torch.zeros(1, dtype=torch.bool),
-            torch.zeros(1, dtype=torch.bool),
-        )
-        named = [c for c, f in zip(WALK_CHECKS, failed[0].tolist()) if f]
-        self.assertEqual(named, ["nonfoot_fraction"])
-        # The clean version of the same trace passes both paths.
-        clean = fixture(1000, command=(0.05, 0.0, 0.0))
-        self.assertTrue(score(clean, "omni_static")["pass"])
-        self.assertFalse(
-            walk_failures(
-                torch.zeros(1, 6, dtype=torch.float64),
+        The gate copies the moving checks of the former 96-case scorer (evaluation/scoring.py,
+        profile omni_static), which main replaced with the walking-requirements judge; the gate
+        keeps those recorded bounds, so this checks it without the removed scorer."""
+        from locomotion.omniwalk.destination_task import WALK_CHECKS, walk_failures
+
+        def failures(nonfoot_controls):
+            sums = torch.zeros(1, 6, dtype=torch.float64)
+            sums[0, 5] = float(nonfoot_controls)
+            return walk_failures(
+                sums,
                 torch.tensor([900.0]),
                 torch.tensor([0.05]),
                 torch.zeros(1, dtype=torch.bool),
                 torch.zeros(1, dtype=torch.bool),
-            ).any()
-        )
+            )
+
+        # Non-foot contact on all 900 counted controls of a perfectly tracked walk.
+        named = [c for c, f in zip(WALK_CHECKS, failures(900)[0].tolist()) if f]
+        self.assertEqual(named, ["nonfoot_fraction"])
+        # The clean walk, and one at the bound (0.9 of 900 controls = 0.001), pass.
+        self.assertFalse(failures(0).any())
+        self.assertFalse(failures(0.9).any())
 
     def test_record_walks_accumulates_the_nonfoot_measurement(self):
         from locomotion.omniwalk.destination_task import experiment_task

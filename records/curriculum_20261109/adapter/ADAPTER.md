@@ -7,6 +7,10 @@ its declaration; `judges/` holds the three evaluation scripts; the identificatio
 matched-draw robustness readouts are reduced into `site/assets/curriculum_bm0_20261119_001/results.json`
 (`adapter_readouts`; raw files on Spark under `/srv/cupi/hexapod/runs/julian/pr108_raw_results_20261119/`); `rehearsal_001/` a full deployment-loop record.
 
+After the merge with main, the judges in `judges/` run on the pre-merge code (commit `41d3e243`):
+they pass the draws as `randomization=` and read the removed 96-case scorer. On the merged code the
+same draws are `SurrogateEnv(dynamics=...)`.
+
 ## Mechanism
 `CompensatedActor` wraps a FROZEN core policy (u600_002, e29be0bc..., bytes sha-verified at
 construction) with bounded, latent-conditioned gains/biases on the proprio + executed-target

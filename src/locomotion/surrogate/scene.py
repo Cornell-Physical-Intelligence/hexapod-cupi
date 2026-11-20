@@ -347,7 +347,7 @@ class Robot:
         self.upside_down = {flip: UpsideDown(self.env.neutral, flip) for flip in ("roll", "pitch")}
         if start.get("upside_down"):
             # On its back in the upside-down standing pose, dropped from just above it; MuJoCo's qpos is wxyz.
-            qpos = self.env._qpos0
+            qpos = self.env._qpos0[0]  # one robot: the env's only reset row
             qpos[2] += UPSIDE_DOWN_LIFT_M
             qpos[3:7] = (0.0, -math.sin(heading / 2), math.cos(heading / 2), 0.0)
             neutral = self.upside_down["roll"].neutral
@@ -356,7 +356,7 @@ class Robot:
         elif start.get("flat"):
             # Lying flat, right side up: the legs folded over the top (the pose getting up on its back ends
             # in), the body dropped from just above where it rests on the ground.
-            qpos = self.env._qpos0
+            qpos = self.env._qpos0[0]  # one robot: the env's only reset row
             qpos[2] = ground + FLAT_HEIGHT_M
             neutral = self.upside_down["roll"].neutral
             qpos[self.env._qpos_columns] = neutral.numpy().astype(np.float64)

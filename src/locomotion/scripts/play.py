@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import time
+from pathlib import Path
 
 from locomotion.evaluation.camera import NativePolicyCamera
 from locomotion.evaluation.checkpoint import (
@@ -26,6 +27,10 @@ from locomotion.scripts.cli import (
 def parse_args(argv=None):
     """Parse the command line and resolve the recipe and the evaluation gait-clock default."""
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
+    from locomotion.evaluation.requirements import REQUIREMENTS
+
+    parser.add_argument("--requirements", type=Path, default=REQUIREMENTS)
+    parser.add_argument("--requirements-set", default="stage2_flat")
     add_common_arguments(parser)
     add_learner_arguments(parser)
     add_app_arguments(parser, argv)
@@ -134,50 +139,36 @@ def smoothed_policy(evaluate, env, action_smoothing):
 
 
 def run_evaluation(env, args, policy, state, started):
-    """Score the policy on the selected cases, then require a complete set of load summaries."""
+    """Record and judge every requirement case, then require a complete set of load summaries."""
     from locomotion.amp.features import extract_features
-    from locomotion.evaluation.runner import evaluate_suite, run_learning_probe_suite
+    from locomotion.evaluation import requirements
+    from locomotion.evaluation.runner import run_cases
 
     env.render = NativePolicyCamera(env)
     remaining = max(0.001, args.max_wall_seconds - (time.monotonic() - started))
-    options = dict(
-        progress=print_progress, max_wall_seconds=remaining, motion_features=extract_features
+    rules, _ = requirements.load_requirements(args.requirements, args.requirements_set)
+    first = requirements.cases(rules)[0]["case_id"]
+    state["evaluation"] = run_cases(
+        env,
+        policy,
+        args.output / "evaluation",
+        args.geometry_extrema,
+        args.checkpoint,
+        requirements_path=args.requirements,
+        requirements_set=args.requirements_set,
+        video_case_id=args.video_case or first,
+        seed=args.seed,
+        progress=print_progress,
+        max_wall_seconds=remaining,
+        motion_features=extract_features,
     )
-    if args.eval_scope == "full":
-        result = evaluate_suite(
-            env,
-            policy,
-            args.output / "evaluation",
-            args.geometry_extrema,
-            args.checkpoint,
-            **options,
-        )
-    else:
-        selected = (
-            ["learning:translate_0.05_0deg", "learning:quiet_20s", "learning:forward_0.05_to_stop"]
-            if args.eval_scope == "focus"
-            else None
-        )
-        result = run_learning_probe_suite(
-            env,
-            policy,
-            args.output / "evaluation",
-            args.geometry_extrema,
-            args.checkpoint,
-            selected_case_ids=selected,
-            record_video=True,
-            video_case_id=args.video_case,
-            seed=args.seed,
-            **options,
-        )
-    state["evaluation"] = result
     summaries = list((args.output / "evaluation").rglob("force_metrics.json"))
     if not summaries or any(json.loads(p.read_text())["status"] != "available" for p in summaries):
         raise ValueError("Evaluation has no complete set of load summaries")
 
 
 def evaluate(env, session):
-    """Load the checkpoint actor and score it on the selected cases."""
+    """Load the checkpoint actor and judge it on the requirement cases."""
     args = session.args
     config = learner_config(args, session.identity, session.state)
     policy = evaluation_policy(

@@ -78,8 +78,10 @@ import torch
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_SCALINGS
 from locomotion.omniwalk.mdp.destination import (
     CONTROL_DT_S,
+    NEUTRAL_FEATURES,
     advance_destination,
     destination_distance,
+    destination_features,
     planar_pose,
 )
 from locomotion.omniwalk.mdp.footfall import (
@@ -1285,8 +1287,9 @@ EXPERIMENTS["destination_v69"] = {**EXPERIMENTS["destination_v59"]}
 # terrain_v2 policies warm-start directly. Recorded odometry drift: 0.3-6 mm/s.
 EXPERIMENTS["destination_v70"] = {**EXPERIMENTS["destination_v59"]}
 
-# The evaluator's moving checks (``evaluation/scoring.py``, profile omni_static) and the controls it skips
-# at the start of each case; the surrogate clamps joints at the native speed limit.
+# The moving checks of the former 96-case scorer (``evaluation/scoring.py``, profile omni_static, which
+# main replaced with the walking-requirements judge) and the controls it skipped at the start of each
+# case, kept as recorded bounds; the surrogate clamps joints at the native speed limit.
 WALK_SKIPPED_CONTROLS = 100
 WALK_CHECKS = (
     "planar_error_mps",
@@ -1443,6 +1446,18 @@ class DestinationTrainingTask(TrainingTask):
     def gait_clock_phase(self):
         """The speed-scaled gait phase in cycles that the wrapper shows the policy, or None."""
         return None if self.gait is None else self.gait.phase
+
+    def destination_input_source(self, destination_input, gait_clock_scaling=None):
+        """The ``DestinationInputs`` that ``rl/destination_wrapper.py`` shows the policy for this task."""
+        from locomotion.omniwalk.mdp.destination_inputs import DestinationInputs
+
+        return DestinationInputs(self, destination_input, gait_clock_scaling)
+
+    def destination_inputs(self, pending):
+        """Five task-owned destination features; pending rows read neutral values."""
+        current = destination_features(self.current["root"], self.destination, self.command_elapsed)
+        neutral = torch.tensor(NEUTRAL_FEATURES, device=current.device).expand_as(current)
+        return torch.where(pending[:, None].to(current.device), neutral, current)
 
     def reset(self, indices=None):
         # A reset draws a fresh command; a stop scheduled for the ended episode lapses.

@@ -193,7 +193,7 @@ class LatentSupervisionTests(unittest.TestCase):
             SurrogateConfig(num_envs=2, seed=20260917, episode_seconds=2.0),
             threads=0,
             contact=ContactModel(touchdown_overshoot=False),
-            randomization=WIDE,
+            dynamics=WIDE,
         )
         try:
             task = experiment_task("destination_v35")(

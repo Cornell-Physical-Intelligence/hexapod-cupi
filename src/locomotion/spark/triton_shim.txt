@@ -1,0 +1,9 @@
+"""Shadow the bundled triton, whose native library faults on import on this image.
+
+torch probes triton with ``has_triton_package`` and treats ImportError as triton
+absent, the normal aarch64 path, so raising here keeps lazy ``torch._dynamo``
+imports (tensordict reaches one through ``torch.compiler.allow_in_graph``) from
+loading the faulting library (terrain_isaac_smoke_20261031_007/_008, probe_002).
+"""
+
+raise ImportError("triton disabled: the bundled native library faults on this image")

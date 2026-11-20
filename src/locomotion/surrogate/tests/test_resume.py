@@ -87,6 +87,7 @@ class ResumeTests(unittest.TestCase):
             ("--contact", "noslip_iterations=0"),
             ("--ppo-config-overrides", '{"num_steps_per_env":12}'),
             ("--episode-seconds", "10"),
+            ("--randomization", "table2_v1"),
         ]
         for index, arguments in enumerate(variants):
             with self.subTest(arguments=arguments):

@@ -1,0 +1,28 @@
+{
+  "id": "20261106T195019_step7_review_fixes",
+  "date": "2026-11-06T19:50:19Z",
+  "title": "Fix the three Step 7 review defects: sweep resume identity, failed-cell retry and per-replica reset height",
+  "summary": "The program lead's review of PR #94 at cc9cecdc found three defects. First, sweep --continue reused any cell with a summary, so a resume with another checkpoint, probe set or seed labelled the earlier results with the new request. It now compares each finished cell's checkpoint bytes, source and model hashes, grid declaration, cell, selected probes and seed with the request, and refuses the whole sweep on a mismatch before it renames or runs a cell. Second, a cell with an acquisition failure was skipped on --continue; it now moves to <id>.attempt_<n> and runs again. Third, the AMP critic's height slot used the nominal 0.1028 m reset height for reset rows; it now reads each surrogate replica's randomized reset height (0.1069, 0.1073 and 0.1115 m for three table2_v1 replicas at seed 3). Each fix has a regression test that fails on cc9cecdc and passes now.",
+  "areas": [
+    "training",
+    "verification"
+  ],
+  "changes": [
+    "src/locomotion/amp/amp.py",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/surrogate/sweep.py",
+    "src/locomotion/surrogate/README.md",
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "src/locomotion/surrogate/tests/test_randomization.py",
+    "site/updates/20261106T195019_step7_review_fixes.json"
+  ],
+  "evidence": [
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "src/locomotion/surrogate/tests/test_randomization.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/94"
+  ],
+  "next": "Ask the program lead to re-review PR #94.",
+  "no_project_impact": true,
+  "reason": "Surrogate sweep bookkeeping and the surrogate critic's height slot: no native run, admission, gate or accepted capability changes."
+}

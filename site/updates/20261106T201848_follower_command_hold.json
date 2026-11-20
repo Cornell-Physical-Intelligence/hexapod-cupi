@@ -1,0 +1,20 @@
+{
+  "id": "20261106T201848_follower_command_hold",
+  "date": "2026-11-06T20:18:48Z",
+  "title": "Hold each follower translation command for the training minimum",
+  "summary": "The waypoint follower now keeps a chosen translation entry for 2 s, the shortest hold the policy saw in training, before it chooses the bearing and speed again. Reaching a goal or tripping the heading gate ends a hold at once. Without the hold, a goal near a 22.5 degree bearing boundary made the follower alternate between two neighbouring bank entries every tick: on the staircase route 1,206 of 1,214 translation segments were one tick long, and on a goal at 22.4 degrees 409 of 410. With the hold both routes complete with no one-tick segment. A new test asserts the hold on three routes and reproduces the defect with the hold disabled.",
+  "areas": ["navigation", "verification"],
+  "next": "Review and merge the bank-conforming follower after green CI; measure the policy's yaw drift while translating before relying on the heading gate.",
+  "changes": [
+    "src/navigation/waypoint.py",
+    "src/navigation/tests/test_producer.py",
+    "src/navigation/README.md",
+    "site/updates/20261106T201848_follower_command_hold.json"
+  ],
+  "evidence": [
+    "src/navigation/tests/test_producer.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/pull/97"
+  ],
+  "no_project_impact": true,
+  "reason": "The change alters the navigation example and its CPU tests. Runtime locomotion sources, checkpoint bytes, the approved robot, acceptance gates and roadmap markers remain unchanged."
+}

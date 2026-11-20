@@ -224,6 +224,11 @@ def merge(base, override):
     return base
 
 
+def randomization_identity(rnd, name):
+    """The declaration a run trains under: its name and hash, and the canonical declaration with its ranges."""
+    return {**rnd.identity(name), "declaration": json.loads(rnd.declaration(name)["json"])}
+
+
 def resume_record(path, identity):
     """Check the checkpoint bytes and training contract before loading learner state."""
     import torch
@@ -385,6 +390,12 @@ def build_parser():
     parser.add_argument("--checkpoint-interval", type=int, default=50)
     parser.add_argument("--max-wall-seconds", type=float, default=86400.0)
     parser.add_argument(
+        "--randomization",
+        choices=["none", "table2_v1"],
+        default="none",
+        help="Step 7 declaration in locomotion/randomization.py; each reset redraws that replica.",
+    )
+    parser.add_argument(
         "--contact",
         action="append",
         default=[],
@@ -461,6 +472,7 @@ def run(args, argv=None):
     import locomotion.evaluation.ppo_diagnostics as diagnostics_module
     import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
     import locomotion.omniwalk.task as task_module
+    import locomotion.randomization as rnd
     import locomotion.rl.ppo as algorithms
     from locomotion.evaluation.task_metrics import TaskMetrics, scalars
     from locomotion.surrogate.env import (
@@ -484,7 +496,9 @@ def run(args, argv=None):
         Path(overrides[1:]).read_text() if overrides.startswith("@") else overrides
     )
     contact = contact_overrides(args.contact)
-    randomization = randomization_overrides(args.randomize) if args.randomize else None
+    dynamics = randomization_overrides(args.randomize) if args.randomize else None
+    if dynamics is not None and args.randomization != "none":
+        raise ValueError("Use --randomize or --randomization, not both")
     terrain = None
     if args.terrain is not None:
         from locomotion.surrogate.terrain import Terrain
@@ -530,7 +544,7 @@ def run(args, argv=None):
         "geometry_sha256": sha(DEFAULT_GEOMETRY),
         "config": cfg.declaration(),
         "contact_model": asdict(contact),
-        "randomization": None if randomization is None else asdict(randomization),
+        "dynamics": None if dynamics is None else asdict(dynamics),
         "latent_supervision": args.latent_supervision or None,
         "anchor_weight": args.anchor_weight or None,
         "terrain": None
@@ -541,6 +555,7 @@ def run(args, argv=None):
             "spawn_margin_m": args.spawn_margin,
         },
         "seed": args.seed,
+        "randomization": randomization_identity(rnd, args.randomization),
         "task": args.task,
         "wrapper": args.wrapper,
         "action_mean": args.action_mean,
@@ -594,7 +609,8 @@ def run(args, argv=None):
             substep_state=False,
             terrain=terrain,
             spawn=None if terrain is None else terrain.spawner(args.spawn_margin, args.seed),
-            randomization=randomization,
+            dynamics=dynamics,
+            randomization=args.randomization,
         )
         task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output / "task")
         # A task class outside TrainingTask may report its own status.
@@ -682,9 +698,7 @@ def run(args, argv=None):
         if args.latent_supervision:
             from locomotion.rl.sim2real import LatentSupervision
 
-            supervision = LatentSupervision(
-                runner.alg, wrapped, randomization, args.latent_supervision
-            )
+            supervision = LatentSupervision(runner.alg, wrapped, dynamics, args.latent_supervision)
             runner.alg.update = supervision.update
         if args.anchor_weight:
             # Installed after --initialize-from, so the anchor holds the widened, loaded start.
