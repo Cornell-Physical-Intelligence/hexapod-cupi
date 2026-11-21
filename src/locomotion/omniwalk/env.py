@@ -69,6 +69,7 @@ class IsaacEnv(DirectRLEnv):
         *,
         reference_metadata=None,
         randomization="none",
+        geometry_extrema=None,
     ):
         self.randomization = rnd.identity(randomization)["name"]
         self.config = config
@@ -76,6 +77,11 @@ class IsaacEnv(DirectRLEnv):
         self.output.mkdir(parents=True, exist_ok=True)
         self.model = verify_assets(asset, model_path)
         self.geometry_path = Path(geometry_path)
+        self.geometry_extrema = (
+            self.geometry_path.with_name("geometry_extrema.npz")
+            if geometry_extrema is None
+            else Path(geometry_extrema)
+        )
         self.geometry_meta = json.loads(self.geometry_path.read_text())
         if self.geometry_meta.get("asset_robot_sha256") != USD_SHA256:
             raise ValueError("Diagnostic geometry belongs to another asset")
@@ -400,7 +406,11 @@ class IsaacEnv(DirectRLEnv):
             for path in self.view.link_paths[0]
         ]
         links = [str(path).rsplit("/", 1)[1] for path in self.view.link_paths[0]]
-        self.materials = wp.to_torch(self.view.get_material_properties()).cpu().clone()
+        properties = wp.to_torch(self.view.get_material_properties()).cpu()
+        self.materials = (
+            torch.tensor([1.0, 1.0, 0.0], dtype=properties.dtype).expand_as(properties).clone()
+        )
+        self.verify_materials()
         if links != self.native_body_names or sum(counts) != self.materials.shape[1]:
             raise ValueError("Native shape layout differs from the link order")
         starts = [sum(counts[:i]) for i in range(len(counts))]
@@ -467,7 +477,7 @@ class IsaacEnv(DirectRLEnv):
         The points are the surrogate's toe-cap cloud in each tibia frame, so both engines lift the
         root by the same kinematic rule: the lowest drawn toe at the nominal pose's lowest toe.
         """
-        path = self.geometry_path.with_name("geometry_extrema.npz")
+        path = self.geometry_extrema
         if sha(path) != self.geometry_meta.get("extrema_sha256"):
             raise ValueError("Toe-cap points belong to another geometry")
         lower = {x["body"]: x["cap_lower_x_m"] for x in self.geometry_meta["shapes"]}
@@ -519,7 +529,8 @@ class IsaacEnv(DirectRLEnv):
         # to its principal axes, so a later centre-of-mass write would undo that turn.
         for key in ("masses", "coms", "inertias"):
             getattr(self.view, "set_" + key)(wp.from_torch(self.inertial[key]), indices)
-        self.verify_inertial(rows)
+        self.verify_materials()
+        self.verify_inertial()
 
     def draw_inertial(self, row, sample):
         """Row ``row``'s link masses and tensors scaled by the draw, and the payload on the base."""
@@ -545,14 +556,23 @@ class IsaacEnv(DirectRLEnv):
         inertial["inertias"][row] = inertias.float()
         self.root_com_local[row] = centres[base, :3].float().to(self.device)
 
-    def verify_inertial(self, rows):
-        """Read the selected rows' masses, centres of mass and link-axis tensors back from PhysX."""
-        rows = rows.cpu().long()
+    def verify_materials(self):
+        """Check the tibia draws and canonical materials on every other shape."""
+        actual = wp.to_torch(self.view.get_material_properties()).cpu()
+        if actual.shape != self.materials.shape or not torch.allclose(
+            actual, self.materials, atol=1e-7, rtol=0
+        ):
+            raise ValueError("Actual native materials differ")
+
+    def verify_inertial(self):
+        """Check masses, centres of mass and link-axis tensors for selected and untouched rows."""
         for key, columns in (("masses", ...), ("coms", slice(0, 3)), ("inertias", ...)):
-            actual = wp.to_torch(getattr(self.view, "get_" + key)()).cpu()[rows][..., columns]
-            wanted = self.inertial[key][rows][..., columns]
+            actual = wp.to_torch(getattr(self.view, "get_" + key)()).cpu()[..., columns]
+            wanted = self.inertial[key][..., columns]
             scale = wanted.abs().amax(-1, keepdim=True) if key == "inertias" else 1.0
-            if not torch.all((actual - wanted).abs() <= 1e-5 * scale + 1e-7):
+            if actual.shape != wanted.shape or not torch.all(
+                (actual - wanted).abs() <= 1e-5 * scale + 1e-7
+            ):
                 raise ValueError("Native readback differs from the drawn " + key)
 
     def schedule_push(self, row, after, first):

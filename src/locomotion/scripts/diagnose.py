@@ -45,7 +45,12 @@ def run_diagnostic(env, session):
 
     args = session.args
     env.commands.zero_()
-    capture = DiagnosticCapture(env, args.output / "standing", args.geometry_extrema)
+    capture = DiagnosticCapture(
+        env,
+        args.output / "standing",
+        args.geometry_extrema,
+        randomization=session.identity.get("randomization"),
+    )
     try:
         for control in range(1000):
             env.step(torch.zeros((env.num_envs, 18), device=env.device))

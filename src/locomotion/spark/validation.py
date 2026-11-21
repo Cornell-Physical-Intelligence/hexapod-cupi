@@ -1,13 +1,11 @@
 """Keep allocation bounds and completed-update behavior shared across entry points."""
 
-import json
 import math
 
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import recipe_options
 from locomotion.omniwalk.mdp.commands import default_gait_clock
-from locomotion.robots import randomization as rnd
 
-RANDOMIZATION_NAMES = rnd.NAMES
+RANDOMIZATION_NAMES = ("none", "table2_v1")
 
 ALLOCATION_PROFILES = ("standard", "flat_pilot_v1")
 CLEANUP_MARGIN_SECONDS = 400
@@ -32,15 +30,17 @@ def update_limit(mode, extended):
 
 
 def validate_randomization(mode, name):
-    """Return the training identity of a Step 7 declaration, or None for the nominal robot.
+    """Return the identity of a Step 7 declaration, or None for the nominal robot.
 
-    Only training draws; evaluation, probes and diagnostics run the nominal robot.
+    Training and standing admission may draw; evaluation and noise probes stay nominal.
     """
-    if name not in RANDOMIZATION_NAMES or (name != "none" and mode != "train"):
-        raise ValueError("A randomization declaration applies to training")
+    if name not in RANDOMIZATION_NAMES or (name != "none" and mode not in ("train", "diagnostic")):
+        raise ValueError("A randomization declaration applies to training and standing diagnostics")
     if name == "none":
         return None
-    return {**rnd.identity(name), "declaration": json.loads(rnd.declaration(name)["json"])}
+    from locomotion.robots import randomization as rnd
+
+    return rnd.identity_record(name)
 
 
 def decay_updates(updates, decay):

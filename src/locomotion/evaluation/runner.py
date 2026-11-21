@@ -21,12 +21,14 @@ from locomotion.evaluation.capture import (
     DiagnosticGeometry,
     classify_patches,
     diagnostic_rotation,
-    diagnostic_servo,
+    expected_motor_law,
+)
+from locomotion.evaluation.capture import (
+    diagnostic_servo as diagnostic_servo,
 )
 from locomotion.evaluation.force_metrics import write_summary
-from locomotion.robots.hexapod import JOINT_NAMES, KD, MODEL_SHA256, URDF_SHA256, USD_SHA256
-from locomotion.robots.randomization import strength_ceiling
-from locomotion.robots.rs05 import STIFFNESS_NM_PER_RAD
+from locomotion.robots.hexapod import JOINT_NAMES, MODEL_SHA256, URDF_SHA256, USD_SHA256
+from locomotion.robots.hexapod import KD as KD
 
 
 class _NativeTrialTermination(RuntimeError):
@@ -58,22 +60,6 @@ def _deadline(seconds):
     if not math.isfinite(seconds) or seconds <= 0:
         raise ValueError("Evaluation wall-clock allocation must be finite and positive")
     return time.monotonic() + seconds
-
-
-def expected_motor_law(q, dq, target, law=None):
-    """The exact float32 torque recurrence each substep must reproduce.
-
-    ``law`` is None for the nominal RS05 law. A Step 7 draw gives float32 ``kp``, ``kd`` and
-    ``strength`` arrays; the ceiling then follows ``randomization.strength_ceiling``, so the
-    1.6 N·m cap still holds and the comparison stays bit-exact.
-    """
-    if law is None:
-        return diagnostic_servo(
-            q, dq, target, np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32)
-        )
-    requested, _, ceiling = diagnostic_servo(q, dq, target, law["kp"], law["kd"])
-    ceiling = np.asarray(strength_ceiling(ceiling, law["strength"]), np.float32)
-    return requested, np.clip(requested, -ceiling, ceiling).astype(np.float32), ceiling
 
 
 class NativeCaptureSource:

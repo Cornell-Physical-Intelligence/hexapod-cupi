@@ -136,7 +136,7 @@ def add_common_arguments(parser):
         "--randomization",
         choices=RANDOMIZATION_NAMES,
         default="none",
-        help="Step 7 declaration in locomotion/robots/randomization.py for training; each reset redraws "
+        help="Step 7 declaration in locomotion/robots/randomization.py for training and standing diagnostics; each reset redraws "
         "that replica. Evaluation runs the nominal robot and records the checkpoint's declaration.",
     )
 
@@ -404,7 +404,7 @@ def build_identity(args, cfg, metadata):
         identity["reward_task"] = args.experiment
     randomization = validate_randomization(args.mode, args.randomization)
     if randomization is not None:
-        # A nominal run records no randomization, so its identity keeps the bytes it had before Step 7.
+        # Keep the nominal identity schema; source hashes still bind the new runtime.
         identity["randomization"] = randomization
     if getattr(args, "initialize_from", None) is not None:
         identity["initialized_from"] = {
@@ -527,6 +527,7 @@ def create_env(args, cfg, metadata):
         reference_metadata=metadata,
         verify=verify_scene,
         randomization=args.randomization,
+        geometry_extrema=args.geometry_extrema,
     )
     if args.mode == "evaluate":
         prepare_policy_scene(env)

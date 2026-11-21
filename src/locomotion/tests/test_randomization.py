@@ -454,6 +454,7 @@ class NativeMotorDrawTests(unittest.TestCase):
         named = {link["name"]: link for link in model["links"]}
         # PhysX state: the ledger's inertial values and the pose last written for each row.
         physx = {
+            "materials": torch.tensor([1.0, 1.0, 0.0]).expand(n, sum(counts), -1).clone(),
             "masses": torch.tensor([named[b]["mass"] for b in links]).expand(n, -1).clone(),
             "coms": torch.tensor([[*named[b]["com"], 0.0, 0.0, 0.0, 1.0] for b in links])
             .expand(n, -1, -1)
@@ -491,12 +492,14 @@ class NativeMotorDrawTests(unittest.TestCase):
                     result[row, k] = torch.tensor([*d.xpos[b], *d.xquat[b][[1, 2, 3, 0]]])
             return result
 
+        def write_materials(data, rows):
+            written.append((data.clone(), rows))
+            physx["materials"][rows] = data[rows]
+
         view = SimpleNamespace(
             link_paths=[[f"/World/envs/env_0/Robot/{b}" for b in links]],
-            get_material_properties=lambda: torch.tensor([1.0, 1.0, 0.0]).expand(
-                n, sum(counts), -1
-            ),
-            set_material_properties=lambda data, rows: written.append((data.clone(), rows)),
+            get_material_properties=lambda: physx["materials"].clone(),
+            set_material_properties=write_materials,
             get_link_transforms=link_transforms,
             get_root_transforms=lambda: physx["root"].clone(),
             **{"get_" + k: (lambda k=k: physx[k].clone()) for k in ("masses", "coms", "inertias")},
@@ -531,6 +534,7 @@ class NativeMotorDrawTests(unittest.TestCase):
         env.model = model
         env.geometry_path = ROOT / "robot/hexapod_mkii_updated_v1/geometry/geometry.json"
         env.geometry_meta = json.loads(env.geometry_path.read_text())
+        env.geometry_extrema = env.geometry_path.with_name("geometry_extrema.npz")
         env.native_body_names = links
         env.native_joint_names = native
         env.joint_index = torch.tensor([native.index(j) for j in JOINT_NAMES])
@@ -592,6 +596,144 @@ class NativeMotorDrawTests(unittest.TestCase):
         self.assertTrue(torch.equal(env.expected_materials, data))
         self.assertEqual(env.ground_friction.tolist()[2], float(friction))
         self.assertEqual(env.ground_friction.tolist()[:2], [1.0, 1.0])
+
+    def test_standing_scorer_replays_each_rows_randomized_torque(self):
+        import tempfile
+        from pathlib import Path
+
+        from locomotion.evaluation.capture import score_diagnostic
+
+        env = self.environment(n=2)
+        env.redraw(torch.arange(2))
+        motor = env.motor_law
+        q = np.full((2, 18), 0.03, dtype=np.float32)
+        target = np.zeros_like(q)
+        requested, applied, ceiling = (
+            value.numpy()
+            for value in rnd.motor_force(
+                torch.from_numpy(q),
+                torch.from_numpy(target),
+                torch.from_numpy(target),
+                torch.from_numpy(motor["kd"]),
+                torch.from_numpy(motor["kp"]),
+                torch.from_numpy(motor["strength"]),
+            )
+        )
+        steps = np.arange(8000)
+        row = {
+            "joint_position_rad": q,
+            "joint_velocity_rad_s": target,
+            "joint_target_rad": target,
+            "pre_joint_position_rad": q,
+            "pre_joint_velocity_rad_s": target,
+            "computed_torque_nm": requested,
+            "applied_torque_nm": applied,
+            "native_input_pre_nm": applied,
+            "effort_ceiling_nm": ceiling,
+            "interval_angle_rate_rad_s": target,
+            "root_pose_xyzw": np.tile([0, 0, 0.1, 0, 0, 0, 1], (2, 1)),
+            "distal_contact": np.ones((2, 6), bool),
+            "nonfoot_contact": np.zeros(2, bool),
+            "minimum_non_toe_floor_m": np.zeros(2),
+            "terminated": np.zeros(2, bool),
+            "truncated": np.zeros(2, bool),
+            "contact_valid": np.ones(2, bool),
+            "interval_valid": np.ones(2, bool),
+        }
+        raw = {
+            key: np.broadcast_to(value, (len(steps), *value.shape)) for key, value in row.items()
+        }
+        raw.update(
+            sequence=steps,
+            control_index=steps // 8,
+            substep_index=steps % 8,
+            explicit_counter=steps + 1,
+            time_s=(steps + 1) * 0.0025,
+        )
+        declaration = rnd.identity_record("table2_v1")
+        session = {
+            "randomization": declaration,
+            "seed": env.config.seed,
+            "motor_law": {key: value.tolist() for key, value in motor.items()},
+            "root_paths": ["/0", "/1"],
+            "joint_names": list(JOINT_NAMES),
+            "substep_files": ["substeps.npz"],
+            "neutral_joint_position_rad": target[0].tolist(),
+        }
+        with tempfile.TemporaryDirectory() as directory:
+            out = Path(directory)
+            (out / "session.json").write_text(json.dumps(session))
+            (out / "initial_reset.json").write_text(
+                json.dumps(
+                    {
+                        "counter_after": 0,
+                        "post_reset": {
+                            "joint_position_rad": q.tolist(),
+                            "joint_velocity_rad_s": target.tolist(),
+                        },
+                    }
+                )
+            )
+            (out / "native_readback.json").write_text(
+                json.dumps(
+                    {
+                        "limits": [[[-3, 3]] * 18] * 2,
+                        "native_max_velocity": [[50] * 18] * 2,
+                    }
+                )
+            )
+            np.savez(out / "control_trace.npz", **{key: value[7::8] for key, value in raw.items()})
+            np.savez(out / "substeps.npz", **raw)
+            report = score_diagnostic(out)
+            self.assertTrue(report["all_pass"])
+            self.assertEqual(report["randomization"], declaration)
+            self.assertEqual(report["substeps"], len(steps))
+            wrong = raw["computed_torque_nm"].copy()
+            wrong[1, 0] = wrong[1, 1]
+            np.savez(out / "substeps.npz", **{**raw, "computed_torque_nm": wrong})
+            with self.assertRaisesRegex(ValueError, "servo recurrence differs:computed_torque_nm"):
+                score_diagnostic(out)
+            session["motor_law"]["strength"].reverse()
+            (out / "session.json").write_text(json.dumps(session))
+            with self.assertRaisesRegex(ValueError, "snapshot differs from the seeded draw"):
+                score_diagnostic(out)
+
+    def test_initial_material_readback_must_match_the_canonical_recipe(self):
+        env = self.environment(init=False)
+        env.physx["materials"][0, 0, 0] = 0.7
+        with self.assertRaisesRegex(ValueError, "Actual native materials differ"):
+            env._init_randomization()
+
+    def test_dropped_or_cross_row_material_writes_are_rejected(self):
+        for cross_row in (False, True):
+            with self.subTest(cross_row=cross_row):
+                env = self.environment()
+
+                def write_materials(data, rows):
+                    if cross_row:
+                        env.physx["materials"][rows] = data[rows]
+                        env.physx["materials"][0] = data[1]
+
+                env.view.set_material_properties = write_materials
+                with self.assertRaisesRegex(ValueError, "Actual native materials differ"):
+                    env.redraw(torch.tensor([1]))
+
+    def test_cross_row_inertial_writes_are_rejected(self):
+        env = self.environment()
+
+        def write_masses(data, rows):
+            env.physx["masses"][rows] = data[rows]
+            env.physx["masses"][0] = data[1]
+
+        env.view.set_masses = write_masses
+        with self.assertRaisesRegex(ValueError, "drawn masses"):
+            env.redraw(torch.tensor([1]))
+
+    def test_randomized_reset_uses_the_declared_extrema_path(self):
+        env = self.environment(init=False)
+        env.geometry_extrema = env.geometry_path
+        with self.assertRaisesRegex(ValueError, "Toe-cap points belong to another geometry"):
+            env._init_randomization()
 
     def test_a_link_layout_that_differs_from_the_body_order_is_refused(self):
         env = self.environment()

@@ -51,12 +51,15 @@ class OmniEnv:
         reference_metadata=None,
         verify=None,
         randomization="none",
+        geometry_extrema=None,
     ):
         from locomotion.omniwalk.env import IsaacEnv
 
         self.cfg, self.device, self.num_envs = cfg, cfg.device, cfg.num_envs
         # The nominal environment is constructed exactly as before Step 7.
-        extra = {} if randomization == "none" else {"randomization": randomization}
+        extra = {}
+        if randomization != "none":
+            extra = {"randomization": randomization, "geometry_extrema": geometry_extrema}
         self.isaac = isaac = IsaacEnv(
             cfg,
             asset,

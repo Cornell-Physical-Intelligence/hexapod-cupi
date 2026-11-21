@@ -229,6 +229,9 @@ def validate_admission(value, identity, cfg, mounts=None):
         or value.get("stance_sha256") != identity["stance_sha256"]
     ):
         raise ValueError("Standing source or neutral stance differs")
+    randomization = identity.get("randomization")
+    if value.get("randomization") != randomization:
+        raise ValueError("Standing randomization declaration differs")
     if value.get("physics_config") != identity["physics_config"]:
         raise ValueError("Standing physics configuration differs")
     for key in ("geometry_sha256", "geometry_extrema_sha256"):
@@ -281,6 +284,20 @@ def validate_admission(value, identity, cfg, mounts=None):
         ):
             if observed.get(key) != identity[key]:
                 raise ValueError("Native standing identity differs: " + name + ":" + key)
+        if (
+            observed.get("randomization") != randomization
+            or report.get("randomization") != randomization
+            or (
+                randomization is not None
+                and (
+                    state.get("mode") != "diagnostic"
+                    or type(observed.get("seed")) is not int
+                    or observed["seed"] < 0
+                    or report.get("seed") != observed["seed"]
+                )
+            )
+        ):
+            raise ValueError("Native standing randomization identity differs: " + name)
         if observed.get("config", {}).get("num_envs") != count:
             raise ValueError("Native standing replica count differs: " + name)
     if cfg.num_envs != 1 and value.get("num_envs") != cfg.num_envs:
@@ -312,6 +329,8 @@ def create(one, batch, output, inputs):
         "num_envs": count,
         **{key: identity[key] for key in keys},
     }
+    if "randomization" in identity:
+        value["randomization"] = identity["randomization"]
     declared = json.loads(inputs.read_text())
     mounts = {}
     for name, root in roots.items():

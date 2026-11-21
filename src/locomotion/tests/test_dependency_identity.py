@@ -12,6 +12,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import locomotion.scripts.cli as cli
+import locomotion.scripts.diagnose as diagnose
 import locomotion.scripts.play as play
 import locomotion.scripts.train as train
 from contracts.release import COMPATIBILITY_KEYS
@@ -257,7 +258,19 @@ class DependencyIdentityTests(unittest.TestCase):
             )
             self.assertNotIn("randomization", evaluated)
             self.assertEqual(evaluated["checkpoint_randomization"], trained["randomization"])
-            for mode in ("evaluate", "probe", "diagnostic"):
+            standing = command("diagnostic", "standing", randomization="table2_v1", seed=123)
+            standing_args = diagnose.parse_args(
+                standing + ["--output", str(root / "unused"), "--preflight-only"]
+            )
+            self.assertEqual(standing_args.seed, 123)
+            self.assertEqual(preflight(diagnose, standing)["randomization"], recorded)
+            self.assertEqual(
+                json.loads((root / "standing/PACK.json").read_text())["randomization"], recorded
+            )
+            self.assertNotIn(
+                "randomization", preflight(diagnose, command("diagnostic", "nominal_standing"))
+            )
+            for mode in ("evaluate", "probe"):
                 with self.subTest(mode=mode):
                     with self.assertRaisesRegex(ValueError, "applies to training"):
                         prepare(
@@ -297,6 +310,7 @@ class DependencyIdentityTests(unittest.TestCase):
         with patch.object(adapter, "OmniEnv") as built:
             cli.create_env(args, None, {})
         self.assertEqual(built.call_args.kwargs["randomization"], "table2_v1")
+        self.assertEqual(built.call_args.kwargs["geometry_extrema"], args.geometry_extrema)
 
     def test_scripts_and_native_replay_declare_one_physics_identity(self):
         import ast

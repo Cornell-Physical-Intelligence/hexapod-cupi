@@ -344,7 +344,7 @@ def prepare(
         binding["command_args"] += ["--updates", str(updates), "--seed", str(seed)]
     if extended_updates:
         binding["command_args"] += ["--extended-updates"]
-    if mode == "probe":
+    if mode == "probe" or (mode == "diagnostic" and randomization_record is not None):
         binding["command_args"] += ["--seed", str(seed)]
     if mode in ("train", "evaluate") and learner == "ppo":
         # The flags below name each option that differs from its default, so the trainer applies no recipe.
@@ -512,7 +512,7 @@ def main():
         "--randomization",
         choices=RANDOMIZATION_NAMES,
         default="none",
-        help="Step 7 declaration in locomotion/robots/randomization.py; training only.",
+        help="Step 7 declaration in locomotion/robots/randomization.py for training and standing diagnostics.",
     )
     parser.add_argument("--initialize-from", type=Path)
     parser.add_argument("--initialize-from-sha")
