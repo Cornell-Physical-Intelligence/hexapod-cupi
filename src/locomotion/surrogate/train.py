@@ -15,7 +15,7 @@ import os
 import sys
 import time
 import traceback
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
@@ -375,6 +375,18 @@ def build_parser():
         help="Physics and torch threads for this process (1 to 6).",
     )
     parser.add_argument("--episode-seconds", type=float, default=20.0)
+    parser.add_argument(
+        "--terrain",
+        type=Path,
+        help="Terrain spec (JSON, surrogate/terrain.py) to train on: the floor becomes its height field, the "
+        "touchdown model is off, and every reset starts at a random place and heading on it.",
+    )
+    parser.add_argument(
+        "--spawn-margin",
+        type=float,
+        default=3.5,
+        help="With --terrain, the least distance from a start to the terrain's edge, in metres.",
+    )
     parser.add_argument("--checkpoint-interval", type=int, default=50)
     parser.add_argument("--max-wall-seconds", type=float, default=86400.0)
     parser.add_argument(
@@ -389,6 +401,30 @@ def build_parser():
         default=[],
         metavar="FIELD=VALUE",
         help="ContactModel override for sensitivity runs, e.g. noslip_iterations=0.",
+    )
+    parser.add_argument(
+        "--randomize",
+        action="append",
+        default=[],
+        metavar="FIELD=VALUE",
+        help="DynamicsRandomization override for sim2real robustness runs, e.g. "
+        "motor_scale=(0.9,1.1); without any the canonical dynamics stay bitwise unchanged.",
+    )
+    parser.add_argument(
+        "--anchor-weight",
+        type=float,
+        default=0.0,
+        help="Per-update fraction pulling the actor back toward its initialization "
+        "(locomotion.rl.ppo:ActorAnchor); 0 keeps the stock learner. Holds a native init's "
+        "precision through long surrogate legs while strong reward gradients still move.",
+    )
+    parser.add_argument(
+        "--latent-supervision",
+        type=float,
+        default=0.0,
+        help="Learning rate of the identification loss on the compensator's latent (the task "
+        "reward is untouched); 0 keeps the stock learner. Needs --randomize and the "
+        "locomotion.rl.sim2real:Sim2RealVecEnv wrapper.",
     )
     parser.add_argument(
         "--resume", type=Path, help="Checkpoint to continue from (same configuration)."
@@ -447,6 +483,7 @@ def run(args, argv=None):
         SurrogateConfig,
         SurrogateEnv,
         contact_overrides,
+        randomization_overrides,
         repository_state,
         sha,
     )
@@ -459,6 +496,16 @@ def run(args, argv=None):
         Path(overrides[1:]).read_text() if overrides.startswith("@") else overrides
     )
     contact = contact_overrides(args.contact)
+    dynamics = randomization_overrides(args.randomize) if args.randomize else None
+    if dynamics is not None and args.randomization != "none":
+        raise ValueError("Use --randomize or --randomization, not both")
+    terrain = None
+    if args.terrain is not None:
+        from locomotion.surrogate.terrain import Terrain
+
+        terrain = Terrain(json.loads(args.terrain.read_text()))
+        # The touchdown model assumes the flat floor.
+        contact = replace(contact, touchdown_overshoot=False)
     task_class, wrapper_class = resolve(args.task), resolve(args.wrapper)
     config = learner_configuration(
         ppo_cfg,
@@ -497,6 +544,16 @@ def run(args, argv=None):
         "geometry_sha256": sha(DEFAULT_GEOMETRY),
         "config": cfg.declaration(),
         "contact_model": asdict(contact),
+        "dynamics": None if dynamics is None else asdict(dynamics),
+        "latent_supervision": args.latent_supervision or None,
+        "anchor_weight": args.anchor_weight or None,
+        "terrain": None
+        if terrain is None
+        else {
+            "spec": terrain.spec,
+            "spec_sha256": sha(args.terrain),
+            "spawn_margin_m": args.spawn_margin,
+        },
         "seed": args.seed,
         "randomization": randomization_identity(rnd, args.randomization),
         "task": args.task,
@@ -550,6 +607,9 @@ def run(args, argv=None):
             threads=args.threads,
             contact=contact,
             substep_state=False,
+            terrain=terrain,
+            spawn=None if terrain is None else terrain.spawner(args.spawn_margin, args.seed),
+            dynamics=dynamics,
             randomization=args.randomization,
         )
         task = task_class(env, task_module.TaskConfig(seed=args.seed), args.output / "task")
@@ -635,6 +695,15 @@ def run(args, argv=None):
             schedule.completed = first
             schedule.apply()
             runner.alg.update = schedule.update
+        if args.latent_supervision:
+            from locomotion.rl.sim2real import LatentSupervision
+
+            supervision = LatentSupervision(runner.alg, wrapped, dynamics, args.latent_supervision)
+            runner.alg.update = supervision.update
+        if args.anchor_weight:
+            # Installed after --initialize-from, so the anchor holds the widened, loaded start.
+            anchor = algorithms.ActorAnchor(runner.alg, args.anchor_weight)
+            runner.alg.update = anchor.update
 
         def checkpoint(update):
             path = args.output / f"checkpoint_update{update:06d}.pt"

@@ -8,7 +8,12 @@ import re
 import shutil
 from pathlib import Path
 
-from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import EXPERIMENT_INPUTS, RECIPES, ppo_config
+from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import (
+    EXPERIMENT_CLOCKS,
+    EXPERIMENT_INPUTS,
+    RECIPES,
+    ppo_config,
+)
 from locomotion.omniwalk.mdp.commands import GAIT_CLOCK_CONTROLS
 from locomotion.robots.hexapod import sha
 from locomotion.spark.safety import HOME_ROOT, RUN_ROOTS, within_roots
@@ -61,6 +66,7 @@ def prepare(
     observation_scaling=None,
     command_segments=None,
     learning_rate_max=None,
+    learning_rate_min=None,
     action_std=None,
     action_noise_correlation=None,
     action_std_final=None,
@@ -72,7 +78,12 @@ def prepare(
     extended_updates=False,
     action_std_decay_updates=None,
     steps_per_env=None,
+    anchor_weight=None,
     experiment=None,
+    terrain=None,
+    terrain_sha=None,
+    terrain_mesh_resolution=None,
+    terrain_spawn=False,
     initialize_from=None,
     initialize_from_sha=None,
     initialize_from_declaration_sha=None,
@@ -97,6 +108,22 @@ def prepare(
         experiment not in EXPERIMENT_INPUTS or mode not in ("train", "evaluate") or learner != "ppo"
     ):
         raise ValueError("A named experiment applies to PPO training and evaluation")
+    if terrain is not None:
+        terrain = Path(terrain)
+        if mode != "train" or learner != "ppo":
+            raise ValueError("A terrain spec applies to PPO training")
+        # The spec is a remote run-tree path at launch time, validated like a checkpoint: by
+        # allowed root and hash shape, never by a local stat.
+        if (
+            not within_roots(terrain, RUN_ROOTS)
+            or ".." in terrain.parts
+            or terrain_sha is None
+            or len(terrain_sha) != 64
+            or set(terrain_sha) - set("0123456789abcdef")
+        ):
+            raise ValueError("Invalid terrain spec identity")
+    elif terrain_spawn or terrain_sha is not None or terrain_mesh_resolution is not None:
+        raise ValueError("Terrain options need a terrain spec")
     learner_options = resolve_learner_options(
         recipe,
         mode,
@@ -108,6 +135,7 @@ def prepare(
             observation_scaling=observation_scaling,
             command_segments=command_segments,
             learning_rate_max=learning_rate_max,
+            learning_rate_min=learning_rate_min,
             action_std=action_std,
             action_noise_correlation=action_noise_correlation,
             action_std_final=action_std_final,
@@ -179,6 +207,11 @@ def prepare(
             observation_normalization=observation_normalization,
             **learner_options,
             **({} if experiment is None else {"destination_input": EXPERIMENT_INPUTS[experiment]}),
+            **(
+                {"gait_clock_scaling": EXPERIMENT_CLOCKS[experiment]}
+                if experiment in EXPERIMENT_CLOCKS
+                else {}
+            ),
         )
     except ValueError as error:
         raise ValueError(
@@ -204,11 +237,19 @@ def prepare(
     ):
         raise ValueError("A video case applies to an evaluation and names one requirement case")
     if type(episode_seconds) is not float or (
-        episode_seconds != 20.0 and (mode != "train" or not 5.0 <= episode_seconds <= 20.0)
+        episode_seconds != 20.0 and (mode != "train" or not 5.0 <= episode_seconds <= 32.0)
     ):
-        raise ValueError("Episode length selection applies to training, between 5 and 20 seconds")
+        # 32 s, the evaluator's longest probe, lets destination_v28 and later train its long stands.
+        raise ValueError("Episode length selection applies to training, between 5 and 32 seconds")
     if initialize_from is not None and (mode != "train" or learner != "ppo"):
         raise ValueError("A starting checkpoint applies to PPO training")
+    if anchor_weight is not None and (
+        mode != "train"
+        or learner != "ppo"
+        or type(anchor_weight) is not float
+        or not 0 < anchor_weight < 1
+    ):
+        raise ValueError("The anchor weight applies to PPO training as a fraction in (0, 1)")
     starting = (initialize_from, initialize_from_sha, initialize_from_declaration_sha)
     if len({value is None for value in starting}) != 1 or initialize_rate not in (
         "configured",
@@ -364,6 +405,8 @@ def prepare(
         binding["command_args"] += ["--video-case", video_case]
     if episode_seconds != 20.0:
         binding["command_args"] += ["--episode-seconds", str(episode_seconds)]
+    if anchor_weight is not None:
+        binding["command_args"] += ["--anchor-weight", str(anchor_weight)]
     if checkpoint is not None:
         binding["extra_mounts"].append([str(checkpoint.parent), "/checkpoint"])
         binding["input_files"][str(checkpoint)] = checkpoint_sha
@@ -376,6 +419,19 @@ def prepare(
         ]
     if experiment is not None:
         binding["command_args"] += ["--experiment", experiment]
+    if terrain is not None:
+        # The spec takes its own read-only mount, like a checkpoint, and the launcher verifies
+        # its recorded hash before execution.
+        binding["extra_mounts"].append([str(terrain.parent), "/terrain"])
+        binding["input_files"][str(terrain)] = terrain_sha
+        binding["command_args"] += ["--terrain", "/terrain/" + terrain.name]
+        if terrain_mesh_resolution is not None:
+            binding["command_args"] += [
+                "--terrain-mesh-resolution",
+                str(terrain_mesh_resolution),
+            ]
+        if terrain_spawn:
+            binding["command_args"] += ["--terrain-spawn"]
     if initialize_from is not None:
         # Training mounts no evaluation checkpoint, so the starting checkpoint and its declaration take
         # the launcher's read-only /checkpoint mount.
@@ -424,6 +480,7 @@ def prepare(
             **selected_options,
             **({} if video_case is None else {"video_case": video_case}),
             **({} if episode_seconds == 20.0 else {"episode_seconds": episode_seconds}),
+            **({} if anchor_weight is None else {"anchor_weight": anchor_weight}),
             **({"extended_updates": True} if extended_updates else {}),
             **({} if experiment is None else {"experiment": experiment}),
             **(
@@ -492,15 +549,21 @@ def main():
     parser.add_argument("--observation-scaling", choices=["none", "fixed"])
     parser.add_argument("--command-segments", choices=["continuous", "bootstrap"])
     parser.add_argument("--learning-rate-max", type=float)
+    parser.add_argument("--learning-rate-min", type=float)
     parser.add_argument("--action-std", type=float)
     parser.add_argument("--action-noise-correlation", type=float)
     parser.add_argument("--action-std-final", type=float)
     parser.add_argument("--action-std-decay-updates", type=int)
     parser.add_argument("--steps-per-env", type=int)
+    parser.add_argument("--anchor-weight", type=float)
     parser.add_argument("--gait-clock", type=int)
     parser.add_argument("--action-smoothing", choices=["none", "mean2"])
     parser.add_argument("--velocity-noise", type=float)
     parser.add_argument("--experiment", choices=sorted(EXPERIMENT_INPUTS))
+    parser.add_argument("--terrain", type=Path)
+    parser.add_argument("--terrain-sha")
+    parser.add_argument("--terrain-mesh-resolution", type=float)
+    parser.add_argument("--terrain-spawn", action="store_true")
     parser.add_argument("--initialize-from", type=Path)
     parser.add_argument("--initialize-from-sha")
     parser.add_argument("--initialize-from-declaration-sha")

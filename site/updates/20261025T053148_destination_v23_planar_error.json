@@ -1,0 +1,22 @@
+{
+  "id": "20261025T053148_destination_v23_planar_error",
+  "date": "2026-10-25T05:31:48.000000Z",
+  "title": "Add destination_v23: charge the evaluator's planar speed error each walking control, and an optional learning-rate floor",
+  "summary": "destination_v23 is destination_v22 with a per-control charge of -0.5 times the square of the planar speed error over the evaluator's bound, max(0.025 m/s, a quarter of the commanded speed), on the root's centre-of-mass velocity while walking. At 0.15 m/s the destination_v21 robots averaged the command within about 1 mm/s over each step but swung 25-40 mm/s within it, so the evaluator's per-control planar check failed; the tracking reward averages velocity over 0.2 s and pays 0.987 at that error, and no other term saw the swing. CappedRatePPO also takes an optional learning_rate_min: the stock adaptive schedule held every attempt at its 1e-5 floor.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v23 on the surrogate from attempt 14's update-1100 checkpoint with a 2e-5 learning-rate floor and test it against v9.",
+  "changes": [
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/rl/ppo.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261025T053148_destination_v23_planar_error.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment and an optional learner setting that no gate or registry entry uses yet; the canonical task, reward, learner defaults and evaluator are unchanged."
+}

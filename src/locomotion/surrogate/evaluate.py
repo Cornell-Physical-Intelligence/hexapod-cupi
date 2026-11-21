@@ -59,11 +59,28 @@ class DeterministicPolicy:
     """The no-noise policy path of ``locomotion/scripts/play.py``: fixed scales, gait clock, actor mean, two-control mean."""
 
     def __init__(
-        self, actor, env, options, *, velocity_input_gain=1.0, action_mean2=False, adapter=None
+        self,
+        actor,
+        env,
+        options,
+        *,
+        velocity_input_gain=1.0,
+        action_mean2=False,
+        adapter=None,
+        schedule_mirror=False,
     ):
         self.actor, self.env, self.adapter = actor, env, adapter
+        # The mirrored tripod schedule changes the footfall predictions on clockwise turns;
+        # evaluation rebuilds them from the recorded task's reward flag (mdp/gait.phase_swing).
+        self.schedule_mirror = bool(schedule_mirror)
         self.scaling = options.get("observation_scaling", "none")
         self.period = options.get("gait_clock", 0)
+        # A speed-scaled clock follows each probe's commands, as the training task does.
+        self.gait = None
+        if options.get("gait_clock_scaling") is not None:
+            from locomotion.omniwalk.mdp.gait import GaitPhase
+
+            self.gait = GaitPhase(env.num_envs, options["gait_clock_scaling"], "cpu")
         self.gain = float(velocity_input_gain)
         if adapter is not None and (self.gain != 1.0 or action_mean2):
             raise ValueError(
@@ -77,10 +94,51 @@ class DeterministicPolicy:
         self.previous = None
         # The destination inputs follow each probe's command from the root pose, as play.py does.
         self.tracker = None
-        if options.get("destination_input", "none") == "ghost":
-            from locomotion.omniwalk.mdp.destination import DestinationTracker
+        if options.get("destination_input", "none") in (
+            "ghost",
+            "ghost_v10",
+            "ghost_v11",
+            "terrain_v2_critic",  # the critic alone read the terrain; the actor is ghost_v11-shaped
+        ):
+            from locomotion.omniwalk.mdp.destination import (
+                DestinationTracker,
+                GhostV10Tracker,
+                GhostV11Tracker,
+            )
 
-            self.tracker = DestinationTracker(env.num_envs, "cpu")
+            tracker = {
+                "ghost": DestinationTracker,
+                "ghost_v10": GhostV10Tracker,
+                "ghost_v11": GhostV11Tracker,
+                "terrain_v2_critic": GhostV11Tracker,
+            }[options["destination_input"]]
+            self.tracker = tracker(env.num_envs, "cpu")
+        elif options.get("destination_input") in (
+            "terrain_v1",
+            "terrain_v2",
+            "terrain_v2_ghost_critic",
+            "terrain_v2_odom",
+        ):
+            from locomotion.omniwalk.mdp.footfall import (
+                TerrainV1Tracker,
+                TerrainV2GhostCriticTracker,
+                TerrainV2Tracker,
+            )
+            from locomotion.omniwalk.mdp.odometry import OdomTerrainTracker
+
+            tracker = {
+                "terrain_v1": TerrainV1Tracker,
+                "terrain_v2": TerrainV2Tracker,
+                "terrain_v2_ghost_critic": TerrainV2GhostCriticTracker,
+                "terrain_v2_odom": OdomTerrainTracker,
+            }[options["destination_input"]]
+            self.tracker = tracker(
+                env.num_envs,
+                "cpu",
+                env=env,
+                scaling=options.get("gait_clock_scaling"),
+                mirror=self.schedule_mirror,
+            )
 
     def record(self, options):
         """The ``policy_path`` entry of the summary: the path that ran and the options that acted on it."""
@@ -113,8 +171,11 @@ class DeterministicPolicy:
             for frame in range(5):
                 scaled[:, 42 * frame + 24 : 42 * frame + 42] *= self.gain
         if self.period:
+            cycles = None
+            if self.gait is not None:
+                cycles = self.gait.follow(observation[:, 210:213], self.env.episode_steps)
             clock = omni_wrapper.clock_features(
-                self.env.episode_steps, self.period, observation[:, 210:213]
+                self.env.episode_steps, self.period, observation[:, 210:213], cycles
             ).to(scaled)
             scaled = torch.cat((scaled, clock), -1)
         if self.tracker is not None:
@@ -580,6 +641,10 @@ def evaluate_checkpoint(args):
             velocity_input_gain=args.velocity_input_gain,
             action_mean2=args.action_mean2,
             adapter=getattr(wrapped, "policy_for_evaluation", None),
+            schedule_mirror=bool(
+                getattr(getattr(task, "reward_config", None), "schedule_mirror_turns", None)
+                or False
+            ),
         )
         renderer = Renderer(env, view=args.view) if videos else None
         loads = FootLoad(env) if record_loads else None

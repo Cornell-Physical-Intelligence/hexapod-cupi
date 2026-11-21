@@ -27,6 +27,10 @@ class RewardConfig:
     schedule_weight: float = 2.0
     schedule_period_controls: int = GAIT_CLOCK_CONTROLS
     schedule_swing_fraction: float = 0.4
+    # None keeps the historical fixed tripod order; True mirrors the schedule (and the footfall
+    # predictions that read it) on rows whose commanded yaw is negative, removing the gait's
+    # handedness that no checkpoint ever out-trained on turn_-0.40.
+    schedule_mirror_turns: bool | None = None
     schedule_load_n: float = 12.2
     swing_travel_weight: float = 1.0
     swing_travel_clip: float = 6.0
@@ -75,12 +79,59 @@ class RewardConfig:
     stride_tracking_weight: float = 0.3
     stride_window_controls: int = 60
     stride_length_weight: float = 2.0
+    # Swing clearance over rough ground (0 keeps the term, its telemetry and the old reward
+    # byte-identical): scheduled-swing unloaded toes earn up to the weight, walking only, in
+    # proportion to their height above the local ground up to the target — and only where the
+    # ground's 5-point spread exceeds the roughness threshold, so flat ground (its 5 mm training
+    # noise included) pays nothing and cannot teach high-stepping.
+    swing_clearance_weight: float = 0.0
+    swing_clearance_target_m: float = 0.035
+    swing_clearance_rough_m: float = 0.008
+    # Landing-conditioned lift (0 keeps the term, its telemetry and the old reward
+    # byte-identical): when a swinging toe's predicted touchdown ground sits at least the rise
+    # above the ground under the toe now, the toe earns up to the weight, walking only, in
+    # proportion to its clearance over the current ground, saturating a target margin above the
+    # landing ground itself — the ceiling scales with the obstacle. Flat ground and descents
+    # never open the rise gate, so they pay nothing by construction.
+    landing_lift_weight: float = 0.0
+    landing_lift_target_m: float = 0.02
+    landing_lift_rise_m: float = 0.01
+    # Situation-priced tracking (0 keeps the reward byte-identical): each tracking term's weight
+    # grows with how hard its own axis is commanded — up to (1 + the factor) times the registered
+    # weight at the reference command — so the price lands on the rows that exercise the axis and
+    # every other situation keeps the base price. Both validators count the ceiling at the full
+    # factor, and the stride-tracking term prices its inner weights the same way.
+    situation_tracking: float = 0.0
+    situation_speed_ref_mps: float = 0.2
+    situation_yaw_ref_rad_s: float = 0.4
+    # Quiet pose hold (0 keeps the reward byte-identical): while still, each joint pays for its
+    # squared deviation from the pose it settled into — the wrapper's quiet_anchor_joint_rad,
+    # captured on the first still control, so the hold never fights the settle. The quiet gate
+    # bounds the window RANGE of joint positions, and the rate and step prices are
+    # quadratically blind to the slow wander that moves it.
+    quiet_hold_weight: float = 0.0
+    quiet_hold_scale_rad: float = 0.01
+    # The hold's own settle: capture the anchor and start pricing this many controls into the
+    # quiet hold instead of at the quiet grace (0 keeps the grace timing). A pose frozen after
+    # one second still carries the settle's lean, and a held lean cannot be corrected once
+    # holding is cheaper than the tilt it saves.
+    quiet_hold_grace_controls: int = 0
+    # Early bound-margin pricing (0 keeps the reward byte-identical): each control pays once a
+    # scorer-judged quantity crosses a fraction of its own case bound — planar velocity error
+    # against max(0.025, 0.25 x commanded speed), yaw rate error against max(0.06, 0.25 x
+    # |commanded yaw|), and the mean over-rating torque fraction against 0.005 — so the penalty
+    # for going over each limit starts slightly earlier than the limit itself. Each family's
+    # excess is normalized by its margin band and capped at two band-widths, keeping the
+    # gradient alive from the fraction to past the bound and the term bounded.
+    bound_margin_weight: float = 0.0
+    bound_margin_fraction: float = 0.8
 
     def validate(self):
         for key, low in (
             ("tracking_window_controls", 1),
             ("schedule_period_controls", 10),
             ("quiet_grace_controls", 0),
+            ("quiet_hold_grace_controls", 0),
         ):
             if type(getattr(self, key)) is not int or not low <= getattr(self, key) <= 250:
                 raise ValueError(f"{key} needs {low} to 250 controls")
@@ -94,17 +145,27 @@ class RewardConfig:
             "contact_force_n",
             "joint_margin_rad",
             "quiet_load_n",
+            "swing_clearance_target_m",
+            "landing_lift_target_m",
+            "situation_speed_ref_mps",
+            "situation_yaw_ref_rad_s",
         ]
         if any(getattr(self, key) <= 0 for key in positive):
             raise ValueError("Positive reward v4 scales required")
         if not 0 < self.schedule_swing_fraction <= 0.5:
             raise ValueError("Each tripod swings for at most half the schedule period")
+        if self.schedule_mirror_turns not in (None, True):
+            raise ValueError("schedule_mirror_turns is None or True")
         if not 0 < self.action_limit_onset < 1:
             raise ValueError("The action-limit onset lies inside the action range")
         if not 0 < self.over_rating_onset_nm < RATED_TORQUE_NM:
             raise ValueError("The over-rating onset lies below 1.6 N.m")
+        if not 0.05 <= self.bound_margin_fraction <= 0.95:
+            raise ValueError("The bound-margin fraction lies between 0.05 and 0.95")
         # A fall must cost more than the discounted loss of the largest per-control tracking reward.
-        if self.termination_weight < 10 * (self.linear_tracking_weight + self.yaw_tracking_weight):
+        if self.termination_weight < 10 * (
+            self.linear_tracking_weight + self.yaw_tracking_weight
+        ) * (1 + self.situation_tracking):
             raise ValueError("The termination weight must reach ten times the tracking ceiling")
         if not math.isfinite(self.yaw_gate_scale_rad_s) or self.yaw_gate_scale_rad_s <= 0:
             raise ValueError("The yaw gate needs a positive finite scale")
@@ -127,8 +188,10 @@ class RewardConfig:
         if not math.isfinite(self.stride_length_weight) or self.stride_length_weight < 0:
             raise ValueError("stride_length_weight must be finite and nonnegative")
         ceiling = (self.linear_tracking_weight + self.yaw_tracking_weight) * (
-            1 + self.stride_tracking_weight
-        ) + 6 * self.stride_length_weight / self.schedule_period_controls
+            1 + self.situation_tracking
+        ) * (1 + self.stride_tracking_weight) + 6 * self.stride_length_weight / (
+            self.schedule_period_controls
+        )
         if self.termination_weight < 10 * ceiling:
             raise ValueError(
                 "The termination weight must reach ten times the tracking ceiling, stride term included"
@@ -190,6 +253,21 @@ def scheduled_swing(episode_steps, config=REWARD_CONFIG):
     swing_a = fraction < config.schedule_swing_fraction
     swing_b = (fraction >= 0.5) & (fraction < 0.5 + config.schedule_swing_fraction)
     return torch.where(first, swing_a[:, None], swing_b[:, None])
+
+
+def situation_weights(commands, config=REWARD_CONFIG):
+    """The tracking weights, each grown with how hard its axis is commanded when situation
+    pricing is on; zero situation_tracking returns the registered scalars unchanged."""
+    if not config.situation_tracking:
+        return config.linear_tracking_weight, config.yaw_tracking_weight
+    speed_share = (
+        torch.linalg.vector_norm(commands[:, :2], dim=-1) / config.situation_speed_ref_mps
+    ).clamp(0, 1)
+    yaw_share = (commands[:, 2].abs() / config.situation_yaw_ref_rad_s).clamp(0, 1)
+    return (
+        config.linear_tracking_weight * (1 + config.situation_tracking * speed_share),
+        config.yaw_tracking_weight * (1 + config.situation_tracking * yaw_share),
+    )
 
 
 def tracking_errors(tracked, commands, config=REWARD_CONFIG):
@@ -290,9 +368,10 @@ def base_reward(telemetry, commands, terminated, config=REWARD_CONFIG, nominal_h
         .clamp(0, 1)
         .mean(-1)
     )
+    linear_weight, yaw_weight = situation_weights(commands, c)
     components = {
-        "linear_tracking": c.linear_tracking_weight * kernel(linear_error, c),
-        "yaw_tracking": c.yaw_tracking_weight * kernel(yaw_error, c),
+        "linear_tracking": linear_weight * kernel(linear_error, c),
+        "yaw_tracking": yaw_weight * kernel(yaw_error, c),
         "gait_schedule": c.schedule_weight
         * moving
         * (unloaded * (2 * wanted_swing - 1)).sum(-1)
@@ -337,6 +416,27 @@ def base_reward(telemetry, commands, terminated, config=REWARD_CONFIG, nominal_h
         / RATED_TORQUE_NM**2,
         "termination": -c.termination_weight * terminated.to(torch.float32),
     }
+    if c.bound_margin_weight:
+        band = 1 - c.bound_margin_fraction
+
+        def crossing(error, bound):
+            return ((error / bound - c.bound_margin_fraction) / band).clamp(0, 2).square()
+
+        components["bound_margin"] = (
+            -c.bound_margin_weight
+            * (
+                crossing(
+                    torch.linalg.vector_norm(tracked[:, :2] - commands[:, :2], dim=-1),
+                    (0.25 * speed).clamp_min(0.025),
+                )
+                + crossing(
+                    (tracked[:, 2] - commands[:, 2]).abs(),
+                    (0.25 * commands[:, 2].abs()).clamp_min(0.06),
+                )
+                + crossing((demand / RATED_TORQUE_NM - 1).clamp_min(0).mean(-1), 0.005)
+            )
+            / 3
+        )
     reward = sum(components.values())
     if not bool(torch.isfinite(reward).all()):
         raise FloatingPointError("Nonfinite reward v4")
@@ -390,12 +490,13 @@ def measured_reward(telemetry, commands, terminated, config=REWARD_CONFIG, nomin
             stride.to(device, torch.float32), commands, config
         )
         moving = (commands != 0).any(-1).to(torch.float32)
+        linear_weight, yaw_weight = situation_weights(commands, config)
         components["stride_tracking"] = (
             config.stride_tracking_weight
             * moving
             * (
-                config.linear_tracking_weight * kernel(linear_error, config)
-                + config.yaw_tracking_weight * kernel(yaw_error, config)
+                linear_weight * kernel(linear_error, config)
+                + yaw_weight * kernel(yaw_error, config)
             )
         )
         reward = reward + components["stride_tracking"]
@@ -416,14 +517,94 @@ def measured_reward(telemetry, commands, terminated, config=REWARD_CONFIG, nomin
         wanted = commands[:, None, :2] + commands[:, None, 2:] * torch.stack(
             (-toe[..., 1], toe[..., 0]), -1
         )
-        period = config.schedule_period_controls * CONTROL_DT_S
+        # A speed-scaled gait clock gives each row its own cycle (``schedule_period_s``); each stride then
+        # pays in proportion to its cycle, so the stride pay per second stays that of the fixed clock.
+        fixed = config.schedule_period_controls * CONTROL_DT_S
+        period = telemetry.get("schedule_period_s")
+        period = fixed if period is None else period.to(device, torch.float32)[:, None]
         ratio = (travel.to(device, torch.float32) * wanted).sum(-1) / (
             wanted.square().sum(-1).clamp_min(1e-8) * period
         )
         moving = (commands != 0).any(-1).to(torch.float32)
         paid = landed.to(device, torch.bool).to(torch.float32) * ratio.clamp(0, 1).square()
+        paid = paid * (period / fixed)
         components["stride_length"] = config.stride_length_weight * moving * paid.sum(-1)
         reward = reward + components["stride_length"]
+    if config.swing_clearance_weight:
+        clearance = telemetry.get("toe_clearance_m")
+        rough = telemetry.get("toe_rough_m")
+        if (
+            not torch.is_tensor(clearance)
+            or tuple(clearance.shape) != (len(commands), 6)
+            or not torch.is_tensor(rough)
+            or tuple(rough.shape) != (len(commands), 6)
+            or not bool(torch.isfinite(clearance).all())
+            or not bool(torch.isfinite(rough).all())
+        ):
+            raise ValueError(
+                "Missing/nonfinite swing-clearance telemetry: toe_clearance_m, toe_rough_m"
+            )
+        airborne = (toe_force <= config.contact_force_n).to(torch.float32)
+        rough_gate = (rough.to(device, torch.float32) > config.swing_clearance_rough_m).to(
+            torch.float32
+        )
+        walking = (commands[:, :2] != 0).any(-1).to(torch.float32)
+        height = (clearance.to(device, torch.float32) / config.swing_clearance_target_m).clamp(0, 1)
+        components["swing_clearance"] = (
+            config.swing_clearance_weight
+            * walking
+            * (rough_gate * swing * airborne * height).sum(-1)
+            / 3
+        )
+        reward = reward + components["swing_clearance"]
+    if config.landing_lift_weight:
+        rise = telemetry.get("toe_landing_rise_m")
+        clearance = telemetry.get("toe_clearance_m")
+        if (
+            not torch.is_tensor(rise)
+            or tuple(rise.shape) != (len(commands), 6)
+            or not torch.is_tensor(clearance)
+            or tuple(clearance.shape) != (len(commands), 6)
+            or not bool(torch.isfinite(rise).all())
+            or not bool(torch.isfinite(clearance).all())
+        ):
+            raise ValueError(
+                "Missing/nonfinite landing-lift telemetry: toe_landing_rise_m, toe_clearance_m"
+            )
+        rise = rise.to(device, torch.float32)
+        airborne = (toe_force <= config.contact_force_n).to(torch.float32)
+        rising = (rise > config.landing_lift_rise_m).to(torch.float32)
+        walking = (commands[:, :2] != 0).any(-1).to(torch.float32)
+        height = (
+            clearance.to(device, torch.float32) / (rise.clamp_min(0) + config.landing_lift_target_m)
+        ).clamp(0, 1)
+        components["landing_lift"] = (
+            config.landing_lift_weight * walking * (rising * swing * airborne * height).sum(-1) / 3
+        )
+        reward = reward + components["landing_lift"]
+    if config.quiet_hold_weight:
+        anchor = telemetry.get("quiet_anchor_joint_rad")
+        position = telemetry.get("joint_position_rad")
+        if (
+            not torch.is_tensor(anchor)
+            or tuple(anchor.shape) != (len(commands), 18)
+            or not bool(torch.isfinite(anchor.to(torch.float32)).all())
+            or not torch.is_tensor(position)
+            or tuple(position.shape) != (len(commands), 18)
+            or not bool(torch.isfinite(position.to(torch.float32)).all())
+        ):
+            raise ValueError(
+                "Missing/nonfinite quiet-hold telemetry: quiet_anchor_joint_rad, joint_position_rad"
+            )
+        quiet = (commands == 0).all(-1).to(torch.float32)
+        age = telemetry.get("command_age_controls")
+        hold_age = max(config.quiet_grace_controls, config.quiet_hold_grace_controls)
+        held = quiet if age is None else quiet * (age.to(device) > hold_age).to(torch.float32)
+        deviation = (
+            position.to(device, torch.float32) - anchor.to(device, torch.float32)
+        ) / config.quiet_hold_scale_rad
+        components["quiet_hold"] = -config.quiet_hold_weight * held * deviation.square().mean(-1)
+        reward = reward + components["quiet_hold"]
     if not bool(torch.isfinite(reward).all()):
         raise FloatingPointError("Nonfinite yaw-gated reward v4")
     return reward, components

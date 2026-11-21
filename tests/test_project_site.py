@@ -163,8 +163,9 @@ class PosterContractTests(unittest.TestCase):
         approval = site.native_approval()
         self.assertEqual(approval["status"], "current")
         self.assertEqual(approval["changed"], [])
+        # The two fixture files plus the pack's shared selection, including the triton shim.
         self.assertIn(
-            "approved at abcdef01, all 10 bound files match", site.approval_line(approval)
+            "approved at abcdef01, all 11 bound files match", site.approval_line(approval)
         )
 
     def test_native_approval_lapses_when_a_bound_file_changes_and_names_it(self):

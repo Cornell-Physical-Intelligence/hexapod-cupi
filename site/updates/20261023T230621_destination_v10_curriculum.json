@@ -1,0 +1,23 @@
+{
+  "id": "20261023T230621_destination_v10_curriculum",
+  "date": "2026-10-23T23:06:21.396472Z",
+  "title": "Add a walking-speed curriculum experiment, destination_v10",
+  "summary": "destination_v10 is destination_v9 with a walking-speed curriculum: every fresh walk gets a uniform direction and, half the time, the current top speed, otherwise a slower level. The top speed starts at 0.075 m/s and rises by 0.025 m/s up to 0.15 m/s each time the destination pay averages above 0.8 over the last 1800 controls (50 updates). Turns, arcs, zero commands and stops after a walk are v9's. The training status reports the level and each advance.",
+  "areas": [
+    "locomotion"
+  ],
+  "next": "Train destination_v10 from the v9 checkpoint on the surrogate, test walks and stops at 0.05 to 0.15 m/s against v9, then on Spark.",
+  "changes": [
+    "configs/source_inventory.json",
+    "src/locomotion/evaluation/task_metrics.py",
+    "src/locomotion/omniwalk/agents/rsl_rl_ppo_cfg.py",
+    "src/locomotion/omniwalk/destination_task.py",
+    "src/locomotion/tests/test_destination.py",
+    "site/updates/20261023T230621_destination_v10_curriculum.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_destination.py"
+  ],
+  "no_project_impact": true,
+  "reason": "A named experiment that no gate or registry entry uses yet; the canonical task and reward are unchanged."
+}

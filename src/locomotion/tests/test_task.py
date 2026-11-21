@@ -9,7 +9,7 @@ import tempfile
 import types
 import unittest
 from array import array
-from dataclasses import asdict
+from dataclasses import asdict, replace
 from pathlib import Path
 
 import torch
@@ -78,7 +78,36 @@ class ActiveTaskTests(unittest.TestCase):
         expected = asdict(self.old.reward_config(SPEC))
         del expected["forward_draw_fraction"]
         del expected["yaw_gate_on"]
-        self.assertEqual(asdict(reward.REWARD_CONFIG), expected)
+        active = asdict(reward.REWARD_CONFIG)
+        # Fields added since the frozen baseline must be exactly these and stay at their inert
+        # defaults, so the recorded checkpoint's options still reproduce the active default reward.
+        self.assertEqual(
+            set(active) - set(expected),
+            {
+                "swing_clearance_weight",
+                "swing_clearance_target_m",
+                "swing_clearance_rough_m",
+                "landing_lift_weight",
+                "landing_lift_target_m",
+                "landing_lift_rise_m",
+                "schedule_mirror_turns",
+                "situation_tracking",
+                "situation_speed_ref_mps",
+                "situation_yaw_ref_rad_s",
+                "quiet_hold_weight",
+                "quiet_hold_scale_rad",
+                "quiet_hold_grace_controls",
+                "bound_margin_weight",
+                "bound_margin_fraction",
+            },
+        )
+        self.assertEqual(active["swing_clearance_weight"], 0.0)
+        self.assertEqual(active["landing_lift_weight"], 0.0)
+        self.assertEqual(active["situation_tracking"], 0.0)
+        self.assertEqual(active["quiet_hold_weight"], 0.0)
+        self.assertEqual(active["bound_margin_weight"], 0.0)
+        self.assertIsNone(active["schedule_mirror_turns"])
+        self.assertEqual({k: v for k, v in active.items() if k in expected}, expected)
         baseline = importlib.import_module("_active_task_baseline.task")
         actual_bank = command_bank(TaskConfig())
         expected_bank = baseline.command_bank(baseline.TaskConfig())
@@ -145,6 +174,108 @@ class ActiveTaskTests(unittest.TestCase):
         )
         actual = reward.measured_reward(values, commands, terminated, reward.REWARD_CONFIG, 0.1)
         self.exact(actual, expected)
+
+    def test_situation_tracking_prices_each_axis_by_its_command(self):
+        commands = torch.tensor(
+            [[0.0, 0.0, 0.0], [0.2, 0.0, 0.0], [0.0, 0.0, -0.4], [0.15, 0.0, 0.05]]
+        )
+        values = telemetry(commands)
+        # Perfect tracking keeps both kernels at one, so the factors are read off directly.
+        values["tracked_velocity_nav"] = commands.clone()
+        terminated = torch.zeros(len(commands), dtype=torch.bool)
+        base = reward.base_reward(values, commands, terminated, reward.REWARD_CONFIG, 0.1)[1]
+        config = replace(reward.REWARD_CONFIG, situation_tracking=1.0, termination_weight=44.0)
+        config.validate()
+        priced = reward.base_reward(values, commands, terminated, config, 0.1)[1]
+        torch.testing.assert_close(
+            priced["linear_tracking"],
+            base["linear_tracking"] * torch.tensor([1.0, 2.0, 1.0, 1.75]),
+        )
+        torch.testing.assert_close(
+            priced["yaw_tracking"],
+            base["yaw_tracking"] * torch.tensor([1.0, 1.0, 2.0, 1.125]),
+        )
+        changed = {key for key in base if not torch.equal(base[key], priced[key])}
+        self.assertEqual(changed, {"linear_tracking", "yaw_tracking"})
+
+    def test_bound_margin_prices_each_scorer_bound_slightly_early(self):
+        commands = torch.tensor(
+            [
+                [0.1, 0.0, -0.2],  # planar error exactly at its bound
+                [0.1, 0.0, -0.2],  # planar error below the 80% start
+                [0.1, 0.0, -0.2],  # planar error past the bound, into the cap
+                [0.0, 0.0, -0.4],  # yaw error at 90% of its bound
+                [0.2, 0.0, 0.0],  # torque demand fraction exactly at 0.005
+            ]
+        )
+        values = telemetry(commands)
+        offsets = torch.zeros(5, 3)
+        offsets[0, 0], offsets[1, 0], offsets[2, 0] = 0.025, 0.019, 0.035
+        offsets[3, 2] = 0.09
+        values["tracked_velocity_nav"] = commands + offsets
+        torque = torch.zeros(5, 18)
+        torque[4] = 1.005 * reward.RATED_TORQUE_NM
+        values["computed_torque_nm"] = torque
+        terminated = torch.zeros(5, dtype=torch.bool)
+        base = reward.base_reward(values, commands, terminated, reward.REWARD_CONFIG, 0.1)[1]
+        self.assertNotIn("bound_margin", base)
+        config = replace(reward.REWARD_CONFIG, bound_margin_weight=3.0)
+        config.validate()
+        priced = reward.base_reward(values, commands, terminated, config, 0.1)[1]
+        # Bounds: planar max(.025, .25x0.1)=.025, yaw max(.06, .25x0.4)=.10, demand .005; the
+        # price starts at 80% of each and the normalized crossing caps at 2 (squared: 4).
+        torch.testing.assert_close(
+            priced["bound_margin"],
+            torch.tensor([-1.0, 0.0, -4.0, -0.25, -1.0]),
+            rtol=0.0,
+            atol=1e-3,
+        )
+        self.assertEqual({key for key in base if not torch.equal(base[key], priced[key])}, set())
+
+    def test_quiet_hold_prices_wander_from_the_anchor_while_still(self):
+        commands = torch.tensor([[0.0, 0.0, 0.0], [0.0, 0.0, 0.0], [0.1, 0.0, 0.0]])
+        values = telemetry(commands)
+        values["joint_position_rad"] = torch.zeros(3, 18)
+        anchor = torch.zeros(3, 18)
+        anchor[0] = -0.01  # one scale of deviation on every joint of the settled stand
+        anchor[2] = -0.02
+        values.update(
+            quiet_anchor_joint_rad=anchor,
+            command_age_controls=torch.tensor([100, 10, 100]),
+            gate_yaw_rate_rad_s=torch.zeros(3),
+            stride_velocity_nav=torch.zeros(3, 3),
+            stride_touchdown=torch.zeros(3, 6, dtype=torch.bool),
+            stride_displacement_nav=torch.zeros(3, 6, 2),
+        )
+        config = replace(reward.REWARD_CONFIG, quiet_hold_weight=3.0)
+        _, components = reward.measured_reward(
+            values, commands, torch.zeros(3, dtype=torch.bool), config, 0.1
+        )
+        # Row 0 is still and one scale off its anchor; row 1 sits inside the grace window;
+        # row 2 is moving, however far from its stale anchor.
+        torch.testing.assert_close(components["quiet_hold"], torch.tensor([-3.0, 0.0, 0.0]))
+        # With the hold's own longer settle, age 100 has not yet reached the hold.
+        _, delayed = reward.measured_reward(
+            values,
+            commands,
+            torch.zeros(3, dtype=torch.bool),
+            replace(config, quiet_hold_grace_controls=120),
+            0.1,
+        )
+        torch.testing.assert_close(delayed["quiet_hold"], torch.zeros(3))
+
+    def test_quiet_hold_telemetry_flows_through_the_task(self):
+        env = GaitDouble(3)
+        wrapped = task.TrainingTask(
+            env,
+            TaskConfig(seed=20260917),
+            reward_config=replace(reward.REWARD_CONFIG, quiet_hold_weight=3.0),
+        )
+        wrapped.reset()
+        for _ in range(3):
+            wrapped.remaining_controls[:] = 2
+            wrapped.step(torch.zeros(3, 18))
+        self.assertIn("quiet_hold", wrapped.last_components)
 
     def test_terminal_rows_keep_the_final_command_until_selected_reset(self):
         env = GaitDouble(3)

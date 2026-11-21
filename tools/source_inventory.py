@@ -25,12 +25,13 @@ IMPORT_BOUNDARIES = {
     "navigation": {"contracts"},
     "mission": {"contracts"},
     "locomotion.robots": set(),
-    "locomotion.omniwalk": {"contracts", "locomotion.robots"},
+    "locomotion.omniwalk": {"contracts", "locomotion.robots", "locomotion.terrain"},
     "locomotion.evaluation": {
         "contracts",
         "navigation",
         "locomotion.omniwalk",
         "locomotion.robots",
+        "locomotion.terrain",
     },
     "locomotion.spark": {"contracts", "locomotion.omniwalk", "locomotion.robots"},
     "locomotion.rl": set(),
@@ -58,8 +59,21 @@ IMPORT_BOUNDARIES = {
         "locomotion.robots",
         "locomotion.spark",
         "locomotion.randomization",
+        "locomotion.terrain",
     },
     "locomotion.randomization": {"locomotion.robots"},
+    # Numpy-only height maps shared by the surrogate floor, the native terrain and the footfall inputs.
+    "locomotion.terrain": set(),
+    # The numpy robot runtime; export.py alone reads checkpoints and the approved robot model.
+    "locomotion.runtime": {
+        "contracts",
+        "locomotion.omniwalk",
+        "locomotion.rl",
+        "locomotion.robots",
+        "locomotion.surrogate",
+    },
+    # The leg-stand fit drives the surrogate's one-leg model.
+    "locomotion.sysid": {"locomotion.surrogate"},
 }
 
 

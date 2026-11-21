@@ -1,0 +1,33 @@
+
+Delay predictor, fitted (kd, toe_friction, joint_friction, armature drawn per episode; touchdown model off; motor check drawn) simulator; 183915 parameters; 254112 rows from 61 cases; 5 folds by case, each case held out once
+Held-out root-mean-square error, pooled over the folds. size = standard deviation of the input over all
+recorded rows. Ratios = network / control per fold (median, min, max); below 1 means the network is closer.
+
+1 control ahead (20 ms)
+input group              unit     size  no prediction    linear   network        / no prediction               / linear
+body angular velocity   rad/s   0.1034        0.08411   0.04560   0.03406       0.40  0.38  0.49       0.74  0.63  0.86
+gravity direction           -   0.0045        0.00111   0.00042   0.00033       0.29  0.26  0.32       0.74  0.65  0.87
+joint position            rad   0.1349        0.01850   0.00680   0.00484       0.25  0.21  0.31       0.67  0.58  0.83
+joint velocity          rad/s   0.8653        0.82001   0.46111   0.38644       0.47  0.44  0.51       0.83  0.77  0.91
+previous action         input   0.3972        0.05284   0.02077   0.01373       0.25  0.20  0.30       0.64  0.54  0.74
+gait clock                  -   0.6367        0.08485   0.01316   0.01266       0.16  0.11  0.17       0.94  0.88  1.00
+odometry ghost          input   0.4197        0.07345   0.04998   0.04204       0.53  0.52  0.64       0.80  0.74  0.94
+footfall values         input   0.0000        0.00000   0.00000   0.00000          -     -     -          -     -     -
+all 278 inputs          input   0.3824        0.23919   0.06062   0.05059       0.21  0.20  0.23       0.83  0.76  0.91
+
+2 controls ahead (40 ms)
+input group              unit     size  no prediction    linear   network        / no prediction               / linear
+body angular velocity   rad/s   0.1034        0.11963   0.05667   0.03617       0.30  0.29  0.35       0.61  0.54  0.73
+gravity direction           -   0.0045        0.00204   0.00109   0.00063       0.28  0.25  0.35       0.52  0.47  0.67
+joint position            rad   0.1349        0.03464   0.01225   0.00729       0.19  0.16  0.26       0.56  0.46  0.72
+joint velocity          rad/s   0.8653        0.86593   0.53827   0.41998       0.49  0.46  0.51       0.78  0.74  0.81
+previous action         input   0.3972        0.10119   0.03722   0.02046       0.19  0.15  0.24       0.53  0.42  0.63
+gait clock                  -   0.6367        0.16873   0.02263   0.01983       0.12  0.08  0.13       0.86  0.75  0.93
+odometry ghost          input   0.4197        0.11299   0.06863   0.05151       0.41  0.39  0.53       0.69  0.61  0.88
+footfall values         input   0.0000        0.00000   0.00000   0.00000          -     -     -          -     -     -
+all 278 inputs          input   0.3824        0.26118   0.09342   0.07452       0.29  0.27  0.30       0.79  0.74  0.85
+
+loss at the last epoch per fold, training / held-out (lowest held-out during training): 0.031 / 0.139 (0.139), 0.033 / 0.059 (0.059), 0.033 / 0.085 (0.085), 0.033 / 0.129 (0.129), 0.033 / 0.091 (0.091)
+final model (trained on all cases; in-sample, not held out), all 278 inputs: 0.03605 at 1 control, 0.05260 at 2
+command types held out per fold: 0: combined, gentle, stop, transition, translate 0.10, turn; 1: combined, gentle, quiet, stop, translate 0.10; 2: combined, gentle, quiet, stop, translate 0.10, turn; 3: combined, formal, gentle, stand, stop, translate 0.10, turn; 4: combined, formal, gentle, stop, translate 0.10, turn
+predictor.pt sha256 1dff0e80c45da0860db229edefa566e665c7e07f8d81db739eca7f3cfec9d0ed
