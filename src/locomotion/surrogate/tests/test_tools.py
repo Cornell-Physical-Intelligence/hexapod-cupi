@@ -2,11 +2,13 @@
 
 import ast
 import contextlib
+import hashlib
 import io
 import json
 import tempfile
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 import torch
@@ -210,10 +212,6 @@ class BoundaryTests(unittest.TestCase):
             self.assertNotIn("sys.path", text, path.name)
 
 
-if __name__ == "__main__":
-    unittest.main()
-
-
 class CyclePolicyTests(unittest.TestCase):
     def test_policy_restarts_with_each_case_and_sends_actions_late(self):
         from types import SimpleNamespace
@@ -249,3 +247,70 @@ class CyclePolicyTests(unittest.TestCase):
         self.assertAlmostEqual(calls[1][0][0], 0.05, places=6)
         self.assertEqual((first.shape, float(first.abs().max())), ((1, 18), 0.0))
         self.assertAlmostEqual(float(second[0, 0]), 2.0, places=6)
+
+    def test_large_delay_starts_neutral_without_preallocating_actions(self):
+        from types import SimpleNamespace
+
+        import torch
+
+        from locomotion.amp.cycle import CycleController
+        from locomotion.surrogate import cycle
+
+        commands = np.array([[0.05, 0.0, 0.0]])
+        targets = np.full((1, 4, 18), 0.05)
+        controller = CycleController(
+            commands, targets, targets / 2, np.zeros(18), learning_rate=0.5, action_delay=10**12
+        )
+        env = SimpleNamespace(
+            episode_steps=torch.tensor([0]), cfg=SimpleNamespace(action_scale_rad=0.35)
+        )
+        observation = torch.zeros(1, 231)
+        observation[0, cycle.COMMAND] = torch.tensor(commands[0])
+        policy = cycle.policy_for(controller, env)
+        for control in range(3):
+            env.episode_steps[0] = control
+            self.assertEqual(float(policy(observation).abs().max()), 0.0)
+        self.assertEqual(controller.fit_samples, 0)
+        with self.assertRaisesRegex(ValueError, "differs from controller delay"):
+            cycle.policy_for(controller, env, delay=0)
+
+    def test_evaluation_binds_loaded_bank_when_the_input_path_changes(self):
+        from types import SimpleNamespace
+
+        from locomotion.surrogate import cycle
+
+        with tempfile.TemporaryDirectory() as directory:
+            bank = Path(directory) / "bank.npz"
+            output = Path(directory) / "output"
+            targets = np.full((1, 4, 18), 0.05)
+            np.savez(bank, commands=[[0.05, 0.0, 0.0]], targets=targets, references=targets / 2)
+            original_sha = hashlib.sha256(bank.read_bytes()).hexdigest()
+            env = SimpleNamespace(
+                neutral=torch.zeros(18), geometry_extrema_path=None, close=lambda: None
+            )
+
+            def run_cases(env, policy, output, geometry, checkpoint, **options):
+                bank.write_bytes(b"replacement")
+                self.assertEqual(
+                    hashlib.sha256(Path(checkpoint).read_bytes()).hexdigest(), original_sha
+                )
+                return {
+                    "requirements_sha256": "requirements",
+                    "judged_cases": 1,
+                    "failed_cases": [],
+                    "failure": None,
+                    "pass": True,
+                }
+
+            with (
+                patch.object(cycle, "SurrogateEnv", return_value=env),
+                patch.object(cycle.evaluation, "run_cases", side_effect=run_cases),
+            ):
+                cycle.main(["--bank", str(bank), "--output", str(output)])
+            summary = json.loads((output / "cycle_summary.json").read_text())
+            self.assertEqual(summary["bank_sha256"], original_sha)
+            self.assertTrue(summary["pass"])
+
+
+if __name__ == "__main__":
+    unittest.main()

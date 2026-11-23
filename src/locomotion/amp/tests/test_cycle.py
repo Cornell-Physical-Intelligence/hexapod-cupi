@@ -1,12 +1,19 @@
 """Check the stored-cycle controller: source selection, ramps and the fitted joint gain."""
 
+import hashlib
+import json
 import tempfile
 import unittest
+from collections import deque
+from contextlib import redirect_stderr
+from io import StringIO
 from pathlib import Path
+from unittest.mock import patch
 
 import numpy as np
 
-from locomotion.amp.cycle import CycleController, bank_from_replays
+from locomotion.amp import cycle as cycle_module
+from locomotion.amp.cycle import CycleController, _bank_from_traces, bank_from_replays
 
 NEUTRAL = np.tile([0.0, -0.3, 0.4], 6)
 FORWARD, LEFT, STAND = (0.05, 0.0, 0.0), (0.0, 0.05, 0.0), (0.0, 0.0, 0.0)
@@ -65,6 +72,28 @@ class CycleControllerTests(unittest.TestCase):
             self.assertTrue(np.allclose(controller.gain, expected, atol=1e-3))
         self.assertTrue(np.array_equal(self.controller(learning_rate=0.5).gain, np.ones(18)))
 
+    def test_gain_fits_delayed_phase_and_discards_old_samples_on_switch(self):
+        _, targets, references = bank()
+        deflection, stiffness, delay = targets - references, 0.6, 3
+        controller = self.controller(learning_rate=0.5, action_delay=delay)
+        pending = deque([(NEUTRAL, np.zeros(18))] * delay)
+        angle = NEUTRAL
+        for control in range(250):
+            command = LEFT if control == 6 else FORWARD
+            index = int(command == LEFT)
+            phase = controller.phase
+            sent = controller(command, angle)
+            pending.append((sent, deflection[index, phase]))
+            applied, offset = pending.popleft()
+            angle = applied - offset / stiffness
+            if 6 <= control < 12:
+                self.assertEqual(controller.fit_samples, 0)
+                np.testing.assert_array_equal(controller.gain, np.ones(18))
+        np.testing.assert_allclose(controller.gain, 1 / stiffness, atol=1e-3)
+        controller.reset()
+        np.testing.assert_array_equal(controller.gain, np.ones(18))
+        self.assertEqual(controller.fit_samples, 0)
+
 
 class BankTests(unittest.TestCase):
     def test_bank_rows_follow_the_phase_of_a_phase_zero_replay(self):
@@ -82,6 +111,74 @@ class BankTests(unittest.TestCase):
             (commands.shape, targets.shape, references.shape), ((1, 3), (1, 60, 18), (1, 60, 18))
         )
         self.assertTrue(np.allclose(targets[0], cycle) and np.allclose(references[0], settled))
+
+    def test_rejects_a_nonrepeating_later_target(self):
+        rng = np.random.default_rng(1)
+        cycle = rng.normal(size=(60, 18))
+        targets = np.tile(cycle, (15, 1))[:, None]
+        targets[899, 0, 0] += 0.01
+        with tempfile.TemporaryDirectory() as directory:
+            np.savez(
+                Path(directory) / "control_trace.npz",
+                command=np.tile(np.float32(FORWARD), (900, 1, 1)),
+                joint_target_rad=targets,
+                joint_position_rad=targets,
+            )
+            path = Path(directory) / "control_trace.npz"
+            with self.assertRaisesRegex(ValueError, "no complete repeated target cycle"):
+                _bank_from_traces([(path, path.read_bytes())])
+
+    def test_cli_accepts_only_admitted_phase_zero_and_preserves_existing_bank(self):
+        with tempfile.TemporaryDirectory() as directory:
+            folder = Path(directory)
+            evaluation = folder / "replay_00_phase05/run/standing/evaluation"
+            evaluation.mkdir(parents=True)
+            (evaluation / "declaration.json").write_text(
+                json.dumps({"schema": "hexapod_native_batch_v1", "cases": []})
+            )
+            path = evaluation / "control_trace.npz"
+            wave = np.random.default_rng(4).normal(size=(60, 18))
+            targets = np.tile(wave, (15, 1))[:, None]
+            np.savez(
+                path,
+                command=np.tile(np.float32(FORWARD), (900, 1, 1)),
+                joint_target_rad=targets,
+                joint_position_rad=targets,
+            )
+            output = folder / "bank"
+            manifest = folder / "admission.json"
+            trace_hash = hashlib.sha256(path.read_bytes()).hexdigest()
+            clip = {"start_phase": 0.5, "trace_sha256": trace_hash}
+            admission = {"admitted": True, "model_sha256": "model", "clips": [clip]}
+            args = ["--replays", str(evaluation), "--output", str(output)]
+            with patch.object(cycle_module, "ADMISSION", manifest):
+                manifest.write_text(json.dumps(admission))
+                with self.assertRaisesRegex(ValueError, "not an admitted phase-zero replay"):
+                    bank_from_replays([evaluation])
+                stderr = StringIO()
+                with redirect_stderr(stderr), self.assertRaises(SystemExit):
+                    cycle_module.main(args)
+                self.assertIn("not an admitted phase-zero replay", stderr.getvalue())
+                clip["start_phase"] = 0
+                manifest.write_text(json.dumps(admission))
+                _, targets, _ = bank_from_replays([evaluation])
+                np.testing.assert_array_equal(targets[0], wave)
+                raw = folder / "raw"
+                raw.mkdir()
+                (raw / "control_trace.npz").write_bytes(path.read_bytes() + b"other trace")
+                with self.assertRaisesRegex(ValueError, "not an admitted phase-zero replay"):
+                    bank_from_replays([evaluation, raw])
+                with redirect_stderr(StringIO()), self.assertRaises(SystemExit):
+                    cycle_module.main(["--replays", str(raw), "--output", str(output)])
+                cycle_module.main(args)
+                saved = output.with_suffix(".npz")
+                with np.load(saved, allow_pickle=False) as bank:
+                    np.testing.assert_array_equal(bank["targets"][0], wave)
+                    self.assertEqual(bank["trace_sha256"].tolist(), [trace_hash])
+                original = saved.read_bytes()
+                with self.assertRaises(FileExistsError):
+                    cycle_module.main(args)
+                self.assertEqual(saved.read_bytes(), original)
 
 
 if __name__ == "__main__":
