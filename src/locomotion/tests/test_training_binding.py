@@ -9,6 +9,7 @@ from pathlib import Path
 from locomotion.evaluation.admission import require_admission
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256, sha
+from locomotion.robots.randomization import identity_record
 
 
 class TrainingBindingTests(unittest.TestCase):
@@ -95,6 +96,32 @@ class TrainingBindingTests(unittest.TestCase):
     def test_matching_state_report_bytes_pass_for_batch_and_video_one(self):
         self.assertEqual(self.accepted()["num_envs"], 32)
         self.assertEqual(self.accepted(EnvConfig(num_envs=1))["num_envs"], 32)
+
+    def test_randomized_training_requires_matching_one_and_batch_declarations(self):
+        record = identity_record("table2_v1")
+        self.identity["randomization"] = record
+        with self.assertRaisesRegex(ValueError, "Standing randomization declaration differs"):
+            self.accepted()
+        self.envelope["randomization"] = record
+        for name in ("one", "batch"):
+            with self.assertRaisesRegex(
+                ValueError, "Native standing randomization identity differs: " + name
+            ):
+                self.accepted()
+            seed = 17 if name == "one" else 18
+            self.states[name]["identity"].update(randomization=record, seed=seed)
+            self.reports[name].update(randomization=record, seed=seed)
+            self.refresh(name)
+        self.assertEqual(self.accepted()["randomization"], record)
+        self.reports["batch"]["seed"] = 17
+        self.refresh("batch")
+        with self.assertRaisesRegex(
+            ValueError, "Native standing randomization identity differs: batch"
+        ):
+            self.accepted()
+        self.identity.pop("randomization")
+        with self.assertRaisesRegex(ValueError, "Standing randomization declaration differs"):
+            self.accepted()
 
     def test_other_batch_layout_cannot_borrow_admission(self):
         with self.assertRaisesRegex(ValueError, "replica layout"):

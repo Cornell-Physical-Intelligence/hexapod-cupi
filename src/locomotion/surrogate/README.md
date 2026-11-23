@@ -32,7 +32,7 @@ identity. The update count and deviation schedule continue; simulator state and
 random generators restart from the recorded seed.
 
 `--randomization table2_v1` trains under the Step 7 declaration in
-`src/locomotion/randomization.py`; the default `none` keeps the nominal robot
+`src/locomotion/robots/randomization.py`; the default `none` keeps the nominal robot
 and reproduces the pre-change trajectory bit for bit. Each reset redraws that
 replica's masses, payload, friction, gains, motor strength and reset pose, and
 schedules its pushes. The identity records the declaration, its ranges and its
@@ -68,7 +68,8 @@ The capture source reads MuJoCo's per-geom floor-force and contact-point sensors
 It records their scope in `source.json`; these summaries provide no native patch
 completeness claim. The common capture retains its array keys, dtypes, contact
 classification and continuity checks. Native capture continues to validate its
-actual patch buffers and fixed motor law.
+actual patch buffers. It checks the nominal motor law, or under a Step 7
+draw the gain, damping and strength snapshotted after the case reset.
 
 The evaluator reconstructs the recorded actor inputs with no observation noise.
 You can test joint-velocity input gains or force a two-control action mean. Static

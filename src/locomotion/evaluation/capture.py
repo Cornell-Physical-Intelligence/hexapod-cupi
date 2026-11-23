@@ -5,6 +5,7 @@ from pathlib import Path
 
 import numpy as np
 
+from locomotion.robots import randomization as rnd
 from locomotion.robots.hexapod import JOINT_NAMES, KD, LEGS
 from locomotion.robots.rs05 import STIFFNESS_NM_PER_RAD
 
@@ -191,7 +192,7 @@ class DiagnosticCapture:
     A native failure is retained and aborts; no rows are reset or discarded.
     """
 
-    def __init__(self, env, output, geometry_extrema):
+    def __init__(self, env, output, geometry_extrema, *, randomization=None):
         self.env = env
         self.output = Path(output)
         self.output.mkdir(parents=True, exist_ok=False)
@@ -199,6 +200,13 @@ class DiagnosticCapture:
             self.geometry = DiagnosticGeometry(
                 env.geometry_meta, {k: data[k] for k in data.files}, env.native_body_names
             )
+        self.randomization = {}
+        if randomization is not None:
+            self.randomization = {
+                "randomization": randomization,
+                "seed": env.cfg.seed,
+                "motor_law": {key: value.tolist() for key, value in env.motor_law.items()},
+            }
         self.rows, self.controls, self.files = [], [], []
         self.count = 0
         self.failure = None
@@ -347,6 +355,7 @@ class DiagnosticCapture:
         self.save(
             "session.json",
             {
+                **self.randomization,
                 "steps": self.count,
                 "controls": len(self.controls),
                 "reset_count": 1,
@@ -384,6 +393,55 @@ def diagnostic_servo(q, dq, target, kp, kd):
     ).astype(np.float32)
     # Float32 representation of 1.6 is accepted only to the explicit 1.60001 numeric gate.
     return raw.astype(np.float32), np.clip(raw, -ceiling, ceiling).astype(np.float32), ceiling
+
+
+def expected_motor_law(q, dq, target, law=None):
+    """The exact float32 torque recurrence each substep must reproduce.
+
+    ``law`` is None for the nominal RS05 law. A Step 7 draw gives float32 ``kp``, ``kd`` and
+    ``strength`` arrays; the ceiling then follows ``randomization.strength_ceiling``, so the
+    1.6 N·m cap still holds and the comparison stays bit-exact.
+    """
+    if law is None:
+        return diagnostic_servo(
+            q, dq, target, np.full(18, STIFFNESS_NM_PER_RAD, np.float32), np.asarray(KD, np.float32)
+        )
+    requested, _, ceiling = diagnostic_servo(q, dq, target, law["kp"], law["kd"])
+    ceiling = np.asarray(rnd.strength_ceiling(ceiling, law["strength"]), np.float32)
+    return requested, np.clip(requested, -ceiling, ceiling).astype(np.float32), ceiling
+
+
+def diagnostic_motor_law(session, num_envs):
+    """Rebuild the first reset's motor law from the recorded declaration, seed and row order."""
+    declaration = session.get("randomization")
+    if declaration is None:
+        if "motor_law" in session:
+            raise ValueError("Motor snapshot requires a standing randomization declaration")
+        return None
+    seed = session.get("seed")
+    if (
+        declaration != rnd.identity_record("table2_v1")
+        or type(seed) is not int
+        or seed < 0
+        or tuple(session["joint_names"]) != JOINT_NAMES
+    ):
+        raise ValueError("Invalid standing randomization identity")
+    kp, kd, strength = [], [], []
+    name = declaration["name"]
+    for row in range(num_envs):
+        sample = rnd.draw(name, rnd.replica_generator(seed, row, name))
+        kp.append(np.full(18, rnd.KP * sample.kp_scale, dtype=np.float32))
+        kd.append(np.asarray(KD, dtype=np.float32) * np.float32(sample.kd_scale))
+        strength.append(sample.motor_strength)
+    law = {"kp": np.asarray(kp), "kd": np.asarray(kd), "strength": np.asarray(strength, np.float32)}
+    snapshot = session.get("motor_law")
+    if (
+        not isinstance(snapshot, dict)
+        or snapshot.keys() != law.keys()
+        or not all(np.array_equal(snapshot[key], value) for key, value in law.items())
+    ):
+        raise ValueError("Standing motor snapshot differs from the seeded draw")
+    return law
 
 
 _QUIET_GATES = {
@@ -466,6 +524,7 @@ def score_diagnostic(directory):
     s = read(d / "session.json")
     names = s["joint_names"]
     n = len(s["root_paths"])
+    law = diagnostic_motor_law(s, n)
     with np.load(d / "control_trace.npz") as z:
         data = {k: z[k] for k in z.files}
     if len(data["sequence"]) != CONTROLS:
@@ -480,6 +539,8 @@ def score_diagnostic(directory):
         "replicas": [],
         "scope": "Provisional simulation standing screen; no hardware calibration or walking admission.",
     }
+    if law is not None:
+        result.update(randomization=s["randomization"], seed=s["seed"])
     maxap = np.zeros(n)
     rawmax = np.zeros(n)
     sat = np.zeros((n, 18), int)
@@ -542,13 +603,19 @@ def score_diagnostic(directory):
             np.concatenate([previous_dq[None], r["joint_velocity_rad_s"][:-1]]),
         ):
             raise ValueError("Servo input not previous native post-step state")
-        a, b, c = diagnostic_servo(
-            r["pre_joint_position_rad"].reshape(-1, 18),
-            r["pre_joint_velocity_rad_s"].reshape(-1, 18),
-            r["joint_target_rad"].reshape(-1, 18),
-            kp,
-            kd,
+        servo_inputs = tuple(
+            r[key]
+            for key in ("pre_joint_position_rad", "pre_joint_velocity_rad_s", "joint_target_rad")
         )
+        if any(value.shape != (m, n, 18) for value in servo_inputs):
+            raise ValueError("Wrong raw standing servo shape")
+        inputs = tuple(value.reshape(-1, 18) for value in servo_inputs)
+        if law is None:
+            a, b, c = diagnostic_servo(*inputs, kp, kd)
+        else:
+            a, b, c = expected_motor_law(
+                *inputs, {key: np.tile(value, (m, 1)) for key, value in law.items()}
+            )
         for key, want in [
             ("computed_torque_nm", a),
             ("applied_torque_nm", b),
