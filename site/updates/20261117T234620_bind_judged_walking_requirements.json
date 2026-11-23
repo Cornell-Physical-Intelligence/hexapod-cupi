@@ -1,0 +1,23 @@
+{
+  "id": "20261117T234620_bind_judged_walking_requirements",
+  "date": "2026-11-17T23:46:20Z",
+  "title": "Bind the claimed walking set to the input recorded by the judge",
+  "summary": "The controller validator reads the exact requirements file used for the published 26-case judgement. It checks the file hash recorded by the judge and compares the current claimed set with the same set in that input. Changing a walking requirement now requires a new judgement even when an editor updates the registry pin.",
+  "areas": [
+    "evaluation",
+    "verification"
+  ],
+  "changes": [
+    "configs/accepted_controller.json",
+    "tools/controller_evidence.py",
+    "tests/test_accepted_controller.py",
+    "site/assets/walking_requirements_20261117_001/walking_requirements.json"
+  ],
+  "evidence": [
+    "site/assets/walking_requirements_20261117_001/walking_requirements.json",
+    "site/assets/c48_surrogate_requirements_20261108_001/judgement.json",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/blob/d846c3a20908e3054a15b6f03c4f8017b0cc53d1/configs/walking_requirements.json"
+  ],
+  "next": "Run the complete walking cases after renewing native approval.",
+  "no_project_impact": false
+}

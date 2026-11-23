@@ -1,0 +1,22 @@
+{
+  "id": "20261111T233328_step7_freeze_table2_v1",
+  "date": "2026-11-11T23:33:28Z",
+  "title": "Freeze the table2_v1 randomization declaration",
+  "summary": "Commit 06aca4e6 froze the table2_v1 declaration at SHA-256 730cad98 and its 27-cell grid at 7d631f12, with no change to the declaration bytes. A test pins both hashes. The training guide and the locomotion guide now state that the declaration is frozen. The decision followed a CPU surrogate comparison of none and table2_v1 on five seeds each to 4000 updates: at update 4000 the arms passed 15 of 15 and 14 of 15 focus probes and a mean of 35.8 and 36.6 of 81 grid cells (permutation p 0.97); at update 2000, mid-schedule, table2_v1 was behind (33.0 against 23.4, p 0.008). These are surrogate results, not native evidence. The commit added no update record; this record covers it.",
+  "areas": [
+    "training"
+  ],
+  "changes": [
+    "docs/TRAINING.md",
+    "src/locomotion/README.md",
+    "src/locomotion/tests/test_randomization.py",
+    "site/updates/20261111T233328_step7_freeze_table2_v1.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_randomization.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Apply the frozen motor and friction draws in the native environment.",
+  "no_project_impact": true,
+  "reason": "Pins an unchanged declaration and grid hash: no native run, admission, gate threshold or accepted capability changes."
+}

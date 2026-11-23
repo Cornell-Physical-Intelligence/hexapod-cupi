@@ -11,8 +11,8 @@ from unittest.mock import patch
 import numpy as np
 import torch
 
-from locomotion import randomization as rnd
 from locomotion.evaluation import requirements, runner
+from locomotion.robots import randomization as rnd
 from locomotion.robots.hexapod import KD
 from locomotion.surrogate.capture import SurrogateCaptureSource
 from locomotion.surrogate.env import SurrogateConfig, SurrogateEnv

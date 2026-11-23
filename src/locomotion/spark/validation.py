@@ -5,6 +5,8 @@ import math
 from locomotion.omniwalk.agents.rsl_rl_ppo_cfg import recipe_options
 from locomotion.omniwalk.mdp.commands import default_gait_clock
 
+RANDOMIZATION_NAMES = ("none", "table2_v1")
+
 ALLOCATION_PROFILES = ("standard", "flat_pilot_v1")
 CLEANUP_MARGIN_SECONDS = 400
 # Training stops at UPDATE_LIMIT; a training pack that opts in to extended updates may run to the larger limit.
@@ -25,6 +27,20 @@ def update_limit(mode, extended):
     if extended and mode != "train":
         raise ValueError("Extended updates apply to training only")
     return EXTENDED_UPDATE_LIMIT if extended else UPDATE_LIMIT
+
+
+def validate_randomization(mode, name):
+    """Return the identity of a Step 7 declaration, or None for the nominal robot.
+
+    Training and standing admission may draw; evaluation and noise probes stay nominal.
+    """
+    if name not in RANDOMIZATION_NAMES or (name != "none" and mode not in ("train", "diagnostic")):
+        raise ValueError("A randomization declaration applies to training and standing diagnostics")
+    if name == "none":
+        return None
+    from locomotion.robots import randomization as rnd
+
+    return rnd.identity_record(name)
 
 
 def decay_updates(updates, decay):

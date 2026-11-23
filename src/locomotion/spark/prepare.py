@@ -18,10 +18,12 @@ from locomotion.spark.validation import (
     CLEANUP_MARGIN_SECONDS,
     ENTRY_POINTS,
     LEARNER_OPTION_DEFAULTS,
+    RANDOMIZATION_NAMES,
     resolve_learner_options,
     update_limit,
     validate_deadline,
     validate_decay,
+    validate_randomization,
 )
 
 ROOT = Path(__file__).resolve().parents[3]
@@ -73,6 +75,7 @@ def prepare(
     action_std_decay_updates=None,
     steps_per_env=None,
     experiment=None,
+    randomization="none",
     initialize_from=None,
     initialize_from_sha=None,
     initialize_from_declaration_sha=None,
@@ -97,6 +100,7 @@ def prepare(
         experiment not in EXPERIMENT_INPUTS or mode not in ("train", "evaluate") or learner != "ppo"
     ):
         raise ValueError("A named experiment applies to PPO training and evaluation")
+    randomization_record = validate_randomization(mode, randomization)
     learner_options = resolve_learner_options(
         recipe,
         mode,
@@ -340,7 +344,7 @@ def prepare(
         binding["command_args"] += ["--updates", str(updates), "--seed", str(seed)]
     if extended_updates:
         binding["command_args"] += ["--extended-updates"]
-    if mode == "probe":
+    if mode == "probe" or (mode == "diagnostic" and randomization_record is not None):
         binding["command_args"] += ["--seed", str(seed)]
     if mode in ("train", "evaluate") and learner == "ppo":
         # The flags below name each option that differs from its default, so the trainer applies no recipe.
@@ -376,6 +380,8 @@ def prepare(
         ]
     if experiment is not None:
         binding["command_args"] += ["--experiment", experiment]
+    if randomization != "none":
+        binding["command_args"] += ["--randomization", randomization]
     if initialize_from is not None:
         # Training mounts no evaluation checkpoint, so the starting checkpoint and its declaration take
         # the launcher's read-only /checkpoint mount.
@@ -426,6 +432,7 @@ def prepare(
             **({} if episode_seconds == 20.0 else {"episode_seconds": episode_seconds}),
             **({"extended_updates": True} if extended_updates else {}),
             **({} if experiment is None else {"experiment": experiment}),
+            **({} if randomization_record is None else {"randomization": randomization_record}),
             **(
                 {}
                 if initialize_from is None
@@ -501,6 +508,12 @@ def main():
     parser.add_argument("--action-smoothing", choices=["none", "mean2"])
     parser.add_argument("--velocity-noise", type=float)
     parser.add_argument("--experiment", choices=sorted(EXPERIMENT_INPUTS))
+    parser.add_argument(
+        "--randomization",
+        choices=RANDOMIZATION_NAMES,
+        default="none",
+        help="Step 7 declaration in locomotion/robots/randomization.py for training and standing diagnostics.",
+    )
     parser.add_argument("--initialize-from", type=Path)
     parser.add_argument("--initialize-from-sha")
     parser.add_argument("--initialize-from-declaration-sha")
