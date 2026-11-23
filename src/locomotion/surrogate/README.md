@@ -72,9 +72,24 @@ actual patch buffers. It checks the nominal motor law, or under a Step 7
 draw the gain, damping and strength snapshotted after the case reset.
 
 The evaluator reconstructs the recorded actor inputs with no observation noise.
-You can test joint-velocity input gains or force a two-control action mean. Static
-probe consensus compares the default contact model with two sensitivity models;
-agreement grants no native acceptance.
+You can test joint-velocity input gains or force a two-control action mean.
+`--action-delay N` sends each action N controls late, at 20 ms per control.
+Each case starts with N neutral actions. The delay applies after action smoothing.
+
+Repeat `--condition FIELD=VALUE` to hold selected properties across resets:
+`kp_scale`, `kd_scale`, `foot_friction`, `motor_strength` or `payload_mass_kg`.
+When you set another property, the toes keep the sliding coefficient from
+`--contact friction`. Set `foot_friction` to override toe-floor sliding
+friction. The shafts and hulls keep the base contact template. The summary
+records the template under `contact_model` and the effective toe coefficient
+under `condition.draw.foot_friction`.
+
+With a fixed condition, consensus compares the configured cone at the
+condition's toe friction, the other cone at the same friction, and the
+configured cone at 90% of that friction. Without a fixed condition, the
+friction comparison uses 0.9, or 1.0 when the configured coefficient is 0.9.
+Use `--no-contact-consensus` to run only the configured model, including when
+the 90% toe coefficient falls below MuJoCo's friction minimum. Agreement grants no native acceptance.
 
 `replay score --telemetry ... --rewards v4_yaw_gate --output ...` runs
 `locomotion.omniwalk.task:TrainingTask` against recorded telemetry, including its

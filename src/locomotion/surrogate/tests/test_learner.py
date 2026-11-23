@@ -21,6 +21,7 @@ from locomotion.omniwalk.mdp.rewards import (
     REWARD_CONFIG as REWARD_V4_CONFIG,
 )
 from locomotion.omniwalk.task import TrainingTask as TrainingTaskV2
+from locomotion.robots import randomization as rnd
 from locomotion.surrogate import evaluate, train
 
 NATIVE_ROW_KEYS = {
@@ -370,6 +371,81 @@ class PolicyTests(unittest.TestCase):
         self.assertTrue(torch.equal(plain(self.observation), a))
         self.assertTrue(torch.equal(plain(self.observation), -a))
 
+    def test_action_delay_sends_each_action_late_and_restarts_neutral(self):
+        a = torch.full((2, 18), 0.4)
+        policy = self.policy({}, [a, 2 * a, 3 * a], action_delay=1)
+        self.env.episode_steps = torch.tensor([0, 0])
+        self.assertEqual(float(policy(self.observation).abs().max()), 0.0)
+        self.env.episode_steps = torch.tensor([1, 1])
+        self.assertTrue(torch.equal(policy(self.observation), a))
+        # Replica 1 starts a new episode, so its queued action never reaches the motor.
+        self.env.episode_steps = torch.tensor([2, 0])
+        late = policy(self.observation)
+        self.assertTrue(torch.equal(late[0], 2 * a[0]))
+        self.assertEqual(float(late[1].abs().max()), 0.0)
+        self.assertEqual(policy.record({})["action_delay_controls"], 1)
+        with self.assertRaisesRegex(ValueError, "whole controls"):
+            self.policy({}, action_delay=-1)
+
+    def test_action_delay_preserves_smoothed_actions_across_staggered_resets(self):
+        a = torch.full((2, 18), 0.5)
+        policy = self.policy({}, [a * i for i in range(1, 10)], action_mean2=True, action_delay=3)
+        for steps, gains in (
+            ([0, 0], [0, 0]),
+            ([1, 1], [0, 0]),
+            ([2, 2], [0, 0]),
+            ([3, 0], [0.5, 0]),
+            ([4, 1], [1.5, 0]),
+            ([5, 2], [2.5, 0]),
+            ([6, 3], [3.5, 2.0]),
+            ([0, 4], [0, 4.5]),
+            ([1, 5], [0, 5.5]),
+        ):
+            self.env.episode_steps = torch.tensor(steps)
+            self.assertTrue(torch.equal(policy(self.observation), a * torch.tensor(gains)[:, None]))
+
+    def test_action_delay_allocates_only_actions_that_have_arrived(self):
+        a = torch.ones((2, 18))
+        policy = self.policy({}, [a] * 5, action_delay=10**30)
+        for steps, queued in (([0, 0], 1), ([1, 1], 2), ([0, 2], 3), ([1, 3], 4), ([0, 0], 1)):
+            self.env.episode_steps = torch.tensor(steps)
+            self.assertTrue(torch.equal(policy(self.observation), torch.zeros_like(a)))
+            self.assertEqual(len(policy.late), queued)
+
+    def test_stress_condition_overrides_named_nominal_fields(self):
+        nominal = rnd.nominal_draw()
+        self.assertEqual(evaluate.stress_condition([], nominal), (None, {}))
+        draw, values = evaluate.stress_condition(["kp_scale=0.8", "motor_strength=0.6"], nominal)
+        self.assertEqual(values, {"kp_scale": 0.8, "motor_strength": 0.6})
+        self.assertEqual(
+            (draw.kp_scale, draw.kd_scale, draw.foot_friction, draw.motor_strength.tolist()),
+            (0.8, 1.0, 1.0, [0.6] * 18),
+        )
+        draw, values = evaluate.stress_condition(["payload_mass_kg=0"], nominal)
+        self.assertEqual((draw.payload_mass_kg, values), (0.0, {"payload_mass_kg": 0.0}))
+        for bad in (
+            ["link_mass_scale=1"],
+            ["kp_scale=0"],
+            ["kd_scale=nan"],
+            ["kp_scale=1", "kp_scale=1"],
+        ):
+            with self.assertRaisesRegex(ValueError, "--condition"):
+                evaluate.stress_condition(bad, nominal)
+        for field, value in (
+            ("kp_scale", ""),
+            ("kp_scale", "hi"),
+            ("kp_scale", "1e38"),
+            ("kd_scale", "1e-45"),
+            ("kd_scale", "1e39"),
+            ("foot_friction", "1e39"),
+            ("motor_strength", "1e-46"),
+            ("payload_mass_kg", "1e1000"),
+            ("payload_mass_kg", "1e-1000"),
+        ):
+            with self.subTest(field=field, value=value):
+                with self.assertRaisesRegex(ValueError, f"--condition {field}"):
+                    evaluate.stress_condition([f"{field}={value}"], nominal)
+
     def test_wrapper_adapter_replaces_the_path(self):
         def adapter(actor, observation):
             return observation[:, :18] * 2
@@ -389,7 +465,11 @@ class PolicyTests(unittest.TestCase):
             ),
             ("wrapper policy_for_evaluation", None, None),
         )
-        for keywords in ({"velocity_input_gain": 1.25}, {"action_mean2": True}):
+        for keywords in (
+            {"velocity_input_gain": 1.25},
+            {"action_mean2": True},
+            {"action_delay": 1},
+        ):
             with self.assertRaisesRegex(ValueError, "policy_for_evaluation"):
                 self.policy({}, adapter=adapter, **keywords)
 

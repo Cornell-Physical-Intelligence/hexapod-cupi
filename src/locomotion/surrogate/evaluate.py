@@ -6,7 +6,9 @@ import argparse
 import json
 import shutil
 import time
+from collections import deque
 from dataclasses import asdict, replace
+from decimal import Decimal
 from pathlib import Path
 
 import numpy as np
@@ -16,6 +18,8 @@ import locomotion.rl.ppo as algorithms
 import locomotion.rl.wrapper as omni_wrapper
 from locomotion.amp.features import extract_features
 from locomotion.evaluation.checkpoint import configuration
+from locomotion.robots.hexapod import KD
+from locomotion.robots.rs05 import STIFFNESS_NM_PER_RAD
 from locomotion.spark.sources import source_files
 from locomotion.surrogate.train import (
     build_wrapper,
@@ -36,15 +40,14 @@ CONSENSUS_SCOPE = (
     "that a surrogate verdict does not rest on those settings. It is no native verdict: "
     "locomotion/surrogate/README.md records cases that pass in each run and fail on native."
 )
-# A fixed-grid cell sets the toe and floor friction, so its friction variant scales the cell's own
-# coefficient: elliptic mu (the default run), pyramidal mu and elliptic 0.9 mu.
+# A fixed condition sets toe friction. Only the toe coefficient changes in the friction variant.
 RELATIVE_FRICTION_VARIANTS = {
     "pyramidal_cone": ({"cone": "pyramidal"}, 1.0),
     "friction_0.9mu": ({}, 0.9),
 }
 RELATIVE_FRICTION_SCOPE = (
-    "Relative-friction consensus: the default (elliptic cone, cell friction mu), pyramidal-cone mu and "
-    "elliptic 0.9 mu runs differ in two contact settings. Agreement shows that a surrogate verdict "
+    "Relative-friction consensus compares {base} at toe friction mu, {alternate} at mu, and "
+    "{base} at 0.9 mu. Agreement shows that a surrogate verdict "
     "does not rest on those settings. It is no native verdict."
 )
 BOUNDS_SCOPE = (
@@ -59,17 +62,29 @@ class DeterministicPolicy:
     """The no-noise policy path of ``locomotion/scripts/play.py``: fixed scales, gait clock, actor mean, two-control mean."""
 
     def __init__(
-        self, actor, env, options, *, velocity_input_gain=1.0, action_mean2=False, adapter=None
+        self,
+        actor,
+        env,
+        options,
+        *,
+        velocity_input_gain=1.0,
+        action_mean2=False,
+        action_delay=0,
+        adapter=None,
     ):
         self.actor, self.env, self.adapter = actor, env, adapter
         self.scaling = options.get("observation_scaling", "none")
         self.period = options.get("gait_clock", 0)
         self.gain = float(velocity_input_gain)
-        if adapter is not None and (self.gain != 1.0 or action_mean2):
+        self.delay = int(action_delay)
+        if self.delay < 0:
+            raise ValueError("--action-delay counts whole controls from zero")
+        if adapter is not None and (self.gain != 1.0 or action_mean2 or self.delay):
             raise ValueError(
                 "The wrapper's policy_for_evaluation replaces the standard policy path; "
-                "--velocity-input-gain and --action-mean2 do not reach it"
+                "--velocity-input-gain, --action-mean2 and --action-delay do not reach it"
             )
+        self.late = deque()
         self.forced = bool(action_mean2)
         self.mean2 = adapter is None and (
             self.forced or options.get("action_smoothing", "none") == "mean2"
@@ -90,6 +105,7 @@ class DeterministicPolicy:
                 "velocity_input_gain": 1.0,
                 "action_mean2_forced": False,
                 "action_smoothing_applied": None,
+                "action_delay_controls": 0,
                 "velocity_noise_recorded": options.get("velocity_noise", 0.0),
                 "velocity_noise_applied": None,
                 "scope": "The wrapper builds the policy input and the action; this module applies no option to them.",
@@ -99,10 +115,11 @@ class DeterministicPolicy:
             "velocity_input_gain": self.gain,
             "action_mean2_forced": self.forced,
             "action_smoothing_applied": "mean2" if self.mean2 else "none",
+            "action_delay_controls": self.delay,
             "velocity_noise_recorded": options.get("velocity_noise", 0.0),
             "velocity_noise_applied": 0.0,
             "scope": "Scales, gait clock, actor mean and two-control mean as the policy path of "
-            "locomotion/scripts/play.py; the gain and the forced mean are stress options.",
+            "locomotion/scripts/play.py; the gain, forced mean and action delay are stress options.",
         }
 
     def inputs(self, observation):
@@ -142,6 +159,16 @@ class DeterministicPolicy:
                 last = torch.zeros_like(action) if self.previous is None else self.previous
                 self.previous = action.clone()
                 action = omni_wrapper.smoothed_action(action, last, self.env.episode_steps)
+            if self.delay:
+                steps = self.env.episode_steps
+                if bool((steps == 0).all()):
+                    self.late.clear()
+                self.late.append(action.clone())
+                if len(self.late) <= self.delay:
+                    return torch.zeros_like(action)
+                # Only a row with enough controls in its current episode can use the queued action.
+                ready = (steps >= self.delay)[:, None].to(action.device)
+                action = torch.where(ready, self.late.popleft(), 0.0)
             return action
 
 
@@ -325,6 +352,88 @@ def consensus(results, scope=CONSENSUS_SCOPE):
     }
 
 
+STRESS_FIELDS = ("kp_scale", "kd_scale", "foot_friction", "motor_strength", "payload_mass_kg")
+
+
+def stress_condition(items, nominal, *, contact=None):
+    """Compose fixed stress fields with the nominal draw and the base contact template."""
+    values = {}
+    for item in items:
+        name, _, text = item.partition("=")
+        if name not in STRESS_FIELDS or name in values:
+            raise ValueError("--condition takes each of " + ", ".join(STRESS_FIELDS) + " once")
+        try:
+            value = float(text)
+        except ValueError as error:
+            raise ValueError(f"--condition {name} needs a number, got {text!r}") from error
+        if name == "payload_mass_kg":
+            if not np.isfinite(value) or value < 0 or (value == 0 and Decimal(text) != 0):
+                raise ValueError("--condition payload_mass_kg needs a finite nonnegative mass")
+        else:
+            with np.errstate(over="ignore", under="ignore", invalid="ignore"):
+                effective = np.float32(value)
+                if name == "kp_scale":
+                    effective = np.float32(STIFFNESS_NM_PER_RAD * value)
+                if name == "kd_scale":
+                    effective = np.asarray(KD, dtype=np.float32) * effective
+            if not (np.isfinite(effective) & (effective > 0)).all():
+                raise ValueError(f"--condition {name} needs positive finite float32 coefficients")
+        values[name] = value
+    if not values:
+        return None, {}
+    fields = dict(values)
+    if contact is not None:
+        base_friction = float(contact.friction[0])
+        if not 0.0 <= base_friction <= float(np.finfo(np.float32).max):
+            raise ValueError("--contact needs finite nonnegative sliding friction for --condition")
+        fields.setdefault("foot_friction", base_friction)
+    if "motor_strength" in fields:
+        fields["motor_strength"] = np.full(18, fields["motor_strength"])
+    return replace(nominal, **fields), values
+
+
+def contact_variants(contact, condition):
+    """Return each sensitivity model's overrides and the scope of their verdict."""
+    if contact.condim == 1:
+        raise ValueError("Contact consensus needs sliding friction; pass --no-contact-consensus")
+    alternate = "elliptic" if contact.cone == "pyramidal" else "pyramidal"
+    cone_name = f"{alternate}_cone"
+    cone_fields = {"cone": alternate}
+    if condition is not None:
+        from mujoco import mjMINMU
+
+        _, scale = RELATIVE_FRICTION_VARIANTS["friction_0.9mu"]
+        friction = condition.foot_friction * scale
+        if friction < mjMINMU:
+            raise ValueError(
+                f"Relative contact consensus needs a 90% sliding friction coefficient "
+                f"of at least {mjMINMU:g} (MuJoCo's minimum); pass --no-contact-consensus"
+            )
+        scope = RELATIVE_FRICTION_SCOPE.format(base=contact.cone, alternate=alternate)
+        return {
+            cone_name: (cone_fields, condition),
+            "friction_0.9mu": (
+                {},
+                replace(condition, foot_friction=friction),
+            ),
+        }, scope
+
+    friction_fields = CONSENSUS_VARIANTS["friction_0.9"]
+    friction_name = "friction_0.9"
+    if contact.friction[0] == friction_fields["friction"][0]:
+        friction_fields = {"friction": (1.0, *contact.friction[1:])}
+        friction_name = "friction_1.0"
+    scope = CONSENSUS_SCOPE
+    if cone_name != "pyramidal_cone" or friction_name != "friction_0.9":
+        scope = (
+            f"Contact consensus compares the base {contact.cone} cone at sliding friction "
+            f"{contact.friction[0]}, the {alternate} cone at the same friction, and the base "
+            f"cone at sliding friction {friction_fields['friction'][0]}. "
+            "Agreement covers these surrogate contact models only."
+        )
+    return {cone_name: (cone_fields, None), friction_name: (friction_fields, None)}, scope
+
+
 def build_parser():
     parser = argparse.ArgumentParser(
         description=__doc__,
@@ -367,6 +476,23 @@ def build_parser():
         "--action-mean2",
         action="store_true",
         help="Stress option: send the mean of each action and the previous one, as --action-smoothing mean2 trains.",
+    )
+    parser.add_argument(
+        "--action-delay",
+        type=int,
+        default=0,
+        help="Stress option: the motor receives each action this many controls late (20 ms each); "
+        "an episode's first controls send the neutral action.",
+    )
+    parser.add_argument(
+        "--condition",
+        action="append",
+        default=[],
+        metavar="FIELD=VALUE",
+        help="Stress option: hold a property across resets, with no push: "
+        + ", ".join(STRESS_FIELDS)
+        + ". Strength applies to all 18 joints. Foot friction overrides toe-floor sliding friction "
+        "from --contact. Contact consensus varies the cone and relative toe friction.",
     )
     parser.add_argument(
         "--foot-load",
@@ -463,7 +589,10 @@ def task_and_wrapper(args, identity):
 
 
 def main(argv=None):
-    args = build_parser().parse_args(argv)
+    parser = build_parser()
+    args = parser.parse_args(argv)
+    if args.action_delay < 0:
+        parser.error("--action-delay counts whole controls from zero")
     # self_check calls this entry point in its own process and keeps its thread settings afterwards.
     with process_threads(args.threads):
         return evaluate_checkpoint(args)
@@ -497,13 +626,21 @@ def evaluate_checkpoint(args):
         raise ValueError("--grid and --cell go together")
     if grid is not None and args.randomization != "none":
         raise ValueError("A grid cell fixes the conditions; leave --randomization at none")
-    condition = rnd.cell_draw(grid, cell) if grid is not None else None
+    contact = contact_overrides(args.contact)
+    condition, stress = stress_condition(
+        getattr(args, "condition", []), rnd.nominal_draw(), contact=contact
+    )
+    if stress and (grid is not None or args.randomization != "none"):
+        raise ValueError("--condition fixes the conditions; leave --grid and --randomization out")
+    if grid is not None:
+        condition = rnd.cell_draw(grid, cell)
     if args.randomization != "none" and not args.no_contact_consensus:
-        # The draw sets the toe and floor friction, so the friction variant would not change the toe contact.
+        # Each reset overrides toe friction, so the contact template cannot vary it.
         raise ValueError(
             "The contact consensus varies friction, which the randomization draws; "
             "pass --no-contact-consensus"
         )
+    plan, scope = ({}, None) if args.no_contact_consensus else contact_variants(contact, condition)
     record_path = args.checkpoint.with_suffix(".json")
     record = json.loads(record_path.read_text()) if record_path.exists() else {"identity": {}}
     identity = record["identity"]
@@ -535,7 +672,6 @@ def evaluate_checkpoint(args):
     )
     if any(case not in probes for case in selected) or any(case not in selected for case in video):
         raise ValueError("Unknown case id, or a video case outside the selected cases")
-    contact = contact_overrides(args.contact)
     # The checkpoint's PPO configuration records the wrapper options of its training.
     options = wrapper_options(config)
     if args.observation_scaling is not None:
@@ -579,6 +715,7 @@ def evaluate_checkpoint(args):
             options,
             velocity_input_gain=args.velocity_input_gain,
             action_mean2=args.action_mean2,
+            action_delay=getattr(args, "action_delay", 0),
             adapter=getattr(wrapped, "policy_for_evaluation", None),
         )
         renderer = Renderer(env, view=args.view) if videos else None
@@ -666,15 +803,8 @@ def evaluate_checkpoint(args):
         }
     static = list(selected)
     variants = {}
-    if static and not args.no_contact_consensus:
+    if plan:
         results = {"default": {result["case_id"]: result for result in summary["cases"]}}
-        if condition is None:
-            plan = {name: (fields, None) for name, fields in CONSENSUS_VARIANTS.items()}
-        else:
-            plan = {
-                name: (fields, replace(condition, foot_friction=condition.foot_friction * scale))
-                for name, (fields, scale) in RELATIVE_FRICTION_VARIANTS.items()
-            }
         for name, (fields, variant_condition) in plan.items():
             directory = args.output / "contact_consensus" / name
             directory.mkdir(parents=True)
@@ -694,6 +824,7 @@ def evaluate_checkpoint(args):
                 "cases": variant_rows,
             }
             if variant_condition is not None:
+                variants[name]["cone"] = fields.get("cone", contact.cone)
                 variants[name]["foot_friction"] = variant_condition.foot_friction
             if not args.keep_variant_captures:
                 for capture in directory.glob("evaluation/batch_*/native400hz"):
@@ -704,7 +835,7 @@ def evaluate_checkpoint(args):
             ):
                 row["contact_consensus"] = consensus(
                     {name: value[row["case_id"]] for name, value in results.items()},
-                    CONSENSUS_SCOPE if condition is None else RELATIVE_FRICTION_SCOPE,
+                    scope,
                 )
     unresolved = [
         row["case_id"]
@@ -735,10 +866,15 @@ def evaluate_checkpoint(args):
         if condition is None
         else {
             "grid": grid,
-            "grid_sha256": rnd.grid_declaration(grid)["sha256"],
+            "grid_sha256": None if grid is None else rnd.grid_declaration(grid)["sha256"],
             "cell": cell,
+            "stress": stress,
             "draw": condition.as_json(),
-            "consensus": "relative_friction",
+            "foot_friction_scope": (
+                "The draw gives effective toe-floor sliding friction. The contact_model gives "
+                "the base template, including sliding friction for shafts and hulls."
+            ),
+            "consensus": None if args.no_contact_consensus else "relative_friction",
         },
         "identity": source_identity(),
         "requirements_set": summary["requirements_set"],
@@ -767,7 +903,7 @@ def evaluate_checkpoint(args):
                     "pass": row["pass"],
                     "failed": row["failed_checks"],
                     "consensus": row.get("contact_consensus", {}).get("verdict"),
-                    "planar_error": row["metrics"].get("planar_error_mps"),
+                    "planar_error": row.get("metrics", {}).get("planar_error_mps"),
                     "mean_velocity": gait.get("mean_velocity_nav_mps"),
                     "root_height": gait.get("root_height_mean_m"),
                     "joint_limit_margin_rad": row.get("joint_limit_margin", {}).get("minimum_rad"),
