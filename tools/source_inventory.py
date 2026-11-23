@@ -57,9 +57,7 @@ IMPORT_BOUNDARIES = {
         "locomotion.rl",
         "locomotion.robots",
         "locomotion.spark",
-        "locomotion.randomization",
     },
-    "locomotion.randomization": {"locomotion.robots"},
 }
 
 

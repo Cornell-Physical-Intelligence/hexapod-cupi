@@ -109,7 +109,8 @@ resume the research sequence.
 
 Run focused checks while editing and the required checks in CONTRIBUTING before
 publication. Pair dependency changes with `uv.lock`. Follow
-[PROJECT_SITE](docs/PROJECT_SITE.md) for each push and verify exact-revision CI
+[PROJECT_SITE](docs/PROJECT_SITE.md): add an update record when a change touches
+a result, the roadmap or the accepted controller. Verify exact-revision CI
 and deployed Pages. CI generates the source manifest when a change merges; do
 not commit a manifest in a PR. When a change adds an important class or a
 directory, also update the code map on the site.

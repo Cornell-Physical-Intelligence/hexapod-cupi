@@ -43,10 +43,12 @@ from locomotion.spark.validation import (
     ALLOCATION_PROFILES,
     LEARNER_OPTION_DEFAULTS,
     OPTION_DEFAULTS,
+    RANDOMIZATION_NAMES,
     resolve_learner_options,
     update_limit,
     validate_deadline,
     validate_decay,
+    validate_randomization,
 )
 
 SOURCE = Path(__file__).resolve().parents[1]
@@ -129,6 +131,13 @@ def add_common_arguments(parser):
         choices=sorted(EXPERIMENT_INPUTS),
         help="A reviewed experiment's task, reward and inputs (omniwalk/destination_task.py); "
         "training and evaluation of its checkpoints name it.",
+    )
+    parser.add_argument(
+        "--randomization",
+        choices=RANDOMIZATION_NAMES,
+        default="none",
+        help="Step 7 declaration in locomotion/robots/randomization.py for training and standing diagnostics; each reset redraws "
+        "that replica. Evaluation runs the nominal robot and records the checkpoint's declaration.",
     )
 
 
@@ -312,6 +321,7 @@ def validate(args):
         args.mode not in ("train", "evaluate") or args.learner != "ppo"
     ):
         raise ValueError("An experiment applies to PPO training and evaluation")
+    validate_randomization(args.mode, args.randomization)
     if args.video_case is not None and args.mode != "evaluate":
         raise ValueError("A video case applies to an evaluation")
     if args.episode_seconds != 20.0 and (
@@ -392,6 +402,10 @@ def build_identity(args, cfg, metadata):
         identity["experiment"] = args.experiment
         identity["reward_version"] = REWARD_VERSION
         identity["reward_task"] = args.experiment
+    randomization = validate_randomization(args.mode, args.randomization)
+    if randomization is not None:
+        # Keep the nominal identity schema; source hashes still bind the new runtime.
+        identity["randomization"] = randomization
     if getattr(args, "initialize_from", None) is not None:
         identity["initialized_from"] = {
             "checkpoint_sha256": args.initialize_from_sha256,
@@ -444,6 +458,9 @@ def bind_checkpoint(args, identity, compatibility):
         if key in record["identity"]:
             identity[key] = record["identity"][key]
     identity["behavior_cloning"] = record["identity"].get("behavior_cloning", False)
+    if "randomization" in record["identity"]:
+        # The evaluation robot is nominal; the checkpoint's training declaration stays on record.
+        identity["checkpoint_randomization"] = record["identity"]["randomization"]
     if "bc" in record["identity"]:
         identity["bc"] = record["identity"]["bc"]
     return record
@@ -509,6 +526,8 @@ def create_env(args, cfg, metadata):
         args.output / "native",
         reference_metadata=metadata,
         verify=verify_scene,
+        randomization=args.randomization,
+        geometry_extrema=args.geometry_extrema,
     )
     if args.mode == "evaluate":
         prepare_policy_scene(env)

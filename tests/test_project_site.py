@@ -1,4 +1,4 @@
-"""Protect the user-mandated public research update and evidence contract."""
+"""Protect the public research update and evidence contract."""
 
 import importlib.util
 import json
@@ -62,21 +62,46 @@ class PosterContractTests(unittest.TestCase):
     def save(self, row):
         (self.root / "site/updates" / f"{row['id']}.json").write_text(json.dumps(row))
 
-    def test_missing_update_rejects_code_change(self):
-        base = self.init()
+    def old_update_base(self):
+        self.init()
         self.save(self.row())
         self.run_git("add", ".")
         self.run_git("commit", "-m", "old update")
-        base = self.run_git("rev-parse", "HEAD")
+        return self.run_git("rev-parse", "HEAD")
+
+    def test_code_change_needs_no_update(self):
+        base = self.old_update_base()
         (self.root / "code.py").write_text("changed\n")
         with patch.object(site, "registry", return_value=({}, {}, {})):
-            with self.assertRaisesRegex(ValueError, "lack a new central update"):
-                site.check(base)
+            site.check(base)
 
-    def test_new_bounded_record_covers_change(self):
+    def test_missing_update_rejects_result_roadmap_and_controller_changes(self):
+        base = self.old_update_base()
+        for name in (
+            "site/assets/run_001/result.json",
+            "site/project.json",
+            "configs/accepted_controller.json",
+        ):
+            with self.subTest(path=name):
+                target = self.root / name
+                target.parent.mkdir(parents=True, exist_ok=True)
+                target.write_text("{}\n")
+                with (
+                    patch.object(site, "registry", return_value=({}, {}, {})),
+                    patch.object(site.controller_evidence, "validate"),
+                    self.assertRaisesRegex(ValueError, "lacks a new update record"),
+                ):
+                    site.check(base)
+                target.unlink()
+
+    def test_new_bounded_record_covers_result_change(self):
         base = self.init()
-        (self.root / "code.py").write_text("changed\n")
-        self.save(self.row())
+        result = self.root / "site/assets/run_001/result.json"
+        result.parent.mkdir(parents=True)
+        result.write_text("{}\n")
+        row = self.row()
+        row["changes"] = ["site/assets/run_001/*"]
+        self.save(row)
         with patch.object(site, "registry", return_value=({}, {}, {})):
             site.check(base)
 

@@ -277,6 +277,11 @@ def identity(name="none"):
     return {"name": name, "declaration_sha256": record["sha256"], "schema": SCHEMA}
 
 
+def identity_record(name):
+    """Include the full canonical declaration in an identity record."""
+    return {**identity(name), "declaration": json.loads(declaration(name)["json"])}
+
+
 @dataclass(frozen=True)
 class ReplicaDraw:
     """One replica's conditions. Arrays follow JOINT_NAMES and BODY_NAMES order."""

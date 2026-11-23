@@ -60,9 +60,10 @@ Use the recorded 0.040 rad / 20 ms limiter for formal motion comparisons.
 Keep measurements with other limiters in separate comparisons.
 
 Publish selected media and small reports under `site/assets/`. Follow
-[PROJECT_SITE](docs/PROJECT_SITE.md) for each push: add an append-only update,
-change the registry when facts change, and verify the full diff
-and rendered site. CI generates the source manifest when a change merges; see
+[PROJECT_SITE](docs/PROJECT_SITE.md): add an append-only update record when a
+change touches a result, the roadmap or the accepted controller, change the
+registry when facts change, and verify the rendered site. CI generates the
+source manifest when a change merges; see
 [PIPELINE_LINEAGES](docs/PIPELINE_LINEAGES.md). Register new source commands in
 `configs/source_inventory.json`.
 
