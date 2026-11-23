@@ -9,6 +9,7 @@ the native experiment. You use native Isaac runs for acceptance.
 | `env.py` | Implement `OmniEnv` on the approved robot: apply the limiter and motor curve, and record contacts and telemetry. |
 | `train.py` | Train through stock RSL-RL, save source-bound checkpoints and resume matching runs. |
 | `evaluate.py` | Run the walking requirement cases, render video and compare results across contact settings. |
+| `cycle.py` | Judge a stored-cycle controller on the walking requirement cases. |
 | `capture.py` | Supply sensor contacts and a reset motor snapshot to the shared evidence checks. |
 | `replay.py` | Replay action traces or noise and score stored telemetry through the current task. |
 
@@ -21,6 +22,16 @@ uv run python -m locomotion.surrogate.evaluate \
 uv run python -m locomotion.surrogate.replay --help
 uv run python -m unittest discover -s src/locomotion/surrogate/tests
 ```
+
+Run `uv run python -m locomotion.surrogate.cycle --help` to evaluate an
+[admitted-trace cycle bank](../amp/README.md#build-a-stored-cycle-controller-bank).
+Use `--cases` to select requirement case IDs. With the default `all`, supply
+a bank that covers all walking commands. `--learning-rate` enables tracking
+correction. `--action-delay` simulates a delay in whole controls and
+`--condition` sets fixed stress fields. The evaluation uses one contact model
+and records the requirements judgement, bank hash, declared bank provenance
+when present, and source and model identities in `cycle_summary.json`.
+Existing banks with only cycle arrays still load.
 
 Keep output directories outside the source checkout. The trainer defaults to
 task `locomotion.omniwalk.task:TrainingTask` and wrapper

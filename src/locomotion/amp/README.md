@@ -10,6 +10,7 @@ identity cite that bank by its pack path, `locomotion/priors/datasets/amp_demons
 | --- | --- |
 | `model.py`, `optimize.py` | Full-body inverse dynamics and constrained periodic trajectory optimization through CasADi/Ipopt. |
 | `prepare.py`, `replay_native.py` | Pack and replay solved targets through the native `OmniEnv`. |
+| `cycle.py` | Build a command-indexed cycle bank from admitted native traces and generate joint targets from measured angles. |
 | `dataset.py` | Audit the command bank, require motion review, export and verify raw transitions. |
 | `features.py` | Pack 61 motion-feature values from measured state. |
 | `amp.py`, `discriminator.py` | Extend stock RSL-RL PPO with the style reward, discriminator and checkpoint state. |
@@ -36,6 +37,22 @@ The program lead reviews direction and tripod motion and supplies the bound
 review to `dataset export`. The exporter crops controls 100:1000 from phase zero;
 half-phase clips stay as audit evidence. You cannot join clip endpoints
 or export reset/terminal transitions.
+
+## Build a stored-cycle controller bank
+
+Run `uv run python -m locomotion.amp.cycle --help` for the command.
+Pass the native `evaluation` directories with `--replays` in command order.
+Each directory must contain the `control_trace.npz` whose hash appears as a
+phase-zero clip in the admitted manifest. The builder verifies that all
+targets repeat across controls 300 to 899. It averages the measured joint
+angles by phase and records the input trace, admission and model hashes in
+the bank.
+
+The controller uses the command and joint angles. It ramps between cycles
+and the neutral pose. Optional tracking correction fits one gain per joint
+from a full period at the active command, pairing each measurement with the
+applied target's phase when actions are delayed. The surrogate guide
+describes how to judge the resulting motion.
 
 ## Feature and learner contracts
 
