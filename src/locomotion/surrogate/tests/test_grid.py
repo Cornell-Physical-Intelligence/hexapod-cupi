@@ -6,6 +6,7 @@ import io
 import json
 import tempfile
 import unittest
+from dataclasses import replace
 from pathlib import Path
 from unittest import mock
 
@@ -20,6 +21,7 @@ from locomotion.surrogate.env import (
     DEFAULT_GEOMETRY,
     DEFAULT_MODEL,
     NEVER,
+    ContactModel,
     SurrogateConfig,
     SurrogateEnv,
     make_env,
@@ -155,6 +157,70 @@ class CellEvaluationTests(unittest.TestCase):
             evaluate.RELATIVE_FRICTION_VARIANTS,
             {"pyramidal_cone": ({"cone": "pyramidal"}, 1.0), "friction_0.9mu": ({}, 0.9)},
         )
+
+    def test_delay_only_consensus_compares_distinct_contact_models(self):
+        default = ContactModel()
+        plan, scope = evaluate.contact_variants(default, None)
+        self.assertEqual(
+            plan,
+            {name: (fields, None) for name, fields in evaluate.CONSENSUS_VARIANTS.items()},
+        )
+        self.assertEqual(scope, evaluate.CONSENSUS_SCOPE)
+
+        contact = replace(default, cone="pyramidal", friction=(0.9, 0.02, 0.003))
+        condition, overrides = evaluate.stress_condition([], rnd.nominal_draw(), contact=contact)
+        self.assertIsNone(condition)
+        self.assertEqual(overrides, {})
+        plan, scope = evaluate.contact_variants(contact, condition)
+        self.assertEqual(
+            plan,
+            {
+                "elliptic_cone": ({"cone": "elliptic"}, None),
+                "friction_1.0": ({"friction": (1.0, 0.02, 0.003)}, None),
+            },
+        )
+        self.assertIn("base pyramidal cone at sliding friction 0.9", scope)
+        self.assertIn("elliptic cone at the same friction", scope)
+
+    def test_consensus_rejects_indistinguishable_friction_before_evaluation(self):
+        for extra in (
+            ("--condition", "kp_scale=0.8", "--contact", "friction=(0,0.005,0.0001)"),
+            ("--condition", "kp_scale=0.8", "--contact", "friction=(1e-5,0.005,0.0001)"),
+            ("--action-delay", "2", "--contact", "condim=1"),
+        ):
+            with self.subTest(extra=extra), tempfile.TemporaryDirectory() as directory:
+                args = self.parse(directory, *extra)
+                with self.assertRaisesRegex(ValueError, "--no-contact-consensus"):
+                    evaluate.evaluate_checkpoint(args)
+                args.no_contact_consensus = True
+                with mock.patch.object(evaluate.torch, "load", side_effect=FileNotFoundError):
+                    with self.assertRaises(FileNotFoundError):
+                        evaluate.evaluate_checkpoint(args)
+                self.assertFalse(args.output.exists())
+        for friction in (-0.1, 1e39, float("inf"), float("nan")):
+            with self.subTest(inherited=friction):
+                contact = ContactModel(friction=(friction, 0.005, 0.0001))
+                with self.assertRaisesRegex(ValueError, "--contact.*sliding friction"):
+                    evaluate.stress_condition(["kp_scale=0.8"], rnd.nominal_draw(), contact=contact)
+
+    def test_fixed_condition_composes_toe_friction_and_keeps_contact_template(self):
+        contact = ContactModel(cone="pyramidal", friction=(0.5, 0.02, 0.003))
+        nominal = rnd.nominal_draw()
+        condition, overrides = evaluate.stress_condition(["kp_scale=0.8"], nominal, contact=contact)
+        self.assertEqual(condition.foot_friction, 0.5)
+        self.assertEqual(overrides, {"kp_scale": 0.8})
+        condition, _ = evaluate.stress_condition(
+            ["kp_scale=0.8", "foot_friction=0.8"], nominal, contact=contact
+        )
+        plan, scope = evaluate.contact_variants(contact, condition)
+        fields, cone_draw = plan["elliptic_cone"]
+        self.assertEqual(replace(contact, **fields).friction, (0.5, 0.02, 0.003))
+        self.assertEqual(cone_draw.foot_friction, 0.8)
+        fields, friction_draw = plan["friction_0.9mu"]
+        self.assertEqual(fields, {})
+        self.assertAlmostEqual(friction_draw.foot_friction, 0.72)
+        self.assertEqual(friction_draw.kp_scale, 0.8)
+        self.assertIn("pyramidal at toe friction mu, elliptic at mu", scope)
 
 
 class SubstepMotorHook:
