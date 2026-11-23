@@ -212,3 +212,40 @@ class BoundaryTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class CyclePolicyTests(unittest.TestCase):
+    def test_policy_restarts_with_each_case_and_sends_actions_late(self):
+        from types import SimpleNamespace
+
+        import torch
+
+        from locomotion.surrogate import cycle
+
+        calls = []
+
+        class Controller:
+            neutral = np.zeros(18)
+
+            def reset(self):
+                calls.append("reset")
+
+            def __call__(self, command, angle):
+                calls.append((tuple(command), float(angle[0])))
+                return np.full(18, 0.35 * len(calls))
+
+        env = SimpleNamespace(
+            episode_steps=torch.tensor([0]), cfg=SimpleNamespace(action_scale_rad=0.35)
+        )
+        observation = torch.zeros(1, 231)
+        observation[0, cycle.COMMAND] = torch.tensor([0.05, 0.0, 0.0])
+        observation[0, cycle.JOINT_OFFSET] = 0.25
+        policy = cycle.policy_for(Controller(), env, delay=1)
+        first = policy(observation)
+        env.episode_steps = torch.tensor([1])
+        second = policy(observation)
+        self.assertEqual(calls[0], "reset")
+        self.assertEqual(calls[1][1], 0.25)
+        self.assertAlmostEqual(calls[1][0][0], 0.05, places=6)
+        self.assertEqual((first.shape, float(first.abs().max())), ((1, 18), 0.0))
+        self.assertAlmostEqual(float(second[0, 0]), 2.0, places=6)
