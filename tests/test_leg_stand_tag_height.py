@@ -162,12 +162,17 @@ class CalibrationCaptureTests(TrackerCase):
         self.hold((300, 1.0))
         self.tr.action("/zero", {})
         old_generation = self.tr.generation
+        old_epoch = self.tr.state()["epoch"]
         self.tr.action("/camera", {"index": ["1"]})
+        self.assertGreater(self.tr.state()["epoch"], old_epoch)
         self.assertIsNone(self.tr.R_lock)
         self.assertIsNone(self.tr.cal.h0)
         self.assertFalse(self.tr.hist)
         self.tr.process(BLACK, time.monotonic(), old_generation, time.monotonic())
         self.assertIsNone(self.tr.sample)
+        self.tr.det = lambda frame: {}
+        self.tr.process(BLACK, time.monotonic(), self.tr.generation, time.monotonic())
+        self.assertEqual(self.tr.sample["epoch"], self.tr.reset_time)
         self.tr.action("/camera", {"index": ["0"]})
         self.assertIsNotNone(self.tr.R_lock)
         self.assertEqual(self.tr.cal.h0, 300.0)

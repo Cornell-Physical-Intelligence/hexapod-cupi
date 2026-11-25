@@ -351,6 +351,7 @@ class Tracker:
             cv2.putText(view, str(i), org, cv2.FONT_HERSHEY_SIMPLEX, 0.8, (40, 160, 255), 2)
         jpeg = cv2.imencode(".jpg", view, [cv2.IMWRITE_JPEG_QUALITY, 75])[1].tobytes()
         sample = {
+            "epoch": self.reset_time,
             "t": round(ts - self.t0, 4),
             "h": None if h is None else round(h, 4),
             "both": both,
@@ -381,6 +382,7 @@ class Tracker:
 
         n = max(len(self.seen), 1)
         return {
+            "epoch": self.reset_time,
             "status": self.status,
             "error": self.error,
             "camera": "sim" if self.a.sim else self.camera,
@@ -463,9 +465,11 @@ def make_handler(tr):
         def log_message(self, *args):
             pass
 
-        def _send(self, body, ctype):
+        def _send(self, body, ctype, epoch=None):
             self.send_response(200)
             self.send_header("Content-Type", ctype)
+            if epoch is not None:
+                self.send_header("X-Tracking-Epoch", str(epoch))
             self.send_header("Cache-Control", "no-store")
             self.send_header("Content-Length", str(len(body)))
             self.end_headers()
@@ -498,8 +502,10 @@ def make_handler(tr):
             elif path == "/state":
                 self._send(json.dumps(tr.state()).encode(), "application/json")
             elif path == "/history":
-                rows = [[round(t, 4), h, int(b)] for t, h, b in tr.window(60)]
-                self._send(json.dumps(rows).encode(), "application/json")
+                with tr.cond:
+                    epoch = tr.reset_time
+                    rows = [[round(t, 4), h, int(b)] for t, h, b in tr.window(60)]
+                self._send(json.dumps(rows).encode(), "application/json", epoch)
             elif path == "/events":
                 self._stream(
                     "text/event-stream", lambda: f"data: {json.dumps(tr.sample)}\n\n".encode()
