@@ -1,0 +1,28 @@
+{
+  "id": "20261112T212931_step7_merge_capture_source",
+  "date": "2026-11-12T21:29:31Z",
+  "title": "Check native Step 7 torques against the draw snapshotted at reset",
+  "summary": "Merging main brought the shared capture sources, which snapshot the motor law after each case reset. The native capture source now also snapshots a Step 7 draw's gain, damping and strength at that point and records them in source.json. It checks each substep against the snapshot with the same float32 oracle the surrogate probes use, so the 1.6 N·m cap still holds. Without a draw it keeps the canonical RS05 law. Main's surrogate capture test and import rules now name the randomization module at locomotion.robots.randomization, where this branch moved it. No Isaac run has exercised this code.",
+  "areas": [
+    "training",
+    "simulation"
+  ],
+  "changes": [
+    "src/locomotion/evaluation/runner.py",
+    "src/locomotion/surrogate/README.md",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/surrogate/sweep.py",
+    "src/locomotion/surrogate/tests/test_capture.py",
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "src/locomotion/tests/test_randomization.py",
+    "tools/source_inventory.py",
+    "site/updates/20261112T212931_step7_merge_capture_source.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_randomization.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Bind robots/randomization.py into the native physics source identity at every entry point, then open the PR.",
+  "no_project_impact": true,
+  "reason": "Merge resolution and native capture code with CPU tests only: no native run, admission result, gate threshold or accepted capability changes."
+}

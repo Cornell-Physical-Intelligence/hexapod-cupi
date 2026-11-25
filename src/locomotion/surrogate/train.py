@@ -381,7 +381,7 @@ def build_parser():
         "--randomization",
         choices=["none", "table2_v1"],
         default="none",
-        help="Step 7 declaration in locomotion/randomization.py; each reset redraws that replica.",
+        help="Step 7 declaration in locomotion/robots/randomization.py; each reset redraws that replica.",
     )
     parser.add_argument(
         "--contact",
@@ -436,8 +436,8 @@ def run(args, argv=None):
     import locomotion.evaluation.ppo_diagnostics as diagnostics_module
     import locomotion.omniwalk.agents.rsl_rl_ppo_cfg as ppo_cfg
     import locomotion.omniwalk.task as task_module
-    import locomotion.randomization as rnd
     import locomotion.rl.ppo as algorithms
+    import locomotion.robots.randomization as rnd
     from locomotion.evaluation.task_metrics import TaskMetrics, scalars
     from locomotion.surrogate.env import (
         DEFAULT_GEOMETRY,

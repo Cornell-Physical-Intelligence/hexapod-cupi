@@ -1,8 +1,10 @@
-"""Read-only checks of native ownership reuse; no remote or subprocess actions."""
+"""Read-only checks of native ownership reuse; no remote actions."""
 
 import ast
 import copy
 import os
+import subprocess
+import sys
 import tempfile
 import unittest
 from contextlib import ExitStack
@@ -58,6 +60,15 @@ class OwnedLaunchTests(unittest.TestCase):
             for name, result in (("verify_tree", None), ("pinned_file", None)):
                 stack.enter_context(patch.object(reservation, name, return_value=result))
             return launch.verify(binding, Path(binding["source"]))
+
+    def test_stock_host_python_can_import_launcher(self):
+        result = subprocess.run(
+            [sys.executable, "-S", "-B", "-m", "locomotion.spark.launch", "--help"],
+            env={**os.environ, "PYTHONPATH": str(ROOT / "src")},
+            capture_output=True,
+            text=True,
+        )
+        self.assertEqual(result.returncode, 0, result.stderr)
 
     def test_current_reservation_helpers_preserved(self):
         old, new = functions(GUARD_PARENT), functions(NEW / "spark/safety.py")

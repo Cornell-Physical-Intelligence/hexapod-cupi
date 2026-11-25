@@ -45,8 +45,8 @@
       "purpose": "Locomotion on the approved direct-drive hexapod."
     },
     {
-      "path": "src/locomotion/randomization.py",
-      "previous_path": "locomotion/randomization.py",
+      "path": "src/locomotion/robots/randomization.py",
+      "previous_path": "src/locomotion/randomization.py",
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Liu et al. Table II domain randomization: the frozen table2_v1 declaration with its hash, per-replica uniform draws, the training push schedule, the payload helpers and the randomized motor law over rs05."
@@ -337,6 +337,13 @@
       "purpose": "Replay an optimized target cycle through the locomotion kernel."
     },
     {
+      "path": "src/locomotion/amp/cycle.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Program lead",
+      "purpose": "Walk from stored optimized cycles: pick the cycle by command, ramp between sources and fit one stiffness gain per joint."
+    },
+    {
       "path": "src/locomotion/rl/__init__.py",
       "previous_path": null,
       "classification": "current",
@@ -510,6 +517,13 @@
       "classification": "prototype",
       "owner": "Platform lead",
       "purpose": "Screen a checkpoint over the Step 7 fixed-condition grid: one surrogate evaluation per cell and a per-cell verdict summary."
+    },
+    {
+      "path": "src/locomotion/surrogate/cycle.py",
+      "previous_path": null,
+      "classification": "prototype",
+      "owner": "Platform lead",
+      "purpose": "Judge the stored optimized cycles on the walking requirement cases in the surrogate."
     },
     {
       "path": "src/locomotion/surrogate/replay.py",
@@ -2210,6 +2224,10 @@
     "locomotion/randomization.py": {
       "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",
       "sha256": "ab69d56ac49d2f10b8302b4aafc76f0766410f744c5d051a8688dd2bba231e0e"
+    },
+    "src/locomotion/randomization.py": {
+      "source_commit": "f7f6a5147b925d00218f0350e916aefbb5be88df",
+      "sha256": "d5823da07b49d8e7c1fff602fbabed18f50809cec7e6da488e0c82bfd33cab24"
     },
     "locomotion/surrogate/provenance.json": {
       "source_commit": "36107dc1338f4420ce1142ab21f5f9f96eb7a60c",

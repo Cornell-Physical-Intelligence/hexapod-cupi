@@ -1,0 +1,25 @@
+{
+  "id": "20261117T000757_step7_native_randomization_option",
+  "date": "2026-11-17T00:07:57Z",
+  "title": "Select the Step 7 declaration on the native training command line",
+  "summary": "Native training packs and scripts/train.py accept --randomization none|table2_v1 and pass it to the native environment. The run identity and PACK.json record the declaration name, hash and canonical ranges; a nominal run records no randomization key, so its identity is unchanged. Evaluation, probes and diagnostics refuse a declaration and run the nominal robot; an evaluation records the checkpoint's declaration. The physics identity and standing admission are those of the nominal robot. No Isaac run has exercised this code.",
+  "areas": [
+    "training",
+    "simulation"
+  ],
+  "changes": [
+    "src/locomotion/scripts/cli.py",
+    "src/locomotion/spark/prepare.py",
+    "src/locomotion/spark/validation.py",
+    "src/locomotion/tests/test_dependency_identity.py",
+    "src/locomotion/README.md",
+    "site/updates/20261117T000757_step7_native_randomization_option.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_dependency_identity.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Push the branch and open the Step 7 native PR; native validation in Isaac waits on program-lead dispatch and admission.",
+  "no_project_impact": true,
+  "reason": "A command-line option only: no native run, admission result, gate threshold or accepted capability changes."
+}

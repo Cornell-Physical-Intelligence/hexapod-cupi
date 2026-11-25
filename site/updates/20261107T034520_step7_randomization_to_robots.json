@@ -1,0 +1,32 @@
+{
+  "id": "20261107T034520_step7_randomization_to_robots",
+  "date": "2026-11-07T03:45:20Z",
+  "title": "Move the Step 7 randomization declaration into the robots package",
+  "summary": "randomization.py moves from src/locomotion/ to src/locomotion/robots/ with unchanged bytes (SHA-256 d5823da0...). The import rules let the native omniwalk environment import only robots, so this placement lets the native Step 7 work use the declaration without a new import edge. The module imports only robots.hexapod and robots.rs05. The table2_v1 (730cad98...) and none (be43cdf0...) declaration hashes are unchanged, and the none oracle still replays bit for bit. The surrogate, its tests and the guides now import locomotion.robots.randomization; the source inventory archives the old path at f7f6a514. robots/__init__.py is unchanged, so native physics source identity is unchanged.",
+  "areas": [
+    "training"
+  ],
+  "changes": [
+    "configs/source_inventory.json",
+    "src/locomotion/README.md",
+    "src/locomotion/randomization.py",
+    "src/locomotion/robots/randomization.py",
+    "src/locomotion/surrogate/README.md",
+    "src/locomotion/surrogate/env.py",
+    "src/locomotion/surrogate/evaluate.py",
+    "src/locomotion/surrogate/sweep.py",
+    "src/locomotion/surrogate/train.py",
+    "src/locomotion/surrogate/tests/test_grid.py",
+    "src/locomotion/surrogate/tests/test_randomization.py",
+    "src/locomotion/tests/test_randomization.py",
+    "site/updates/20261107T034520_step7_randomization_to_robots.json"
+  ],
+  "evidence": [
+    "src/locomotion/tests/test_randomization.py",
+    "src/locomotion/surrogate/tests/test_randomization.py",
+    "https://github.com/Cornell-Physical-Intelligence/hexapod-cupi/issues/67"
+  ],
+  "next": "Make the probe runner's motor-law check use the cell's declared gain, damping and strength, still exact.",
+  "no_project_impact": true,
+  "reason": "A module move with unchanged bytes and declaration hashes: no native run, admission, gate or accepted capability changes."
+}

@@ -506,5 +506,27 @@ class SceneCheckTests(unittest.TestCase):
                 self.assertNotIn("reset", scene.events)
 
 
+class RandomizedMaterialTests(unittest.TestCase):
+    """A Step 7 scene must read back exactly the tibia friction it wrote; nominal scenes keep 1, 1, 0."""
+
+    def test_written_friction_passes_and_any_other_value_fails(self):
+        with tempfile.TemporaryDirectory() as directory:
+            scene = Scene(directory)
+            written = scene.native["get_material_properties"].clone()
+            written[1, 40:42, :2] = 0.37
+            scene.native["get_material_properties"] = written.clone()
+            scene.expected_materials = written.clone()
+            construct(scene)
+            self.assertIn("reset", scene.events)
+        with tempfile.TemporaryDirectory() as directory:
+            scene = Scene(directory)
+            expected = scene.native["get_material_properties"].clone()
+            expected[1, 40:42, :2] = 0.37
+            scene.expected_materials = expected
+            with self.assertRaisesRegex(ValueError, "^Actual native materials differ$"):
+                construct(scene)
+            self.assertNotIn("reset", scene.events)
+
+
 if __name__ == "__main__":
     unittest.main()
