@@ -247,11 +247,15 @@ def validate_admission(value, identity, cfg, mounts=None):
         raise ValueError("At least 32 same-source standing replicas are required")
     for name, count in (("one", 1), ("batch", value.get("num_envs"))):
         row = value.get(name, {})
+        state_path = resolve(row.get("state_path", ""))
         if current:
+            attempt = state_path.parent.parent
             audit_path = resolve(row.get("contact_audit_path", ""))
             log_path = resolve(row.get("log_path", ""))
             if (
-                not audit_path.is_file()
+                audit_path != attempt / "jobs/standing_contact_data_audit.json"
+                or log_path != attempt / "logs/standing.log"
+                or not audit_path.is_file()
                 or sha(audit_path) != row.get("contact_audit_sha256")
                 or not log_path.is_file()
             ):
@@ -284,7 +288,6 @@ def validate_admission(value, identity, cfg, mounts=None):
             )
         ):
             raise ValueError("Standing quality rejected: " + name)
-        state_path = resolve(row.get("state_path", ""))
         if not state_path.is_file() or sha(state_path) != row.get("state_sha256"):
             raise ValueError("Missing/changed native standing acquisition: " + name)
         state = json.loads(state_path.read_text())
@@ -357,9 +360,6 @@ def create(one, batch, output, inputs):
     mounts = {}
     for name, root in roots.items():
         report_path = root / "standing/standing_report.json"
-        report = json.loads(report_path.read_text())
-        if score_diagnostic(root / "standing") != report:
-            raise ValueError("Standing report differs from raw recomputation: " + name)
         target = "/standing_" + name
         attempt = root.parent
         mounts[target] = attempt
@@ -378,6 +378,10 @@ def create(one, batch, output, inputs):
             value[name][kind + "_sha256"] = digest
             declared["input_files"][str(path)] = digest
     validate_admission(value, identity, EnvConfig(num_envs=count), mounts)
+    for name, root in roots.items():
+        capture = root / "standing"
+        if score_diagnostic(capture) != json.loads((capture / "standing_report.json").read_text()):
+            raise ValueError("Standing report differs from raw recomputation: " + name)
     output.mkdir(parents=True, exist_ok=False)
     path = output / "admission.json"
     path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")

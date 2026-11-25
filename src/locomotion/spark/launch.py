@@ -471,6 +471,18 @@ def run_owned(binding, paths):
                 os.close(fd)
 
 
+def save_cleanup(output, receipt):
+    path = output / "cleanup.json"
+    try:
+        stream = path.open("x")
+    except FileExistsError:
+        path = path.with_name(f"cleanup_recovery_{uuid.uuid4().hex}.json")
+        stream = path.open("x")
+    with stream:
+        json.dump(receipt, stream, indent=2, allow_nan=False)
+        stream.write("\n")
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--bindings", type=Path, required=True)
@@ -487,15 +499,7 @@ def main():
             receipt = guard.cleanup_owned(paths["output"])
             receipt["host"] = cleanup_host_snapshot()
             if paths["output"].exists():
-                path = paths["output"] / "cleanup.json"
-                try:
-                    stream = path.open("x")
-                except FileExistsError:
-                    path = path.with_name(f"cleanup_recovery_{uuid.uuid4().hex}.json")
-                    stream = path.open("x")
-                with stream:
-                    json.dump(receipt, stream, indent=2, allow_nan=False)
-                    stream.write("\n")
+                save_cleanup(paths["output"], receipt)
         print(json.dumps(receipt, indent=2))
         return
     require_wandb_key(binding["command_args"])
@@ -522,7 +526,7 @@ def main():
             cleanup = guard.cleanup_owned(paths["output"])
             cleanup["host"] = cleanup_host_snapshot()
             verify(binding, Path(__file__).resolve().parents[2])
-            guard.save(paths["output"] / "cleanup.json", cleanup)
+            save_cleanup(paths["output"], cleanup)
 
 
 if __name__ == "__main__":

@@ -143,6 +143,14 @@ class TrainingBindingTests(unittest.TestCase):
                 result[name][key] = str(roots[name].parent / recorded)
         self.envelope = result
         self.accepted()
+        one = self.envelope["one"]
+        own_log = one["log_path"]
+        one["log_path"] = self.envelope["batch"]["log_path"]
+        with self.assertRaisesRegex(
+            ValueError, "Missing/changed standing contact audit or log: one"
+        ):
+            self.accepted()
+        one["log_path"] = own_log
         logs["one"].write_text("different log without a warning\n")
         with self.assertRaisesRegex(ValueError, "differs from the log: one"):
             self.accepted()
