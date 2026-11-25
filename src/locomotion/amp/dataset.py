@@ -61,6 +61,29 @@ def command_index(command):
     return matches[0]
 
 
+def replay_motion_case(command):
+    """Match the declared AMP command in the recorded float32 representation."""
+    from locomotion.omniwalk.mdp.commands import COMMAND_SET
+
+    index = command_index(command)
+    case = motion_cases()[index]
+    recorded = np.asarray(command, dtype=np.float32)
+    if np.array_equal(recorded, np.asarray(case["command"], dtype=np.float32)):
+        return index, case
+    speed_index, bearing = divmod(index, COMMAND_SET.translate_bearings)
+    speeds = COMMAND_SET.translate_speeds_mps
+    alternate = (
+        COMMAND_SET.cardinal_translation(speeds[speed_index], bearing)
+        if speed_index < len(speeds)
+        else None
+    )
+    if alternate is not None and np.array_equal(
+        recorded, np.asarray(alternate.as_tuple(), dtype=np.float32)
+    ):
+        return index, {**case, "command": list(alternate.as_tuple())}
+    raise ValueError("Replay command is outside its exact AMP bank schedule")
+
+
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
@@ -314,7 +337,7 @@ def audit_replay(directory):
         or not identity.get("optimization_source_files")
     ):
         raise ValueError("Missing native admission or optimizer identity")
-    index = command_index(identity["command"])
+    index, case = replay_motion_case(identity["command"])
     report_path = directory / "evaluation/report.json"
     report = json.loads(report_path.read_text())
     if (
@@ -355,11 +378,6 @@ def audit_replay(directory):
     with np.load(trace_path, allow_pickle=False) as archive:
         trace = {key: archive[key] for key in archive.files}
     parity = validate_trace(trace, identity["command"], identity["root_com_local_m"])
-    case = motion_cases()[index]
-    # The reviewed replay may record exact cardinal components instead of trigonometric roundoff.
-    # Use its recorded translation, and use the selected bank's command for pure turns.
-    if any(case["command"][:2]):
-        case["command"] = identity["command"]
     judged = judge_case(trace, load_requirements()[0], case=case)
     if not judged["pass"]:
         raise ValueError("Recomputed motion screen failed: " + ", ".join(judged["failed_checks"]))

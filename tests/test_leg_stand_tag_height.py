@@ -202,6 +202,43 @@ class CalibrationCaptureTests(TrackerCase):
         self.assertEqual(self.tr.lock_path.read_bytes(), old_lock)
         self.assertEqual(self.tr.cal.h0, 300.0)
 
+    def test_invalid_saved_calibration_and_rotation_fall_back_to_a_fresh_reference(self):
+        self.lock()
+        self.hold((300, 1.0))
+        self.tr.action("/zero", {})
+        old_cal = self.tr.cal_path.read_bytes()
+        valid_lock = self.tr.lock_path.read_bytes()
+        old_path = self.tr.cal_path
+        valid_cal = json.loads(old_cal)
+        fixtures = (
+            {"h0": "300"},
+            {"h0": float("nan")},
+            {"sign": float("inf")},
+            {"points": [{"height_mm": 200.0, "ref_mm": 10.0, "sd_mm": "0"}]},
+            {"points": [{"height_mm": 1e308, "ref_mm": 1e308, "sd_mm": 0.0}]},
+        )
+        for camera, changes in enumerate(fixtures, 1):
+            with self.subTest(changes=changes):
+                self.tr.lock_path.with_stem(f"lock-{camera}").write_bytes(valid_lock)
+                bad_cal = json.dumps(valid_cal | changes)
+                old_path.with_stem(f"calibration-{camera}").write_text(bad_cal)
+                self.tr.action("/camera", {"index": [str(camera)]})
+                state = self.tr.state()
+                self.assertEqual(state["camera"], camera)
+                self.assertFalse(state["locked"])
+                self.assertIsNone(state["cal"]["h0"])
+                self.assertIn("unreadable", state["reference_error"])
+                json.dumps(state, allow_nan=False)
+                self.assertEqual(self.tr.cal_path.read_text(), bad_cal)
+        broken = json.loads(valid_lock) | {"R": [[0, 0, 0]] * 3}
+        self.tr.lock_path.with_stem("lock-6").write_text(json.dumps(broken))
+        self.tr.action("/camera", {"index": ["6"]})
+        self.assertFalse(self.tr.state()["locked"])
+        self.tr.action("/camera", {"index": ["0"]})
+        self.assertTrue(self.tr.state()["locked"])
+        self.assertEqual(self.tr.cal.h0, 300.0)
+        self.assertEqual(self.tr.cal_path.read_bytes(), old_cal)
+
     def test_stream_does_not_resend_the_last_frame_on_timeout(self):
         self.tr.frame_no = 1
         self.tr.sample = {"h": 1}

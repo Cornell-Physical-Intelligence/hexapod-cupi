@@ -50,7 +50,7 @@ def trace_fixture(command=(0.025, 0.0, 0.0), heading=0.0):
     return trace, offset
 
 
-def replay_fixture(root, requested_command=(0.025, 0.0, 0.0)):
+def replay_fixture(root, requested_command=(0.025, 0.0, 0.0), *, tracking=True):
     """Create a synthetic file bundle to exercise the offline audit end to end."""
     evaluation = root / "evaluation"
     native = evaluation / "native400hz"
@@ -60,6 +60,8 @@ def replay_fixture(root, requested_command=(0.025, 0.0, 0.0)):
     # The body follows the path its command traces, so the judge's drift is zero; the motion
     # features depend on velocities and body-relative positions, not on where the body is.
     path = ghost_path((0.0, 0.0, 0.0), [command] * 1000)[:1000, :2]
+    if not tracking:
+        path[:] = 0.0
     shift = np.concatenate([path, np.zeros((1000, 1))], axis=1)
     trace["toe_xyz_world_m"] = trace["toe_xyz_world_m"] + shift[:, None, None, :]
     trace["root_pose_xyzw"][:, 0, :2] = path
@@ -185,6 +187,32 @@ class DatasetTests(unittest.TestCase):
                 ValueError, "Recomputed motion screen failed: turn_direction"
             ):
                 dataset.audit_replay(root)
+
+    def test_amp_replay_cannot_bypass_the_drift_row_by_adjusting_the_declared_speed(self):
+        for speed, error in (
+            (0.05, "Recomputed motion screen failed: drift_per_hold_m"),
+            (0.05000009, "exact AMP bank schedule"),
+        ):
+            with self.subTest(speed=speed), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                command = (speed, 0.0, 0.0)
+                replay_fixture(root, command, tracking=False)
+                self.assertEqual(
+                    dataset.command_index(command), dataset.command_index((0.05, 0.0, 0.0))
+                )
+                with self.assertRaisesRegex(ValueError, error):
+                    dataset.audit_replay(root)
+
+    def test_exact_amp_match_covers_the_bank_and_retained_clip_declarations(self):
+        for index, case in enumerate(dataset.motion_cases()):
+            self.assertEqual(dataset.replay_motion_case(case["command"]), (index, case))
+        manifest = json.loads((dataset.DATASET / "manifest.json").read_text())
+        for clip in manifest["clips"]:
+            index, selected = dataset.replay_motion_case(clip["command"])
+            self.assertEqual(index, dataset.command_index(clip["command"]))
+            np.testing.assert_array_equal(
+                np.float32(selected["command"]), np.float32(clip["command"])
+            )
 
     def test_amp_replay_preserves_the_retained_exact_cardinal_schedule(self):
         with tempfile.TemporaryDirectory() as tmp:

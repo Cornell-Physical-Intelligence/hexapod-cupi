@@ -172,6 +172,33 @@ class Calibration:
         if c.get("lock_id") != lock_id:
             c = {}
         self.h0, self.sign, self.points = c.get("h0"), c.get("sign", -1.0), c.get("points", [])
+        if load:
+            self._validate()
+
+    def _validate(self):
+        def finite(value):
+            return type(value) in (int, float) and math.isfinite(value)
+
+        if (
+            (self.h0 is not None and not finite(self.h0))
+            or not finite(self.sign)
+            or self.sign not in (-1, 1)
+            or not isinstance(self.points, list)
+            or (self.h0 is None and self.points)
+            or any(
+                not isinstance(point, dict)
+                or any(not finite(point.get(key)) for key in ("height_mm", "ref_mm", "sd_mm"))
+                or ("n" in point and not finite(point["n"]))
+                for point in self.points
+            )
+        ):
+            raise ValueError("Invalid saved calibration")
+        with np.errstate(over="raise", invalid="raise", divide="raise"):
+            fitted = self.summary()
+        if not finite(fitted["a"]) or any(
+            not finite(point[key]) for point in fitted["points"] for key in ("z_mm", "resid_mm")
+        ):
+            raise ValueError("Nonfinite saved calibration fit")
 
     @property
     def a(self):
@@ -250,12 +277,13 @@ class Tracker:
                         or not lock_id
                         or rotation.shape != (3, 3)
                         or not np.isfinite(rotation).all()
+                        or not np.allclose(rotation @ rotation.T, np.eye(3), rtol=0, atol=1e-9)
+                        or np.linalg.det(rotation) <= 0
                     ):
                         raise ValueError("Invalid saved orientation")
                     cal = Calibration(self.cal_path, lock_id, load=True)
-                    cal.summary()
                     self.lock_id, self.R_lock, self.cal = lock_id, rotation, cal
-            except (OSError, ValueError, KeyError, TypeError):
+            except (OSError, ValueError, KeyError, TypeError, ArithmeticError):
                 self.reference_error = "Saved camera reference is unreadable. Acquiring a new lock."
 
     def _open(self, camera):

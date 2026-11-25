@@ -311,16 +311,17 @@ def validate_legacy_measurements(result, trace, report, recorded_trace_sha, case
     if (check := checks.get("tilt_deg")) is not None:
         tilt = tilt_degrees(pose[:, 0])
         stop_control = declared.get("stop_control")
-        if not np.any(trace["command"]):
-            observed = tilt.max()
-        elif "command" in declared and stop_control is not None:
-            settle_s = (declared["controls"] - stop_control) * CONTROL_DT_S / 2
-            still = stand_and_stop_rows(trace, settle_s)
-            observed = tilt[still].max() if still.any() else None
-        else:
-            # The old route judgement did not record the settle window.
-            observed = check["value"] if check["value"] in tilt else None
-        if check["value"] != observed:
+        maxima = [tilt.max()]
+        if np.any(trace["command"]):
+            if "command" in declared and stop_control is not None:
+                settle_s = (declared["controls"] - stop_control) * CONTROL_DT_S / 2
+                still = stand_and_stop_rows(trace, settle_s)
+                if still.any():
+                    maxima.append(tilt[still].max())
+            else:
+                # An unpinned route record does not identify the eligible settle window.
+                maxima = tilt
+        if check["value"] not in maxima:
             raise ValueError("Historical judgement tilt differs from the trace: " + case_id)
     if (check := checks.get("stopping_distance_m")) is not None:
         moving = np.any(trace["command"][:, 0] != 0, axis=1)

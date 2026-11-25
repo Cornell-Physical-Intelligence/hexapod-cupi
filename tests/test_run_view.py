@@ -418,6 +418,42 @@ class RunViewTests(unittest.TestCase):
             ):
                 run_view.build(evaluation)
 
+    def test_unindexed_legacy_replay_preserves_both_historical_tilt_conventions(self):
+        evaluation = Path(self.directory.name) / "legacy/evaluation"
+        folder = evaluation / "batch_000"
+        case_id = "legacy:forward"
+        forward = [0.05, 0.0, 0.0]
+        batch(folder, case_id, [forward] * 4 + [[0.0, 0.0, 0.0]] * 2, [(0.0, 0.0, 0.0)] * 6)
+        trace_path = folder / "control_trace.npz"
+        with np.load(trace_path, allow_pickle=False) as archive:
+            trace = dict(archive)
+        trace["root_pose_xyzw"][1, 0, 3:] = [np.sin(0.25), 0.0, 0.0, np.cos(0.25)]
+        np.savez(trace_path, **trace)
+        report_path = folder / "report.json"
+        report = json.loads(report_path.read_bytes())
+        report["cases"] = [
+            {"case_id": case_id, "command": forward, "stop_control": 4, "controls": 6}
+        ]
+        report["files"] = {trace_path.name: hashlib.sha256(trace_path.read_bytes()).hexdigest()}
+        report_path.write_text(json.dumps(report))
+        from locomotion.evaluation.requirements import tilt_degrees
+
+        whole_trace = float(tilt_degrees(trace["root_pose_xyzw"][:, 0]).max())
+        for tilt, expected_pass in ((whole_trace, False), (0.0, True)):
+            with self.subTest(tilt=tilt):
+                row = {
+                    "case_id": case_id,
+                    "pass": expected_pass,
+                    "checks": {"tilt_deg": {"value": tilt, "bound": 1.7, "pass": expected_pass}},
+                }
+                judgement = {"schema": "hexapod_walking_requirements_judgement_v2", "cases": [row]}
+                path = evaluation / "judgement.json"
+                for indent in (None, 2):
+                    path.write_text(json.dumps(judgement, indent=indent))
+                    exported = run_view.build(evaluation)
+                    self.assertEqual(exported["judgement_binding"], "legacy")
+                    self.assertIs(exported["cases"][0]["pass"], expected_pass)
+
     def test_current_evaluator_output_exports_its_recorded_failure(self):
         root = Path(self.directory.name)
         geometry, checkpoint = fixture_files(root)
