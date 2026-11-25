@@ -153,6 +153,17 @@ class WaypointFollowerTests(unittest.TestCase):
             command.validate(BANK_ENVELOPE)
         return emitted, poses
 
+    def test_cardinal_commands_fit_zero_width_cross_axis_envelopes(self):
+        for x, y in ((1, 0), (0, 1), (-1, 0), (0, -1)):
+            with self.subTest(direction=(x, y)):
+                x_bounds = (-0.05, 0.05) if x else (0.0, 0.0)
+                y_bounds = (-0.05, 0.05) if y else (0.0, 0.0)
+                envelope = CommandEnvelope(x_bounds, y_bounds, (0.0, 0.0))
+                follower = WaypointFollower([(x, y)], envelope=envelope)
+                command = follower.update(Pose2D(0, 0, 0), 0.0)
+                self.assertEqual(command.as_tuple(), (0.05 * x, 0.05 * y, 0.0))
+                command.validate(envelope)
+
     def test_staircase_route_emits_bank_commands_only(self) -> None:
         follower = WaypointFollower(STAIRCASE, stop_radius_m=0.12)
         emitted, poses = self.assert_route_completes(follower, Pose2D(0.0, 0.0, 0.0), STAIRCASE)

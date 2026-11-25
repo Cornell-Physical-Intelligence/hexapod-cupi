@@ -9,7 +9,9 @@ training and evaluation build this bank through `contracts.command.CommandSet`
 from the walking requirements. Its default envelope is the bank's per-axis
 extremes. A narrower envelope selects an allowed speed on the chosen bearing;
 the follower raises `ValueError` when that bearing or the required yaw is
-unavailable. It rejects an envelope that cannot stand. A translation command is held for the training minimum of 2 s
+unavailable. If roundoff on a cardinal command's cross axis exceeds the
+envelope, the follower checks the same bearing with an exact zero on that axis.
+It rejects an envelope that cannot stand. A translation command is held for the training minimum of 2 s
 before it is chosen again, so the policy sees the hold lengths it was trained
 on; reaching a goal or tripping the heading gate ends a hold. The heading gate has hysteresis (turn from 0.05 rad, release at 0.01 rad), and a goal is retired at 0.06 m, inside the 0.12 m stop tolerance by the body's stopping distance. The follower has no obstacle avoidance. Position and heading
 will come from the pose source that the walking requirements name: Mid-360 odometry, with GPS for the global frame

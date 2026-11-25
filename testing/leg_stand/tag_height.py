@@ -13,6 +13,7 @@ import json
 import math
 import threading
 import time
+import uuid
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import parse_qs, urlparse
@@ -163,8 +164,11 @@ class Calibration:
     """z = a (h - h0). Set zero stores h0; a is -1 (toward the camera is +) or +1 (flipped) until
     reference points exist, then the least-squares scale through the zero."""
 
-    def __init__(self):
-        c = json.loads(CAL.read_text()) if CAL.exists() else {}
+    def __init__(self, path=None, lock_id=None):
+        self.path, self.lock_id = path, lock_id
+        c = json.loads(path.read_text()) if lock_id and path and path.is_file() else {}
+        if c.get("lock_id") != lock_id:
+            c = {}
         self.h0, self.sign, self.points = c.get("h0"), c.get("sign", -1.0), c.get("points", [])
 
     @property
@@ -176,7 +180,17 @@ class Calibration:
         return float(dh @ ref / (dh @ dh)) if dh @ dh > 1e-6 else self.sign
 
     def save(self):
-        CAL.write_text(json.dumps({"h0": self.h0, "sign": self.sign, "points": self.points}))
+        if self.path is not None and self.lock_id is not None:
+            self.path.write_text(
+                json.dumps(
+                    {
+                        "lock_id": self.lock_id,
+                        "h0": self.h0,
+                        "sign": self.sign,
+                        "points": self.points,
+                    }
+                )
+            )
 
     def summary(self):
         a, h0 = self.a, self.h0
@@ -193,21 +207,41 @@ class Tracker:
     tag alone, corrected by its offset from the two-tag height (learned on two-tag frames)."""
 
     def __init__(self, a):
-        self.a, self.det, self.cal = a, Detector(), Calibration()
+        self.a, self.det = a, Detector()
         self.cond, self.fcond = threading.Condition(), threading.Condition()
+        self.measurements = threading.RLock()
         self.raw = self.sample = self.jpeg = None
         self.raw_no = self.frame_no = 0
         self.hist = collections.deque(maxlen=8000)  # (t, height or None, both tags)
         self.cap_ts, self.proc_ts = collections.deque(maxlen=60), collections.deque(maxlen=60)
         self.seen = collections.deque(maxlen=60)
         self.status, self.error, self.camera, self.reopen = "starting", None, a.camera, True
-        self.R_lock = np.array(json.loads(LOCK.read_text())["R"]) if LOCK.exists() else None
-        self.lock_Rs, self.relock, self.lock_t = [], False, -math.inf
-        self.off, self.off_n = dict.fromkeys(TAGS, 0.0), dict.fromkeys(TAGS, 0)
-        self.t0 = time.monotonic()
+        self.generation = 0
+        self.t0 = self.reset_time = time.monotonic()
+        self.reset_measurements(load=True)
 
-    def _open(self):
-        cap = cv2.VideoCapture(self.camera)
+    def reset_measurements(self, *, load):
+        # The persisted reference belongs to one camera and one orientation lock.
+        self.lock_path = None if self.a.sim else LOCK.with_stem(f"{LOCK.stem}-{self.camera}")
+        self.cal_path = None if self.a.sim else CAL.with_stem(f"{CAL.stem}-{self.camera}")
+        lock = (
+            json.loads(self.lock_path.read_text())
+            if load and self.lock_path and self.lock_path.is_file()
+            else {}
+        )
+        self.lock_id = lock.get("lock_id")
+        self.R_lock = np.array(lock["R"]) if self.lock_id else None
+        self.cal = Calibration(self.cal_path, self.lock_id)
+        self.lock_Rs, self.lock_t = [], -math.inf
+        self.off, self.off_n = dict.fromkeys(TAGS, 0.0), dict.fromkeys(TAGS, 0)
+        self.det.prev = None
+        self.hist.clear()
+        self.seen.clear()
+        self.proc_ts.clear()
+        self.sample = self.jpeg = None
+
+    def _open(self, camera):
+        cap = cv2.VideoCapture(camera)
         cap.set(cv2.CAP_PROP_FOURCC, cv2.VideoWriter_fourcc(*"MJPG"))
         cap.set(cv2.CAP_PROP_FRAME_WIDTH, SIZE[0])
         cap.set(cv2.CAP_PROP_FRAME_HEIGHT, SIZE[1])
@@ -215,37 +249,55 @@ class Tracker:
         ok, f = cap.read() if cap.isOpened() else (False, None)
         if not ok:
             cap.release()
-            return None, f"camera {self.camera} gave no frame (macOS: allow Camera access)"
+            return None, f"camera {camera} gave no frame (macOS: allow Camera access)"
         if (f.shape[1], f.shape[0]) != SIZE:
             cap.release()
-            return None, f"camera {self.camera} delivered {f.shape[1]}x{f.shape[0]}, not 1280x720"
+            return None, f"camera {camera} delivered {f.shape[1]}x{f.shape[0]}, not 1280x720"
         return cap, None
 
     def capture_loop(self):
         cap, rng = None, np.random.default_rng(0)
+        active = -1
         while True:
+            with self.cond:
+                generation = self.generation
+                camera = self.camera
+                reopen = self.reopen or active != generation
+                if not self.a.sim and reopen:
+                    self.status, self.reopen = "opening camera", False
             if self.a.sim:
                 hgt = 380 + 80 * math.sin((time.monotonic() - self.t0) / 6)
                 frame = cv2.cvtColor(render_plate(hgt, 0.5, (1, -2), 2, rng)[0], cv2.COLOR_GRAY2BGR)
                 self.status = "simulated"
             else:
-                if self.reopen:
+                if reopen:
                     if cap is not None:
                         cap.release()
-                    self.status, self.reopen = "opening camera", False
-                    cap, self.error = self._open()
+                    cap, error = self._open(camera)
+                    active = generation
+                    with self.cond:
+                        if generation != self.generation:
+                            continue
+                        self.error = error
+                        self.status = "no camera" if cap is None else "live"
+                        self.reopen = cap is None
                     if cap is None:
-                        self.status, self.reopen = "no camera", True
                         time.sleep(2)
                         continue
-                    self.status, self.det.prev = "live", None
+                ts = time.monotonic()
                 ok, frame = cap.read()
                 if not ok:
-                    self.error, self.reopen = "the camera stopped delivering frames", True
+                    with self.cond:
+                        if generation == self.generation:
+                            self.error, self.reopen = "the camera stopped delivering frames", True
                     continue
-            with self.fcond:
-                self.raw, self.raw_t, self.raw_no = frame, time.monotonic(), self.raw_no + 1
-                self.cap_ts.append(self.raw_t)
+            with self.cond, self.fcond:
+                if generation != self.generation:
+                    continue
+                now = time.monotonic()
+                self.raw = (frame, now, generation, now if self.a.sim else ts)
+                self.raw_no += 1
+                self.cap_ts.append(now)
                 self.fcond.notify_all()
 
     def process_loop(self):
@@ -254,12 +306,18 @@ class Tracker:
             with self.fcond:
                 if not self.fcond.wait_for(lambda: self.raw_no != last, timeout=1):
                     continue
-                frame, ts, last = self.raw, self.raw_t, self.raw_no
-            self.process(frame, ts)
+                raw, last = self.raw, self.raw_no
+            self.process(*raw)
 
-    def process(self, frame, ts):
-        if self.relock:
-            self.R_lock, self.lock_Rs, self.relock = None, [], False
+    def process(self, frame, ts, generation=None, started=None):
+        with self.measurements:
+            if generation is not None and (
+                generation != self.generation or started < self.reset_time
+            ):
+                return
+            self._process(frame, ts)
+
+    def _process(self, frame, ts):
         dets = self.det(frame)
         res = solve(dets, self.R_lock)
         both = bool(res) and len(res["ids"]) == len(TAGS)
@@ -268,7 +326,12 @@ class Tracker:
             self.lock_Rs.append(res["R"])
             if len(self.lock_Rs) >= self.a.lock:
                 self.R_lock, self.lock_t = mean_rotation(self.lock_Rs), round(ts - self.t0, 4)
-                LOCK.write_text(json.dumps({"R": self.R_lock.tolist()}))
+                self.lock_id = uuid.uuid4().hex
+                if self.lock_path is not None:
+                    self.lock_path.write_text(
+                        json.dumps({"lock_id": self.lock_id, "R": self.R_lock.tolist()})
+                    )
+                self.cal = Calibration(self.cal_path, self.lock_id)
         elif res and self.R_lock is not None:
             if both:  # learn each tag's own-height offset from the two-tag height
                 for i in TAGS:
@@ -309,6 +372,10 @@ class Tracker:
             return [r for r in self.hist if r[0] >= now - seconds and r[1] is not None]
 
     def state(self):
+        with self.measurements, self.cond:
+            return self._state()
+
+    def _state(self):
         def rate(ts):
             return 1 / float(np.median(np.diff(list(ts)))) if len(ts) > 3 else None
 
@@ -337,18 +404,37 @@ class Tracker:
         hs, third = np.array([r[1] for r in rows]), len(rows) // 3
         if not third or rows[-1][0] - rows[0][0] < 0.8 * self.a.avg:
             raise ValueError(f"hold both tags in view for {self.a.avg:g} s after the lock")
-        moved = abs(float(hs[-third:].mean() - hs[:third].mean()))
+        moved = float(np.ptp(np.convolve(hs, np.full(third, 1 / third), mode="valid")))
         if moved > self.a.steady:
             raise ValueError(f"the height moved {moved:.2f} mm during the average; hold still")
         return {"height_mm": float(hs.mean()), "sd_mm": float(hs.std()), "n": len(hs)}
 
     def action(self, path, q):
+        with self.measurements, self.cond:
+            self._action(path, q)
+
+    def _action(self, path, q):
         cal = self.cal
         if path == "/relock":
-            self.relock = True
-        elif path == "/camera":
-            self.camera, self.reopen = int(q["index"][0]), True
-        elif path == "/zero":
+            if self.lock_path is not None:
+                self.lock_path.write_text("{}")
+            self.reset_time = time.monotonic()
+            self.reset_measurements(load=False)
+            return
+        if path == "/camera":
+            if self.a.sim:
+                raise ValueError("simulated tracking has no physical camera")
+            camera = int(q["index"][0])
+            if camera != self.camera:
+                self.camera, self.reopen = camera, True
+                self.generation += 1
+                self.status, self.error = "opening camera", None
+                self.reset_time = time.monotonic()
+                self.reset_measurements(load=True)
+                with self.fcond:
+                    self.cap_ts.clear()
+            return
+        if path == "/zero":
             cal.h0, cal.points = self.average()["height_mm"], []
         elif path == "/point":
             if cal.h0 is None:
@@ -395,10 +481,12 @@ def make_handler(tr):
             try:
                 while True:
                     with tr.cond:
-                        tr.cond.wait_for(lambda: tr.frame_no != last, timeout=1)
+                        if not tr.cond.wait_for(lambda: tr.frame_no != last, timeout=1):
+                            continue
                         last = tr.frame_no
-                    if tr.sample is not None:
-                        self.wfile.write(chunk())
+                        data = chunk() if tr.sample is not None else None
+                    if data is not None:
+                        self.wfile.write(data)
                         self.wfile.flush()
             except (BrokenPipeError, ConnectionResetError):
                 pass

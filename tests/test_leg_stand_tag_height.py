@@ -2,11 +2,13 @@
 
 import argparse
 import importlib.util
+import json
 import math
 import tempfile
 import time
 import unittest
 from pathlib import Path
+from unittest.mock import Mock
 
 import cv2
 import numpy as np
@@ -56,7 +58,7 @@ class TrackerCase(unittest.TestCase):
         self.addCleanup(setattr, th, "CAL", th.CAL)
         th.LOCK, th.CAL = Path(tmp.name) / "lock.json", Path(tmp.name) / "calibration.json"
         self.tr = th.Tracker(
-            argparse.Namespace(camera=0, fps=60, avg=1.0, lock=60, port=0, sim=True, steady=0.5)
+            argparse.Namespace(camera=0, fps=60, avg=1.0, lock=60, port=0, sim=False, steady=0.5)
         )
         self.tr.t0 = time.monotonic() - 100
 
@@ -67,6 +69,11 @@ class TrackerCase(unittest.TestCase):
 
     def lock(self):
         self.tr.R_lock = plate_pose(300)[0]
+        self.tr.lock_id = "fixture lock"
+        self.tr.cal.lock_id = self.tr.lock_id
+        self.tr.lock_path.write_text(
+            json.dumps({"lock_id": self.tr.lock_id, "R": self.tr.R_lock.tolist()})
+        )
 
     def hold(self, *spans):
         """Two-tag frames at 60 fps that end now: (height, seconds) spans, oldest first."""
@@ -90,7 +97,7 @@ class OrientationLockTests(TrackerCase):
         for seed in range(10):
             with self.subTest(seed=seed):
                 rng = np.random.default_rng(seed)
-                self.tr.relock = True
+                self.tr.action("/relock", {})
                 for _ in range(60):
                     self.feed(corners(380, rng))
                 self.assertIsNotNone(self.tr.R_lock)
@@ -127,6 +134,61 @@ class CalibrationCaptureTests(TrackerCase):
             self.tr.action("/zero", {})
         self.assertIsNone(self.tr.cal.h0)
 
+    def test_zero_rejects_a_move_that_returns_and_accepts_measurement_noise(self):
+        self.lock()
+        self.hold((300, 0.35), (304, 0.3), (300, 0.35))
+        with self.assertRaisesRegex(ValueError, "moved"):
+            self.tr.action("/zero", {})
+        self.hold(*([(300.2, 1 / 60), (299.8, 1 / 60)] * 30))
+        self.tr.action("/zero", {})
+        self.assertAlmostEqual(self.tr.cal.h0, 300.0, delta=0.01)
+
+    def test_simulation_cannot_read_or_change_physical_calibration(self):
+        self.lock()
+        self.hold((300, 1.0))
+        self.tr.action("/zero", {})
+        lock_bytes = self.tr.lock_path.read_bytes()
+        cal_bytes = self.tr.cal_path.read_bytes()
+        sim = th.Tracker(argparse.Namespace(**(vars(self.tr.a) | {"sim": True})))
+        self.assertIsNone(sim.R_lock)
+        self.assertIsNone(sim.cal.h0)
+        sim.action("/relock", {})
+        sim.action("/flip", {})
+        self.assertEqual(self.tr.lock_path.read_bytes(), lock_bytes)
+        self.assertEqual(self.tr.cal_path.read_bytes(), cal_bytes)
+
+    def test_switch_camera_drops_old_samples_and_loads_only_its_own_reference(self):
+        self.lock()
+        self.hold((300, 1.0))
+        self.tr.action("/zero", {})
+        old_generation = self.tr.generation
+        self.tr.action("/camera", {"index": ["1"]})
+        self.assertIsNone(self.tr.R_lock)
+        self.assertIsNone(self.tr.cal.h0)
+        self.assertFalse(self.tr.hist)
+        self.tr.process(BLACK, time.monotonic(), old_generation, time.monotonic())
+        self.assertIsNone(self.tr.sample)
+        self.tr.action("/camera", {"index": ["0"]})
+        self.assertIsNotNone(self.tr.R_lock)
+        self.assertEqual(self.tr.cal.h0, 300.0)
+        self.tr.action("/relock", {})
+        self.assertIsNone(self.tr.cal.h0)
+        fresh = th.Tracker(self.tr.a)
+        self.assertIsNone(fresh.R_lock)
+        self.assertIsNone(fresh.cal.h0)
+
+    def test_stream_does_not_resend_the_last_frame_on_timeout(self):
+        self.tr.frame_no = 1
+        self.tr.sample = {"h": 1}
+        handler = object.__new__(th.make_handler(self.tr))
+        handler.send_response = Mock()
+        handler.send_header = Mock()
+        handler.end_headers = Mock()
+        handler.wfile = Mock()
+        self.tr.cond.wait_for = Mock(side_effect=[True, False, BrokenPipeError])
+        handler._stream("test", lambda: b"frame")
+        handler.wfile.write.assert_called_once_with(b"frame")
+
     def test_zero_from_a_part_of_the_window_is_refused(self):
         self.lock()
         self.hold((300, 0.3))
@@ -152,7 +214,7 @@ class ReferenceInputTests(TrackerCase):
             with self.assertRaises(ValueError):
                 self.tr.action("/point", {"ref": [ref]})
         self.assertEqual(self.tr.cal.points, [])
-        self.assertNotIn("NaN", th.CAL.read_text())
+        self.assertNotIn("NaN", self.tr.cal_path.read_text())
 
     def test_point_at_the_zero_is_refused(self):
         self.hold((300.01, 1.0))

@@ -28,7 +28,7 @@ uv run python testing/leg_stand/tag_height.py serve --camera 0    # http://local
 On macOS, allow Camera access for the terminal app. The MacBook camera can take index 0; pick
 the ELP in the dashboard's Camera menu. `serve --sim` shows a simulated plate.
 
-1. With both tags in view, the first 60 two-tag frames lock the camera orientation (`lock.json`).
+1. With both tags in view, the first 60 two-tag frames lock the camera orientation (`lock-<camera index>.json`).
    Press **Re-lock orientation** after the camera mount is bumped, then set the zero again.
 2. Put the carriage at the reference position and press **Set zero here** (1 s average).
 3. Move to known offsets (gauge blocks or the encoder), type each offset in mm and press **Add
@@ -36,10 +36,13 @@ the ELP in the dashboard's Camera menu. `serve --sim` shows a simulated plate.
    With no points, a move toward the camera reads positive (**Flip direction** reverses it).
 
 The zero and each point need the lock and 1 s of two-tag frames that hold still: the page refuses
-an average that moves more than 0.5 mm from its first third to its last (`--steady`). A point
+an average when the moving one-third-window mean spans more than 0.5 mm (`--steady`). A point
 needs a finite offset and at least 5 mm of travel from the zero.
 
-The zero and the points are kept in `calibration.json`. Both JSON files stay out of Git.
+The physical tracker saves the zero and points in `calibration-<camera index>.json` and binds
+them to the orientation lock. Re-lock and set the zero after moving a camera or reassigning its
+index. The simulated tracker keeps its measurements in memory. The old unbound
+`lock.json` and `calibration.json` files are retained on disk. All these files stay out of Git.
 
 ## Method
 

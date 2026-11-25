@@ -80,6 +80,20 @@ BANK_ENVELOPE = COMMAND_SET.envelope()
 STAND = VelocityCommand(vx_mps=0.0, vy_mps=0.0, wz_rad_s=0.0, frame=Frame.NAVIGATION)
 
 
+def _translation_for_envelope(command_set, speed, bearing, envelope):
+    command = command_set.translation(speed, bearing)
+    if command.is_within(envelope):
+        return command
+    # A cardinal bank entry may carry roundoff on the cross axis.
+    quadrant, remainder = divmod(4 * bearing, command_set.translate_bearings)
+    if remainder == 0:
+        x, y = ((speed, 0.0), (0.0, speed), (-speed, 0.0), (0.0, -speed))[quadrant]
+        exact = VelocityCommand(x, y, 0.0)
+        if exact.is_within(envelope):
+            return exact
+    return None
+
+
 class WaypointFollower:
     """Drive a sequence of ``(x, y)`` goals with bank translation and bank yaw."""
 
@@ -104,7 +118,10 @@ class WaypointFollower:
             [
                 (speed, command)
                 for speed in command_set.translate_speeds_mps
-                if (command := command_set.translation(speed, bearing)).is_within(self.envelope)
+                if (
+                    command := _translation_for_envelope(command_set, speed, bearing, self.envelope)
+                )
+                is not None
             ]
             for bearing in range(command_set.translate_bearings)
         ]

@@ -112,9 +112,45 @@ def navigation(xy, origin_yaw=0.0):
     return np.stack((-y, x), -1)
 
 
-def source_of(evaluation):
-    """Surrogate output folders hold surrogate_summary.json beside evaluation/; native attempts do not."""
-    return "surrogate" if (evaluation.parent / "surrogate_summary.json").exists() else "native"
+def source_of(evaluation, batches):
+    """Prefer captured backend metadata, then identify historical attempt layouts."""
+    backends = set()
+    for batch in batches:
+        source = batch / "native400hz/source.json"
+        if source.is_file():
+            backend = json.loads(source.read_text()).get("backend", "")
+            if backend == "isaac":
+                backends.add("native")
+            elif isinstance(backend, str) and backend.lower().split()[:1] == ["mujoco"]:
+                backends.add("surrogate")
+            else:
+                backends.add("unknown")
+    if backends:
+        return backends.pop() if len(backends) == 1 else "unknown"
+    attempt = evaluation.parent
+    if any(
+        (root / name).is_file()
+        for root in (evaluation, attempt)
+        for name in ("surrogate_summary.json", "cycle_summary.json")
+    ):
+        return "surrogate"
+    readback = attempt / "native/native_readback.json"
+    if readback.is_file():
+        engine = (json.loads(readback.read_text()).get("surrogate") or {}).get("engine", "")
+        if isinstance(engine, str) and engine.lower().split()[:1] == ["mujoco"]:
+            return "surrogate"
+    if (
+        attempt.parent.name == "contact_consensus"
+        and (attempt.parent.parent / "surrogate_summary.json").is_file()
+    ):
+        return "surrogate"
+    if (
+        evaluation.name == "evaluation"
+        and attempt.name == "standing"
+        and attempt.parent.name == "run"
+    ):
+        return "native"
+    return "unknown"
 
 
 def evaluation_folder(path):
@@ -138,10 +174,10 @@ def attempt_name(evaluation):
 
 
 def judgement_rows(evaluation):
-    """Return recorded verdicts by case ID and their hash; None selects historical batch reports."""
+    """Return recorded verdicts, provenance and the file hash when a judgement exists."""
     path = evaluation / "judgement.json"
     if not path.exists():
-        return None, None
+        return None, None, None
     raw = path.read_bytes()
     value = json.loads(raw)
     if not isinstance(value, dict) or value.get("schema") not in {
@@ -188,12 +224,23 @@ def judgement_rows(evaluation):
         if not unjudged and (set(failed) != set(false_checks) or row["pass"] != (not failed)):
             raise ValueError("Judgement verdict and check flags disagree: " + case_id)
         rows[case_id] = dict(row, failed_checks=failed)
-    return rows, hashlib.sha256(raw).hexdigest()
+    checkpoints = value.get("checkpoint_sha256")
+    if checkpoints is not None and (
+        not isinstance(checkpoints, list)
+        or len(checkpoints) > 1
+        or any(not isinstance(digest, str) or len(digest) != 64 for digest in checkpoints)
+    ):
+        raise ValueError("Invalid or mixed judgement checkpoint identity")
+    return rows, value, hashlib.sha256(raw).hexdigest()
 
 
-def case(batch, joints, judged=None):
+def case(batch, joints, judged=None, provenance=None):
     report = json.loads((batch / "report.json").read_text())
     case_id = report["assigned_case_ids"][0]
+    trace_path = batch / "control_trace.npz"
+    trace_sha = report.get("files", {}).get(trace_path.name)
+    if trace_sha is not None and hashlib.sha256(trace_path.read_bytes()).hexdigest() != trace_sha:
+        raise ValueError("Trace bytes differ from the batch report: " + case_id)
     if judged is None:
         result = report["results"][0]
         if type(result.get("pass")) is not bool:
@@ -201,8 +248,19 @@ def case(batch, joints, judged=None):
     else:
         if case_id not in judged:
             raise ValueError("Missing judgement case: " + case_id)
+        checkpoint = report.get("checkpoint_sha256")
+        checkpoints = provenance.get("checkpoint_sha256")
+        allocation = provenance.get("allocation") or {}
+        if checkpoint is not None and (
+            (checkpoints is not None and checkpoints != [checkpoint])
+            or allocation.get("checkpoint_sha256", checkpoint) != checkpoint
+        ):
+            raise ValueError("Judgement checkpoint differs from the batch: " + case_id)
+        source = report.get("source_sha256")
+        if source is not None and allocation.get("orchestrator_sha256", source) != source:
+            raise ValueError("Judgement source differs from the batch: " + case_id)
         result = judged[case_id]
-    trace = np.load(batch / "control_trace.npz")
+    trace = np.load(trace_path)
     pose = trace["root_pose_xyzw"][:, 0].astype(float)
     q = trace["joint_position_rad"][:, 0].astype(float)
     toe = trace["toe_xyz_world_m"][:, 0].astype(float)
@@ -264,19 +322,26 @@ def compress(data):
 def build(folder, model=None):
     """The run file as a dict; cases without a control trace are listed but not drawn."""
     evaluation = evaluation_folder(folder)
-    judged, judgement_sha = judgement_rows(evaluation)
+    judged, provenance, judgement_sha = judgement_rows(evaluation)
+    allocation = evaluation / "allocation.json"
+    if provenance is not None and allocation.is_file():
+        recorded = json.loads(allocation.read_text())
+        if provenance.get("allocation", recorded) != recorded:
+            raise ValueError("Judgement allocation differs from the recorded allocation")
+        provenance = {**provenance, "allocation": recorded}
     active = json.loads((ROOT / "robot/active_model.json").read_text())
     model = Path(model) if model else ROOT / active["model"]["path"]
     joints = {j["name"]: j for j in json.loads(model.read_text())["joints"]}
     cases, skipped, points, contacts = [], [], [], []
-    for batch in sorted(evaluation.glob("batch_*")):
+    batches = sorted(evaluation.glob("batch_*"))
+    for batch in batches:
         if not (batch / "control_trace.npz").exists():
             if (batch / "report.json").exists():
                 skipped.append(
                     json.loads((batch / "report.json").read_text())["assigned_case_ids"][0]
                 )
             continue
-        row = case(batch, joints, judged)
+        row = case(batch, joints, judged, provenance)
         row["points_offset"] = sum(p.nbytes for p in points)
         row["contacts_offset"] = sum(c.nbytes for c in contacts)
         points.append(row.pop("_points"))
@@ -288,7 +353,7 @@ def build(folder, model=None):
     summary = evaluation / "summary.json"
     value = {
         "schema": SCHEMA,
-        "source": source_of(evaluation),
+        "source": source_of(evaluation, batches),
         "name": attempt_name(evaluation),
         "summary_sha256": hashlib.sha256(summary.read_bytes()).hexdigest()
         if summary.exists()

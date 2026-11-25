@@ -187,6 +187,45 @@ class RunViewTests(unittest.TestCase):
                 self.assertEqual(value["judgement_sha256"], hashlib.sha256(before).hexdigest())
                 self.assertEqual(path.read_bytes(), before)
 
+    def test_a_judgement_for_another_checkpoint_cannot_label_a_trace(self):
+        evaluation = self.attempt / "run/standing/evaluation"
+        report_path = evaluation / "batch_000/report.json"
+        report = json.loads(report_path.read_text())
+        report_path.write_text(json.dumps({**report, "checkpoint_sha256": "a" * 64}))
+        judgement = self.recorded_judgement()
+        self.save_judgement({**judgement, "checkpoint_sha256": ["b" * 64]})
+        with self.assertRaisesRegex(ValueError, "Judgement checkpoint differs"):
+            run_view.build(self.attempt)
+
+    def test_backend_uses_capture_metadata_and_historical_surrogate_markers(self):
+        standalone = Path(self.directory.name) / "standalone"
+        (self.attempt / "run/standing/evaluation").rename(standalone)
+        self.assertEqual(run_view.build(standalone)["source"], "unknown")
+        for name in ("cycle_summary.json", "surrogate_summary.json"):
+            with self.subTest(marker=name):
+                marker = standalone / name
+                marker.write_text("{}")
+                self.assertEqual(run_view.build(standalone)["source"], "surrogate")
+                marker.unlink()
+        source = standalone / "batch_000/native400hz/source.json"
+        source.parent.mkdir()
+        source.write_text(json.dumps({"backend": "mujoco 3.14.0"}))
+        self.assertEqual(run_view.build(standalone)["source"], "surrogate")
+        source.parent.rename(standalone / "capture_backup")
+        parent = Path(self.directory.name) / "surrogate_parent"
+        variant = parent / "contact_consensus/variant/evaluation"
+        variant.parent.mkdir(parents=True)
+        standalone.rename(variant)
+        native = variant.parent / "native"
+        native.mkdir()
+        (native / "native_readback.json").write_text(
+            json.dumps({"surrogate": {"engine": "mujoco 3.14.0"}})
+        )
+        self.assertEqual(run_view.build(variant)["source"], "surrogate")
+        (native / "native_readback.json").unlink()
+        (parent / "surrogate_summary.json").write_text("{}")
+        self.assertEqual(run_view.build(variant)["source"], "surrogate")
+
     def test_a_present_judgement_cannot_fall_back_to_old_report_verdicts(self):
         for kind in (
             "missing",
