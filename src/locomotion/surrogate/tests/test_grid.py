@@ -300,6 +300,8 @@ def fake_summary(cell, verdict=True, failure=None, command=None):
             case["case_id"] for case in requirements.cases(requirements.load_requirements()[0])
         ]
         summary["checkpoint_sha256"] = sha(Path(option("--checkpoint")))
+        summary["requirements_set"] = "stage2_flat"
+        summary["requirements_sha256"] = requirements.load_requirements()[1]
         summary["seed"] = int(option("--seed", 20260917))
         summary["selected_case_ids"] = evaluate.selected_cases(option("--cases"), probes)
         summary["identity"] = source_identity()
@@ -405,6 +407,12 @@ class SweepTests(unittest.TestCase):
             with mock.patch.object(rnd, "grid_declaration", return_value=declaration):
                 with self.assertRaisesRegex(ValueError, "grid_sha256"):
                     self.sweep(directory, "--cells", NOMINAL, "--cases", "focus", "--continue")
+            rules, _ = requirements.load_requirements()
+            with mock.patch.object(
+                requirements, "load_requirements", return_value=(rules, "0" * 64)
+            ):
+                with self.assertRaisesRegex(ValueError, "requirements_sha256"):
+                    self.sweep(directory, "--cells", NOMINAL, "--cases", "focus", "--continue")
             self.assertEqual((cells / NOMINAL / "surrogate_summary.json").read_bytes(), before)
 
     def test_continue_sets_an_acquisition_failure_aside_and_runs_the_cell_again(self):
@@ -426,6 +434,48 @@ class SweepTests(unittest.TestCase):
             self.assertTrue((cells / f"{CORNER}.attempt_001.log").exists())
             row = next(row for row in summary["cells"] if row["cell"] == CORNER)
             self.assertEqual(row["set_aside_attempts"], [f"{CORNER}.attempt_001"])
+
+    def test_a_new_child_cannot_contribute_verdicts_for_different_requirements(self):
+        for failure in (None, "partial acquisition"):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                checkpoint = root / "checkpoint.pt"
+                checkpoint.write_bytes(b"weights")
+                sweep_root = root / "sweep"
+                child = sweep_root / "cells" / NOMINAL / "surrogate_summary.json"
+
+                def wrong_requirements(command, log):
+                    child.parent.mkdir()
+                    summary = fake_summary(NOMINAL, failure=failure, command=command)
+                    summary["requirements_sha256"] = "0" * 64
+                    child.write_text(json.dumps(summary))
+                    return 0
+
+                argv = [
+                    "--checkpoint",
+                    str(checkpoint),
+                    "--output",
+                    str(sweep_root),
+                    "--cells",
+                    NOMINAL,
+                ]
+                grid = sweep_root / "grid_summary.json"
+                with (
+                    mock.patch.object(sweep, "run_process", wrong_requirements),
+                    contextlib.redirect_stdout(io.StringIO()),
+                ):
+                    if failure is None:
+                        with self.assertRaisesRegex(ValueError, "requirements_sha256"):
+                            sweep.main(argv)
+                        self.assertFalse(grid.exists())
+                    else:
+                        self.assertEqual(sweep.main(argv), 1)
+                        summary = json.loads(grid.read_text())
+                        self.assertEqual(summary["verdict_counts"], {})
+                        self.assertEqual(
+                            summary["cells"][0]["identity_mismatch"], ["requirements_sha256"]
+                        )
+                self.assertTrue(child.is_file())
 
     def test_an_acquisition_failure_is_no_complete_cell(self):
         with tempfile.TemporaryDirectory() as directory:

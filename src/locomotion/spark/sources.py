@@ -58,6 +58,7 @@ def allocation_files(root, *, learner="ppo", mode="evaluate"):
             "networks.py",
             "dataset.py",
             "processing_sources_v2.json",
+            "processing_sources_v3.json",
         )
         if learner == "amp"
         else ("__init__.py", "replay_native.py")

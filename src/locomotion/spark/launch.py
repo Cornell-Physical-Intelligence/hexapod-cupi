@@ -4,10 +4,8 @@ from __future__ import annotations
 
 import argparse
 import fcntl
-import hashlib
 import json
 import os
-import re
 import signal
 import subprocess
 import time
@@ -16,6 +14,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import locomotion.spark.safety as guard
+from locomotion.omniwalk.contact_log import audit_contact_log
 from locomotion.spark.safety import INPUT_ROOTS, RUN_ROOTS, within_roots
 from locomotion.spark.validation import (
     ALLOCATION_PROFILES,
@@ -23,8 +22,6 @@ from locomotion.spark.validation import (
     ENTRY_POINTS,
     validate_deadline,
 )
-
-_INCOMPLETE = re.compile(r"incomplete\s+(?:contact|friction)\s+data", re.IGNORECASE)
 
 
 def host_snapshot():
@@ -111,29 +108,6 @@ def live_competitors(processes, owned, identity, proc_root=Path("/proc")):
         if identity not in cgroup:
             competing.append({"process": line, "cgroup": cgroup.strip()})
     return competing
-
-
-def audit_contact_log(path):
-    path = Path(path)
-    data = path.read_bytes()  # A missing/unreadable log must never pass.
-    lines = data.decode("utf-8", errors="replace").splitlines()
-    matches = [line for line in lines if _INCOMPLETE.search(line)]
-    capacities = sorted(
-        {
-            int(value)
-            for line in matches
-            for value in re.findall(r"maxContactDataCount\s*=\s*(\d+)", line)
-        }
-    )
-    return dict(
-        log_sha256=hashlib.sha256(data).hexdigest(),
-        incomplete_data_warning_count=len(matches),
-        reported_capacities=capacities,
-        first_warning=matches[0] if matches else None,
-        last_warning=matches[-1] if matches else None,
-        passed=not matches,
-        scope="Required absence of reported contact/friction data truncation; raw physical gate must also pass",
-    )
 
 
 def verify(binding, own):
@@ -497,6 +471,13 @@ def run_owned(binding, paths):
                 os.close(fd)
 
 
+def save_cleanup(output, receipt):
+    path = output / "cleanup.json"
+    while path.exists() or path.is_symlink():
+        path = output / f"cleanup_recovery_{uuid.uuid4().hex}.json"
+    guard.save(path, receipt)
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, allow_abbrev=False)
     parser.add_argument("--bindings", type=Path, required=True)
@@ -513,7 +494,7 @@ def main():
             receipt = guard.cleanup_owned(paths["output"])
             receipt["host"] = cleanup_host_snapshot()
             if paths["output"].exists():
-                guard.save(paths["output"] / "cleanup.json", receipt)
+                save_cleanup(paths["output"], receipt)
         print(json.dumps(receipt, indent=2))
         return
     require_wandb_key(binding["command_args"])
@@ -540,7 +521,7 @@ def main():
             cleanup = guard.cleanup_owned(paths["output"])
             cleanup["host"] = cleanup_host_snapshot()
             verify(binding, Path(__file__).resolve().parents[2])
-            guard.save(paths["output"] / "cleanup.json", cleanup)
+            save_cleanup(paths["output"], cleanup)
 
 
 if __name__ == "__main__":

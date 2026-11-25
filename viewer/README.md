@@ -22,10 +22,16 @@ uv run python viewer/run_view.py /path/to/surrogate_output --output surrogate.js
 
 The folder can be a native attempt (`<attempt>/run/standing/evaluation`), a surrogate output folder
 (`<output>/evaluation`) or the evaluation folder itself. Copy native attempts from Spark first; only batches
-with a control trace are drawn, and the file lists the others.
+with a control trace are drawn, and the file lists the others. The exporter reads the capture
+backend when available, recognizes historical attempt layouts and surrogate summaries, and labels
+a standalone capture with no backend evidence as unknown.
 
 The exporter reads each verdict and failed check from `judgement.json` by case ID and records that
-file's SHA-256. It rejects missing, duplicate or malformed verdicts. Historical evaluations without
+file's SHA-256. Current judgements bind each verdict to its batch report and control trace
+hashes. The exporter can use a published raw-file index to verify an archived judgement's
+original reports and traces. It checks available measurements in other historical judgements and
+the Runs page labels their trace binding as unverified. The exporter rejects missing, duplicate
+or malformed verdicts. Historical evaluations without
 that file retain their batch-report verdicts, and existing run files keep their format.
 Historical v1 judgements with no checks retain their null verdict and appear as "not judged".
 

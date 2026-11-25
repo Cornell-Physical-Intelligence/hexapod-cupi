@@ -371,10 +371,10 @@ class _DelayedStream:
         )
         valid = self._has_value & (age_s >= 0.0) & (age_s <= self.cfg.stale_after_s)
         return Phase3SensorFrame(
-            values=self._latest_values,
+            values={name: value.clone() for name, value in self._latest_values.items()},
             valid=valid,
             age_s=age_s,
-            capture_time_s=self._capture_time_s,
+            capture_time_s=self._capture_time_s.clone(),
         )
 
     @torch.inference_mode(False)

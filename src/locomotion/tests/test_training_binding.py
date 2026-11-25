@@ -5,8 +5,9 @@ import tempfile
 import unittest
 from copy import deepcopy
 from pathlib import Path
+from unittest.mock import patch
 
-from locomotion.evaluation.admission import require_admission
+from locomotion.evaluation.admission import audit_contact_log, create, require_admission
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256, sha
 from locomotion.robots.randomization import identity_record
@@ -96,6 +97,63 @@ class TrainingBindingTests(unittest.TestCase):
     def test_matching_state_report_bytes_pass_for_batch_and_video_one(self):
         self.assertEqual(self.accepted()["num_envs"], 32)
         self.assertEqual(self.accepted(EnvConfig(num_envs=1))["num_envs"], 32)
+
+    def test_new_admission_requires_both_passed_launcher_audits_and_binds_the_logs(self):
+        roots, logs, audits = {}, {}, {}
+        for name in ("one", "batch"):
+            attempt = self.root / name
+            roots[name] = attempt / "standing"
+            report = roots[name] / "standing/standing_report.json"
+            report.parent.mkdir(parents=True)
+            report.write_text(json.dumps(self.reports[name]))
+            (roots[name] / "state.json").write_text(json.dumps(self.states[name]))
+            logs[name] = attempt / "logs/standing.log"
+            audits[name] = attempt / "jobs/standing_contact_data_audit.json"
+            for path in (logs[name], audits[name]):
+                path.parent.mkdir()
+
+        inputs = self.root / "inputs.json"
+        inputs.write_text(json.dumps({"extra_mounts": [], "input_files": {}}))
+        score = "locomotion.evaluation.capture.score_diagnostic"
+        output = self.root / "new_admission"
+        with patch(
+            score, side_effect=lambda path: json.loads((path / "standing_report.json").read_text())
+        ):
+            for failed in ("one", "batch", None):
+                for name, path in logs.items():
+                    path.write_text(
+                        "incomplete contact data\n" if name == failed else "completed\n"
+                    )
+                    audits[name].write_text(json.dumps(audit_contact_log(path)))
+                if failed is not None:
+                    with self.assertRaisesRegex(ValueError, "contact audit failed.*" + failed):
+                        create(**roots, output=output, inputs=inputs)
+                    self.assertFalse(output.exists())
+                else:
+                    result = create(**roots, output=output, inputs=inputs)
+        self.assertEqual(result["schema"], "hexapod_locomotion_standing_admission_v2")
+        declared = json.loads((output / "inputs.json").read_text())
+        for paths in (logs, audits):
+            for path in paths.values():
+                self.assertEqual(declared["input_files"][str(path.resolve())], sha(path))
+        for name in ("one", "batch"):
+            for kind in ("state", "report", "contact_audit", "log"):
+                key = kind + "_path"
+                recorded = Path(result[name][key]).relative_to("/standing_" + name)
+                result[name][key] = str(roots[name].parent / recorded)
+        self.envelope = result
+        self.accepted()
+        one = self.envelope["one"]
+        own_log = one["log_path"]
+        one["log_path"] = self.envelope["batch"]["log_path"]
+        with self.assertRaisesRegex(
+            ValueError, "Missing/changed standing contact audit or log: one"
+        ):
+            self.accepted()
+        one["log_path"] = own_log
+        logs["one"].write_text("different log without a warning\n")
+        with self.assertRaisesRegex(ValueError, "differs from the log: one"):
+            self.accepted()
 
     def test_randomized_training_requires_matching_one_and_batch_declarations(self):
         record = identity_record("table2_v1")

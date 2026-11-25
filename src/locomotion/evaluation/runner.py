@@ -483,7 +483,11 @@ def run_batch(
         data = {k: np.stack([r[k] for r in rows]) for k in rows[0]} if rows else {}
         if data:
             np.savez_compressed(out / "control_trace.npz", **data)
-    complete = failure is None and receipt["steps"] == 8 * len(rows) and receipt["failure"] is None
+    if receipt["failure"] is not None or receipt["steps"] != 8 * len(rows):
+        capture_failure = receipt["failure"] or "Substep count differs from the captured controls"
+        failure = f"{failure}; {capture_failure}" if failure else capture_failure
+        failure_kind = "acquisition_error"
+    complete = failure is None
     results = [
         {
             "case_id": case["case_id"],

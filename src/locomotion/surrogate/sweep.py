@@ -4,7 +4,7 @@ Each cell runs ``locomotion.surrogate.evaluate --grid --cell`` in its own proces
 ``<output>/cells/<cell id>``, so any cell can be reproduced alone. ``grid_summary.json`` collects
 the verdict of each case in each cell: the relative-friction consensus where the cell ran it, else
 the case's own verdict. ``--continue`` finishes an interrupted sweep: it keeps a finished cell only
-when its summary matches this request (checkpoint bytes, sources, grid, cell, cases and seed) and
+when its summary matches this request (checkpoint bytes, sources, requirements, grid, cell, cases and seed) and
 refuses the sweep on any mismatch. It sets every incomplete or acquisition-failed
 attempt aside under a fresh name and runs that cell again.
 """
@@ -107,8 +107,15 @@ def cell_identity(summary):
         "grid_sha256": condition.get("grid_sha256"),
         "cell": condition.get("cell"),
         "selected_case_ids": summary.get("selected_case_ids"),
+        "requirements_set": summary.get("requirements_set"),
+        "requirements_sha256": summary.get("requirements_sha256"),
         "seed": summary.get("seed"),
     }
+
+
+def cell_differences(summary, expected):
+    observed = cell_identity(summary)
+    return sorted(key for key, value in expected.items() if observed[key] != value)
 
 
 def cell_state(path, expected):
@@ -121,8 +128,7 @@ def cell_state(path, expected):
         summary = json.loads(path.read_text())
     except (FileNotFoundError, json.JSONDecodeError):
         return "retry"
-    observed = cell_identity(summary)
-    differences = sorted(key for key, value in expected.items() if observed[key] != value)
+    differences = cell_differences(summary, expected)
     if differences:
         return differences
     return "finished" if summary.get("acquisition_failure") is None else "retry"
@@ -193,17 +199,20 @@ def main(argv=None):
         raise ValueError("Checkpoint bytes differ from the paired record")
     if args.output.exists() and not args.resume:
         raise ValueError("The output exists; pass --continue to finish that sweep")
+    requirements_set = "stage2_flat"
+    rules, requirements_sha = requirements.load_requirements(name=requirements_set)
     request = {
         "checkpoint_sha256": checkpoint_sha256,
+        "requirements_set": requirements_set,
+        "requirements_sha256": requirements_sha,
         "grid_sha256": rnd.grid_declaration(args.grid)["sha256"],
         "selected_case_ids": selected_cases(
             args.cases,
-            [case["case_id"] for case in requirements.cases(requirements.load_requirements()[0])],
+            [case["case_id"] for case in requirements.cases(rules)],
         ),
         "seed": effective_seed(args.seed, record.get("identity", {})),
+        "identity": source_identity(),
     }
-    if args.resume:
-        request["identity"] = source_identity()
     # Check every finished cell before any rename or run, so a refused resume changes nothing.
     finished, mismatched = set(), {}
     for cell, _ in cells:
@@ -239,7 +248,17 @@ def main(argv=None):
     rows = []
     for cell, values in cells:
         path = args.output / "cells" / cell / "surrogate_summary.json"
-        row = cell_row(cell, values, json.loads(path.read_text()) if path.exists() else None)
+        summary = json.loads(path.read_text()) if path.exists() else None
+        differences = (
+            [] if summary is None else cell_differences(summary, {**request, "cell": cell})
+        )
+        if differences:
+            if summary.get("acquisition_failure") is None:
+                raise ValueError(f"Cell {cell} answers another request: {', '.join(differences)}")
+            summary = {**summary, "cases": []}
+        row = cell_row(cell, values, summary)
+        if differences:
+            row["identity_mismatch"] = differences
         if cell in exit_codes:
             row["exit_code"] = exit_codes[cell]
         if cell in set_aside_attempts:
@@ -261,9 +280,11 @@ def main(argv=None):
         "scope": "CPU MuJoCo surrogate screen at fixed conditions; design evidence. One trial per case "
         "per cell. Native runs are the only acceptance evidence.",
         "checkpoint": str(args.checkpoint),
-        "checkpoint_sha256": sha(args.checkpoint),
+        "checkpoint_sha256": checkpoint_sha256,
         "grid": args.grid,
         "grid_sha256": declaration["sha256"],
+        "requirements_set": requirements_set,
+        "requirements_sha256": requirements_sha,
         "grid_declaration": json.loads(declaration["json"]),
         "cases_option": args.cases,
         "seed_option": args.seed,

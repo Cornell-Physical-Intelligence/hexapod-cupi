@@ -1,6 +1,7 @@
 """Exercise dataset rejection paths with synthetic records, without native claims."""
 
 import copy
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -49,16 +50,18 @@ def trace_fixture(command=(0.025, 0.0, 0.0), heading=0.0):
     return trace, offset
 
 
-def replay_fixture(root):
+def replay_fixture(root, requested_command=(0.025, 0.0, 0.0), *, tracking=True):
     """Create a synthetic file bundle to exercise the offline audit end to end."""
     evaluation = root / "evaluation"
     native = evaluation / "native400hz"
     native.mkdir(parents=True)
-    command = [0.025, 0.0, 0.0]
+    command = list(requested_command)
     trace, offset = trace_fixture(command)
     # The body follows the path its command traces, so the judge's drift is zero; the motion
     # features depend on velocities and body-relative positions, not on where the body is.
     path = ghost_path((0.0, 0.0, 0.0), [command] * 1000)[:1000, :2]
+    if not tracking:
+        path[:] = 0.0
     shift = np.concatenate([path, np.zeros((1000, 1))], axis=1)
     trace["toe_xyz_world_m"] = trace["toe_xyz_world_m"] + shift[:, None, None, :]
     trace["root_pose_xyzw"][:, 0, :2] = path
@@ -175,6 +178,108 @@ class DatasetTests(unittest.TestCase):
             (root / "evaluation/native400hz/substeps_000.npz").write_bytes(b"changed")
             with self.assertRaisesRegex(ValueError, "native force chunk"):
                 dataset.audit_replay(root)
+
+    def test_amp_motion_screen_rejects_stationary_replay_of_a_pure_turn(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            replay_fixture(root, (0.0, 0.0, 0.2))
+            with self.assertRaisesRegex(
+                ValueError, "Recomputed motion screen failed: turn_direction"
+            ):
+                dataset.audit_replay(root)
+
+    def test_amp_replay_cannot_bypass_the_drift_row_by_adjusting_the_declared_speed(self):
+        for speed, error in (
+            (0.05, "Recomputed motion screen failed: drift_per_hold_m"),
+            (0.05000009, "exact AMP bank schedule"),
+        ):
+            with self.subTest(speed=speed), tempfile.TemporaryDirectory() as tmp:
+                root = Path(tmp)
+                command = (speed, 0.0, 0.0)
+                replay_fixture(root, command, tracking=False)
+                self.assertEqual(
+                    dataset.command_index(command), dataset.command_index((0.05, 0.0, 0.0))
+                )
+                with self.assertRaisesRegex(ValueError, error):
+                    dataset.audit_replay(root)
+
+    def test_exact_amp_match_covers_the_bank_and_retained_clip_declarations(self):
+        for index, case in enumerate(dataset.motion_cases()):
+            self.assertEqual(dataset.replay_motion_case(case["command"]), (index, case))
+        manifest = json.loads((dataset.DATASET / "manifest.json").read_text())
+        for clip in manifest["clips"]:
+            index, selected = dataset.replay_motion_case(clip["command"])
+            self.assertEqual(index, dataset.command_index(clip["command"]))
+            np.testing.assert_array_equal(
+                np.float32(selected["command"]), np.float32(clip["command"])
+            )
+
+    def test_amp_replay_preserves_the_retained_exact_cardinal_schedule(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            command = (0.0, 0.05, 0.0)
+            replay_fixture(root, command)
+            self.assertEqual(
+                dataset.audit_replay(root)[0]["command_index"], dataset.command_index(command)
+            )
+
+    def test_processing_v3_remains_frozen_and_current_v4_requires_its_additions(self):
+        current = dataset.processing_identity()
+        self.assertEqual(current["schema"], "hexapod_processing_sources_v4")
+        added = {"locomotion/amp/processing_sources_v3.json", "locomotion/omniwalk/contact_log.py"}
+        self.assertTrue(added <= current["source_files"].keys())
+        historical = {
+            **current,
+            "schema": "hexapod_processing_sources_v3",
+            "source_files": {
+                key: digest for key, digest in current["source_files"].items() if key not in added
+            },
+        }
+        dataset.validate_processing_identity(historical)
+        for wrong in (
+            {**historical, "schema": current["schema"]},
+            {**current, "schema": historical["schema"]},
+        ):
+            with self.assertRaisesRegex(ValueError, "processing source"):
+                dataset.validate_processing_identity(wrong)
+
+    def test_current_replay_uses_its_bound_capture_to_enforce_the_original_physical_screen(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            replay_fixture(root)
+            evaluation = root / "evaluation"
+            capture_path = evaluation / "native400hz/capture.json"
+            report_path = evaluation / "report.json"
+            state_path = root / "state.json"
+            capture = json.loads(capture_path.read_text())
+            report = json.loads(report_path.read_text())
+            state = json.loads(state_path.read_text())
+            fields = {
+                "joint_bound_violation_steps": 0,
+                "speed_bound_violation_steps": 0,
+                "maximum_applied_nm": 1.6,
+                "minimum_non_toe_floor_m": -0.001,
+                "minimum_plate_height_m": 0.055,
+                "nonfoot_contact_steps_400hz": 8,
+            }
+            for bad in ({}, {"nonfoot_contact_steps_400hz": 9}, {"joint_bound_violation_steps": 1}):
+                facts = fields | bad
+                capture.update({key: [value] for key, value in facts.items()})
+                capture["contact_classification"] = "exact_distal_points"
+                dataset.save(capture_path, capture)
+                dataset.save(evaluation / "force_metrics.json", report_for(evaluation))
+                report["files"]["force_metrics.json"] = dataset.sha(
+                    evaluation / "force_metrics.json"
+                )
+                report["results"] = [dict(facts, native_capture_complete=True, controls=1000)]
+                dataset.save(report_path, report)
+                state["replay"] = report
+                dataset.save(state_path, state)
+                if bad:
+                    with self.assertRaisesRegex(ValueError, "Native motion, contact or force"):
+                        dataset.audit_replay(root)
+                else:
+                    self.assertEqual(dataset.audit_replay(root)[0]["command_index"], 0)
 
     def test_reconstruction_uses_origin_velocity_and_is_yaw_invariant(self):
         command = (0.04, 0.0, 0.15)

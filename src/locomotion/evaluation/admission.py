@@ -9,6 +9,7 @@ import argparse
 import json
 from pathlib import Path
 
+from locomotion.omniwalk.contact_log import audit_contact_log
 from locomotion.omniwalk.env_cfg import EnvConfig
 from locomotion.robots.hexapod import (
     ISAACLAB_REVISION,
@@ -220,8 +221,13 @@ def validate_admission(value, identity, cfg, mounts=None):
                 return Path(source) / path.relative_to(target)
         return path
 
-    if value.get("schema") != "hexapod_locomotion_standing_admission_v1":
-        raise ValueError("Wrong standing admission schema")
+    schema = value.get("schema")
+    current = schema == "hexapod_locomotion_standing_admission_v2"
+    if not current and (
+        schema != "hexapod_locomotion_standing_admission_v1"
+        or identity["physics_source_files"].get("evaluation/admission.py") == sha(__file__)
+    ):
+        raise ValueError("Standing admission requires both launcher contact log audits")
     if value.get("model_sha256") != MODEL_SHA256 or value.get("usd_sha256") != USD_SHA256:
         raise ValueError("Standing admission model differs")
     if (
@@ -241,6 +247,26 @@ def validate_admission(value, identity, cfg, mounts=None):
         raise ValueError("At least 32 same-source standing replicas are required")
     for name, count in (("one", 1), ("batch", value.get("num_envs"))):
         row = value.get(name, {})
+        state_path = resolve(row.get("state_path", ""))
+        if current:
+            attempt = state_path.parent.parent
+            audit_path = resolve(row.get("contact_audit_path", ""))
+            log_path = resolve(row.get("log_path", ""))
+            if (
+                audit_path != attempt / "jobs/standing_contact_data_audit.json"
+                or log_path != attempt / "logs/standing.log"
+                or not audit_path.is_file()
+                or sha(audit_path) != row.get("contact_audit_sha256")
+                or not log_path.is_file()
+            ):
+                raise ValueError("Missing/changed standing contact audit or log: " + name)
+            audit = audit_contact_log(log_path)
+            if (
+                audit["passed"] is not True
+                or audit["log_sha256"] != row.get("log_sha256")
+                or audit != json.loads(audit_path.read_text())
+            ):
+                raise ValueError("Standing contact audit failed or differs from the log: " + name)
         report_path = resolve(row.get("report_path", ""))
         if not report_path.is_file() or sha(report_path) != row.get("report_sha256"):
             raise ValueError("Missing/changed actual standing report: " + name)
@@ -262,7 +288,6 @@ def validate_admission(value, identity, cfg, mounts=None):
             )
         ):
             raise ValueError("Standing quality rejected: " + name)
-        state_path = resolve(row.get("state_path", ""))
         if not state_path.is_file() or sha(state_path) != row.get("state_sha256"):
             raise ValueError("Missing/changed native standing acquisition: " + name)
         state = json.loads(state_path.read_text())
@@ -325,7 +350,7 @@ def create(one, batch, output, inputs):
         "geometry_extrema_sha256",
     )
     value = {
-        "schema": "hexapod_locomotion_standing_admission_v1",
+        "schema": "hexapod_locomotion_standing_admission_v2",
         "num_envs": count,
         **{key: identity[key] for key in keys},
     }
@@ -335,21 +360,28 @@ def create(one, batch, output, inputs):
     mounts = {}
     for name, root in roots.items():
         report_path = root / "standing/standing_report.json"
-        report = json.loads(report_path.read_text())
-        if score_diagnostic(root / "standing") != report:
-            raise ValueError("Standing report differs from raw recomputation: " + name)
         target = "/standing_" + name
-        mounts[target] = root
-        value[name] = {
-            "report_path": target + "/standing/standing_report.json",
-            "report_sha256": sha(report_path),
-            "state_path": target + "/state.json",
-            "state_sha256": sha(root / "state.json"),
-        }
-        declared["extra_mounts"].append([str(root), target])
-        for path in (report_path, root / "state.json"):
-            declared["input_files"][str(path)] = sha(path)
+        attempt = root.parent
+        mounts[target] = attempt
+        value[name] = {}
+        declared["extra_mounts"].append([str(attempt), target])
+        for kind, path in (
+            ("report", report_path),
+            ("state", root / "state.json"),
+            ("contact_audit", attempt / "jobs/standing_contact_data_audit.json"),
+            ("log", attempt / "logs/standing.log"),
+        ):
+            if not path.is_file():
+                raise ValueError("Missing standing evidence: " + str(path))
+            digest = sha(path)
+            value[name][kind + "_path"] = target + "/" + path.relative_to(attempt).as_posix()
+            value[name][kind + "_sha256"] = digest
+            declared["input_files"][str(path)] = digest
     validate_admission(value, identity, EnvConfig(num_envs=count), mounts)
+    for name, root in roots.items():
+        capture = root / "standing"
+        if score_diagnostic(capture) != json.loads((capture / "standing_report.json").read_text()):
+            raise ValueError("Standing report differs from raw recomputation: " + name)
     output.mkdir(parents=True, exist_ok=False)
     path = output / "admission.json"
     path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n")

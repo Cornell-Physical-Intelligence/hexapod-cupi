@@ -156,6 +156,7 @@ export default function RunViewer() {
             {runs.map((run, r) => (
               <div key={r} className="run-chip" style={{ borderColor: `var(${RUN_COLOURS[r % 4]})` }}>
                 <b>{run.name}</b> · {run.source} · {run.cases.filter((c) => c.pass).length} of {run.cases.length} cases passed
+                {run.judgement_binding === 'legacy' && ' · legacy verdicts, unverified trace binding'}
                 {run.cases.some((c) => c.pass === null) && ` · ${run.cases.filter((c) => c.pass === null).length} not judged`}
                 {run.cases_without_trace.length > 0 && ` · ${run.cases_without_trace.length} more without a trace`}
               </div>

@@ -152,9 +152,16 @@ def run_evaluation(env, args, policy, state, started):
         max_wall_seconds=remaining,
         motion_features=extract_features,
     )
-    summaries = list((args.output / "evaluation").rglob("force_metrics.json"))
-    if not summaries or any(json.loads(p.read_text())["status"] != "available" for p in summaries):
-        raise ValueError("Evaluation has no complete set of load summaries")
+    evaluation = state["evaluation"]
+    cases = evaluation["allocation"]["cases"]
+    if evaluation["failure"] is not None or [row["case_id"] for row in evaluation["cases"]] != [
+        case["case_id"] for case in cases
+    ]:
+        raise ValueError("Evaluation did not acquire every allocated case")
+    for index, case in enumerate(cases):
+        summary = args.output / "evaluation" / f"batch_{index:03d}" / "force_metrics.json"
+        if not summary.is_file() or json.loads(summary.read_text())["status"] != "available":
+            raise ValueError("Evaluation lacks an available load summary for " + case["case_id"])
 
 
 def evaluate(env, session):

@@ -173,6 +173,16 @@ class CommandSet:
         angle = bearing * self.bearing_step_rad
         return VelocityCommand(speed * math.cos(angle), speed * math.sin(angle), 0.0)
 
+    def cardinal_translation(self, speed: float, bearing: int) -> VelocityCommand | None:
+        """The exact axis form of a cardinal bearing, without altering the recorded bank."""
+        if speed not in self.translate_speeds_mps or not 0 <= bearing < self.translate_bearings:
+            raise ValueError("Translation speed or bearing is outside the command set")
+        quarter_turns, remainder = divmod(4 * bearing, self.translate_bearings)
+        if remainder != 0:
+            return None
+        x, y = ((speed, 0.0), (0.0, speed), (-speed, 0.0), (0.0, -speed))[quarter_turns]
+        return VelocityCommand(x, y, 0.0)
+
     def nonzero(self, maximum_speed_mps=None) -> tuple[VelocityCommand, ...]:
         """Translations, turns, then arcs in their recorded training order."""
         maximum = math.inf if maximum_speed_mps is None else maximum_speed_mps

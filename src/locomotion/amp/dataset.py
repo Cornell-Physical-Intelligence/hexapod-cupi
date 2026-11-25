@@ -10,7 +10,10 @@ from pathlib import Path
 import numpy as np
 
 from locomotion.amp.features import extract_features, feature_contract
-from locomotion.evaluation.requirements import judge_case, load_requirements
+from locomotion.evaluation.requirements import (
+    judge_case,
+    load_requirements,
+)
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256
 from locomotion.spark.sources import source_files
 
@@ -26,7 +29,7 @@ PROCESSING_FILES = (
     "priors/commands.py",
     "priors/dataset.py",
 )
-PROCESSING_SCHEMA = "hexapod_processing_sources_v3"
+PROCESSING_SCHEMA = "hexapod_processing_sources_v4"
 
 
 def motion_cases():
@@ -58,6 +61,29 @@ def command_index(command):
     return matches[0]
 
 
+def replay_motion_case(command):
+    """Match the declared AMP command in the recorded float32 representation."""
+    from locomotion.omniwalk.mdp.commands import COMMAND_SET
+
+    index = command_index(command)
+    case = motion_cases()[index]
+    recorded = np.asarray(command, dtype=np.float32)
+    if np.array_equal(recorded, np.asarray(case["command"], dtype=np.float32)):
+        return index, case
+    speed_index, bearing = divmod(index, COMMAND_SET.translate_bearings)
+    speeds = COMMAND_SET.translate_speeds_mps
+    alternate = (
+        COMMAND_SET.cardinal_translation(speeds[speed_index], bearing)
+        if speed_index < len(speeds)
+        else None
+    )
+    if alternate is not None and np.array_equal(
+        recorded, np.asarray(alternate.as_tuple(), dtype=np.float32)
+    ):
+        return index, {**case, "command": list(alternate.as_tuple())}
+    raise ValueError("Replay command is outside its exact AMP bank schedule")
+
+
 def sha(path):
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
@@ -75,7 +101,12 @@ def processing_identity():
             **{"locomotion/" + name: digest for name, digest in source_files(root).items()},
             **{
                 "locomotion/" + name: sha(root / name)
-                for name in ("amp/features.py", "amp/dataset.py", "amp/processing_sources_v2.json")
+                for name in (
+                    "amp/features.py",
+                    "amp/dataset.py",
+                    "amp/processing_sources_v2.json",
+                    "amp/processing_sources_v3.json",
+                )
             },
         },
     }
@@ -86,12 +117,19 @@ def validate_processing_identity(processing):
     schema = processing.get("schema")
     if schema is None:
         expected = {"locomotion/" + name for name in PROCESSING_FILES}
-    elif schema == "hexapod_processing_sources_v2":
-        expected = set(
-            json.loads(Path(__file__).with_name("processing_sources_v2.json").read_text())["files"]
-        )
-    elif schema == PROCESSING_SCHEMA:
-        expected = set(processing_identity()["source_files"])
+    elif schema in (
+        "hexapod_processing_sources_v2",
+        "hexapod_processing_sources_v3",
+        PROCESSING_SCHEMA,
+    ):
+        version = "v2" if schema.endswith("_v2") else "v3"
+        layout = Path(__file__).with_name(f"processing_sources_{version}.json")
+        expected = set(json.loads(layout.read_text())["files"])
+        if schema == PROCESSING_SCHEMA:
+            expected |= {
+                "locomotion/amp/processing_sources_v3.json",
+                "locomotion/omniwalk/contact_log.py",
+            }
     else:
         raise ValueError("Unknown dataset processing source identity")
     if (
@@ -230,6 +268,44 @@ def motion_diagnostics(trace, command):
     }
 
 
+def native_replay_screen(result, capture, command):
+    """Apply the retained replay screen to the acquisition-only capture receipt."""
+    if any(
+        key in result
+        for key in ("pass", "native_motor_and_joint_checks_pass", "native_contact_screen")
+    ):
+        return (
+            result.get("pass") is True
+            and result.get("native_motor_and_joint_checks_pass") is True
+            and result.get("native_contact_screen", {}).get("pass") is True
+        )
+    limits = {
+        "joint_bound_violation_steps": (0, 0),
+        "speed_bound_violation_steps": (0, 0),
+        "maximum_applied_nm": (0, 1.60001),
+        "minimum_non_toe_floor_m": (-0.001, np.inf),
+        "minimum_plate_height_m": (0.055, np.inf),
+        "nonfoot_contact_steps_400hz": (0, 8 if any(command) else 0),
+    }
+    if (
+        result.get("native_capture_complete") is not True
+        or result.get("controls") != 1000
+        or capture.get("contact_classification") != "exact_distal_points"
+        or type(result.get("nonfoot_contact_steps_400hz")) is not int
+    ):
+        return False
+    for key, (lower, upper) in limits.items():
+        value = result.get(key)
+        if (
+            type(value) not in (int, float)
+            or not np.isfinite(value)
+            or not lower <= value <= upper
+            or capture.get(key) != [value]
+        ):
+            return False
+    return True
+
+
 def audit_replay(directory):
     directory = Path(directory).resolve()
     state_path = directory / "state.json"
@@ -261,7 +337,7 @@ def audit_replay(directory):
         or not identity.get("optimization_source_files")
     ):
         raise ValueError("Missing native admission or optimizer identity")
-    index = command_index(identity["command"])
+    index, case = replay_motion_case(identity["command"])
     report_path = directory / "evaluation/report.json"
     report = json.loads(report_path.read_text())
     if (
@@ -269,9 +345,6 @@ def audit_replay(directory):
         or report.get("acquisition_complete") is not True
         or report.get("recorded_physics_steps") != 8000
         or len(report.get("results", [])) != 1
-        or report["results"][0].get("pass") is not True
-        or report["results"][0].get("native_motor_and_joint_checks_pass") is not True
-        or report["results"][0].get("native_contact_screen", {}).get("pass") is not True
         or report.get("force_metrics", {}).get("status") != "available"
     ):
         raise ValueError("Native motion, contact or force evidence is incomplete")
@@ -298,11 +371,14 @@ def audit_replay(directory):
         or computed_loads["cases"][0]["requested_window_complete"] is not True
     ):
         raise ValueError("Incomplete native force/torque capture")
+    capture = json.loads((report_path.parent / "native400hz/capture.json").read_text())
+    if not native_replay_screen(report["results"][0], capture, identity["command"]):
+        raise ValueError("Native motion, contact or force evidence is incomplete")
     trace_path = report_path.parent / "control_trace.npz"
     with np.load(trace_path, allow_pickle=False) as archive:
         trace = {key: archive[key] for key in archive.files}
     parity = validate_trace(trace, identity["command"], identity["root_com_local_m"])
-    judged = judge_case(trace, load_requirements()[0], 1000)
+    judged = judge_case(trace, load_requirements()[0], case=case)
     if not judged["pass"]:
         raise ValueError("Recomputed motion screen failed: " + ", ".join(judged["failed_checks"]))
     record = {

@@ -154,6 +154,29 @@ class CleanupTests(unittest.TestCase):
             receipt = json.loads((root / "attempt/cleanup.json").read_text())
             self.assertEqual(receipt["host"], {"error": repr(RuntimeError("nvidia-smi failed"))})
 
+    def test_repeated_cleanup_preserves_the_first_receipt(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            original = root / "attempt/cleanup.json"
+            original.parent.mkdir()
+            original.write_text('{"original":true}')
+            for _ in range(2):
+                self.run_main(root, ["--cleanup-only"])
+            receipts = sorted(original.parent.glob("cleanup_recovery_*.json"))
+            self.assertEqual(len(receipts), 2)
+            self.assertEqual(original.read_text(), '{"original":true}')
+            for receipt in receipts:
+                self.assertFalse(json.loads(receipt.read_text())["reservation_released"])
+
+    def test_cleanup_receipt_is_published_only_after_serialization(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaises(ValueError):
+                launch.save_cleanup(root, {"invalid": float("nan")})
+            self.assertFalse((root / "cleanup.json").exists())
+            launch.save_cleanup(root, {"done": True})
+            self.assertEqual(json.loads((root / "cleanup.json").read_text()), {"done": True})
+
     def test_missing_container_and_inspection_failure_are_distinct(self):
         with patch.object(
             launch.subprocess,

@@ -187,6 +187,45 @@ class RunViewTests(unittest.TestCase):
                 self.assertEqual(value["judgement_sha256"], hashlib.sha256(before).hexdigest())
                 self.assertEqual(path.read_bytes(), before)
 
+    def test_a_judgement_for_another_checkpoint_cannot_label_a_trace(self):
+        evaluation = self.attempt / "run/standing/evaluation"
+        report_path = evaluation / "batch_000/report.json"
+        report = json.loads(report_path.read_text())
+        report_path.write_text(json.dumps({**report, "checkpoint_sha256": "a" * 64}))
+        judgement = self.recorded_judgement()
+        self.save_judgement({**judgement, "checkpoint_sha256": ["b" * 64]})
+        with self.assertRaisesRegex(ValueError, "Judgement checkpoint differs"):
+            run_view.build(self.attempt)
+
+    def test_backend_uses_capture_metadata_and_historical_surrogate_markers(self):
+        standalone = Path(self.directory.name) / "standalone"
+        (self.attempt / "run/standing/evaluation").rename(standalone)
+        self.assertEqual(run_view.build(standalone)["source"], "unknown")
+        for name in ("cycle_summary.json", "surrogate_summary.json"):
+            with self.subTest(marker=name):
+                marker = standalone / name
+                marker.write_text("{}")
+                self.assertEqual(run_view.build(standalone)["source"], "surrogate")
+                marker.unlink()
+        source = standalone / "batch_000/native400hz/source.json"
+        source.parent.mkdir()
+        source.write_text(json.dumps({"backend": "mujoco 3.14.0"}))
+        self.assertEqual(run_view.build(standalone)["source"], "surrogate")
+        source.parent.rename(standalone / "capture_backup")
+        parent = Path(self.directory.name) / "surrogate_parent"
+        variant = parent / "contact_consensus/variant/evaluation"
+        variant.parent.mkdir(parents=True)
+        standalone.rename(variant)
+        native = variant.parent / "native"
+        native.mkdir()
+        (native / "native_readback.json").write_text(
+            json.dumps({"surrogate": {"engine": "mujoco 3.14.0"}})
+        )
+        self.assertEqual(run_view.build(variant)["source"], "surrogate")
+        (native / "native_readback.json").unlink()
+        (parent / "surrogate_summary.json").write_text("{}")
+        self.assertEqual(run_view.build(variant)["source"], "surrogate")
+
     def test_a_present_judgement_cannot_fall_back_to_old_report_verdicts(self):
         for kind in (
             "missing",
@@ -316,6 +355,104 @@ class RunViewTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "Out of range float"):
             run_view.main([str(self.attempt), "--output", str(output)])
         self.assertFalse(output.exists())
+
+    def test_a_pass_from_another_run_cannot_label_a_short_or_terminal_stand(self):
+        root = Path(self.directory.name)
+        geometry, checkpoint = fixture_files(root)
+        evaluations = [root / name / "evaluation" for name in ("pass", "terminal")]
+        with patch.object(runner, "ExactEvaluationCapture", FakeCapture):
+            for evaluation, terminate in zip(evaluations, (None, 2)):
+                runner.run_cases(
+                    FakeNative(terminate_at=terminate),
+                    lambda observation: torch.zeros(1, 18),
+                    evaluation,
+                    geometry,
+                    checkpoint,
+                    case_ids=["stand"],
+                )
+        successful, failed = (folder / "judgement.json" for folder in evaluations)
+        self.assertTrue(run_view.build(evaluations[0])["cases"][0]["pass"])
+        self.assertFalse(run_view.build(evaluations[1])["cases"][0]["pass"])
+        judgement = json.loads(successful.read_bytes())
+        self.assertEqual(judgement["allocation"], json.loads(failed.read_bytes())["allocation"])
+        failed.write_bytes(successful.read_bytes())
+        with self.assertRaisesRegex(ValueError, "Judgement batch or trace identity differs"):
+            run_view.build(evaluations[1])
+        judgement["schema"] = "hexapod_walking_requirements_judgement_v2"
+        for key in ("batch", "report_sha256", "control_trace_sha256"):
+            del judgement["cases"][0][key]
+        successful.write_text(json.dumps(judgement))
+        self.assertTrue(run_view.build(evaluations[0])["cases"][0]["pass"])
+        failed.write_text(json.dumps(judgement))
+        with self.assertRaisesRegex(ValueError, "incomplete or terminal trace"):
+            run_view.build(evaluations[1])
+
+    def test_published_legacy_judgement_uses_its_own_archive_subgroup(self):
+        root = Path(self.directory.name)
+        evaluation = self.attempt / "run/standing/evaluation"
+        path = self.save_judgement(self.recorded_judgement())
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        prefix = "contact_consensus/pyramidal_cone/evaluation"
+        raw_files = {
+            f"{prefix}/judgement.json": {"sha256": digest},
+            "evaluation/batch_000/control_trace.npz": {"sha256": "0" * 64},
+        }
+        for batch_dir in sorted(evaluation.glob("batch_*"))[:2]:
+            for name in ("report.json", "control_trace.npz"):
+                raw = (batch_dir / name).read_bytes()
+                raw_files[f"{prefix}/{batch_dir.name}/{name}"] = {
+                    "sha256": hashlib.sha256(raw).hexdigest()
+                }
+        manifest = root / "site/assets/fixture/files.json"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({"raw_files": raw_files}))
+        with patch.object(run_view, "ROOT", root):
+            archived = run_view.archived_batch_digests(digest)
+        self.assertNotEqual(archived["batch_000/control_trace.npz"], "0" * 64)
+        with patch.object(run_view, "archived_batch_digests", return_value=archived):
+            self.assertEqual(run_view.build(evaluation)["judgement_binding"], "archive_hashes")
+            report_path = evaluation / "batch_000/report.json"
+            report_path.write_bytes(report_path.read_bytes() + b" ")
+            with self.assertRaisesRegex(
+                ValueError, "Published judgement batch or trace identity differs"
+            ):
+                run_view.build(evaluation)
+
+    def test_unindexed_legacy_replay_preserves_both_historical_tilt_conventions(self):
+        evaluation = Path(self.directory.name) / "legacy/evaluation"
+        folder = evaluation / "batch_000"
+        case_id = "legacy:forward"
+        forward = [0.05, 0.0, 0.0]
+        batch(folder, case_id, [forward] * 4 + [[0.0, 0.0, 0.0]] * 2, [(0.0, 0.0, 0.0)] * 6)
+        trace_path = folder / "control_trace.npz"
+        with np.load(trace_path, allow_pickle=False) as archive:
+            trace = dict(archive)
+        trace["root_pose_xyzw"][1, 0, 3:] = [np.sin(0.25), 0.0, 0.0, np.cos(0.25)]
+        np.savez(trace_path, **trace)
+        report_path = folder / "report.json"
+        report = json.loads(report_path.read_bytes())
+        report["cases"] = [
+            {"case_id": case_id, "command": forward, "stop_control": 4, "controls": 6}
+        ]
+        report["files"] = {trace_path.name: hashlib.sha256(trace_path.read_bytes()).hexdigest()}
+        report_path.write_text(json.dumps(report))
+        from locomotion.evaluation.requirements import tilt_degrees
+
+        whole_trace = float(tilt_degrees(trace["root_pose_xyzw"][:, 0]).max())
+        for tilt, expected_pass in ((whole_trace, False), (0.0, True)):
+            with self.subTest(tilt=tilt):
+                row = {
+                    "case_id": case_id,
+                    "pass": expected_pass,
+                    "checks": {"tilt_deg": {"value": tilt, "bound": 1.7, "pass": expected_pass}},
+                }
+                judgement = {"schema": "hexapod_walking_requirements_judgement_v2", "cases": [row]}
+                path = evaluation / "judgement.json"
+                for indent in (None, 2):
+                    path.write_text(json.dumps(judgement, indent=indent))
+                    exported = run_view.build(evaluation)
+                    self.assertEqual(exported["judgement_binding"], "legacy")
+                    self.assertIs(exported["cases"][0]["pass"], expected_pass)
 
     def test_current_evaluator_output_exports_its_recorded_failure(self):
         root = Path(self.directory.name)

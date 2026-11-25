@@ -79,6 +79,22 @@ class TransportTest(unittest.TestCase):
         enqueue(s, [20.0], 0.02)
         self.assertEqual(s.read(0.1).values["range"].item(), 20.0)
 
+    def test_reads_are_stable_across_consumer_mutation_and_reset(self):
+        s = stream()
+        enqueue(s, [10.0, 20.0], 0.0)
+        original = s.read(0.01)
+        mutable = s.read(0.01)
+        mutable.values["range"][0] = 99.0
+        mutable.values.clear()
+        mutable.capture_time_s[0] = 99.0
+        current = s.read(0.02)
+        s.reset([0])
+        self.assertEqual(current.values["range"].flatten().tolist(), [10.0, 20.0])
+        self.assertEqual(original.values["range"].flatten().tolist(), [10.0, 20.0])
+        self.assertEqual(current.capture_time_s.tolist(), [0.0, 0.0])
+        self.assertEqual(original.capture_time_s.tolist(), [0.0, 0.0])
+        self.assertEqual(s.read(0.02).valid.tolist(), [False, True])
+
     def test_order_does_not_use_rounded_float32_capture_times(self):
         s = stream(delayed=True)
         s._jitter_rng.uniform = Mock(side_effect=[0.04, -0.04])

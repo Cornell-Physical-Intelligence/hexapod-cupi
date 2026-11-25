@@ -154,16 +154,31 @@ const fmt = (v, d = 2) => (v === null || v === undefined || !isFinite(v)) ? '–
 const WINDOW = 30;                              // seconds on the chart
 let buf = [];                                   // [t, h_raw|null, both]
 let lastT = 0, lastRecv = 0, last = null, S = null, smooth = 0.1, dirty = true;
+let epoch = null;
 
-async function post(url) { const r = await fetch(url, { method: 'POST' }); const j = await r.json(); refreshState(); return j; }
+async function post(url) { const r = await fetch(url, { method: 'POST' }); const j = await r.json(); await refreshState(); return j; }
+
+function useEpoch(next) {
+  if (epoch !== null && next < epoch) return false;
+  if (next !== epoch) {
+    epoch = next; buf = []; last = null; lastT = 0; dirty = true;
+    $('hero').innerHTML = '–<small>mm</small>';
+    $('heroSub').textContent = 'Waiting for frames';
+    $('heroLabel').textContent = 'Waiting for camera state';
+    $('chartTitle').textContent = 'Waiting for camera state';
+    for (const id of ['mNoise', 'mReproj', 'mTilt', 'mLat']) $(id).textContent = '–';
+  }
+  return true;
+}
 
 // ---------------------------------------------------------------- calibration on the client (same formula as the server)
 function z(h) {
   if (h === null || h === undefined) return null;
-  if (!S || S.cal.h0 === null) return h;
+  if (!calibrated()) return h;
   return S.cal.a * (h - S.cal.h0);
 }
-const calibrated = () => S && S.cal.h0 !== null;
+const stateMatches = () => S?.epoch === epoch;
+const calibrated = () => stateMatches() && S.cal.h0 !== null;
 
 // ---------------------------------------------------------------- controls
 $('relock').onclick = () => post('/relock');
@@ -190,6 +205,9 @@ function connect() {
   const es = new EventSource('/events');
   es.onmessage = e => {
     const s = JSON.parse(e.data);
+    const epochChanged = s.epoch !== epoch;
+    if (!useEpoch(s.epoch)) return;
+    if (epochChanged) refreshState();
     last = s; lastRecv = performance.now();
     buf.push([s.t, s.h, s.both ? 1 : 0]);
     lastT = s.t;
@@ -203,7 +221,7 @@ function recent(sec) { const out = []; for (let i = buf.length - 1; i >= 0 && bu
 function sd(a) { if (a.length < 2) return null; const m = a.reduce((x, y) => x + y) / a.length; return Math.sqrt(a.reduce((x, y) => x + (y - m) ** 2, 0) / (a.length - 1)); }
 
 function updateHero() {
-  if (!last) return;
+  if (!last || !stateMatches()) return;
   let vals = smooth > 0 ? recent(smooth) : (last.h !== null ? [last.h] : []);
   if (!vals.length) { const r = recent(0.5); if (r.length) vals = [r[0]]; }
   const stale = last.h === null;
@@ -222,7 +240,11 @@ function updateHero() {
 
 // ---------------------------------------------------------------- slow state (1 Hz)
 async function refreshState() {
-  try { S = await (await fetch('/state', { cache: 'no-store' })).json(); } catch (e) { $('statusText').textContent = 'server not reachable'; setDot($('statusDot'), 'crit'); return; }
+  try {
+    const state = await (await fetch('/state', { cache: 'no-store' })).json();
+    if (!useEpoch(state.epoch)) return;
+    S = state;
+  } catch (e) { $('statusText').textContent = 'server not reachable'; setDot($('statusDot'), 'crit'); return; }
   const live = S.status === 'live' || S.status === 'simulated';
   setDot($('statusDot'), live ? 'good' : (S.status === 'no camera' ? 'crit' : 'warn'));
   $('statusText').textContent = S.status + (live && S.camera !== null ? ` · index ${S.camera}` : '');
@@ -258,6 +280,7 @@ async function refreshState() {
   if (live && S.seen['0'] !== null && Math.min(S.seen['0'], S.seen['1']) < 0.9) notes.push(['warn', 'A tag drops out in some frames. Single-tag frames are offset-corrected, but sharper contrast helps: black tags on white (printed paper or white filament), even light, no glare.']);
   if (live && S.camera_fps && S.camera_fps < 25 && S.status === 'live') notes.push(['warn', `The camera delivers ${S.camera_fps.toFixed(0)} fps: auto-exposure in dim light. More light on the plate raises it.`]);
   if (S.status === 'no camera') notes.push(['crit', S.error]);
+  if (S.reference_error) notes.push(['warn', S.reference_error]);
   $('notes').innerHTML = notes.map(([k, t]) => `<div class="note"><span class="dot ${k}"></span><span>${t}</span></div>`).join('');
   updateHero(); dirty = true;
 }
@@ -274,7 +297,9 @@ function draw() {
   if (cv.width !== W * dpr || cv.height !== H * dpr) { cv.width = W * dpr; cv.height = H * dpr; }
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0); ctx.clearRect(0, 0, W, H);
   const m = { l: 60, r: 14, t: 10, b: 24 };
-  const pts = buf.filter(p => p[1] !== null && p[0] >= lastT - WINDOW).map(p => [p[0], z(p[1]), p[2]]);
+  const pts = stateMatches()
+    ? buf.filter(p => p[1] !== null && p[0] >= lastT - WINDOW).map(p => [p[0], z(p[1]), p[2]])
+    : [];
   let lo = 0, hi = 1;
   if (pts.length) {
     lo = Infinity; hi = -Infinity; for (const p of pts) { if (p[1] < lo) lo = p[1]; if (p[1] > hi) hi = p[1]; }
@@ -317,7 +342,14 @@ window.addEventListener('resize', () => dirty = true);
 // ---------------------------------------------------------------- start
 (async () => {
   await refreshState();
-  try { for (const p of await (await fetch('/history')).json()) buf.push(p); if (buf.length) lastT = buf[buf.length - 1][0]; } catch (e) {}
+  try {
+    const response = await fetch('/history');
+    const history = await response.json();
+    if (useEpoch(Number(response.headers.get('X-Tracking-Epoch')))) {
+      buf = history;
+      if (buf.length) lastT = buf[buf.length - 1][0];
+    }
+  } catch (e) {}
   connect(); draw();
   setInterval(refreshState, 1000);
   setInterval(() => { if (last && performance.now() - lastRecv > 600) { $('hero').classList.add('stale'); $('heroSub').textContent = 'no new frames'; } }, 300);
