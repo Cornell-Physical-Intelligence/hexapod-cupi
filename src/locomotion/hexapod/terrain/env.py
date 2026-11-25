@@ -30,7 +30,7 @@ from .curriculum import (
 )
 from .env_cfg import HexapodTerrainEnvCfg
 from .geometry import course_bounds
-from .terrains_cfg import terrain_type_names
+from .terrains_cfg import add_obstacle_corridor, terrain_type_names
 
 LEGS = ("lf", "lm", "lr", "rf", "rm", "rr")
 TOE_OFFSET = (0.130, 0.0, 0.0)
@@ -58,6 +58,9 @@ class HexapodTerrainEnv(HexapodEnv):
                 cfg.command_curriculum_success,
                 cfg.command_curriculum_window_episodes,
             )
+        if cfg.obstacle_corridor:
+            cfg = cfg.copy()
+            add_obstacle_corridor(cfg.terrain.terrain_generator)
         super().__init__(cfg, render_mode, **kwargs)
         self._v_along_cmd_sum = torch.zeros(self.num_envs, device=self.device)
         self._off_course = torch.zeros(self.num_envs, dtype=torch.bool, device=self.device)

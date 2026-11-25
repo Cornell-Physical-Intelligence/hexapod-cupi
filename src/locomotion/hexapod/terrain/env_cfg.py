@@ -34,6 +34,8 @@ class HexapodTerrainEnvCfg(HexapodFlatEnvCfg):
         ),
         debug_vis=False,
     )
+    obstacle_corridor: bool = False
+
     # env origins come from the 2 m terrain tiles; env_spacing only places the cloned prims before the first reset
     scene: InteractiveSceneCfg = InteractiveSceneCfg(num_envs=4096, env_spacing=2.0, replicate_physics=True)
 

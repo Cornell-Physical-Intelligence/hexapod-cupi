@@ -62,6 +62,7 @@ def load_terrains_cfg(pyramid_sloped_terrain, random_uniform_terrain=None):
         "MeshPyramidStairsTerrainCfg",
         "MeshInvertedPyramidStairsTerrainCfg",
         "MeshRandomGridTerrainCfg",
+        "SubTerrainBaseCfg",
         "TerrainGeneratorCfg",
     ]
     terrains = module("isaaclab.terrains", **{name: _Cfg for name in cfg_names})
@@ -71,10 +72,12 @@ def load_terrains_cfg(pyramid_sloped_terrain, random_uniform_terrain=None):
         hf_terrains_cfg=module("cfg", **{name: _Cfg for name in cfg_names}),
     )
     utils = module("isaaclab.terrains.height_field.utils", height_field_to_mesh=lambda f: f)
+    lab_utils = module("isaaclab.utils", configclass=lambda cls: cls)
     package = module("hexapod_terrain_pkg")
     package.__path__ = [str(PACKAGE)]
     stubs = {
-        "isaaclab": module("isaaclab", terrains=terrains),
+        "isaaclab": module("isaaclab", terrains=terrains, utils=lab_utils),
+        "isaaclab.utils": lab_utils,
         "isaaclab.terrains": terrains,
         "isaaclab.terrains.height_field": height_field,
         "isaaclab.terrains.height_field.hf_terrains": hf_terrains,
@@ -692,6 +695,323 @@ class TerrainEnvSourceTests(unittest.TestCase):
         )
         self.assertIn("super()._setup_scene()", ast.unparse(setup))
         self.assertNotIn("Articulation(", ast.unparse(setup))
+
+
+def footprint(obstacle):
+    """Footprint of a corridor obstacle as (convex vertices, inflation radius): a box's four corners, or a pillar's
+    centre inflated by its radius (the pillar mesh is a polygon inscribed in that circle)."""
+    if obstacle.kind == "pillar":
+        return np.array([[obstacle.x, obstacle.y]]), obstacle.size[0] / 2
+    c, s = math.cos(obstacle.yaw), math.sin(obstacle.yaw)
+    half = np.array([[1, 1], [-1, 1], [-1, -1], [1, -1]]) * np.array(obstacle.size) / 2
+    return half @ np.array([[c, s], [-s, c]]) + [obstacle.x, obstacle.y], 0.0
+
+
+def _point_segment(p, a, b):
+    ab = b - a
+    t = 0.0 if not ab.any() else float(np.clip(np.dot(p - a, ab) / np.dot(ab, ab), 0.0, 1.0))
+    return float(np.linalg.norm(p - (a + t * ab)))
+
+
+def _cross(o, a, b):
+    return (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0])
+
+
+def _inside(p, poly):
+    if len(poly) < 3:
+        return False
+    signs = [_cross(poly[i], poly[(i + 1) % len(poly)], p) for i in range(len(poly))]
+    return all(v >= 0 for v in signs) or all(v <= 0 for v in signs)
+
+
+def polygon_distance(a, b):
+    """Distance between two convex polygons (0 when they touch or overlap); one-point polygons are points."""
+    if any(_inside(p, b) for p in a) or any(_inside(p, a) for p in b):
+        return 0.0
+    edges = lambda poly: [(poly[i], poly[(i + 1) % len(poly)]) for i in range(len(poly))]  # noqa: E731
+    best = math.inf
+    for a0, a1 in edges(a):
+        for b0, b1 in edges(b):
+            d1, d2 = _cross(a0, a1, b0), _cross(a0, a1, b1)
+            d3, d4 = _cross(b0, b1, a0), _cross(b0, b1, a1)
+            if d1 * d2 < 0 and d3 * d4 < 0:
+                return 0.0
+            best = min(
+                best,
+                _point_segment(a0, b0, b1),
+                _point_segment(a1, b0, b1),
+                _point_segment(b0, a0, a1),
+                _point_segment(b1, a0, a1),
+            )
+    return best
+
+
+def clearance(o1, o2):
+    (p1, r1), (p2, r2) = footprint(o1), footprint(o2)
+    return polygon_distance(p1, p2) - r1 - r2
+
+
+class ObstacleCorridorTests(unittest.TestCase):
+    """The corridor sub-terrain: every layout keeps its gap, at every difficulty and for many seeds."""
+
+    DIFFICULTIES = sorted(
+        set(np.linspace(0.0, 1.0, 41)) | {(row + 0.999) / 10 for row in range(10)}
+    )
+    SEEDS = range(25)
+
+    @classmethod
+    def setUpClass(cls):
+        cls.t = load_terrains_cfg(lambda d, cfg: None)
+        cls.corridor = cls.t.corridor
+        cls.geometry = load("geometry")
+
+    def cfg(self, **kwargs):
+        cfg = self.t.ObstacleCorridorTerrainCfg(
+            proportion=1.0, size=(2.0, 2.0), seed=None, **kwargs
+        )
+        cfg.function = None  # the stand-in base class would bind the class default as a method
+        return cfg
+
+    def layout(self, difficulty, cfg):
+        """Obstacles of the shipped ``obstacle_corridor_terrain``, with the trimesh step replaced by a pass-through."""
+        from unittest import mock
+
+        with mock.patch.object(
+            self.corridor, "corridor_meshes", lambda obstacles, *a, **k: obstacles
+        ):
+            obstacles, origin = self.t.obstacle_corridor_terrain(difficulty, cfg)
+        np.testing.assert_allclose(origin, [cfg.size[0] / 2, cfg.size[1] / 2, 0.0])
+        return obstacles
+
+    def assert_gap_guarantee(self, obstacles, cfg, gap):
+        sx, sy = cfg.size
+        t = cfg.wall_thickness
+        hx, hy = self.geometry.spawn_half_extent()
+        spawn = np.array(
+            [[sx / 2 + hx, sy / 2 + hy], [sx / 2 - hx, sy / 2 + hy], [sx / 2 - hx, sy / 2 - hy]]
+        )
+        spawn = np.vstack([spawn, [sx / 2 + hx, sy / 2 - hy]])
+        side = {}
+        for i, o in enumerate(obstacles):
+            pts, r = footprint(o)
+            x_lo, x_hi = pts[:, 0].min() - r, pts[:, 0].max() + r
+            y_lo, y_hi = pts[:, 1].min() - r, pts[:, 1].max() + r
+            left, right = x_lo - t, sx - t - x_hi
+            self.assertGreaterEqual(min(left, right), -1e-9, "inside the side walls")
+            self.assertGreaterEqual(max(left, right), gap - 1e-9, "a lane to one side wall")
+            self.assertGreaterEqual(y_lo, gap / 2 - 1e-9, "half a gap to the open end")
+            self.assertLessEqual(y_hi, sy - gap / 2 + 1e-9, "half a gap to the open end")
+            self.assertGreaterEqual(
+                polygon_distance(pts, spawn) - r, cfg.spawn_clearance - 1e-9, "spawn area"
+            )
+            self.assertGreater(o.height, 0.1, "taller than the standing robot")
+            side[i] = (left < gap, right < gap)
+            for j in range(i):
+                self.assertGreaterEqual(
+                    clearance(o, obstacles[j]), gap - 1e-9, f"obstacles {i} and {j}"
+                )
+        # no chain of links narrower than the gap joins the two side walls (obstacle-obstacle links are never narrow)
+        reach, frontier = set(), [i for i, (near_left, _) in side.items() if near_left]
+        while frontier:
+            i = frontier.pop()
+            if i not in reach:
+                reach.add(i)
+                frontier += [
+                    j for j in side if j != i and clearance(obstacles[i], obstacles[j]) < gap
+                ]
+        self.assertFalse(any(side[i][1] for i in reach), "the walls are joined by narrow links")
+
+    def test_smallest_gap_passes_the_toe_footprint_and_difficulty_shrinks_it(self):
+        g = self.corridor.corridor_gap
+        width = self.geometry.TOE_FOOTPRINT[0] + 2 * self.geometry.SPAWN_MARGIN
+        self.assertGreater(g(1.0), width)
+        gaps = [g(d) for d in self.DIFFICULTIES]
+        self.assertEqual(gaps, sorted(gaps, reverse=True))
+        self.assertLess(g(1.0), g(0.0))
+        self.assertEqual(g(1.5), g(1.0))
+
+    def test_gap_guarantee_holds_at_every_difficulty(self):
+        for difficulty in self.DIFFICULTIES:
+            gap = self.corridor.corridor_gap(difficulty)
+            placed = 0
+            for seed in self.SEEDS:
+                cfg = self.cfg(layout_seed=seed)
+                obstacles = self.layout(difficulty, cfg)
+                placed += len(obstacles)
+                self.assertLessEqual(len(obstacles), cfg.num_obstacles)
+                with self.subTest(difficulty=difficulty, seed=seed):
+                    self.assert_gap_guarantee(obstacles, cfg, gap)
+            self.assertGreater(
+                placed, len(self.SEEDS), f"too few obstacles at difficulty {difficulty}"
+            )
+
+    def test_gap_guarantee_holds_when_the_wall_lane_rule_binds(self):
+        # on a 4 m tile with gaps above half the 1.9 m corridor, an obstacle on the centre line leaves no lane on
+        # either side; the layout must avoid it
+        for difficulty in (0.0, 0.5, 1.0):
+            gap = self.corridor.corridor_gap(difficulty, (1.2, 1.0))
+            for seed in range(10):
+                cfg = self.cfg(layout_seed=seed, gap_range=(1.2, 1.0), num_obstacles=20)
+                cfg.size = (2.0, 4.0)
+                obstacles = self.layout(difficulty, cfg)
+                with self.subTest(difficulty=difficulty, seed=seed):
+                    self.assert_gap_guarantee(obstacles, cfg, gap)
+
+    def test_neighbouring_tiles_keep_the_smaller_gap(self):
+        # the two corridor columns of a level touch along y; each keeps half its own gap to the shared edge
+        for seed in self.SEEDS:
+            d_a, d_b = 0.31, 0.38
+            a, b = (
+                self.layout(d_a, self.cfg(layout_seed=seed)),
+                self.layout(d_b, self.cfg(layout_seed=seed + 100)),
+            )
+            shifted = [
+                self.corridor.Obstacle(o.kind, o.x, o.y + 2.0, o.yaw, o.size, o.height) for o in b
+            ]
+            gap = min(self.corridor.corridor_gap(d_a), self.corridor.corridor_gap(d_b))
+            for o1 in a:
+                for o2 in shifted:
+                    self.assertGreaterEqual(clearance(o1, o2), gap - 1e-9)
+
+    def test_layout_seed_fixes_the_layout_and_falls_back_to_the_generator_seed(self):
+        self.assertEqual(
+            self.layout(0.4, self.cfg(layout_seed=3)), self.layout(0.4, self.cfg(layout_seed=3))
+        )
+        self.assertNotEqual(
+            self.layout(0.4, self.cfg(layout_seed=3)), self.layout(0.4, self.cfg(layout_seed=4))
+        )
+        generator_seeded = self.cfg()
+        generator_seeded.seed = 3  # TerrainGenerator writes its own seed here
+        self.assertEqual(
+            self.layout(0.4, generator_seeded), self.layout(0.4, self.cfg(layout_seed=3))
+        )
+
+    def test_corridor_is_opt_in_and_adds_one_type(self):
+        default = self.t.make_hexapod_terrains_cfg()
+        self.assertNotIn("obstacle_corridor", default.sub_terrains)
+        self.assertEqual(default.num_cols, 12)
+        cfg = self.t.make_hexapod_terrains_cfg(obstacle_corridor=True)
+        self.assertEqual(list(cfg.sub_terrains)[:6], list(default.sub_terrains))
+        self.assertEqual(cfg.num_cols, 14)
+        self.assertEqual(self.t.terrain_type_names(cfg)[-2:], ["obstacle_corridor"] * 2)
+        self.assertIsNone(cfg.sub_terrains["obstacle_corridor"].layout_seed)
+
+    def test_stock_task_switch_copies_cfg_before_scene_generation(self):
+        from copy import deepcopy
+
+        cfg_fields = assignments("env_cfg.py", "HexapodTerrainEnvCfg")
+        self.assertFalse(ast.literal_eval(cfg_fields["obstacle_corridor"]))
+        tree = ast.parse((PACKAGE / "env.py").read_text())
+        env_class = next(node for node in tree.body if isinstance(node, ast.ClassDef))
+        env_class.body = [
+            node
+            for node in env_class.body
+            if isinstance(node, ast.FunctionDef) and node.name in {"__init__", "_setup_scene"}
+        ]
+        terrain_module = self.t
+
+        class Config(SimpleNamespace):
+            def copy(self):
+                return deepcopy(self)
+
+        class SceneGenerated(Exception):
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+        class Base:
+            def __init__(self, cfg, render_mode, **kwargs):
+                self.cfg = cfg
+                self._setup_scene()
+
+            def _setup_scene(self):
+                raise SceneGenerated(self.cfg)
+
+        scope = {
+            "HexapodEnv": Base,
+            "HexapodTerrainEnvCfg": Config,
+            "add_obstacle_corridor": terrain_module.add_obstacle_corridor,
+        }
+        exec(
+            compile(ast.Module(body=[env_class], type_ignores=[]), str(PACKAGE / "env.py"), "exec"),
+            scope,
+        )
+
+        gen = terrain_module.make_hexapod_terrains_cfg()
+        gen.border_width = 11.0
+        cfg = Config(
+            obstacle_corridor=True,
+            command_curriculum=False,
+            terrain=SimpleNamespace(terrain_generator=gen),
+        )
+        for enabled in (True, False):
+            with self.subTest(enabled=enabled):
+                cfg.obstacle_corridor = enabled
+                with self.assertRaises(SceneGenerated) as scene:
+                    scope["HexapodTerrainEnv"](cfg)
+                active = scene.exception.cfg.terrain.terrain_generator
+                names = terrain_module.terrain_type_names(active)
+                self.assertEqual(len(names), 14 if enabled else 12)
+                self.assertEqual(names.count("obstacle_corridor"), 2 if enabled else 0)
+                self.assertEqual(active.border_width, 11.0)
+                self.assertNotIn("obstacle_corridor", cfg.terrain.terrain_generator.sub_terrains)
+                self.assertEqual(cfg.terrain.terrain_generator.num_cols, 12)
+
+    def test_corridor_adds_two_columns_with_overridden_generator_weights(self):
+        for num_cols in (1, 6, 20):
+            with self.subTest(num_cols=num_cols):
+                cfg = self.t.make_hexapod_terrains_cfg()
+                cfg.num_cols = num_cols
+                cfg.sub_terrains["slope"].proportion = 3.0
+                self.t.add_obstacle_corridor(cfg)
+                self.t.add_obstacle_corridor(cfg)
+                names = self.t.terrain_type_names(cfg)
+                self.assertEqual(len(names), num_cols + 2)
+                self.assertEqual(names.count("obstacle_corridor"), 2)
+
+    def test_invalid_clearance_configs_fail_before_mesh_generation(self):
+        for overrides, message in (
+            ({"gap_range": (2.0, 2.0)}, "fit between the walls"),
+            ({"gap_range": (0.0, 0.0)}, "positive"),
+            ({"gap_range": (0.62, 0.90)}, "nonincreasing"),
+            ({"gap_range": (float("nan"), 0.62)}, "finite"),
+            (
+                {"wall_thickness": 0.72, "num_obstacles": 0, "gap_range": (0.5, 0.5)},
+                "spawn area and clearance",
+            ),
+            ({"spawn_clearance": -0.05}, "spawn area and clearance"),
+        ):
+            with self.subTest(overrides=overrides), self.assertRaisesRegex(ValueError, message):
+                self.t.obstacle_corridor_terrain(0.5, self.cfg(**overrides))
+
+    def test_corridor_cfg_function_is_the_module_level_name(self):
+        tree = ast.parse((PACKAGE / "terrains_cfg.py").read_text())
+        (cls,) = [
+            n
+            for n in tree.body
+            if isinstance(n, ast.ClassDef) and n.name == "ObstacleCorridorTerrainCfg"
+        ]
+        values = assignments("terrains_cfg.py", "ObstacleCorridorTerrainCfg")
+        self.assertEqual(ast.unparse(values["function"]), "obstacle_corridor_terrain")
+        self.assertIn(
+            "obstacle_corridor_terrain",
+            {n.name for n in tree.body if isinstance(n, ast.FunctionDef)},
+        )
+        self.assertNotIn("seed", values, "TerrainGenerator overwrites cfg.seed")
+        self.assertTrue(cls.decorator_list)
+
+    @unittest.skipIf(importlib.util.find_spec("trimesh") is None, "trimesh is not installed")
+    def test_meshes_stay_inside_the_tile_and_the_footprints(self):
+        for difficulty in (0.0, 0.5, 1.0):
+            obstacles = self.layout(difficulty, self.cfg(layout_seed=11))
+            meshes = self.corridor.corridor_meshes(obstacles, (2.0, 2.0))
+            self.assertEqual(len(meshes), 3 + len(obstacles))
+            for mesh in meshes:
+                self.assertGreaterEqual(mesh.vertices.min(), -1e-9)
+                self.assertLessEqual(mesh.vertices[:, :2].max(), 2.0 + 1e-9)
+            for o, mesh in zip(obstacles, meshes[3:]):
+                pts, r = footprint(o)
+                for v in mesh.vertices[:, :2]:
+                    self.assertLessEqual(polygon_distance(np.array([v]), pts) - r, 1e-9)
 
 
 if __name__ == "__main__":
