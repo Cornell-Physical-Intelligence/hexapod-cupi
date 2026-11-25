@@ -216,6 +216,7 @@ class CalibrationCaptureTests(TrackerCase):
             {"sign": float("inf")},
             {"points": [{"height_mm": 200.0, "ref_mm": 10.0, "sd_mm": "0"}]},
             {"points": [{"height_mm": 1e308, "ref_mm": 1e308, "sd_mm": 0.0}]},
+            {"points": [{"height_mm": 200.0, "ref_mm": 10.0, "sd_mm": 0.0, "extra": float("nan")}]},
         )
         for camera, changes in enumerate(fixtures, 1):
             with self.subTest(changes=changes):
@@ -231,8 +232,9 @@ class CalibrationCaptureTests(TrackerCase):
                 json.dumps(state, allow_nan=False)
                 self.assertEqual(self.tr.cal_path.read_text(), bad_cal)
         broken = json.loads(valid_lock) | {"R": [[0, 0, 0]] * 3}
-        self.tr.lock_path.with_stem("lock-6").write_text(json.dumps(broken))
-        self.tr.action("/camera", {"index": ["6"]})
+        rotation_camera = str(len(fixtures) + 1)
+        self.tr.lock_path.with_stem(f"lock-{rotation_camera}").write_text(json.dumps(broken))
+        self.tr.action("/camera", {"index": [rotation_camera]})
         self.assertFalse(self.tr.state()["locked"])
         self.tr.action("/camera", {"index": ["0"]})
         self.assertTrue(self.tr.state()["locked"])

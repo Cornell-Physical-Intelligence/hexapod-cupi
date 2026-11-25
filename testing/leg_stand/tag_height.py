@@ -187,8 +187,8 @@ class Calibration:
             or (self.h0 is None and self.points)
             or any(
                 not isinstance(point, dict)
-                or any(not finite(point.get(key)) for key in ("height_mm", "ref_mm", "sd_mm"))
-                or ("n" in point and not finite(point["n"]))
+                or not {"height_mm", "ref_mm", "sd_mm"} <= point.keys()
+                or any(not finite(value) for value in point.values())
                 for point in self.points
             )
         ):
