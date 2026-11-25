@@ -113,6 +113,11 @@ def cell_identity(summary):
     }
 
 
+def cell_differences(summary, expected):
+    observed = cell_identity(summary)
+    return sorted(key for key, value in expected.items() if observed[key] != value)
+
+
 def cell_state(path, expected):
     """``"finished"``, ``"retry"`` or the sorted request keys on which the summary differs.
 
@@ -123,8 +128,7 @@ def cell_state(path, expected):
         summary = json.loads(path.read_text())
     except (FileNotFoundError, json.JSONDecodeError):
         return "retry"
-    observed = cell_identity(summary)
-    differences = sorted(key for key, value in expected.items() if observed[key] != value)
+    differences = cell_differences(summary, expected)
     if differences:
         return differences
     return "finished" if summary.get("acquisition_failure") is None else "retry"
@@ -207,9 +211,8 @@ def main(argv=None):
             [case["case_id"] for case in requirements.cases(rules)],
         ),
         "seed": effective_seed(args.seed, record.get("identity", {})),
+        "identity": source_identity(),
     }
-    if args.resume:
-        request["identity"] = source_identity()
     # Check every finished cell before any rename or run, so a refused resume changes nothing.
     finished, mismatched = set(), {}
     for cell, _ in cells:
@@ -245,7 +248,17 @@ def main(argv=None):
     rows = []
     for cell, values in cells:
         path = args.output / "cells" / cell / "surrogate_summary.json"
-        row = cell_row(cell, values, json.loads(path.read_text()) if path.exists() else None)
+        summary = json.loads(path.read_text()) if path.exists() else None
+        differences = (
+            [] if summary is None else cell_differences(summary, {**request, "cell": cell})
+        )
+        if differences:
+            if summary.get("acquisition_failure") is None:
+                raise ValueError(f"Cell {cell} answers another request: {', '.join(differences)}")
+            summary = {**summary, "cases": []}
+        row = cell_row(cell, values, summary)
+        if differences:
+            row["identity_mismatch"] = differences
         if cell in exit_codes:
             row["exit_code"] = exit_codes[cell]
         if cell in set_aside_attempts:
@@ -267,7 +280,7 @@ def main(argv=None):
         "scope": "CPU MuJoCo surrogate screen at fixed conditions; design evidence. One trial per case "
         "per cell. Native runs are the only acceptance evidence.",
         "checkpoint": str(args.checkpoint),
-        "checkpoint_sha256": sha(args.checkpoint),
+        "checkpoint_sha256": checkpoint_sha256,
         "grid": args.grid,
         "grid_sha256": declaration["sha256"],
         "requirements_set": requirements_set,

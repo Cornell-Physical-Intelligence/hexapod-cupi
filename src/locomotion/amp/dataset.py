@@ -29,7 +29,7 @@ PROCESSING_FILES = (
     "priors/commands.py",
     "priors/dataset.py",
 )
-PROCESSING_SCHEMA = "hexapod_processing_sources_v3"
+PROCESSING_SCHEMA = "hexapod_processing_sources_v4"
 
 
 def motion_cases():
@@ -78,7 +78,12 @@ def processing_identity():
             **{"locomotion/" + name: digest for name, digest in source_files(root).items()},
             **{
                 "locomotion/" + name: sha(root / name)
-                for name in ("amp/features.py", "amp/dataset.py", "amp/processing_sources_v2.json")
+                for name in (
+                    "amp/features.py",
+                    "amp/dataset.py",
+                    "amp/processing_sources_v2.json",
+                    "amp/processing_sources_v3.json",
+                )
             },
         },
     }
@@ -89,12 +94,19 @@ def validate_processing_identity(processing):
     schema = processing.get("schema")
     if schema is None:
         expected = {"locomotion/" + name for name in PROCESSING_FILES}
-    elif schema == "hexapod_processing_sources_v2":
-        expected = set(
-            json.loads(Path(__file__).with_name("processing_sources_v2.json").read_text())["files"]
-        )
-    elif schema == PROCESSING_SCHEMA:
-        expected = set(processing_identity()["source_files"])
+    elif schema in (
+        "hexapod_processing_sources_v2",
+        "hexapod_processing_sources_v3",
+        PROCESSING_SCHEMA,
+    ):
+        version = "v2" if schema.endswith("_v2") else "v3"
+        layout = Path(__file__).with_name(f"processing_sources_{version}.json")
+        expected = set(json.loads(layout.read_text())["files"])
+        if schema == PROCESSING_SCHEMA:
+            expected |= {
+                "locomotion/amp/processing_sources_v3.json",
+                "locomotion/omniwalk/contact_log.py",
+            }
     else:
         raise ValueError("Unknown dataset processing source identity")
     if (
@@ -343,7 +355,12 @@ def audit_replay(directory):
     with np.load(trace_path, allow_pickle=False) as archive:
         trace = {key: archive[key] for key in archive.files}
     parity = validate_trace(trace, identity["command"], identity["root_com_local_m"])
-    judged = judge_case(trace, load_requirements()[0], 1000)
+    case = motion_cases()[index]
+    # The reviewed replay may record exact cardinal components instead of trigonometric roundoff.
+    # Use its recorded translation, and use the selected bank's command for pure turns.
+    if any(case["command"][:2]):
+        case["command"] = identity["command"]
+    judged = judge_case(trace, load_requirements()[0], case=case)
     if not judged["pass"]:
         raise ValueError("Recomputed motion screen failed: " + ", ".join(judged["failed_checks"]))
     record = {

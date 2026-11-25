@@ -57,6 +57,7 @@ def judgement(value, controller, requirements_set, required_ids, probe_ids=None)
         in (
             "hexapod_walking_requirements_judgement_v1",
             "hexapod_walking_requirements_judgement_v2",
+            "hexapod_walking_requirements_judgement_v3",
         ),
         "unsupported judgement schema",
     )
@@ -149,7 +150,10 @@ def _validate(root, accepted):
         documents[name] = [read(root, path, digest) for path, digest in zip(paths, digests)]
         for evidence in documents[name]:
             # Only the historical probe rescore for drift and stopping predates this input.
-            if evidence["schema"] == "hexapod_walking_requirements_judgement_v2" or name in (
+            if evidence["schema"] in (
+                "hexapod_walking_requirements_judgement_v2",
+                "hexapod_walking_requirements_judgement_v3",
+            ) or name in (
                 "tilt_deg",
                 "stop_position_tolerance_m",
             ):

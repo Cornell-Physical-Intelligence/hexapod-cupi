@@ -183,6 +183,7 @@ def judgement_rows(evaluation):
     if not isinstance(value, dict) or value.get("schema") not in {
         "hexapod_walking_requirements_judgement_v1",
         "hexapod_walking_requirements_judgement_v2",
+        "hexapod_walking_requirements_judgement_v3",
     }:
         raise ValueError("Unsupported judgement schema")
     if not isinstance(value.get("cases"), list):
@@ -234,12 +235,124 @@ def judgement_rows(evaluation):
     return rows, value, hashlib.sha256(raw).hexdigest()
 
 
-def case(batch, joints, judged=None, provenance=None):
-    report = json.loads((batch / "report.json").read_text())
+def archived_batch_digests(judgement_sha):
+    """Find the batch digests recorded with a published raw judgement."""
+    for manifest in sorted((ROOT / "site/assets").glob("*/files.json")):
+        files = json.loads(manifest.read_text()).get("raw_files", {})
+        for name, pin in files.items():
+            path = Path(name)
+            if path.name == "judgement.json" and pin["sha256"] == judgement_sha:
+                return {
+                    Path(member).relative_to(path.parent).as_posix(): record["sha256"]
+                    for member, record in files.items()
+                    if Path(member).is_relative_to(path.parent)
+                }
+    return None
+
+
+def validate_legacy_measurements(result, trace, report, recorded_trace_sha, case_id):
+    """Check the historical judgement's recorded measurements against this trace."""
+    from locomotion.evaluation.requirements import (
+        CONTROL_DT_S,
+        drift_per_hold,
+        planar_pose,
+        stand_and_stop_rows,
+        stop_position,
+        tilt_degrees,
+    )
+
+    checks = result["checks"]
+    pose = trace["root_pose_xyzw"]
+    terminal = any(key in trace and trace[key].any() for key in ("terminated", "truncated"))
+    terminal |= report.get("failure_kind") == "native_terminal_prefix"
+    declared = (report.get("cases") or [{}])[0]
+    if result["pass"] is True and (
+        terminal
+        or report.get("failure") is not None
+        or report.get("acquisition_complete") is False
+        or report.get("native_capture_failure") is not None
+        or any(row.get("native_capture_complete") is False for row in report.get("results", []))
+        or len(pose) != declared.get("controls", len(pose))
+    ):
+        raise ValueError(
+            "Historical passing judgement has an incomplete or terminal trace: " + case_id
+        )
+    if recorded_trace_sha is None:
+        return
+    if "terminal_state" in checks and not terminal:
+        raise ValueError("Historical judgement terminal state differs from the trace: " + case_id)
+    if (check := checks.get("turn_direction")) is not None:
+        command = result.get("command") or declared["command"]
+        yaw = np.unwrap(planar_pose(pose[:, 0])[:, 2])
+        last = declared.get("stop_control", len(yaw)) - 1
+        signed = np.sign(command[2]) * (yaw[last] - yaw[0])
+        if check["value"] != signed:
+            raise ValueError(
+                "Historical judgement turn direction differs from the trace: " + case_id
+            )
+    if (check := checks.get("complete_trace")) is not None and check["value"] != len(pose):
+        raise ValueError("Historical judgement has a different trace length: " + case_id)
+    measured = {"drift_per_hold_m", "stopping_distance_m", "tilt_deg", "applied_torque_nm"}
+    if result["pass"] is True and not (checks.keys() & measured or "turn_direction" in checks):
+        raise ValueError("Historical passing judgement has no trace measurements: " + case_id)
+    if not (checks.keys() & measured or result.get("holds") or result.get("route")):
+        return
+    holds = drift_per_hold(trace)
+    if "holds" in result and holds != result["holds"]:
+        raise ValueError("Historical judgement holds differ from the trace: " + case_id)
+    if (check := checks.get("drift_per_hold_m")) is not None and check["value"] not in [
+        hold["max_gap_m"] for hold in holds
+    ]:
+        raise ValueError("Historical judgement drift differs from the trace: " + case_id)
+    if (check := checks.get("applied_torque_nm")) is not None and check["value"] != float(
+        np.abs(trace["applied_torque_abs_max_400hz"]).max()
+    ):
+        raise ValueError("Historical judgement torque differs from the trace: " + case_id)
+    if (check := checks.get("tilt_deg")) is not None:
+        tilt = tilt_degrees(pose[:, 0])
+        stop_control = declared.get("stop_control")
+        if not np.any(trace["command"]):
+            observed = tilt.max()
+        elif "command" in declared and stop_control is not None:
+            settle_s = (declared["controls"] - stop_control) * CONTROL_DT_S / 2
+            still = stand_and_stop_rows(trace, settle_s)
+            observed = tilt[still].max() if still.any() else None
+        else:
+            # The old route judgement did not record the settle window.
+            observed = check["value"] if check["value"] in tilt else None
+        if check["value"] != observed:
+            raise ValueError("Historical judgement tilt differs from the trace: " + case_id)
+    if (check := checks.get("stopping_distance_m")) is not None:
+        moving = np.any(trace["command"][:, 0] != 0, axis=1)
+        stops = np.flatnonzero(moving[:-1] & ~moving[1:]) + 1
+        xy = planar_pose(pose[:, 0])[:, :2]
+        # Earlier judgements measured from the first stopped sample. Later v2 files
+        # measured from the last moving sample. Each has one exact recorded origin.
+        if not len(stops) or check["value"] not in np.hypot(
+            *(xy[-1] - xy[[stops[0], stops[0] - 1]]).T
+        ):
+            raise ValueError("Historical judgement stop differs from the trace: " + case_id)
+    if (route := result.get("route")) is not None and route != stop_position(
+        trace, result, route["stay_window_controls"] * CONTROL_DT_S
+    ):
+        raise ValueError("Historical judgement route differs from the trace: " + case_id)
+
+
+def case(batch, joints, judged=None, provenance=None, archived=None):
+    report_bytes = (batch / "report.json").read_bytes()
+    report = json.loads(report_bytes)
     case_id = report["assigned_case_ids"][0]
     trace_path = batch / "control_trace.npz"
-    trace_sha = report.get("files", {}).get(trace_path.name)
-    if trace_sha is not None and hashlib.sha256(trace_path.read_bytes()).hexdigest() != trace_sha:
+    trace_bytes = trace_path.read_bytes()
+    trace_sha = hashlib.sha256(trace_bytes).hexdigest()
+    report_sha = hashlib.sha256(report_bytes).hexdigest()
+    if archived is not None and (
+        archived.get(f"{batch.name}/report.json") != report_sha
+        or archived.get(f"{batch.name}/control_trace.npz") != trace_sha
+    ):
+        raise ValueError("Published judgement batch or trace identity differs: " + case_id)
+    recorded_trace_sha = report.get("files", {}).get(trace_path.name)
+    if trace_path.name in report.get("files", {}) and trace_sha != recorded_trace_sha:
         raise ValueError("Trace bytes differ from the batch report: " + case_id)
     if judged is None:
         result = report["results"][0]
@@ -260,7 +373,15 @@ def case(batch, joints, judged=None, provenance=None):
         if source is not None and allocation.get("orchestrator_sha256", source) != source:
             raise ValueError("Judgement source differs from the batch: " + case_id)
         result = judged[case_id]
-    trace = np.load(trace_path)
+        if provenance["schema"].endswith("_v3") and (
+            result.get("batch") != batch.name
+            or result.get("report_sha256") != report_sha
+            or result.get("control_trace_sha256") != trace_sha
+        ):
+            raise ValueError("Judgement batch or trace identity differs: " + case_id)
+    trace = np.load(io.BytesIO(trace_bytes), allow_pickle=False)
+    if judged is not None and archived is None and not provenance["schema"].endswith("_v3"):
+        validate_legacy_measurements(result, trace, report, recorded_trace_sha, case_id)
     pose = trace["root_pose_xyzw"][:, 0].astype(float)
     q = trace["joint_position_rad"][:, 0].astype(float)
     toe = trace["toe_xyz_world_m"][:, 0].astype(float)
@@ -329,6 +450,11 @@ def build(folder, model=None):
         if provenance.get("allocation", recorded) != recorded:
             raise ValueError("Judgement allocation differs from the recorded allocation")
         provenance = {**provenance, "allocation": recorded}
+    archived = (
+        archived_batch_digests(judgement_sha)
+        if provenance is not None and not provenance["schema"].endswith("_v3")
+        else None
+    )
     active = json.loads((ROOT / "robot/active_model.json").read_text())
     model = Path(model) if model else ROOT / active["model"]["path"]
     joints = {j["name"]: j for j in json.loads(model.read_text())["joints"]}
@@ -341,7 +467,7 @@ def build(folder, model=None):
                     json.loads((batch / "report.json").read_text())["assigned_case_ids"][0]
                 )
             continue
-        row = case(batch, joints, judged, provenance)
+        row = case(batch, joints, judged, provenance, archived)
         row["points_offset"] = sum(p.nbytes for p in points)
         row["contacts_offset"] = sum(c.nbytes for c in contacts)
         points.append(row.pop("_points"))
@@ -368,6 +494,11 @@ def build(folder, model=None):
     }
     if judged is not None:
         value["judgement_sha256"] = judgement_sha
+        value["judgement_binding"] = "legacy"
+        if provenance["schema"].endswith("_v3"):
+            value["judgement_binding"] = "trace_hashes"
+        elif archived is not None:
+            value["judgement_binding"] = "archive_hashes"
     return value
 
 

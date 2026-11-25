@@ -26,6 +26,8 @@ Run: ``python -m locomotion.evaluation.requirements <evaluation dir> [--set stag
 from __future__ import annotations
 
 import argparse
+import hashlib
+import io
 import json
 import math
 from pathlib import Path
@@ -38,7 +40,7 @@ from locomotion.evaluation.requirement_cases import case_definitions
 
 REQUIREMENTS = default_requirements_path()
 CONTROL_DT_S = 0.02
-SCHEMA = "hexapod_walking_requirements_judgement_v2"
+SCHEMA = "hexapod_walking_requirements_judgement_v3"
 
 
 def load_requirements(path=REQUIREMENTS, name="stage2_flat"):
@@ -280,6 +282,12 @@ def judge_case(trace, rules, controls=None, case=None):
     elif valid and case is not None and "route_m" in case:
         commands = CommandSet.from_mapping(rules["commands"])
         allowed = [command.as_tuple() for command in commands.nonzero()]
+        allowed.extend(
+            cardinal.as_tuple()
+            for speed in commands.translate_speeds_mps
+            for bearing in range(commands.translate_bearings)
+            if (cardinal := commands.cardinal_translation(speed, bearing)) is not None
+        )
         if commands.stand:
             allowed.append((0.0, 0.0, 0.0))
         recorded = np.asarray(trace["command"][:, 0], dtype=np.float32)
@@ -378,7 +386,8 @@ def judge(evaluation_dir, requirements=None, name="stage2_flat"):
             raise ValueError("Evaluation allocation differs from the named requirement set")
     rows, checkpoints, seen = [], set(), set()
     for index, report_path in enumerate(sorted(directory.glob("batch_*/report.json"))):
-        report = json.loads(report_path.read_text())
+        report_bytes = report_path.read_bytes()
+        report = json.loads(report_bytes)
         if len(report["cases"]) != 1:
             raise ValueError("A requirement batch must declare one case")
         declared = report["cases"][0]
@@ -396,11 +405,15 @@ def judge(evaluation_dir, requirements=None, name="stage2_flat"):
         checkpoint = report.get("checkpoint_sha256")
         checkpoints.add(checkpoint)
         trace_path = report_path.with_name("control_trace.npz")
-        if trace_path.exists():
-            with np.load(trace_path, allow_pickle=False) as archive:
+        trace, trace_sha = {}, None
+        if trace_path.is_file():
+            trace_bytes = trace_path.read_bytes()
+            trace_sha = hashlib.sha256(trace_bytes).hexdigest()
+            recorded = report.get("files", {}).get(trace_path.name)
+            if trace_path.name in report.get("files", {}) and trace_sha != recorded:
+                raise ValueError("Trace bytes differ from the batch report: " + case_id)
+            with np.load(io.BytesIO(trace_bytes), allow_pickle=False) as archive:
                 trace = dict(archive)
-        else:
-            trace = {}
         case = canonical[case_id]
         result = judge_case(trace, rules, case=case)
         if not _case_matches(declared, case):
@@ -426,6 +439,9 @@ def judge(evaluation_dir, requirements=None, name="stage2_flat"):
         rows.append(
             {
                 "case_id": case_id,
+                "batch": report_path.parent.name,
+                "report_sha256": hashlib.sha256(report_bytes).hexdigest(),
+                "control_trace_sha256": trace_sha,
                 "command": case.get("command"),
                 "route_m": case.get("route_m"),
                 **result,

@@ -182,6 +182,26 @@ class CalibrationCaptureTests(TrackerCase):
         self.assertIsNone(fresh.R_lock)
         self.assertIsNone(fresh.cal.h0)
 
+    def test_a_truncated_camera_lock_cannot_carry_the_last_camera_calibration(self):
+        self.lock()
+        self.hold((300, 1.0))
+        self.tr.action("/zero", {})
+        old_lock = self.tr.lock_path.read_bytes()
+        next_lock = self.tr.lock_path.with_stem("lock-1")
+        next_lock.write_text('{"lock_id":')
+        self.tr.action("/camera", {"index": ["1"]})
+        self.assertEqual(self.tr.camera, 1)
+        self.assertIsNone(self.tr.R_lock)
+        self.assertIsNone(self.tr.cal.h0)
+        self.assertIsNone(self.tr.cal.lock_id)
+        self.assertFalse(self.tr.hist)
+        self.assertIsNone(self.tr.sample)
+        self.assertIn("unreadable", self.tr.state()["reference_error"])
+        self.assertEqual(next_lock.read_text(), '{"lock_id":')
+        self.tr.action("/camera", {"index": ["0"]})
+        self.assertEqual(self.tr.lock_path.read_bytes(), old_lock)
+        self.assertEqual(self.tr.cal.h0, 300.0)
+
     def test_stream_does_not_resend_the_last_frame_on_timeout(self):
         self.tr.frame_no = 1
         self.tr.sample = {"h": 1}

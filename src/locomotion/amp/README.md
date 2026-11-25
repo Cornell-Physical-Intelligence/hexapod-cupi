@@ -33,6 +33,7 @@ can seed a fresh attempt through `--initial-trajectory`; it grants no admission.
 Replay each solved command at start phases 0 and 0.5. Follow
 [OPERATIONS](../../../docs/OPERATIONS.md) for standing admission and GPU ownership.
 `dataset inspect` checks telemetry, hashes, tracking and feature reconstruction.
+New datasets write processing source layout v4. The importer reads the retained v3 and v2 layouts.
 The program lead reviews direction and tripod motion and supplies the bound
 review to `dataset export`. The exporter crops controls 100:1000 from phase zero;
 half-phase clips stay as audit evidence. You cannot join clip endpoints

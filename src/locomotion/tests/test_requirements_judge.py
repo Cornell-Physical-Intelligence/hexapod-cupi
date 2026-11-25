@@ -1,5 +1,6 @@
 """The requirements judge: the cases of a set and the four checks it measures from a control trace."""
 
+import hashlib
 import json
 import math
 import tempfile
@@ -176,6 +177,29 @@ class JudgeTests(unittest.TestCase):
             self.assertEqual(judge.judge(root)["cases"][0]["failed_checks"], ["terminal_state"])
             allocation_path.write_text(json.dumps(allocation | {"cases": [stand, walk]}))
             self.assertEqual(judge.judge(root)["missing_case_ids"], [walk["case_id"]])
+
+    def test_rescore_verifies_the_recorded_trace_hash_before_loading(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            case = judge.cases(self.rules)[0]
+            commands = [judge.command_at(case, k) for k in range(case["controls"])]
+            trace = trace_from_path(judge.ghost_path((0, 0, 0), commands)[1:], commands)
+            save_batch(root, 0, case, trace)
+            batch = root / "batch_000"
+            trace_path = batch / "control_trace.npz"
+            report_path = batch / "report.json"
+            trace_sha = hashlib.sha256(trace_path.read_bytes()).hexdigest()
+            report = json.loads(report_path.read_text())
+            report["files"] = {trace_path.name: trace_sha}
+            report_path.write_text(json.dumps(report))
+            row = judge.judge(root)["cases"][0]
+            self.assertEqual(row["control_trace_sha256"], trace_sha)
+            self.assertEqual(
+                row["report_sha256"], hashlib.sha256(report_path.read_bytes()).hexdigest()
+            )
+            trace_path.write_bytes(b"changed; not an NPZ file")
+            with self.assertRaisesRegex(ValueError, "Trace bytes differ"):
+                judge.judge(root)
 
     def test_declared_float32_diagonal_passes_without_a_schedule_tolerance(self):
         case = next(c for c in judge.cases(self.rules) if c["case_id"] == "walk_0.050_45deg")
@@ -359,6 +383,20 @@ class RouteTests(unittest.TestCase):
         produce = judge.producer(self.case, rules)
         facing_x = [0.0, 0.0, 0.1, 0.0, 0.0, math.sin(math.pi / 4), math.cos(math.pi / 4)]
         self.assertEqual(produce(0, facing_x), [0.025, 0.0, 0.0])
+
+    def test_a_route_accepts_the_exact_and_recorded_cardinal_bank_commands(self):
+        trace = self.route_trace((0.45, 0.02), 1300)
+        speed = self.rules["commands"]["translate_speeds_mps"][0]
+        legacy = [speed * math.cos(math.pi), speed * math.sin(math.pi), 0.0]
+        for command in (legacy, [-speed, 0.0, 0.0]):
+            with self.subTest(command=command):
+                trace["command"][0, 0] = command
+                result = judge.judge_case(trace, self.rules, case=self.case)
+                self.assertNotIn("command_set", result["failed_checks"])
+        trace["command"][0, 0, 1] = 1.0e-17
+        self.assertEqual(
+            judge.judge_case(trace, self.rules, case=self.case)["failed_checks"], ["command_set"]
+        )
 
     def test_a_route_cannot_pass_with_commands_outside_its_requirement_set(self):
         trace = self.route_trace((0.45, 0.02), 1300)

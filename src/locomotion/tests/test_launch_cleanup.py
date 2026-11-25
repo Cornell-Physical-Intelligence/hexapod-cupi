@@ -168,6 +168,15 @@ class CleanupTests(unittest.TestCase):
             for receipt in receipts:
                 self.assertFalse(json.loads(receipt.read_text())["reservation_released"])
 
+    def test_cleanup_receipt_is_published_only_after_serialization(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            with self.assertRaises(ValueError):
+                launch.save_cleanup(root, {"invalid": float("nan")})
+            self.assertFalse((root / "cleanup.json").exists())
+            launch.save_cleanup(root, {"done": True})
+            self.assertEqual(json.loads((root / "cleanup.json").read_text()), {"done": True})
+
     def test_missing_container_and_inspection_failure_are_distinct(self):
         with patch.object(
             launch.subprocess,

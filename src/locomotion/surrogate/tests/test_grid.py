@@ -435,6 +435,48 @@ class SweepTests(unittest.TestCase):
             row = next(row for row in summary["cells"] if row["cell"] == CORNER)
             self.assertEqual(row["set_aside_attempts"], [f"{CORNER}.attempt_001"])
 
+    def test_a_new_child_cannot_contribute_verdicts_for_different_requirements(self):
+        for failure in (None, "partial acquisition"):
+            with self.subTest(failure=failure), tempfile.TemporaryDirectory() as directory:
+                root = Path(directory)
+                checkpoint = root / "checkpoint.pt"
+                checkpoint.write_bytes(b"weights")
+                sweep_root = root / "sweep"
+                child = sweep_root / "cells" / NOMINAL / "surrogate_summary.json"
+
+                def wrong_requirements(command, log):
+                    child.parent.mkdir()
+                    summary = fake_summary(NOMINAL, failure=failure, command=command)
+                    summary["requirements_sha256"] = "0" * 64
+                    child.write_text(json.dumps(summary))
+                    return 0
+
+                argv = [
+                    "--checkpoint",
+                    str(checkpoint),
+                    "--output",
+                    str(sweep_root),
+                    "--cells",
+                    NOMINAL,
+                ]
+                grid = sweep_root / "grid_summary.json"
+                with (
+                    mock.patch.object(sweep, "run_process", wrong_requirements),
+                    contextlib.redirect_stdout(io.StringIO()),
+                ):
+                    if failure is None:
+                        with self.assertRaisesRegex(ValueError, "requirements_sha256"):
+                            sweep.main(argv)
+                        self.assertFalse(grid.exists())
+                    else:
+                        self.assertEqual(sweep.main(argv), 1)
+                        summary = json.loads(grid.read_text())
+                        self.assertEqual(summary["verdict_counts"], {})
+                        self.assertEqual(
+                            summary["cells"][0]["identity_mismatch"], ["requirements_sha256"]
+                        )
+                self.assertTrue(child.is_file())
+
     def test_an_acquisition_failure_is_no_complete_cell(self):
         with tempfile.TemporaryDirectory() as directory:
             checkpoint = Path(directory) / "checkpoint.pt"

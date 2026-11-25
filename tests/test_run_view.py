@@ -356,6 +356,68 @@ class RunViewTests(unittest.TestCase):
             run_view.main([str(self.attempt), "--output", str(output)])
         self.assertFalse(output.exists())
 
+    def test_a_pass_from_another_run_cannot_label_a_short_or_terminal_stand(self):
+        root = Path(self.directory.name)
+        geometry, checkpoint = fixture_files(root)
+        evaluations = [root / name / "evaluation" for name in ("pass", "terminal")]
+        with patch.object(runner, "ExactEvaluationCapture", FakeCapture):
+            for evaluation, terminate in zip(evaluations, (None, 2)):
+                runner.run_cases(
+                    FakeNative(terminate_at=terminate),
+                    lambda observation: torch.zeros(1, 18),
+                    evaluation,
+                    geometry,
+                    checkpoint,
+                    case_ids=["stand"],
+                )
+        successful, failed = (folder / "judgement.json" for folder in evaluations)
+        self.assertTrue(run_view.build(evaluations[0])["cases"][0]["pass"])
+        self.assertFalse(run_view.build(evaluations[1])["cases"][0]["pass"])
+        judgement = json.loads(successful.read_bytes())
+        self.assertEqual(judgement["allocation"], json.loads(failed.read_bytes())["allocation"])
+        failed.write_bytes(successful.read_bytes())
+        with self.assertRaisesRegex(ValueError, "Judgement batch or trace identity differs"):
+            run_view.build(evaluations[1])
+        judgement["schema"] = "hexapod_walking_requirements_judgement_v2"
+        for key in ("batch", "report_sha256", "control_trace_sha256"):
+            del judgement["cases"][0][key]
+        successful.write_text(json.dumps(judgement))
+        self.assertTrue(run_view.build(evaluations[0])["cases"][0]["pass"])
+        failed.write_text(json.dumps(judgement))
+        with self.assertRaisesRegex(ValueError, "incomplete or terminal trace"):
+            run_view.build(evaluations[1])
+
+    def test_published_legacy_judgement_uses_its_own_archive_subgroup(self):
+        root = Path(self.directory.name)
+        evaluation = self.attempt / "run/standing/evaluation"
+        path = self.save_judgement(self.recorded_judgement())
+        digest = hashlib.sha256(path.read_bytes()).hexdigest()
+        prefix = "contact_consensus/pyramidal_cone/evaluation"
+        raw_files = {
+            f"{prefix}/judgement.json": {"sha256": digest},
+            "evaluation/batch_000/control_trace.npz": {"sha256": "0" * 64},
+        }
+        for batch_dir in sorted(evaluation.glob("batch_*"))[:2]:
+            for name in ("report.json", "control_trace.npz"):
+                raw = (batch_dir / name).read_bytes()
+                raw_files[f"{prefix}/{batch_dir.name}/{name}"] = {
+                    "sha256": hashlib.sha256(raw).hexdigest()
+                }
+        manifest = root / "site/assets/fixture/files.json"
+        manifest.parent.mkdir(parents=True)
+        manifest.write_text(json.dumps({"raw_files": raw_files}))
+        with patch.object(run_view, "ROOT", root):
+            archived = run_view.archived_batch_digests(digest)
+        self.assertNotEqual(archived["batch_000/control_trace.npz"], "0" * 64)
+        with patch.object(run_view, "archived_batch_digests", return_value=archived):
+            self.assertEqual(run_view.build(evaluation)["judgement_binding"], "archive_hashes")
+            report_path = evaluation / "batch_000/report.json"
+            report_path.write_bytes(report_path.read_bytes() + b" ")
+            with self.assertRaisesRegex(
+                ValueError, "Published judgement batch or trace identity differs"
+            ):
+                run_view.build(evaluation)
+
     def test_current_evaluator_output_exports_its_recorded_failure(self):
         root = Path(self.directory.name)
         geometry, checkpoint = fixture_files(root)

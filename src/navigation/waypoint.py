@@ -84,13 +84,9 @@ def _translation_for_envelope(command_set, speed, bearing, envelope):
     command = command_set.translation(speed, bearing)
     if command.is_within(envelope):
         return command
-    # A cardinal bank entry may carry roundoff on the cross axis.
-    quadrant, remainder = divmod(4 * bearing, command_set.translate_bearings)
-    if remainder == 0:
-        x, y = ((speed, 0.0), (0.0, speed), (-speed, 0.0), (0.0, -speed))[quadrant]
-        exact = VelocityCommand(x, y, 0.0)
-        if exact.is_within(envelope):
-            return exact
+    exact = command_set.cardinal_translation(speed, bearing)
+    if exact is not None and exact.is_within(envelope):
+        return exact
     return None
 
 

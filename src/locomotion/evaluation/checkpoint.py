@@ -19,7 +19,8 @@ SCHEMA = "hexapod_checkpoint_compatibility_v2"
 LEGACY_SCHEMA = "hexapod_checkpoint_compatibility_v1"
 RANGES_SCHEMA = "hexapod_refactor_ranges_v2"
 LEGACY_RANGES_SCHEMA = "hexapod_refactor_ranges_v1"
-REQUIREMENTS_SCHEMA = "hexapod_walking_requirements_judgement_v2"
+REQUIREMENTS_SCHEMA = "hexapod_walking_requirements_judgement_v3"
+REQUIREMENTS_SCHEMAS = {"hexapod_walking_requirements_judgement_v2", REQUIREMENTS_SCHEMA}
 PROBE_SCHEMA = "canonical_learning_probe_suite_v1"
 CHECKPOINT_SHA = "bda143d766cc0a2b35cd7f85d5c11871325287a7a3b08484fd9f6ac64dace6a9"
 DECLARATION_SHA = "8959def5b9c758f192e8447126620d7a65d2e72a4ac9daf87bbc66cbb26158c3"
@@ -170,7 +171,7 @@ def numbers(value, path=""):
 
 def measurements(judgement):
     """Every number of a complete judgement, by case, and the bounds it judged against."""
-    if judgement.get("schema") != REQUIREMENTS_SCHEMA:
+    if judgement.get("schema") not in REQUIREMENTS_SCHEMAS:
         raise ValueError("Unsupported requirements judgement schema")
     rows = judgement["cases"]
     declared = [case["case_id"] for case in judgement["allocation"]["cases"]]
@@ -321,7 +322,7 @@ def read_compatibility_receipt(path, digest):
     legacy = receipt["schema"] == LEGACY_SCHEMA
     if ranges.get("schema") != (LEGACY_RANGES_SCHEMA if legacy else RANGES_SCHEMA) or summary.get(
         "schema"
-    ) != (PROBE_SCHEMA if legacy else REQUIREMENTS_SCHEMA):
+    ) not in ({PROBE_SCHEMA} if legacy else REQUIREMENTS_SCHEMAS):
         raise ValueError("Compatibility receipt and evidence schemas differ")
     try:
         if ranges["identity"]["checkpoint_sha256"] != CHECKPOINT_SHA:

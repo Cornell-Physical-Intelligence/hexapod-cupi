@@ -164,9 +164,11 @@ class Calibration:
     """z = a (h - h0). Set zero stores h0; a is -1 (toward the camera is +) or +1 (flipped) until
     reference points exist, then the least-squares scale through the zero."""
 
-    def __init__(self, path=None, lock_id=None):
+    def __init__(self, path=None, lock_id=None, *, load=False):
         self.path, self.lock_id = path, lock_id
-        c = json.loads(path.read_text()) if lock_id and path and path.is_file() else {}
+        c = json.loads(path.read_text()) if load and lock_id and path and path.is_file() else {}
+        if not isinstance(c, dict):
+            raise ValueError("Invalid saved calibration")
         if c.get("lock_id") != lock_id:
             c = {}
         self.h0, self.sign, self.points = c.get("h0"), c.get("sign", -1.0), c.get("points", [])
@@ -224,14 +226,9 @@ class Tracker:
         # The persisted reference belongs to one camera and one orientation lock.
         self.lock_path = None if self.a.sim else LOCK.with_stem(f"{LOCK.stem}-{self.camera}")
         self.cal_path = None if self.a.sim else CAL.with_stem(f"{CAL.stem}-{self.camera}")
-        lock = (
-            json.loads(self.lock_path.read_text())
-            if load and self.lock_path and self.lock_path.is_file()
-            else {}
-        )
-        self.lock_id = lock.get("lock_id")
-        self.R_lock = np.array(lock["R"]) if self.lock_id else None
-        self.cal = Calibration(self.cal_path, self.lock_id)
+        self.lock_id = self.R_lock = None
+        self.cal = Calibration(self.cal_path)
+        self.reference_error = None
         self.lock_Rs, self.lock_t = [], -math.inf
         self.off, self.off_n = dict.fromkeys(TAGS, 0.0), dict.fromkeys(TAGS, 0)
         self.det.prev = None
@@ -239,6 +236,27 @@ class Tracker:
         self.seen.clear()
         self.proc_ts.clear()
         self.sample = self.jpeg = None
+
+        if load and self.lock_path is not None and self.lock_path.is_file():
+            try:
+                lock = json.loads(self.lock_path.read_text())
+                if not isinstance(lock, dict):
+                    raise ValueError("Invalid saved orientation")
+                if lock:
+                    lock_id = lock["lock_id"]
+                    rotation = np.asarray(lock["R"], dtype=float)
+                    if (
+                        not isinstance(lock_id, str)
+                        or not lock_id
+                        or rotation.shape != (3, 3)
+                        or not np.isfinite(rotation).all()
+                    ):
+                        raise ValueError("Invalid saved orientation")
+                    cal = Calibration(self.cal_path, lock_id, load=True)
+                    cal.summary()
+                    self.lock_id, self.R_lock, self.cal = lock_id, rotation, cal
+            except (OSError, ValueError, KeyError, TypeError):
+                self.reference_error = "Saved camera reference is unreadable. Acquiring a new lock."
 
     def _open(self, camera):
         cap = cv2.VideoCapture(camera)
@@ -332,6 +350,7 @@ class Tracker:
                         json.dumps({"lock_id": self.lock_id, "R": self.R_lock.tolist()})
                     )
                 self.cal = Calibration(self.cal_path, self.lock_id)
+                self.reference_error = None
         elif res and self.R_lock is not None:
             if both:  # learn each tag's own-height offset from the two-tag height
                 for i in TAGS:
@@ -385,6 +404,7 @@ class Tracker:
             "epoch": self.reset_time,
             "status": self.status,
             "error": self.error,
+            "reference_error": self.reference_error,
             "camera": "sim" if self.a.sim else self.camera,
             "camera_fps": rate(self.cap_ts),
             "process_fps": rate(self.proc_ts),

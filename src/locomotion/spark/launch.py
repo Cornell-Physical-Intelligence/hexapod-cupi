@@ -473,14 +473,9 @@ def run_owned(binding, paths):
 
 def save_cleanup(output, receipt):
     path = output / "cleanup.json"
-    try:
-        stream = path.open("x")
-    except FileExistsError:
-        path = path.with_name(f"cleanup_recovery_{uuid.uuid4().hex}.json")
-        stream = path.open("x")
-    with stream:
-        json.dump(receipt, stream, indent=2, allow_nan=False)
-        stream.write("\n")
+    while path.exists() or path.is_symlink():
+        path = output / f"cleanup_recovery_{uuid.uuid4().hex}.json"
+    guard.save(path, receipt)
 
 
 def main():

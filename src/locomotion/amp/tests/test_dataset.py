@@ -50,12 +50,12 @@ def trace_fixture(command=(0.025, 0.0, 0.0), heading=0.0):
     return trace, offset
 
 
-def replay_fixture(root):
+def replay_fixture(root, requested_command=(0.025, 0.0, 0.0)):
     """Create a synthetic file bundle to exercise the offline audit end to end."""
     evaluation = root / "evaluation"
     native = evaluation / "native400hz"
     native.mkdir(parents=True)
-    command = [0.025, 0.0, 0.0]
+    command = list(requested_command)
     trace, offset = trace_fixture(command)
     # The body follows the path its command traces, so the judge's drift is zero; the motion
     # features depend on velocities and body-relative positions, not on where the body is.
@@ -176,6 +176,44 @@ class DatasetTests(unittest.TestCase):
             (root / "evaluation/native400hz/substeps_000.npz").write_bytes(b"changed")
             with self.assertRaisesRegex(ValueError, "native force chunk"):
                 dataset.audit_replay(root)
+
+    def test_amp_motion_screen_rejects_stationary_replay_of_a_pure_turn(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            replay_fixture(root, (0.0, 0.0, 0.2))
+            with self.assertRaisesRegex(
+                ValueError, "Recomputed motion screen failed: turn_direction"
+            ):
+                dataset.audit_replay(root)
+
+    def test_amp_replay_preserves_the_retained_exact_cardinal_schedule(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            command = (0.0, 0.05, 0.0)
+            replay_fixture(root, command)
+            self.assertEqual(
+                dataset.audit_replay(root)[0]["command_index"], dataset.command_index(command)
+            )
+
+    def test_processing_v3_remains_frozen_and_current_v4_requires_its_additions(self):
+        current = dataset.processing_identity()
+        self.assertEqual(current["schema"], "hexapod_processing_sources_v4")
+        added = {"locomotion/amp/processing_sources_v3.json", "locomotion/omniwalk/contact_log.py"}
+        self.assertTrue(added <= current["source_files"].keys())
+        historical = {
+            **current,
+            "schema": "hexapod_processing_sources_v3",
+            "source_files": {
+                key: digest for key, digest in current["source_files"].items() if key not in added
+            },
+        }
+        dataset.validate_processing_identity(historical)
+        for wrong in (
+            {**historical, "schema": current["schema"]},
+            {**current, "schema": historical["schema"]},
+        ):
+            with self.assertRaisesRegex(ValueError, "processing source"):
+                dataset.validate_processing_identity(wrong)
 
     def test_current_replay_uses_its_bound_capture_to_enforce_the_original_physical_screen(self):
         with tempfile.TemporaryDirectory() as tmp:
