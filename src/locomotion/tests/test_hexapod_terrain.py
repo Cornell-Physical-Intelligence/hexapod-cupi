@@ -896,6 +896,93 @@ class ObstacleCorridorTests(unittest.TestCase):
         self.assertEqual(self.t.terrain_type_names(cfg)[-2:], ["obstacle_corridor"] * 2)
         self.assertIsNone(cfg.sub_terrains["obstacle_corridor"].layout_seed)
 
+    def test_stock_task_switch_copies_cfg_before_scene_generation(self):
+        from copy import deepcopy
+
+        cfg_fields = assignments("env_cfg.py", "HexapodTerrainEnvCfg")
+        self.assertFalse(ast.literal_eval(cfg_fields["obstacle_corridor"]))
+        tree = ast.parse((PACKAGE / "env.py").read_text())
+        env_class = next(node for node in tree.body if isinstance(node, ast.ClassDef))
+        env_class.body = [
+            node
+            for node in env_class.body
+            if isinstance(node, ast.FunctionDef) and node.name in {"__init__", "_setup_scene"}
+        ]
+        terrain_module = self.t
+
+        class Config(SimpleNamespace):
+            def copy(self):
+                return deepcopy(self)
+
+        class SceneGenerated(Exception):
+            def __init__(self, cfg):
+                self.cfg = cfg
+
+        class Base:
+            def __init__(self, cfg, render_mode, **kwargs):
+                self.cfg = cfg
+                self._setup_scene()
+
+            def _setup_scene(self):
+                raise SceneGenerated(self.cfg)
+
+        scope = {
+            "HexapodEnv": Base,
+            "HexapodTerrainEnvCfg": Config,
+            "add_obstacle_corridor": terrain_module.add_obstacle_corridor,
+        }
+        exec(
+            compile(ast.Module(body=[env_class], type_ignores=[]), str(PACKAGE / "env.py"), "exec"),
+            scope,
+        )
+
+        gen = terrain_module.make_hexapod_terrains_cfg()
+        gen.border_width = 11.0
+        cfg = Config(
+            obstacle_corridor=True,
+            command_curriculum=False,
+            terrain=SimpleNamespace(terrain_generator=gen),
+        )
+        for enabled in (True, False):
+            with self.subTest(enabled=enabled):
+                cfg.obstacle_corridor = enabled
+                with self.assertRaises(SceneGenerated) as scene:
+                    scope["HexapodTerrainEnv"](cfg)
+                active = scene.exception.cfg.terrain.terrain_generator
+                names = terrain_module.terrain_type_names(active)
+                self.assertEqual(len(names), 14 if enabled else 12)
+                self.assertEqual(names.count("obstacle_corridor"), 2 if enabled else 0)
+                self.assertEqual(active.border_width, 11.0)
+                self.assertNotIn("obstacle_corridor", cfg.terrain.terrain_generator.sub_terrains)
+                self.assertEqual(cfg.terrain.terrain_generator.num_cols, 12)
+
+    def test_corridor_adds_two_columns_with_overridden_generator_weights(self):
+        for num_cols in (1, 6, 20):
+            with self.subTest(num_cols=num_cols):
+                cfg = self.t.make_hexapod_terrains_cfg()
+                cfg.num_cols = num_cols
+                cfg.sub_terrains["slope"].proportion = 3.0
+                self.t.add_obstacle_corridor(cfg)
+                self.t.add_obstacle_corridor(cfg)
+                names = self.t.terrain_type_names(cfg)
+                self.assertEqual(len(names), num_cols + 2)
+                self.assertEqual(names.count("obstacle_corridor"), 2)
+
+    def test_invalid_clearance_configs_fail_before_mesh_generation(self):
+        for overrides, message in (
+            ({"gap_range": (2.0, 2.0)}, "fit between the walls"),
+            ({"gap_range": (0.0, 0.0)}, "positive"),
+            ({"gap_range": (0.62, 0.90)}, "nonincreasing"),
+            ({"gap_range": (float("nan"), 0.62)}, "finite"),
+            (
+                {"wall_thickness": 0.72, "num_obstacles": 0, "gap_range": (0.5, 0.5)},
+                "spawn area and clearance",
+            ),
+            ({"spawn_clearance": -0.05}, "spawn area and clearance"),
+        ):
+            with self.subTest(overrides=overrides), self.assertRaisesRegex(ValueError, message):
+                self.t.obstacle_corridor_terrain(0.5, self.cfg(**overrides))
+
     def test_corridor_cfg_function_is_the_module_level_name(self):
         tree = ast.parse((PACKAGE / "terrains_cfg.py").read_text())
         (cls,) = [

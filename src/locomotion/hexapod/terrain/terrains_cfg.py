@@ -99,12 +99,31 @@ def sloped_terrain(difficulty: float, cfg: hf_terrains_cfg.HfPyramidSlopedTerrai
 def obstacle_corridor_terrain(difficulty: float, cfg: "ObstacleCorridorTerrainCfg"):
     """Walled corridor of static obstacles whose gap shrinks with ``difficulty``; origin at the tile centre on the
     ground. Returns ``([mesh, ...], origin)`` like Isaac Lab's mesh sub-terrains."""
+    sx, sy = cfg.size
+    wide_gap, narrow_gap = cfg.gap_range
+    low_height, high_height = cfg.obstacle_height_range
+    spawn_half = spawn_half_extent()
+    width = sx - 2 * cfg.wall_thickness
+    dimensions = (*cfg.size, *cfg.gap_range, *cfg.obstacle_height_range,
+                  cfg.wall_thickness, cfg.wall_height, cfg.spawn_clearance)
+    if not np.isfinite(dimensions).all():
+        raise ValueError("Corridor dimensions and ranges must be finite")
+    if not 0 < narrow_gap <= wide_gap <= width:
+        raise ValueError("Corridor gap_range must be positive, nonincreasing and fit between the walls")
+    if not (cfg.wall_thickness > 0 and cfg.wall_height > 0 and 0 < low_height <= high_height):
+        raise ValueError("Corridor wall dimensions and ordered obstacle heights must be positive")
+    if (
+        cfg.spawn_clearance < 0
+        or width < 2 * (spawn_half[0] + cfg.spawn_clearance)
+        or sy < 2 * (spawn_half[1] + cfg.spawn_clearance)
+    ):
+        raise ValueError("Corridor spawn area and clearance must fit inside the tile and walls")
     gap = corridor.corridor_gap(difficulty, cfg.gap_range)
     obstacles = corridor.place_obstacles(
         corridor.corridor_rng(cfg.seed if cfg.layout_seed is None else cfg.layout_seed, difficulty),
         cfg.size,
         gap,
-        spawn_half_extent(),
+        spawn_half,
         num_obstacles=cfg.num_obstacles,
         wall_thickness=cfg.wall_thickness,
         spawn_clearance=cfg.spawn_clearance,
@@ -127,6 +146,20 @@ class ObstacleCorridorTerrainCfg(terrain_gen.SubTerrainBaseCfg):
     wall_height: float = corridor.WALL_HEIGHT
     obstacle_height_range: tuple[float, float] = corridor.OBSTACLE_HEIGHT_RANGE
     spawn_clearance: float = corridor.SPAWN_CLEARANCE
+
+
+def add_obstacle_corridor(cfg: TerrainGeneratorCfg) -> None:
+    """Add corridor terrain with the weight of two columns in the default curriculum.
+
+    With the curriculum disabled, Isaac Lab samples tile types by weight.
+    """
+    if "obstacle_corridor" not in cfg.sub_terrains:
+        total = sum(terrain.proportion for terrain in cfg.sub_terrains.values())
+        if cfg.num_cols < 1 or not np.isfinite(total) or total <= 0:
+            raise ValueError("The terrain generator needs a positive column count and total proportion")
+        proportion = 2 * total / cfg.num_cols
+        cfg.sub_terrains["obstacle_corridor"] = ObstacleCorridorTerrainCfg(proportion=proportion)
+        cfg.num_cols += 2
 
 
 def make_hexapod_terrains_cfg(
@@ -186,9 +219,7 @@ def make_hexapod_terrains_cfg(
             proportion=1.0, grid_width=grid_width, grid_height_range=(0.0025, step_cap / 2), platform_width=box_platform
         ),
     }
-    if obstacle_corridor:
-        sub_terrains["obstacle_corridor"] = ObstacleCorridorTerrainCfg(proportion=1.0)
-    return TerrainGeneratorCfg(
+    cfg = TerrainGeneratorCfg(
         size=(tile_size, tile_size),
         border_width=course_border,
         num_rows=NUM_LEVELS,
@@ -200,6 +231,9 @@ def make_hexapod_terrains_cfg(
         use_cache=False,
         sub_terrains=sub_terrains,
     )
+    if obstacle_corridor:
+        add_obstacle_corridor(cfg)
+    return cfg
 
 
 HEXAPOD_TERRAINS_CFG = make_hexapod_terrains_cfg()
