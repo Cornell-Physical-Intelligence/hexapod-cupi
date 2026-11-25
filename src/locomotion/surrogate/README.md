@@ -63,8 +63,8 @@ cell's own coefficient. The evaluator without `--grid` keeps the historical
 consensus. `grid_summary.json` lists each probe's pass, fail or unresolved
 verdict per cell with its failed bounds. `--continue` finishes an interrupted
 sweep. It reuses a finished cell only when its summary matches the request:
-checkpoint bytes, source and model hashes, grid declaration, cell, selected
-probes and seed. Any mismatch stops the sweep before it renames or runs a cell;
+checkpoint bytes, source and model hashes, requirement set and input hash,
+grid declaration, cell, selected probes and seed. Any mismatch stops the sweep before it renames or runs a cell;
 use a new `--output` for another request. Incomplete cells and cells with an
 acquisition failure move to `<id>.attempt_<n>` and run again.
 

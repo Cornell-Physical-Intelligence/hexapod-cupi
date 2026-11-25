@@ -4,7 +4,7 @@ Each cell runs ``locomotion.surrogate.evaluate --grid --cell`` in its own proces
 ``<output>/cells/<cell id>``, so any cell can be reproduced alone. ``grid_summary.json`` collects
 the verdict of each case in each cell: the relative-friction consensus where the cell ran it, else
 the case's own verdict. ``--continue`` finishes an interrupted sweep: it keeps a finished cell only
-when its summary matches this request (checkpoint bytes, sources, grid, cell, cases and seed) and
+when its summary matches this request (checkpoint bytes, sources, requirements, grid, cell, cases and seed) and
 refuses the sweep on any mismatch. It sets every incomplete or acquisition-failed
 attempt aside under a fresh name and runs that cell again.
 """
@@ -107,6 +107,8 @@ def cell_identity(summary):
         "grid_sha256": condition.get("grid_sha256"),
         "cell": condition.get("cell"),
         "selected_case_ids": summary.get("selected_case_ids"),
+        "requirements_set": summary.get("requirements_set"),
+        "requirements_sha256": summary.get("requirements_sha256"),
         "seed": summary.get("seed"),
     }
 
@@ -193,12 +195,16 @@ def main(argv=None):
         raise ValueError("Checkpoint bytes differ from the paired record")
     if args.output.exists() and not args.resume:
         raise ValueError("The output exists; pass --continue to finish that sweep")
+    requirements_set = "stage2_flat"
+    rules, requirements_sha = requirements.load_requirements(name=requirements_set)
     request = {
         "checkpoint_sha256": checkpoint_sha256,
+        "requirements_set": requirements_set,
+        "requirements_sha256": requirements_sha,
         "grid_sha256": rnd.grid_declaration(args.grid)["sha256"],
         "selected_case_ids": selected_cases(
             args.cases,
-            [case["case_id"] for case in requirements.cases(requirements.load_requirements()[0])],
+            [case["case_id"] for case in requirements.cases(rules)],
         ),
         "seed": effective_seed(args.seed, record.get("identity", {})),
     }
@@ -264,6 +270,8 @@ def main(argv=None):
         "checkpoint_sha256": sha(args.checkpoint),
         "grid": args.grid,
         "grid_sha256": declaration["sha256"],
+        "requirements_set": requirements_set,
+        "requirements_sha256": requirements_sha,
         "grid_declaration": json.loads(declaration["json"]),
         "cases_option": args.cases,
         "seed_option": args.seed,

@@ -1,6 +1,7 @@
 """Exercise dataset rejection paths with synthetic records, without native claims."""
 
 import copy
+import json
 import tempfile
 import unittest
 from pathlib import Path
@@ -175,6 +176,44 @@ class DatasetTests(unittest.TestCase):
             (root / "evaluation/native400hz/substeps_000.npz").write_bytes(b"changed")
             with self.assertRaisesRegex(ValueError, "native force chunk"):
                 dataset.audit_replay(root)
+
+    def test_current_replay_uses_its_bound_capture_to_enforce_the_original_physical_screen(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            root = Path(tmp)
+            replay_fixture(root)
+            evaluation = root / "evaluation"
+            capture_path = evaluation / "native400hz/capture.json"
+            report_path = evaluation / "report.json"
+            state_path = root / "state.json"
+            capture = json.loads(capture_path.read_text())
+            report = json.loads(report_path.read_text())
+            state = json.loads(state_path.read_text())
+            fields = {
+                "joint_bound_violation_steps": 0,
+                "speed_bound_violation_steps": 0,
+                "maximum_applied_nm": 1.6,
+                "minimum_non_toe_floor_m": -0.001,
+                "minimum_plate_height_m": 0.055,
+                "nonfoot_contact_steps_400hz": 8,
+            }
+            for bad in ({}, {"nonfoot_contact_steps_400hz": 9}, {"joint_bound_violation_steps": 1}):
+                facts = fields | bad
+                capture.update({key: [value] for key, value in facts.items()})
+                capture["contact_classification"] = "exact_distal_points"
+                dataset.save(capture_path, capture)
+                dataset.save(evaluation / "force_metrics.json", report_for(evaluation))
+                report["files"]["force_metrics.json"] = dataset.sha(
+                    evaluation / "force_metrics.json"
+                )
+                report["results"] = [dict(facts, native_capture_complete=True, controls=1000)]
+                dataset.save(report_path, report)
+                state["replay"] = report
+                dataset.save(state_path, state)
+                if bad:
+                    with self.assertRaisesRegex(ValueError, "Native motion, contact or force"):
+                        dataset.audit_replay(root)
+                else:
+                    self.assertEqual(dataset.audit_replay(root)[0]["command_index"], 0)
 
     def test_reconstruction_uses_origin_velocity_and_is_yaw_invariant(self):
         command = (0.04, 0.0, 0.15)

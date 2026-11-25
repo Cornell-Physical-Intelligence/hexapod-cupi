@@ -130,8 +130,10 @@ and fails the allocation unless the requested update count has completed.
 
 Training and evaluation require matching one-robot and batch standing admission.
 Use [`admission`](../src/locomotion/evaluation/admission.py) to recompute the captures and create
-the subsequent input declaration. A launcher success does not pass a physical
-gate or qualify a policy. A source manifest does not grant admission.
+the subsequent input declaration. Pass the `standing` directory from each
+launcher attempt. Keep the attempt's `logs/standing.log` and
+`jobs/standing_contact_data_audit.json` beside it. Admission verifies both
+logs against their passed audit receipts and recomputes the physical gates.
 
 ## Ownership and cleanup
 
@@ -145,7 +147,8 @@ Signal a container by the immutable ID bound to this run. Check its name and ID
 before acting. Docker client exit does not prove container exit; inspect again
 after terminating the client to catch a creation race. Keep startup/deadline
 bounds and contact-data truncation checks. Use the frozen launcher's
-`--cleanup-only` path after a failed wrapper, then record its separate receipt.
+`--cleanup-only` path after a failed wrapper. If `cleanup.json` already exists,
+the launcher preserves it and writes a fresh `cleanup_recovery_<id>.json` receipt.
 
 One lead owns allocation and cleanup. On 14 September 2026 the program lead
 authorized full HEXAPOD compute ownership, including the Spark lead stopping

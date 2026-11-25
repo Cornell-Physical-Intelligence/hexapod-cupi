@@ -124,6 +124,36 @@ class AcceptedControllerTests(unittest.TestCase):
                     with self.assertRaises(ValueError):
                         controller_evidence.validate(root, accepted)
 
+    def test_drift_projection_cannot_omit_the_other_seven_native_walks(self):
+        metric = "drift_per_hold_m"
+        accepted = deepcopy(self.accepted)
+        reference, support = accepted["judged"][metric]["evidence"]
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            self.evidence_fixture(root)
+            path = root / reference
+            value = json.loads(path.read_bytes())
+            kept = next(row for row in value["cases"] if row["checks"].get(metric, {}).get("pass"))
+            for row in value["cases"]:
+                if row is not kept:
+                    row["checks"].pop(metric, None)
+            value["judged_cases"] = sum(bool(row["checks"]) for row in value["cases"])
+            path.write_text(json.dumps(value))
+            self.repin(accepted, reference, path)
+            result = kept["checks"][metric]
+            accepted["judged"][metric].update(value=round(result["value"], 3), **{"pass": True})
+            with self.assertRaisesRegex(ValueError, "missing drift evidence"):
+                controller_evidence.validate(root, accepted)
+            path.write_bytes((ROOT / reference).read_bytes())
+            accepted = deepcopy(self.accepted)
+            path = root / support
+            value = json.loads(path.read_bytes())
+            next(row for row in value["cases"] if metric in row["checks"])["checks"].pop(metric)
+            path.write_text(json.dumps(value))
+            self.repin(accepted, support, path)
+            with self.assertRaisesRegex(ValueError, "missing drift evidence"):
+                controller_evidence.validate(root, accepted)
+
     def test_removing_failed_walks_cannot_turn_tilt_into_a_pass(self):
         reference = self.accepted["judged"]["tilt_deg"]["evidence"]
         with tempfile.TemporaryDirectory() as temporary:

@@ -126,6 +126,57 @@ class JudgeTests(unittest.TestCase):
                     save_batch(Path(directory), 0, case, trace)
                     self.assertFalse(judge.judge(directory)["pass"])
 
+    def test_pure_turn_requires_achieved_yaw_in_the_commanded_direction(self):
+        for case in judge.cases(self.rules):
+            if not case["case_id"].startswith("turn_"):
+                continue
+            commands = np.asarray([judge.command_at(case, k) for k in range(case["controls"])])
+            for response in (0, -1, 1):
+                with self.subTest(case=case["case_id"], response=response):
+                    path = judge.ghost_path((0, 0, 3.0), response * commands)
+                    trace = trace_from_path(path[1:], commands)
+                    result = judge.judge_case(trace, self.rules, case=case)
+                    self.assertEqual(result["checks"]["turn_direction"]["pass"], response == 1)
+
+    def test_rescore_binds_case_definitions_allocation_and_full_trace(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            stand, walk = judge.cases(self.rules)[:2]
+            count = stand["controls"]
+            commands = [judge.command_at(stand, k) for k in range(count)]
+            trace = trace_from_path(judge.ghost_path((0, 0, 0), commands)[1:], commands)
+            save_batch(root, 0, stand, trace)
+            self.assertFalse(judge.judge(root)["pass"])  # No allocation declares a subset.
+            allocation = {
+                "schema": "hexapod_requirements_allocation_v1",
+                "requirements_set": "stage2_flat",
+                "requirements_sha256": "0" * 64,
+                "checkpoint_sha256": "c" * 64,
+                "cases": [stand],
+            }
+            allocation_path = root / "allocation.json"
+            allocation_path.write_text(json.dumps(allocation))
+            result = judge.judge(root)
+            self.assertTrue(result["pass"])
+            self.assertEqual(result["recorded_requirements_sha256"], "0" * 64)
+            report_path = root / "batch_000/report.json"
+            report = json.loads(report_path.read_text())
+            for failure in (
+                {"cases": [{**stand, "controls": count - 1}]},
+                {"failure_kind": "native_terminal_prefix", "acquisition_complete": False},
+                {"native_capture_failure": "missing substep"},
+            ):
+                with self.subTest(failure=failure):
+                    report_path.write_text(json.dumps(report | failure))
+                    self.assertFalse(judge.judge(root)["pass"])
+            trace["terminated"] = np.zeros((count, 1), dtype=bool)
+            trace["terminated"][-1] = True
+            np.savez(report_path.with_name("control_trace.npz"), **trace)
+            report_path.write_text(json.dumps(report))
+            self.assertEqual(judge.judge(root)["cases"][0]["failed_checks"], ["terminal_state"])
+            allocation_path.write_text(json.dumps(allocation | {"cases": [stand, walk]}))
+            self.assertEqual(judge.judge(root)["missing_case_ids"], [walk["case_id"]])
+
     def test_declared_float32_diagonal_passes_without_a_schedule_tolerance(self):
         case = next(c for c in judge.cases(self.rules) if c["case_id"] == "walk_0.050_45deg")
         commands = [judge.command_at(case, k) for k in range(case["controls"])]
@@ -149,7 +200,7 @@ class JudgeTests(unittest.TestCase):
     def test_perfect_tracking_has_zero_drift_and_zero_stopping_distance(self):
         commands = [[0.05, 0.0, 0.0]] * 1000 + [[0.0, 0.0, 0.0]] * 200
         path = judge.ghost_path((0.0, 0.0, 0.3), commands)
-        trace = trace_from_path(path, commands)
+        trace = trace_from_path(path[1:], commands)
         holds = judge.drift_per_hold(trace)
         self.assertEqual(len(holds), 1)
         self.assertLess(holds[0]["max_gap_m"], 1e-6)
@@ -167,13 +218,13 @@ class JudgeTests(unittest.TestCase):
         commands = [[0.05, 0.0, 0.0]] * 1000 + [[0.0, 0.0, 0.0]] * 200
         path = judge.ghost_path((0.0, 0.0, 0.0), commands)
         path[:, 1] += np.arange(len(path)) * 0.0001  # 0.1 mm of left slip per control
-        path[1001:, 0] -= 0.03  # the body moves 3 cm after the stop
-        trace = trace_from_path(path, commands)
+        path[1001:, 0] -= 0.03  # the body moves 3 cm during the first zero control
+        trace = trace_from_path(path[1:], commands)
         hold = judge.drift_per_hold(trace)[0]
         self.assertAlmostEqual(hold["end_gap_m"], 999 * 0.0001, places=6)
         self.assertAlmostEqual(hold["max_gap_m"], hold["end_gap_m"], places=9)
         stop = judge.stopping_distance(trace, settle_s=2.0)
-        self.assertAlmostEqual(stop["final_distance_m"], math.hypot(0.03, 199 * 0.0001), places=6)
+        self.assertAlmostEqual(stop["final_distance_m"], math.hypot(0.03, 200 * 0.0001), places=6)
 
     def test_tilt_and_torque_are_judged_against_the_file_limits(self):
         commands = [[0.0, 0.0, 0.0]] * 50
@@ -219,10 +270,10 @@ class JudgeTests(unittest.TestCase):
     def test_judgement_binds_the_requirements_hash_and_fails_on_the_drift_limit(self):
         with tempfile.TemporaryDirectory() as temp:
             root = Path(temp)
-            commands = [[0.05, 0.0, 0.0]] * 1000
+            case = next(c for c in judge.cases(self.rules) if c["case_id"] == "walk_0.050_0deg")
+            commands = [judge.command_at(case, k) for k in range(case["controls"])]
             path = judge.ghost_path((0.0, 0.0, 0.0), commands)
-            path[:, 1] += np.arange(len(path)) * 0.0002  # 200 mm at the end
-            case = {"case_id": "walk_0.050_0deg", "command": [0.05, 0, 0], "controls": 1000}
+            path[:, 1] += np.minimum(np.arange(len(path)), case["stop_control"]) * 0.0002
             save_batch(root, 0, case, trace_from_path(path, commands))
             result = judge.judge(root)
             self.assertEqual(result["schema"], judge.SCHEMA)
@@ -242,7 +293,7 @@ class JudgeTests(unittest.TestCase):
                 commands = [judge.command_at(case, c) for c in range(case["controls"])]
                 trace = trace_from_path(judge.ghost_path((0.0, 0.0, 0.0), commands), commands)
                 save_batch(root, index, case, trace)
-            missing = {"case_id": "turn_+0.20", "command": [0, 0, 0.2], "controls": 1000}
+            missing = next(c for c in judge.cases(rules) if c["case_id"] == "turn_+0.20")
             batch = root / "batch_003"
             batch.mkdir()
             (batch / "report.json").write_text(json.dumps({"cases": [missing]}))
@@ -320,6 +371,7 @@ class RouteTests(unittest.TestCase):
         commands = [[0.05, 0.0, 0.0]] * (n - zero_controls) + [[0.0, 0.0, 0.0]] * zero_controls
         path = np.zeros((n, 3))
         path[:, 2] = math.pi / 2
+        path[: n - zero_controls, :2] = np.linspace((0.0, 0.0), rest, n - zero_controls)
         path[n - zero_controls :, :2] = rest
         return trace_from_path(path, commands)
 

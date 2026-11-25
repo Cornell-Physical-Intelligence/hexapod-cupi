@@ -10,7 +10,10 @@ from pathlib import Path
 import numpy as np
 
 from locomotion.amp.features import extract_features, feature_contract
-from locomotion.evaluation.requirements import judge_case, load_requirements
+from locomotion.evaluation.requirements import (
+    judge_case,
+    load_requirements,
+)
 from locomotion.robots.hexapod import MODEL_SHA256, USD_SHA256
 from locomotion.spark.sources import source_files
 
@@ -230,6 +233,44 @@ def motion_diagnostics(trace, command):
     }
 
 
+def native_replay_screen(result, capture, command):
+    """Apply the retained replay screen to the acquisition-only capture receipt."""
+    if any(
+        key in result
+        for key in ("pass", "native_motor_and_joint_checks_pass", "native_contact_screen")
+    ):
+        return (
+            result.get("pass") is True
+            and result.get("native_motor_and_joint_checks_pass") is True
+            and result.get("native_contact_screen", {}).get("pass") is True
+        )
+    limits = {
+        "joint_bound_violation_steps": (0, 0),
+        "speed_bound_violation_steps": (0, 0),
+        "maximum_applied_nm": (0, 1.60001),
+        "minimum_non_toe_floor_m": (-0.001, np.inf),
+        "minimum_plate_height_m": (0.055, np.inf),
+        "nonfoot_contact_steps_400hz": (0, 8 if any(command) else 0),
+    }
+    if (
+        result.get("native_capture_complete") is not True
+        or result.get("controls") != 1000
+        or capture.get("contact_classification") != "exact_distal_points"
+        or type(result.get("nonfoot_contact_steps_400hz")) is not int
+    ):
+        return False
+    for key, (lower, upper) in limits.items():
+        value = result.get(key)
+        if (
+            type(value) not in (int, float)
+            or not np.isfinite(value)
+            or not lower <= value <= upper
+            or capture.get(key) != [value]
+        ):
+            return False
+    return True
+
+
 def audit_replay(directory):
     directory = Path(directory).resolve()
     state_path = directory / "state.json"
@@ -269,9 +310,6 @@ def audit_replay(directory):
         or report.get("acquisition_complete") is not True
         or report.get("recorded_physics_steps") != 8000
         or len(report.get("results", [])) != 1
-        or report["results"][0].get("pass") is not True
-        or report["results"][0].get("native_motor_and_joint_checks_pass") is not True
-        or report["results"][0].get("native_contact_screen", {}).get("pass") is not True
         or report.get("force_metrics", {}).get("status") != "available"
     ):
         raise ValueError("Native motion, contact or force evidence is incomplete")
@@ -298,6 +336,9 @@ def audit_replay(directory):
         or computed_loads["cases"][0]["requested_window_complete"] is not True
     ):
         raise ValueError("Incomplete native force/torque capture")
+    capture = json.loads((report_path.parent / "native400hz/capture.json").read_text())
+    if not native_replay_screen(report["results"][0], capture, identity["command"]):
+        raise ValueError("Native motion, contact or force evidence is incomplete")
     trace_path = report_path.parent / "control_trace.npz"
     with np.load(trace_path, allow_pickle=False) as archive:
         trace = {key: archive[key] for key in archive.files}

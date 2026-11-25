@@ -85,6 +85,11 @@ def check_values(rows, metric, limit):
     return [check["value"] for check in selected]
 
 
+def require_drift_coverage(rows, required_ids):
+    measured = {case_id for case_id, row in rows.items() if "drift_per_hold_m" in row["checks"]}
+    require(required_ids <= measured, "missing drift evidence for applicable cases")
+
+
 def validate(root, accepted=None):
     """Reject a changed registry value, limit, verdict, evidence hash or checkpoint identity."""
     root = Path(root)
@@ -182,8 +187,18 @@ def _validate(root, accepted):
     )
     require(judged["commands"]["pass"] is command_pass, "command verdict differs")
 
-    required_ids = {case["case_id"] for case in case_definitions(rules)}
-    probe_ids = indexed(documents["motor_torque_nm"][0]["results"]).keys()
+    canonical = case_definitions(rules)
+    required_ids = {case["case_id"] for case in canonical}
+    probes = indexed(documents["motor_torque_nm"][0]["results"])
+    probe_ids = probes.keys()
+    drift_cases = {
+        case["case_id"]
+        for case in canonical
+        if any(case.get("command", ()))
+        and math.hypot(*case["command"][:2]) <= rules["controller"]["drift_speed_mps"] * (1 + 1e-6)
+        and rules["hold_max_s"] >= rules["controller"]["drift_hold_s"]
+    }
+    drift_probes = {case_id for case_id in probes if case_id.startswith("learning:translate_")}
     values = {}
     for name in (
         "stopping_distance_m",
@@ -209,12 +224,17 @@ def _validate(root, accepted):
                 "route goals differ",
             )
             selected_rows = list(routes.values())
+        if name == "drift_per_hold_m":
+            require_drift_coverage(
+                rows, drift_probes if evidence["schema"].endswith("_v1") else drift_cases
+            )
         measured = check_values(selected_rows, metric, limits[name])
         if name in ("tilt_deg", "stop_position_tolerance_m"):
             require(len(measured) == len(selected_rows), "missing evidence metric: " + metric)
         values[name] = max(measured)
         for supporting in documents[name][1:]:
             support = judgement(supporting, controller, accepted["requirements_set"], required_ids)
+            require_drift_coverage(support, drift_cases)
             check_values(support.values(), metric, limits[name])
 
     torque_row = judged["motor_torque_nm"]

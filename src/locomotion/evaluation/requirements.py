@@ -16,7 +16,9 @@ largest body tilt while standing and after each stop, past the settle; the body 
 moves) and applied motor torque (the largest absolute value). The drift limit is set
 at ``drift_speed_mps`` and applied to every command of the set at or below that speed. A route
 case adds the stop position: the body must finish within ``stop.position_tolerance_m`` of the last
-goal and stay there, under a zero command, for ``stop.stay_stopped_s``. An incomplete trace fails.
+goal and stay there, under a zero command, for ``stop.stay_stopped_s``. Pure turns must achieve
+yaw in the commanded direction during their hold. The requirement set gives no yaw-rate tracking
+limit. An incomplete or terminal trace fails.
 
 Run: ``python -m locomotion.evaluation.requirements <evaluation dir> [--set stage2_flat]``.
 """
@@ -193,11 +195,12 @@ def stopping_distance(trace, settle_s):
     if len(stops) == 0:
         return None
     k = int(stops[0])
-    settle = min(len(pose) - 1, k + int(round(settle_s / CONTROL_DT_S)))
-    travel = np.hypot(*(pose[k:, :2] - pose[k, :2]).T)
+    settle = min(len(pose) - 1, k - 1 + round(settle_s / CONTROL_DT_S))
+    # Each trace pose follows its control, so the switch to zero starts at row k - 1.
+    travel = np.hypot(*(pose[k - 1 :, :2] - pose[k - 1, :2]).T)
     return {
         "stop_control": k,
-        "settle_distance_m": float(travel[settle - k]),
+        "settle_distance_m": float(travel[settle - k + 1]),
         "final_distance_m": float(travel[-1]),
         "max_distance_m": float(travel.max()),
     }
@@ -235,6 +238,13 @@ def stop_position(trace, case, stay_stopped_s):
         "final_distance_m": float(distance[-1]),
         "stay_distance_max_m": float(distance[-window:].max()) if arrived else None,
     }
+
+
+def _case_matches(recorded, canonical):
+    recorded = dict(recorded)
+    if "route_m" in canonical and recorded.get("stop_control") == canonical["controls"]:
+        del recorded["stop_control"]
+    return recorded == canonical
 
 
 def judge_case(trace, rules, controls=None, case=None):
@@ -289,6 +299,19 @@ def judge_case(trace, rules, controls=None, case=None):
     holds = drift_per_hold(trace)
     stop = stopping_distance(trace, rules["stop"]["settle_s"])
     checks = {}
+    if any(np.asarray(trace.get(key, False)).any() for key in ("terminated", "truncated")):
+        checks["terminal_state"] = _check(1, 0)
+    if case is not None and "command" in case:
+        vx, vy, wz = case["command"]
+        if vx == vy == 0.0 and wz:
+            yaw = np.unwrap(planar_pose(trace["root_pose_xyzw"][:, 0, :])[:, 2])
+            last = case.get("stop_control", n) - 1
+            signed = math.copysign(1.0, wz) * (yaw[last] - yaw[0])
+            checks["turn_direction"] = {
+                "value": float(signed),
+                "bound": 0.0,
+                "pass": bool(signed > 0),
+            }
     walks = [
         h
         for h in holds
@@ -332,30 +355,95 @@ def judge_case(trace, rules, controls=None, case=None):
 def judge(evaluation_dir, requirements=None, name="stage2_flat"):
     """Every recorded batch under ``evaluation_dir`` against one requirement set."""
     rules, requirements_sha = load_requirements(requirements or REQUIREMENTS, name)
-    rows, checkpoints = [], set()
-    for report_path in sorted(Path(evaluation_dir).glob("batch_*/report.json")):
+    canonical = {case["case_id"]: case for case in cases(rules)}
+    directory = Path(evaluation_dir)
+    allocation_path = directory / "allocation.json"
+    allocation = json.loads(allocation_path.read_text()) if allocation_path.exists() else None
+    selected = list(canonical)
+    if allocation is not None:
+        declared = allocation["cases"]
+        selected = [case["case_id"] for case in declared]
+        if (
+            allocation.get("schema") != "hexapod_requirements_allocation_v1"
+            or allocation.get("requirements_set") != name
+            or not isinstance(allocation.get("requirements_sha256"), str)
+            or len(allocation["requirements_sha256"]) != 64
+            or not selected
+            or len(selected) != len(set(selected))
+            or not all(
+                key in canonical and _case_matches(case, canonical[key])
+                for key, case in zip(selected, declared)
+            )
+        ):
+            raise ValueError("Evaluation allocation differs from the named requirement set")
+    rows, checkpoints, seen = [], set(), set()
+    for index, report_path in enumerate(sorted(directory.glob("batch_*/report.json"))):
         report = json.loads(report_path.read_text())
-        checkpoints.add(report.get("checkpoint_sha256"))
-        case = report["cases"][0]
+        if len(report["cases"]) != 1:
+            raise ValueError("A requirement batch must declare one case")
+        declared = report["cases"][0]
+        case_id = declared["case_id"]
+        if (
+            case_id in seen
+            or case_id not in selected
+            or (
+                allocation is not None
+                and (case_id != selected[index] or report_path.parent.name != f"batch_{index:03d}")
+            )
+        ):
+            raise ValueError("Unexpected or duplicate requirement batch: " + case_id)
+        seen.add(case_id)
+        checkpoint = report.get("checkpoint_sha256")
+        checkpoints.add(checkpoint)
         trace_path = report_path.with_name("control_trace.npz")
-        trace = dict(np.load(trace_path)) if trace_path.exists() else {}
+        if trace_path.exists():
+            with np.load(trace_path, allow_pickle=False) as archive:
+                trace = dict(archive)
+        else:
+            trace = {}
+        case = canonical[case_id]
+        result = judge_case(trace, rules, case=case)
+        if not _case_matches(declared, case):
+            result["checks"]["case_declaration"] = _check(1, 0)
+        if allocation is not None and checkpoint != allocation.get("checkpoint_sha256"):
+            result["checks"]["checkpoint_identity"] = _check(1, 0)
+        if "complete_trace" not in result["checks"]:
+            if report.get("failure_kind") == "native_terminal_prefix":
+                result["checks"]["terminal_state"] = _check(1, 0)
+            elif (
+                report.get("failure") is not None
+                or report.get("acquisition_complete") is False
+                or report.get("native_capture_failure") is not None
+                or any(
+                    row.get("native_capture_complete") is False for row in report.get("results", [])
+                )
+            ):
+                result["checks"]["capture_complete"] = _check(1, 0)
+        result["failed_checks"] = [
+            key for key, check in result["checks"].items() if not check["pass"]
+        ]
+        result["pass"] = not result["failed_checks"]
         rows.append(
             {
-                "case_id": case["case_id"],
+                "case_id": case_id,
                 "command": case.get("command"),
                 "route_m": case.get("route_m"),
-                **judge_case(trace, rules, case.get("controls"), case),
+                **result,
             }
         )
     return {
         "schema": SCHEMA,
         "requirements_set": name,
         "requirements_sha256": requirements_sha,
+        "recorded_requirements_sha256": None
+        if allocation is None
+        else allocation["requirements_sha256"],
         "checkpoint_sha256": sorted(c for c in checkpoints if c),
         "cases": rows,
         "judged_cases": len(rows),
         "failed_cases": [row["case_id"] for row in rows if not row["pass"]],
-        "pass": all(row["pass"] for row in rows) if rows else None,
+        "missing_case_ids": [key for key in selected if key not in seen],
+        "pass": seen == set(selected) and all(row["pass"] for row in rows),
     }
 
 

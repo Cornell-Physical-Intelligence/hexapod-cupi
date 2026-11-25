@@ -14,6 +14,7 @@ import locomotion.evaluation.requirements as requirements
 import locomotion.evaluation.runner as run
 from locomotion.amp.features import extract_features
 from locomotion.omniwalk.env_cfg import EnvConfig
+from locomotion.scripts import play
 
 
 class FakeNative:
@@ -460,6 +461,52 @@ class CaseRunTests(unittest.TestCase):
             # A 44 s forward hold is also a drift case, and the static body drifts from its ghost.
             self.assertEqual(route["failed_checks"], ["drift_per_hold_m", "stop_position_m"])
             self.assertEqual(route["checks"]["stop_position_m"]["bound"], 0.12)
+
+    def test_last_control_terminal_does_not_pass_with_a_complete_trace(self):
+        stand = requirements.cases(requirements.load_requirements()[0])[0]
+        with TemporaryDirectory() as directory:
+            native = FakeNative(terminate_at=stand["controls"])
+            result = self.run_cases(native, directory, case_ids=["stand"])
+        self.assertIsNone(result["failure"])
+        self.assertFalse(result["pass"])
+        self.assertEqual(result["cases"][0]["failed_checks"], ["terminal_state"])
+
+    def test_play_requires_every_case_load_summary_but_accepts_recorded_motion_failure(self):
+        with TemporaryDirectory() as directory:
+            root = Path(directory)
+            args = SimpleNamespace(
+                output=root,
+                geometry_extrema=None,
+                checkpoint=None,
+                requirements=requirements.REQUIREMENTS,
+                requirements_set="stage2_flat",
+                video_case=None,
+                seed=1,
+                max_wall_seconds=60,
+            )
+            chosen = requirements.cases(requirements.load_requirements()[0])[:2]
+            results = [{"case_id": case["case_id"], "pass": False} for case in chosen]
+            evaluation = {"allocation": {"cases": chosen}, "cases": results, "failure": None}
+            (root / "evaluation/batch_000").mkdir(parents=True)
+            (root / "evaluation/batch_000/force_metrics.json").write_text('{"status":"available"}')
+            for result, expected_error in (
+                ({**evaluation, "cases": results[:1]}, "did not acquire"),
+                ({**evaluation, "failure": "acquisition error"}, "did not acquire"),
+                (evaluation, "lacks an available load summary"),
+            ):
+                with (
+                    patch.object(run, "run_cases", return_value=result),
+                    patch.object(play, "NativePolicyCamera"),
+                    self.assertRaisesRegex(ValueError, expected_error),
+                ):
+                    play.run_evaluation(SimpleNamespace(), args, None, {}, play.time.monotonic())
+            (root / "evaluation/batch_001").mkdir()
+            (root / "evaluation/batch_001/force_metrics.json").write_text('{"status":"available"}')
+            with (
+                patch.object(run, "run_cases", return_value=evaluation),
+                patch.object(play, "NativePolicyCamera"),
+            ):
+                play.run_evaluation(SimpleNamespace(), args, None, {}, play.time.monotonic())
 
     def test_a_fall_ends_its_case_and_the_next_case_still_runs(self):
         native = FakeNative(terminate_at=2)
