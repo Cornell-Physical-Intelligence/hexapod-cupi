@@ -10,7 +10,7 @@ tracks the work.
 |---|---|
 | `hexapod.repos` | Pinned revisions of the third-party sources |
 | `patches/` | Changes applied to third-party sources after download |
-| `src/hexapod_bringup/` | Launch files and parameter files (none yet) |
+| `src/hexapod_bringup/` | Launch files and parameter files |
 | `src/external/` | Third-party sources, downloaded and git-ignored |
 
 ## Third-party sources
@@ -93,3 +93,34 @@ in WSL 2 and keep the clone inside the Linux filesystem. Run every command from
 
 These steps were last checked on 2026-11-16 in WSL 2 with Ubuntu 24.04.5,
 GCC 13.3.0 and CMake 3.28.3.
+
+## Replay a bag
+
+`replay.launch.py` plays a bag's raw lidar and motion-sensor topics through
+FAST-LIO, builds a Nav2 obstacle map (costmap) from FAST-LIO's point cloud,
+and stops when the bag ends. It needs `ros-jazzy-nav2-costmap-2d` and
+`ros-jazzy-nav2-lifecycle-manager`. The settings are in the launch file and
+`config/costmap.yaml`.
+
+```sh
+ros2 launch hexapod_bringup replay.launch.py bag:=<input bag> \
+  roll:=<rad> pitch:=<rad> height:=<m> rviz:=true
+```
+
+FAST-LIO's frame starts at the sensor's pose and is not levelled, so a tilted
+sensor makes the floor look like an obstacle. `roll` and `pitch` level it and
+`height` puts the map's `odom` frame on the floor. They describe how a
+recording was made, not the robot. For the two 2026-11-14 bags, use
+`roll:=-0.0088 pitch:=0.8007 height:=1.27`: the roll and pitch come from the
+average accelerometer reading at rest, and the height from the floor's height
+in the levelled point cloud.
+
+To keep FAST-LIO's output or the map, start a recorder in another shell first,
+for example `ros2 bag record -o <output bag> /Odometry /tf /costmap`.
+
+The costmap process exits with a segmentation fault at shutdown, after the
+bag has finished; the map it produced is unaffected.
+
+Any other FAST-LIO running on the same ROS domain also processes the replayed
+scans and doubles the output. Stop it first, or run the replay with a different
+`ROS_DOMAIN_ID`.

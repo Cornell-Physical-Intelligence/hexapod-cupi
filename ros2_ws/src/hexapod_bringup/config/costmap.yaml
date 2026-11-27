@@ -1,0 +1,31 @@
+# Nav2 obstacle map (costmap) built from FAST-LIO's point cloud.
+# See ros2_ws/README.md, "Replay a bag", and the Nav2 costmap docs:
+# https://docs.nav2.org/configuration/packages/configuring-costmaps.html
+/**:
+  ros__parameters:
+    global_frame: odom          # levelled, origin on the floor below the lidar
+    robot_base_frame: body      # FAST-LIO's sensor frame
+    rolling_window: true        # map follows the robot
+    width: 12                   # m
+    height: 12                  # m
+    resolution: 0.05            # m per cell
+    update_frequency: 5.0       # Hz
+    publish_frequency: 2.0      # Hz
+    always_send_full_costmap: true
+    robot_radius: 0.3           # m; placeholder until the robot's size is fixed
+    plugins: ["obstacle_layer", "inflation_layer"]
+    obstacle_layer:
+      plugin: "nav2_costmap_2d::ObstacleLayer"
+      observation_sources: lidar
+      lidar:
+        topic: /cloud_registered_body
+        data_type: PointCloud2
+        marking: true
+        clearing: true          # cells along each ray are freed, so a passer-by clears
+        min_obstacle_height: 0.15   # m above the floor; lower points count as floor
+        max_obstacle_height: 2.0    # m; higher points (ceiling) are ignored
+        obstacle_max_range: 8.0     # m
+        raytrace_max_range: 9.0     # m
+    inflation_layer:
+      plugin: "nav2_costmap_2d::InflationLayer"
+      inflation_radius: 0.5     # m
